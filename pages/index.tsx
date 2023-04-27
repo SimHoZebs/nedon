@@ -3,6 +3,7 @@ import { trpc } from "../lib/util/trpc";
 import { useEffect, useState } from "react";
 import { Products } from "plaid";
 import { useStoreActions } from "../lib/util/store";
+import Header from "../lib/comp/Header";
 
 const Home: NextPage = () => {
   const hello = trpc.hello.useQuery({ text: "client" });
@@ -51,6 +52,7 @@ const Home: NextPage = () => {
 
   return (
     <div>
+      <Header />
       {hello.data ? <p>{hello.data.greeting}</p> : <div>Loading...</div>}
       <div>Step 1</div>
       <button onClick={getInfo}>getInfo</button>

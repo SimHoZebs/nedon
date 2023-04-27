@@ -6,6 +6,9 @@ import {
   Products,
   PlaidEnvironments,
   CountryCode,
+  TransferType,
+  TransferNetwork,
+  ACHClass,
 } from "plaid";
 
 const APP_PORT = process.env.APP_PORT || 8000;
@@ -102,6 +105,82 @@ export const appRouter = router({
       language: "en",
     });
     return response.data.link_token;
+  }),
+
+  setAccessToken: procedure.input(z.string()).mutation(async ({ input }) => {
+    const authorizeAndCreateTransfer = async (accessToken) => {
+      // We call /accounts/get to obtain first account_id - in production,
+      // account_id's should be persisted in a data store and retrieved
+      // from there.
+      const accountsResponse = await client.accountsGet({
+        access_token: accessToken,
+      });
+      const accountId = accountsResponse.data.accounts[0].account_id;
+
+      const transferAuthorizationResponse =
+        await client.transferAuthorizationCreate({
+          access_token: accessToken,
+          account_id: accountId,
+          type: TransferType.Credit,
+          network: TransferNetwork.Ach,
+          amount: "1.34",
+          ach_class: ACHClass.Ppd,
+          user: {
+            legal_name: "FirstName LastName",
+            email_address: "foobar@email.com",
+            address: {
+              street: "123 Main St.",
+              city: "San Francisco",
+              region: "CA",
+              postal_code: "94053",
+              country: "US",
+            },
+          },
+        });
+      const authorizationId =
+        transferAuthorizationResponse.data.authorization.id;
+
+      const transferResponse = await client.transferCreate({
+        idempotency_key: "1223abc456xyz7890001",
+        access_token: accessToken,
+        account_id: accountId,
+        authorization_id: authorizationId,
+        type: TransferType.Credit,
+        network: TransferNetwork.Ach,
+        amount: "12.34",
+        description: "Payment",
+        ach_class: ACHClass.Ppd,
+        user: {
+          legal_name: "FirstName LastName",
+          email_address: "foobar@email.com",
+          address: {
+            street: "123 Main St.",
+            city: "San Francisco",
+            region: "CA",
+            postal_code: "94053",
+            country: "US",
+          },
+        },
+      });
+      return transferResponse.data.transfer.id;
+    };
+
+    const tokenResponse = await client.itemPublicTokenExchange({
+      public_token: PUBLIC_TOKEN,
+    });
+
+    ACCESS_TOKEN = tokenResponse.data.access_token;
+    ITEM_ID = tokenResponse.data.item_id;
+    if (PLAID_PRODUCTS.includes(Products.Transfer)) {
+      TRANSFER_ID = await authorizeAndCreateTransfer(ACCESS_TOKEN);
+    }
+
+    return {
+      // the 'access_token' is a private token, DO NOT pass this token to the frontend in your production environment
+      access_token: ACCESS_TOKEN,
+      item_id: ITEM_ID,
+      error: null,
+    };
   }),
 });
 

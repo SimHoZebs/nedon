@@ -5,6 +5,7 @@ interface StoreModel {
   setLinkSuccess: Action<StoreModel, boolean>;
 
   isItemAccess: boolean;
+  setIsItemAccess: Action<StoreModel, boolean>;
 
   isPaymentInitiation: boolean;
   setIsPaymentInitiation: Action<StoreModel, boolean>;
@@ -13,7 +14,11 @@ interface StoreModel {
   setLinkToken: Action<StoreModel, string | null>;
 
   accessToken: string | null;
+  setAccessToken: Action<StoreModel, string | null>;
+
   itemId: string | null;
+  setItemId: Action<StoreModel, string | null>;
+
   isError: boolean;
   backend: boolean;
   products: string[];
@@ -33,6 +38,10 @@ const store = createStore<StoreModel>({
   }),
 
   isItemAccess: true,
+  setIsItemAccess: action((state, payload) => {
+    state.isItemAccess = payload;
+  }),
+
   isPaymentInitiation: false,
   setIsPaymentInitiation: action((state, payload) => {
     state.isPaymentInitiation = payload;
@@ -44,7 +53,15 @@ const store = createStore<StoreModel>({
   }),
 
   accessToken: null,
+  setAccessToken: action((state, payload) => {
+    state.accessToken = payload;
+  }),
+
   itemId: null,
+  setItemId: action((state, payload) => {
+    state.itemId = payload;
+  }),
+
   isError: false,
   backend: true,
 
