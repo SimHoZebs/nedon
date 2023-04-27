@@ -1,11 +1,12 @@
 import { z } from "zod";
 import { procedure, router } from "../trpc";
-const {
+import {
   Configuration,
   PlaidApi,
   Products,
   PlaidEnvironments,
-} = require("plaid");
+  CountryCode,
+} from "plaid";
 
 const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
@@ -17,13 +18,13 @@ const PLAID_ENV = process.env.PLAID_ENV || "sandbox";
 // able to create and retrieve asset reports.
 const PLAID_PRODUCTS = (
   process.env.PLAID_PRODUCTS || Products.Transactions
-).split(",");
+).split(",") as Products[];
 
 // PLAID_COUNTRY_CODES is a comma-separated list of countries for which users
 // will be able to select institutions from.
-const PLAID_COUNTRY_CODES = (process.env.PLAID_COUNTRY_CODES || "US").split(
-  ","
-);
+const PLAID_COUNTRY_CODES = (
+  process.env.PLAID_COUNTRY_CODES || CountryCode.Us
+).split(",") as CountryCode[];
 
 // Parameters used for the OAuth redirect Link flow.
 //
@@ -43,6 +44,7 @@ const PLAID_ANDROID_PACKAGE_NAME = process.env.PLAID_ANDROID_PACKAGE_NAME || "";
 let ACCESS_TOKEN = null;
 let PUBLIC_TOKEN = null;
 let ITEM_ID = null;
+
 // The payment_id is only relevant for the UK/EU Payment Initiation product.
 // We store the payment_id in memory - in production, store it in a secure
 // persistent data store along with the Payment metadata, such as userId .
@@ -98,8 +100,6 @@ export const appRouter = router({
       products: PLAID_PRODUCTS,
       country_codes: PLAID_COUNTRY_CODES,
       language: "en",
-      redirect_uri: PLAID_REDIRECT_URI,
-      android_package_name: PLAID_ANDROID_PACKAGE_NAME,
     });
     return response.data.link_token;
   }),
