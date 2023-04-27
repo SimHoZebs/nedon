@@ -1,15 +1,16 @@
 import type { NextPage } from 'next'
-import { trpc } from "../util/trpc";
+import { trpc } from "../lib/util/trpc";
 import { useEffect, useState } from "react";
 import { Products } from "plaid";
+import { useStoreActions } from "../lib/util/store";
 
 const Home: NextPage = () => {
   const hello = trpc.hello.useQuery({ text: "client" });
-  const [linkSuccess, setLinkSuccess] = useState(false);
   const server = trpc.useContext();
-  const [linkToken, setLinkToken] = useState<string | null>("");
-  const [products, setProducts] = useState<string[]>([]);
-  const [isPaymentInitiation, setIsPaymentInitiation] = useState(false);
+
+  const { setProducts, setLinkToken, setIsPaymentInitiation } = useStoreActions(
+    (actions) => actions
+  );
 
   const getInfo = async () => {
     try {
