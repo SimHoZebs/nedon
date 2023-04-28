@@ -3,7 +3,6 @@ import type { AppType } from "next/app";
 import { trpc } from "../lib/util/trpc";
 import store from "../lib/util/store";
 import { StoreProvider } from "easy-peasy";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const MyApp: AppType = ({ Component, pageProps }) => {

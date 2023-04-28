@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import Button from "plaid-threads/Button";
 
@@ -7,37 +7,25 @@ import { trpc } from "../util/trpc";
 
 const Link = () => {
   const { linkToken, isPaymentInitiation } = useStoreState((state) => state);
-  const {
-    setLinkToken,
-    setIsPaymentInitiation,
-    setIsItemAccess,
-    setItemId,
-    setAccessToken,
-    setLinkSuccess,
-  } = useStoreActions((actions) => actions);
-  const server = trpc.useContext();
+  const { setIsItemAccess, setItemId, setAccessToken, setLinkSuccess } =
+    useStoreActions((actions) => actions);
+  const setAccessTokenServer = trpc.setAccessToken.useMutation();
 
   const onSuccess = React.useCallback(
     (public_token: string) => {
       // If the access_token is needed, send public_token to server
       const exchangePublicTokenForAccessToken = async () => {
-        const response = await fetch("/api/set_access_token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-          },
-          body: `public_token=${public_token}`,
-        });
+        const response = await setAccessTokenServer.mutateAsync(public_token);
 
-        if (!response.ok) {
+        if (response.error) {
           setItemId(`no item_id retrieved`);
           setAccessToken(`no access_token retrieved`);
           setIsItemAccess(false);
           return;
         }
-        const data = await response.json();
-        setItemId(data.item_id);
-        setAccessToken(data.access_token);
+
+        setItemId(response.item_id);
+        setAccessToken(response.access_token);
         setIsItemAccess(true);
       };
 
@@ -54,6 +42,7 @@ const Link = () => {
     [
       isPaymentInitiation,
       setAccessToken,
+      setAccessTokenServer,
       setIsItemAccess,
       setItemId,
       setLinkSuccess,

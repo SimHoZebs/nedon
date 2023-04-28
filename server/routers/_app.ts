@@ -44,18 +44,18 @@ const PLAID_ANDROID_PACKAGE_NAME = process.env.PLAID_ANDROID_PACKAGE_NAME || "";
 
 // We store the access_token in memory - in production, store it in a secure
 // persistent data store
-let ACCESS_TOKEN = null;
-let PUBLIC_TOKEN = null;
-let ITEM_ID = null;
+let ACCESS_TOKEN: string | null = null;
+let PUBLIC_TOKEN: string | null = null;
+let ITEM_ID: string | null = null;
 
 // The payment_id is only relevant for the UK/EU Payment Initiation product.
 // We store the payment_id in memory - in production, store it in a secure
 // persistent data store along with the Payment metadata, such as userId .
-let PAYMENT_ID = null;
+let PAYMENT_ID: string | null = null;
 // The transfer_id is only relevant for Transfer ACH product.
 // We store the transfer_id in memory - in production, store it in a secure
 // persistent data store
-let TRANSFER_ID = null;
+let TRANSFER_ID: string | null = null;
 
 // Initialize the Plaid client
 // Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
@@ -108,7 +108,7 @@ export const appRouter = router({
   }),
 
   setAccessToken: procedure.input(z.string()).mutation(async ({ input }) => {
-    const authorizeAndCreateTransfer = async (accessToken) => {
+    const authorizeAndCreateTransfer = async (accessToken: string) => {
       // We call /accounts/get to obtain first account_id - in production,
       // account_id's should be persisted in a data store and retrieved
       // from there.
@@ -165,6 +165,7 @@ export const appRouter = router({
       return transferResponse.data.transfer.id;
     };
 
+    PUBLIC_TOKEN = input;
     const tokenResponse = await client.itemPublicTokenExchange({
       public_token: PUBLIC_TOKEN,
     });
@@ -182,7 +183,265 @@ export const appRouter = router({
       error: null,
     };
   }),
+
+  // Retrieve ACH or ETF Auth data for an Item's accounts
+  // https://plaid.com/docs/#auth
+  auth: procedure.input(z.void()).mutation(async ({ input }) => {
+    const authResponse = await client.authGet({
+      access_token: ACCESS_TOKEN,
+    });
+
+    return authResponse.data;
+  }),
+
+  // Retrieve Transactions for an Item
+  // https://plaid.com/docs/#transactions
+  transactions: procedure.input(z.void()).mutation(async ({ input }) => {
+    // Set cursor to empty to receive all historical updates
+    let cursor = null;
+
+    // New transaction updates since "cursor"
+    let added = [];
+    let modified = [];
+    // Removed transaction ids
+    let removed = [];
+    let hasMore = true;
+    // Iterate through each page of new transaction updates for item
+    while (hasMore) {
+      const request = {
+        access_token: ACCESS_TOKEN,
+        cursor: cursor,
+      };
+      const response = await client.transactionsSync(request);
+      const data = response.data;
+      // Add this page of results
+      added = added.concat(data.added);
+      modified = modified.concat(data.modified);
+      removed = removed.concat(data.removed);
+      hasMore = data.has_more;
+      // Update cursor to the next cursor
+      cursor = data.next_cursor;
+    }
+
+    const compareTxnsByDateAscending = (a, b) =>
+      (a.date > b.date) - (a.date < b.date);
+    // Return the 8 most recent transactions
+    const recently_added = [...added]
+      .sort(compareTxnsByDateAscending)
+      .slice(-8);
+    return { latest_transactions: recently_added };
+  }),
+
+  // Retrieve Investment Transactions for an Item
+  // https://plaid.com/docs/#investments
+  investments_transactions: procedure
+    .input(z.void())
+    .mutation(async ({ input }) => {
+      const startDate = moment().subtract(30, "days").format("YYYY-MM-DD");
+      const endDate = moment().format("YYYY-MM-DD");
+      const configs = {
+        access_token: ACCESS_TOKEN,
+        start_date: startDate,
+        end_date: endDate,
+      };
+      const investmentTransactionsResponse =
+        await client.investmentsTransactionsGet(configs);
+
+      return {
+        error: null,
+        investments_transactions: investmentTransactionsResponse.data,
+      };
+    }),
+
+  // Retrieve Identity for an Item
+  // https://plaid.com/docs/#identity
+  identity: procedure.input(z.void()).mutation(async ({ input }) => {
+    const identityResponse = await client.identityGet({
+      access_token: ACCESS_TOKEN,
+    });
+
+    return { identity: identityResponse.data.accounts };
+  }),
+
+  // Retrieve real-time Balances for each of an Item's accounts
+  // https://plaid.com/docs/#balance
+  balance: procedure.input(z.void()).mutation(async ({ input }) => {
+    const balanceResponse = await client.accountsBalanceGet({
+      access_token: ACCESS_TOKEN,
+    });
+
+    return balanceResponse.data;
+  }),
+
+  // Retrieve Holdings for an Item
+  // https://plaid.com/docs/#investments
+  holdings: procedure.input(z.void()).mutation(async ({ input }) => {
+    const holdingsResponse = await client.investmentsHoldingsGet({
+      access_token: ACCESS_TOKEN,
+    });
+
+    return { error: null, holdings: holdingsResponse.data };
+  }),
+
+  // Retrieve Liabilities for an Item
+  // https://plaid.com/docs/#liabilities
+  liabilities: procedure.input(z.void()).mutation(async ({ input }) => {
+    const liabilitiesResponse = await client.liabilitiesGet({
+      access_token: ACCESS_TOKEN,
+    });
+
+    return { error: null, liabilities: liabilitiesResponse.data };
+  }),
+
+  // Retrieve information about an Item
+  // https://plaid.com/docs/#retrieve-item
+  item: procedure.input(z.void()).mutation(async ({ input }) => {
+    // Pull the Item - this includes information about available products,
+    // billed products, webhook information, and more.
+    const itemResponse = await client.itemGet({
+      access_token: ACCESS_TOKEN,
+    });
+    // Also pull information about the institution
+    const configs = {
+      institution_id: itemResponse.data.item.institution_id,
+      country_codes: PLAID_COUNTRY_CODES,
+    };
+    const instResponse = await client.institutionsGetById(configs);
+
+    return {
+      item: itemResponse.data.item,
+      institution: instResponse.data.institution,
+    };
+  }),
+
+  // Retrieve an Item's accounts
+  // https://plaid.com/docs/#accounts
+  accounts: procedure.input(z.void()).mutation(async ({ input }) => {
+    const accountsResponse = await client.accountsGet({
+      access_token: ACCESS_TOKEN,
+    });
+
+    return accountsResponse.data;
+  }),
+
+  // Create and then retrieve an Asset Report for one or more Items. Note that an
+  // Asset Report can contain up to 100 items, but for simplicity we're only
+  // including one Item here.
+  // https://plaid.com/docs/#assets
+  assets: procedure.input(z.void()).mutation(async ({ input }) => {
+    // You can specify up to two years of transaction history for an Asset
+    // Report.
+    const daysRequested = 10;
+
+    // The `options` object allows you to specify a webhook for Asset Report
+    // generation, as well as information that you want included in the Asset
+    // Report. All fields are optional.
+    const options = {
+      client_report_id: "Custom Report ID #123",
+      // webhook: 'https://your-domain.tld/plaid-webhook',
+      user: {
+        client_user_id: "Custom User ID #456",
+        first_name: "Alice",
+        middle_name: "Bobcat",
+        last_name: "Cranberry",
+        ssn: "123-45-6789",
+        phone_number: "555-123-4567",
+        email: "alice@example.com",
+      },
+    };
+    const configs = {
+      access_tokens: [ACCESS_TOKEN],
+      days_requested: daysRequested,
+      options,
+    };
+    const assetReportCreateResponse = await client.assetReportCreate(configs);
+
+    const assetReportToken = assetReportCreateResponse.data.asset_report_token;
+
+    const getResponse = await getAssetReportWithRetries(
+      client,
+      assetReportToken
+    );
+    const pdfRequest = {
+      asset_report_token: assetReportToken,
+    };
+
+    const pdfResponse = await client.assetReportPdfGet(pdfRequest, {
+      responseType: "arraybuffer",
+    });
+    return {
+      json: getResponse.data.report,
+      pdf: pdfResponse.data.toString("base64"),
+    };
+  }),
+
+  transfer: procedure.input(z.void()).mutation(async ({ input }) => {
+    const transferGetResponse = await client.transferGet({
+      transfer_id: TRANSFER_ID,
+    });
+
+    return {
+      error: null,
+      transfer: transferGetResponse.data.transfer,
+    };
+  }),
+
+  // This functionality is only relevant for the UK/EU Payment Initiation product.
+  // Retrieve Payment for a specified Payment ID
+  payment: procedure.input(z.void()).mutation(async ({ input }) => {
+    const paymentGetResponse = await client.paymentInitiationPaymentGet({
+      payment_id: PAYMENT_ID,
+    });
+
+    return { error: null, payment: paymentGetResponse.data };
+  }),
+
+  //TO-DO: This endpoint will be deprecated in the near future
+  incomeVerificationPaystubs: procedure
+    .input(z.void())
+    .mutation(async ({ input }) => {
+      const paystubsGetResponse = await client.incomeVerificationPaystubsGet({
+        access_token: ACCESS_TOKEN,
+      });
+
+      return { error: null, paystubs: paystubsGetResponse.data };
+    }),
 });
 
 // export type definition of API
 export type AppRouter = typeof appRouter;
+
+// This is a helper function to poll for the completion of an Asset Report and
+// then send it in the response to the client. Alternatively, you can provide a
+// webhook in the `options` object in your `/asset_report/create` request to be
+// notified when the Asset Report is finished being generated.
+
+const getAssetReportWithRetries = (
+  plaidClient,
+  asset_report_token,
+  ms = 1000,
+  retriesLeft = 20
+) =>
+  new Promise((resolve, reject) => {
+    const request = {
+      asset_report_token,
+    };
+
+    plaidClient
+      .assetReportGet(request)
+      .then(resolve)
+      .catch(() => {
+        setTimeout(() => {
+          if (retriesLeft === 1) {
+            reject("Ran out of retries while polling for asset report");
+            return;
+          }
+          getAssetReportWithRetries(
+            plaidClient,
+            asset_report_token,
+            ms,
+            retriesLeft - 1
+          ).then(resolve);
+        }, ms);
+      });
+  });
