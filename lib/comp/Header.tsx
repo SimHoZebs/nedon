@@ -132,12 +132,12 @@ const Header = () => {
               <div className="">
                 <p className="">
                   <span className="">item_id</span>
-                  <span className=""></span>
+                  <span className="">{itemId}</span>
                 </p>
 
                 <p className="">
                   <span className="">access_token</span>
-                  <span className=""></span>
+                  <span className="">{accessToken}</span>
                 </p>
               </div>
               {isItemAccess && (

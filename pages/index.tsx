@@ -1,4 +1,4 @@
-import type { NextPage } from 'next'
+import type { NextPage } from "next";
 import { trpc } from "../lib/util/trpc";
 import { useCallback, useEffect, useState } from "react";
 import { Products } from "plaid";
@@ -84,4 +84,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home
+export default Home;

@@ -6,8 +6,8 @@ interface Props {
 }
 
 const TypeContainer: React.FC<Props> = (props) => (
-  <div className="">
-    <h4 className=""></h4>
+  <div className="flex flex-col w-full items-center">
+    <h4 className="font-extrabold w-full">{props.productType}</h4>
     {props.children}
   </div>
 );

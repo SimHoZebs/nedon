@@ -41,18 +41,18 @@ const Endpoint = (props: Props) => {
 
   return (
     <>
-      <div className="">
+      <div className="grid w-full">
         <Note info className="">
           POST
         </Note>
         <div className="">
           <div className="">
-            {props.name != null && <span className=""></span>}
-            <span className=""></span>
+            {props.name != null && <span className="">{props.name}</span>}
+            <span className="">{props.schema}</span>
           </div>
-          <div className=""></div>
+          <div className="">{props.description}</div>
         </div>
-        <div className="">
+        <div className="flex flex-col">
           <Button small centered wide secondary className="" onClick={getData}>
             {isLoading ? "Loading..." : `Send request`}
           </Button>
