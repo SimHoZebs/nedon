@@ -29,8 +29,8 @@ interface StoreModel {
     error_type: string;
   };
 
-  user: User;
-  setUser: Action<StoreModel, User>;
+  user: Omit<User, "ACCESS_TOKEN">;
+  setUser: Action<StoreModel, Omit<User, "ACCESS_TOKEN">>;
 }
 
 const store = createStore<StoreModel>({
@@ -54,6 +54,7 @@ const store = createStore<StoreModel>({
     state.linkToken = payload;
   }),
 
+  //accessToken is only visible for dev purposes. Remove it from the frontend in production.
   accessToken: null,
   setAccessToken: action((state, payload) => {
     state.accessToken = payload;
@@ -77,7 +78,6 @@ const store = createStore<StoreModel>({
 
   user: {
     id: "",
-    ACCESS_TOKEN: null,
     PUBLIC_TOKEN: null,
     ITEM_ID: null,
     // The transfer_id is only relevant for Transfer ACH product.

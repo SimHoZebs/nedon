@@ -16,7 +16,7 @@ const Home: NextPage = () => {
   });
   const server = trpc.useContext();
 
-  const { user } = useStoreState((state) => state);
+  const { user, accessToken } = useStoreState((state) => state);
   const { setProducts, setLinkToken, setIsPaymentInitiation, setUser } =
     useStoreActions((actions) => actions);
 
@@ -76,7 +76,7 @@ const Home: NextPage = () => {
         allUsers.data.map((user) => (
           <div key={user.id}>
             <p>id: {user.id}</p>
-            <p>ACCESS_TOKEN: {user.ACCESS_TOKEN}</p>
+            <p>ACCESS_TOKEN: {accessToken}</p>
             <p>PUBLIC_TOKEN: {user.PUBLIC_TOKEN}</p>
             <Button
               onClick={async () => {
