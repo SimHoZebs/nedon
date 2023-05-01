@@ -20,8 +20,6 @@ interface StoreModel {
   itemId: string | null;
   setItemId: Action<StoreModel, string | null>;
 
-  isError: boolean;
-  backend: boolean;
   products: string[];
   setProducts: Action<StoreModel, string[]>;
 
@@ -65,9 +63,6 @@ const store = createStore<StoreModel>({
   setItemId: action((state, payload) => {
     state.itemId = payload;
   }),
-
-  isError: false,
-  backend: true,
 
   products: ["transactions"],
   setProducts: action((state, payload) => {

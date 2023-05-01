@@ -61,11 +61,14 @@ const Link = () => {
     onSuccess,
   };
 
-  if (window.location.href.includes("?oauth_state_id=")) {
-    // TODO: figure out how to delete this ts-ignore
-    // @ts-ignore
-    config.receivedRedirectUri = window.location.href;
-    isOauth = true;
+  //For reasons I don't understand, I can't do an && statement instead
+  if (typeof window !== "undefined") {
+    if (window.location.href.includes("?oauth_state_id=")) {
+      // TODO: figure out how to delete this ts-ignore
+      // @ts-ignore
+      config.receivedRedirectUri = window.location.href;
+      isOauth = true;
+    }
   }
 
   const { open, ready } = usePlaidLink(config);
@@ -78,7 +81,7 @@ const Link = () => {
 
   return (
     <button className="bg-blue-400 p-2 rounded-lg" onClick={() => open()}>
-      Launch Link
+      {linkToken ? "Launch Link" : "Loading..."}
     </button>
   );
 };
