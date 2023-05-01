@@ -1,12 +1,13 @@
 import React, { useEffect } from "react";
 import { usePlaidLink } from "react-plaid-link";
-import Button from "plaid-threads/Button";
 
 import { useStoreActions, useStoreState } from "../util/store";
 import { trpc } from "../util/trpc";
 
 const Link = () => {
-  const { linkToken, isPaymentInitiation } = useStoreState((state) => state);
+  const { linkToken, isPaymentInitiation, user } = useStoreState(
+    (state) => state
+  );
   const { setIsItemAccess, setItemId, setAccessToken, setLinkSuccess } =
     useStoreActions((actions) => actions);
   const setAccessTokenServer = trpc.setAccessToken.useMutation();
@@ -15,9 +16,13 @@ const Link = () => {
     (public_token: string) => {
       // If the access_token is needed, send public_token to server
       const exchangePublicTokenForAccessToken = async () => {
-        const response = await setAccessTokenServer.mutateAsync(public_token);
+        const response = await setAccessTokenServer.mutateAsync({
+          publicToken: public_token,
+          id: user.id,
+        });
 
         if (response.error) {
+          console.log("error setting access token from server");
           setItemId(`no item_id retrieved`);
           setAccessToken(`no access_token retrieved`);
           setIsItemAccess(false);
@@ -46,6 +51,7 @@ const Link = () => {
       setIsItemAccess,
       setItemId,
       setLinkSuccess,
+      user.id,
     ]
   );
 
@@ -71,9 +77,9 @@ const Link = () => {
   }, [ready, open, isOauth]);
 
   return (
-    <Button type="button" large onClick={() => open()} disabled={!ready}>
+    <button className="bg-blue-400 p-2 rounded-lg" onClick={() => open()}>
       Launch Link
-    </Button>
+    </button>
   );
 };
 

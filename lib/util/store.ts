@@ -1,4 +1,5 @@
 import { action, createStore, Action, createTypedHooks } from "easy-peasy";
+import { User } from "@prisma/client";
 
 interface StoreModel {
   linkSuccess: boolean;
@@ -29,6 +30,9 @@ interface StoreModel {
     error_code: string;
     error_type: string;
   };
+
+  user: User;
+  setUser: Action<StoreModel, User>;
 }
 
 const store = createStore<StoreModel>({
@@ -75,6 +79,20 @@ const store = createStore<StoreModel>({
     error_code: "",
     error_message: "",
   },
+
+  user: {
+    id: "",
+    ACCESS_TOKEN: null,
+    PUBLIC_TOKEN: null,
+    ITEM_ID: null,
+    // The transfer_id is only relevant for Transfer ACH product.
+    TRANSFER_ID: null,
+    // The payment_id is only relevant for the UK/EU Payment Initiation product.
+    PAYMENT_ID: null,
+  },
+  setUser: action((state, payload) => {
+    state.user = payload;
+  }),
 });
 
 export default store;
