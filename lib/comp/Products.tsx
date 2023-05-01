@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import Endpoint from "./Endpoint";
 import ProductTypesContainer from "./ProductTypesContainer";
@@ -27,11 +27,34 @@ import {
   transformIncomePaystubsData,
 } from "../util/dataUtil";
 import { useStoreState } from "../util/store";
+import { trpc } from "../util/trpc";
 
 const Products = () => {
   const { products } = useStoreState((state) => state);
+  const server = trpc.useContext();
+  const [data, setData] = useState({});
+
   return (
     <ProductTypesContainer productType="Products">
+      <div className="flex w-full justify-between">
+        <div>
+          <p>Retrieve information about your latest payment.</p>
+          <button
+            className="bg-blue-300 p-2 rounded-lg"
+            onClick={async () => {
+              const hello = await server.payment.fetch();
+              setData(hello);
+            }}
+          >
+            Payment
+          </button>
+        </div>
+        <div>
+          <div>Response</div>
+          <div>{JSON.stringify(data)}</div>
+        </div>
+      </div>
+
       {products.includes("payment_initiation") && (
         <Endpoint
           endpoint="payment"
@@ -42,6 +65,7 @@ const Products = () => {
           transformData={transformPaymentData}
         />
       )}
+
       {products.includes("auth") && (
         <Endpoint
           endpoint="auth"
@@ -52,6 +76,7 @@ const Products = () => {
           transformData={transformAuthData}
         />
       )}
+
       {products.includes("transactions") && (
         <Endpoint
           endpoint="transactions"

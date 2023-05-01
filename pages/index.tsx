@@ -1,11 +1,11 @@
 import type { NextPage } from "next";
 import { trpc } from "../lib/util/trpc";
-import { useCallback, useEffect, useState } from "react";
 import { Products } from "plaid";
 import { useStoreActions, useStoreState } from "../lib/util/store";
 import Header from "../lib/comp/Header";
 import ProductContainer from "../lib/comp/Products";
 import Items from "../lib/comp/Items";
+import { User } from "@prisma/client";
 
 const Home: NextPage = () => {
   const allUsers = trpc.account.getAll.useQuery(undefined);
@@ -22,7 +22,7 @@ const Home: NextPage = () => {
   const { setProducts, setLinkToken, setIsPaymentInitiation, setUser } =
     useStoreActions((actions) => actions);
 
-  const getInfo = async () => {
+  const getInfo = async (user: User) => {
     if (!user) {
       console.log("no user");
       return;
@@ -30,7 +30,7 @@ const Home: NextPage = () => {
 
     const info = await server.info.fetch(user.id);
     if (!info) {
-      console.log("info with user id not found");
+      console.log(`info with user id ${user.id} not found`);
       return;
     }
 
@@ -46,7 +46,7 @@ const Home: NextPage = () => {
 
   const createToken = async () => {
     const linkToken = await createLinkToken.refetch();
-    console.log("createLinkeToken", linkToken);
+    console.log("createLinkToken", linkToken);
 
     if (linkToken.error || !linkToken.data) {
       setLinkToken(null);
@@ -85,7 +85,7 @@ const Home: NextPage = () => {
               className="p-2 bg-blue-300 w-fit rounded-lg"
               onClick={async () => {
                 setUser(user);
-                const paymentInitation = await getInfo(); // used to determine which path to take when generating token
+                const paymentInitation = await getInfo(user); // used to determine which path to take when generating token
                 // do not generate a new token for OAuth redirect; instead
                 // setLinkToken from localStorage
                 if (window.location.href.includes("?oauth_state_id=")) {

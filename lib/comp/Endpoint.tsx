@@ -24,13 +24,18 @@ const Endpoint = (props: Props) => {
 
   const getData = async () => {
     setIsLoading(true);
-    const response = await fetch(`/api/${props.endpoint}`, { method: "GET" });
+
+    const response = await fetch(`/api/trpc/${props.endpoint}`, {
+      method: "GET",
+    });
+
     const data = await response.json();
     if (data.error != null) {
       setError(data.error);
       setIsLoading(false);
       return;
     }
+
     setTransformedData(props.transformData(data)); // transform data into proper format for each individual product
     if (data.pdf != null) {
       setPdf(data.pdf);
@@ -45,17 +50,21 @@ const Endpoint = (props: Props) => {
         <Note info className="">
           POST
         </Note>
+
         <div className="">
           <div className="">
             {props.name != null && <span className="">{props.name}</span>}
             <span className="">{props.schema}</span>
           </div>
+
           <div className="">{props.description}</div>
         </div>
+
         <div className="flex flex-col">
           <Button small centered wide secondary className="" onClick={getData}>
             {isLoading ? "Loading..." : `Send request`}
           </Button>
+
           {pdf != null && (
             <Button
               small
