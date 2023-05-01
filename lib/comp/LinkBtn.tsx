@@ -3,14 +3,17 @@ import { usePlaidLink } from "react-plaid-link";
 
 import { useStoreActions, useStoreState } from "../util/store";
 import { trpc } from "../util/trpc";
+import { useRouter } from "next/router";
+import Button from "./Button";
 
-const Link = () => {
+const LinkBtn = () => {
   const { linkToken, isPaymentInitiation, user } = useStoreState(
     (state) => state
   );
   const { setIsItemAccess, setItemId, setAccessToken, setLinkSuccess } =
     useStoreActions((actions) => actions);
   const setAccessTokenServer = trpc.setAccessToken.useMutation();
+  const router = useRouter();
 
   const onSuccess = React.useCallback(
     (public_token: string) => {
@@ -42,10 +45,11 @@ const Link = () => {
       }
 
       setLinkSuccess(true);
-      window.history.pushState("", "", "/");
+      router.push("/user");
     },
     [
       isPaymentInitiation,
+      router,
       setAccessToken,
       setAccessTokenServer,
       setIsItemAccess,
@@ -64,8 +68,6 @@ const Link = () => {
   //For reasons I don't understand, I can't do an && statement instead
   if (typeof window !== "undefined") {
     if (window.location.href.includes("?oauth_state_id=")) {
-      // TODO: figure out how to delete this ts-ignore
-      // @ts-ignore
       config.receivedRedirectUri = window.location.href;
       isOauth = true;
     }
@@ -80,12 +82,12 @@ const Link = () => {
   }, [ready, open, isOauth]);
 
   return (
-    <button className="bg-blue-400 p-2 rounded-lg" onClick={() => open()}>
+    <Button onClick={() => open()}>
       {linkToken ? "Launch Link" : "Loading..."}
-    </button>
+    </Button>
   );
 };
 
-Link.displayName = "Link";
+LinkBtn.displayName = "Link";
 
-export default Link;
+export default LinkBtn;

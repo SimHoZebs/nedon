@@ -3,9 +3,8 @@ import { trpc } from "../lib/util/trpc";
 import { Products } from "plaid";
 import { useStoreActions, useStoreState } from "../lib/util/store";
 import Header from "../lib/comp/Header";
-import ProductContainer from "../lib/comp/Products";
-import Items from "../lib/comp/Items";
 import { User } from "@prisma/client";
+import Button from "../lib/comp/Button";
 
 const Home: NextPage = () => {
   const allUsers = trpc.account.getAll.useQuery(undefined);
@@ -17,8 +16,7 @@ const Home: NextPage = () => {
   });
   const server = trpc.useContext();
 
-  const { isPaymentInitiation, isItemAccess, linkSuccess, user } =
-    useStoreState((state) => state);
+  const { user } = useStoreState((state) => state);
   const { setProducts, setLinkToken, setIsPaymentInitiation, setUser } =
     useStoreActions((actions) => actions);
 
@@ -62,8 +60,7 @@ const Home: NextPage = () => {
     <div className="flex flex-col p-3">
       <div>Current user: {user ? user.id : "none"}</div>
       <Header />
-      <button
-        className="p-2 bg-blue-300 w-fit rounded-lg font-bold"
+      <Button
         onClick={async () => {
           const user = await createUser.refetch();
           if (user.error || !user.data) {
@@ -73,7 +70,7 @@ const Home: NextPage = () => {
         }}
       >
         create new user
-      </button>
+      </Button>
 
       {allUsers.data &&
         allUsers.data.map((user) => (
@@ -81,8 +78,7 @@ const Home: NextPage = () => {
             <p>id: {user.id}</p>
             <p>ACCESS_TOKEN: {user.ACCESS_TOKEN}</p>
             <p>PUBLIC_TOKEN: {user.PUBLIC_TOKEN}</p>
-            <button
-              className="p-2 bg-blue-300 w-fit rounded-lg"
+            <Button
               onClick={async () => {
                 setUser(user);
                 const paymentInitation = await getInfo(user); // used to determine which path to take when generating token
@@ -96,20 +92,9 @@ const Home: NextPage = () => {
               }}
             >
               Test with this user
-            </button>
+            </Button>
           </div>
         ))}
-      {linkSuccess && (
-        <>
-          {isPaymentInitiation && <ProductContainer />}
-          {isItemAccess && (
-            <>
-              <ProductContainer />
-              <Items />
-            </>
-          )}
-        </>
-      )}
     </div>
   );
 };

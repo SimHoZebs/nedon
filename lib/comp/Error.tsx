@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import Button from "plaid-threads/Button";
-import Note from "plaid-threads/Note";
 
 import { ErrorDataItem } from "../util/dataUtil";
+import Link from "next/link";
 
 interface Props {
   error: ErrorDataItem;
@@ -40,9 +39,7 @@ const Error = (props: Props) => {
     <>
       <div className=""></div>
       <div className="">
-        <Note error className="">
-          {props.error.status_code ? props.error.status_code : "error"}
-        </Note>
+        <div>{props.error.status_code ? props.error.status_code : "error"}</div>
         <div className="">
           <div className="">
             <span className="">Error code: </span>
@@ -66,9 +63,9 @@ const Error = (props: Props) => {
             </span>
           </div>
         </div>
-        <Button small wide className="" target="_blank" href={path}>
+        <Link target="_blank" href={path}>
           Learn more
-        </Button>
+        </Link>
       </div>
     </>
   );

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import Button from "plaid-threads/Button";
-import Note from "plaid-threads/Note";
+import Button from "./Button";
 
 import Table from "./Table";
 import Error from "./Error";
 import { DataItem, Categories, ErrorDataItem, Data } from "../util/dataUtil";
+import Link from "next/link";
 
 interface Props {
   endpoint: string;
@@ -47,9 +47,7 @@ const Endpoint = (props: Props) => {
   return (
     <>
       <div className="grid w-full">
-        <Note info className="">
-          POST
-        </Note>
+        <div>POST</div>
 
         <div className="">
           <div className="">
@@ -61,21 +59,12 @@ const Endpoint = (props: Props) => {
         </div>
 
         <div className="flex flex-col">
-          <Button small centered wide secondary className="" onClick={getData}>
+          <Button onClick={getData}>
             {isLoading ? "Loading..." : `Send request`}
           </Button>
 
           {pdf != null && (
-            <Button
-              small
-              centered
-              wide
-              className=""
-              href={`data:application/pdf;base64,${pdf}`}
-              componentProps={{ download: "Asset Report.pdf" }}
-            >
-              Download PDF
-            </Button>
+            <button>pdf download not available at the moment</button>
           )}
         </div>
       </div>

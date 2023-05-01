@@ -28,6 +28,7 @@ import {
 } from "../util/dataUtil";
 import { useStoreState } from "../util/store";
 import { trpc } from "../util/trpc";
+import Button from "./Button";
 
 const Products = () => {
   const { products } = useStoreState((state) => state);
@@ -39,15 +40,14 @@ const Products = () => {
       <div className="flex w-full justify-between">
         <div>
           <p>Retrieve information about your latest payment.</p>
-          <button
-            className="bg-blue-300 p-2 rounded-lg"
+          <Button
             onClick={async () => {
               const hello = await server.payment.fetch();
               setData(hello);
             }}
           >
             Payment
-          </button>
+          </Button>
         </div>
         <div>
           <div>Response</div>
