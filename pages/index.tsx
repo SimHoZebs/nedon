@@ -3,8 +3,9 @@ import { trpc } from "../lib/util/trpc";
 import { Products } from "plaid";
 import { useStoreActions, useStoreState } from "../lib/util/store";
 import Header from "../lib/comp/Header";
-import { User } from "@prisma/client";
 import Button from "../lib/comp/Button";
+import { UserClientSide } from "../lib/util/types";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
   const allUsers = trpc.account.getAll.useQuery(undefined);
@@ -15,23 +16,13 @@ const Home: NextPage = () => {
     enabled: false,
   });
   const server = trpc.useContext();
+  const router = useRouter();
 
-  const { user, accessToken } = useStoreState((state) => state);
+  const { user } = useStoreState((state) => state);
   const { setProducts, setLinkToken, setIsPaymentInitiation, setUser } =
     useStoreActions((actions) => actions);
 
-  const prepareUserForLink = async (user: User) => {
-    const info = await server.info.fetch(user.id);
-    if (!info) {
-      console.log(`info with user id ${user.id} not found`);
-      return;
-    }
-
-    const isPaymentInit = info.products.includes(Products.PaymentInitiation);
-
-    setProducts(info.products);
-    setIsPaymentInitiation(isPaymentInit);
-
+  const setUpLink = async () => {
     // used to determine which path to take when generating token
     // do not generate a new token for OAuth redirect; instead
     // setLinkToken from localStorage
@@ -54,9 +45,10 @@ const Home: NextPage = () => {
   };
 
   return (
-    <div className="flex flex-col p-3">
+    <div className="flex flex-col p-3 gap-3">
       <div>Current user: {user ? user.id : "none"}</div>
       <Header />
+
       <Button
         onClick={async () => {
           const user = await createUser.refetch();
@@ -69,28 +61,43 @@ const Home: NextPage = () => {
         create new user
       </Button>
 
+      <h3 className="text-2xl">Available users</h3>
       {allUsers.data &&
         allUsers.data.map((user) => (
-          <div key={user.id}>
+          <div key={user.id} className="flex flex-col gap-y-2">
             <p>id: {user.id}</p>
-            <p>ACCESS_TOKEN: {accessToken}</p>
             <p>PUBLIC_TOKEN: {user.PUBLIC_TOKEN}</p>
             <Button
               onClick={async () => {
-                if (!user) {
-                  console.log("no user");
+                const { ACCESS_TOKEN, ...rest } = user;
+
+                const info = await server.info.fetch(user.id);
+                if (!info) {
+                  console.log(`info with user id ${user.id} not found`);
                   return;
                 }
 
-                setUser(user);
-                if (process.env.NODE_ENV == "development") {
-                  //use sandboxaccess instead
+                const isPaymentInit = info.products.includes(
+                  Products.PaymentInitiation
+                );
+                setIsPaymentInitiation(isPaymentInit);
+
+                setProducts(info.products);
+
+                const userClientSide: UserClientSide = {
+                  hasAccessToken: ACCESS_TOKEN ? true : false,
+                  ...rest,
+                };
+
+                setUser((prev) => userClientSide);
+                if (userClientSide.hasAccessToken) {
+                  router.push("/user");
                 } else {
-                  prepareUserForLink(user);
+                  setUpLink();
                 }
               }}
             >
-              Test with this user
+              Log in as this user
             </Button>
           </div>
         ))}

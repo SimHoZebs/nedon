@@ -1,5 +1,6 @@
 import { action, createStore, Action, createTypedHooks } from "easy-peasy";
 import { User } from "@prisma/client";
+import { UserClientSide } from "./types";
 
 interface StoreModel {
   linkSuccess: boolean;
@@ -14,9 +15,6 @@ interface StoreModel {
   linkToken: string | null;
   setLinkToken: Action<StoreModel, string | null>;
 
-  accessToken: string | null;
-  setAccessToken: Action<StoreModel, string | null>;
-
   itemId: string | null;
   setItemId: Action<StoreModel, string | null>;
 
@@ -29,8 +27,8 @@ interface StoreModel {
     error_type: string;
   };
 
-  user: Omit<User, "ACCESS_TOKEN">;
-  setUser: Action<StoreModel, Omit<User, "ACCESS_TOKEN">>;
+  user: UserClientSide;
+  setUser: Action<StoreModel, (user: UserClientSide) => UserClientSide>;
 }
 
 const store = createStore<StoreModel>({
@@ -54,12 +52,6 @@ const store = createStore<StoreModel>({
     state.linkToken = payload;
   }),
 
-  //accessToken is only visible for dev purposes. Remove it from the frontend in production.
-  accessToken: null,
-  setAccessToken: action((state, payload) => {
-    state.accessToken = payload;
-  }),
-
   itemId: null,
   setItemId: action((state, payload) => {
     state.itemId = payload;
@@ -78,6 +70,7 @@ const store = createStore<StoreModel>({
 
   user: {
     id: "",
+    hasAccessToken: false,
     PUBLIC_TOKEN: null,
     ITEM_ID: null,
     // The transfer_id is only relevant for Transfer ACH product.
@@ -85,8 +78,9 @@ const store = createStore<StoreModel>({
     // The payment_id is only relevant for the UK/EU Payment Initiation product.
     PAYMENT_ID: null,
   },
+
   setUser: action((state, payload) => {
-    state.user = payload;
+    state.user = { ...payload(state.user) };
   }),
 });
 

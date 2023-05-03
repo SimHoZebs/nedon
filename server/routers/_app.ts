@@ -74,7 +74,7 @@ const setAccessToken = async ({
     public_token: publicToken,
   });
 
-  const userUpdateData: Omit<User, "id" | "PAYMENT_ID"> = {
+  const userUpdateData: Partial<User> = {
     PUBLIC_TOKEN: publicToken,
     ACCESS_TOKEN: tokenResponse.data.access_token,
     ITEM_ID: tokenResponse.data.item_id,

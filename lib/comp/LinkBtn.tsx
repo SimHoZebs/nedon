@@ -10,7 +10,7 @@ const LinkBtn = () => {
   const { linkToken, isPaymentInitiation, user } = useStoreState(
     (state) => state
   );
-  const { setIsItemAccess, setItemId, setAccessToken, setLinkSuccess } =
+  const { setIsItemAccess, setItemId, setUser, setLinkSuccess } =
     useStoreActions((actions) => actions);
   const setAccessTokenServer = trpc.setAccessToken.useMutation();
   const router = useRouter();
@@ -27,13 +27,15 @@ const LinkBtn = () => {
         if (response.error) {
           console.log("error setting access token from server");
           setItemId(`no item_id retrieved`);
-          setAccessToken(`no access_token retrieved`);
           setIsItemAccess(false);
           return;
         }
 
         setItemId(response.item_id);
-        setAccessToken(response.access_token);
+        setUser((user) => ({
+          ...user,
+          hasAccessToken: response.access_token ? true : false,
+        }));
         setIsItemAccess(true);
       };
 
@@ -50,11 +52,11 @@ const LinkBtn = () => {
     [
       isPaymentInitiation,
       router,
-      setAccessToken,
       setAccessTokenServer,
       setIsItemAccess,
       setItemId,
       setLinkSuccess,
+      setUser,
       user.id,
     ]
   );
@@ -83,7 +85,7 @@ const LinkBtn = () => {
 
   return (
     <Button onClick={() => open()}>
-      {linkToken ? "Launch Link" : "Loading..."}
+      {linkToken ? "Link a bank account" : "Waiting for link token..."}
     </Button>
   );
 };

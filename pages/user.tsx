@@ -8,8 +8,7 @@ import Items from "../lib/comp/Items";
 import Link from "next/link";
 
 const User: NextPage = () => {
-  const { itemId, accessToken, isItemAccess, isPaymentInitiation } =
-    useStoreState((state) => state);
+  const { user, isPaymentInitiation } = useStoreState((state) => state);
 
   return (
     <>
@@ -36,9 +35,9 @@ const User: NextPage = () => {
         </>
       ) : (
         /* If not using the payment_initiation product, show the item_id and access_token information */ <>
-          {isItemAccess ? (
+          {user.ITEM_ID ? (
             <h4 className="">
-              Congrats! By linking an account, you have created an
+              Congrats! By linking an account, you have created an{" "}
               <Link
                 href="http://plaid.com/docs/quickstart/glossary/#item"
                 target="_blank"
@@ -54,19 +53,8 @@ const User: NextPage = () => {
               </div>
             </h4>
           )}
-          <div className="">
-            <p className="">
-              <span className="">item_id</span>
-              <span className="">{itemId}</span>
-            </p>
 
-            <p className="">
-              <span className="">access_token</span>
-              <span className="">{accessToken}</span>
-            </p>
-          </div>
-
-          {isItemAccess && (
+          {user.ITEM_ID && (
             <p className="">
               Now that you have an access_token, you can make all of the
               following requests:
@@ -74,7 +62,7 @@ const User: NextPage = () => {
           )}
 
           {isPaymentInitiation && <ProductContainer />}
-          {isItemAccess && (
+          {user.ITEM_ID && (
             <>
               <ProductContainer />
               <Items />
