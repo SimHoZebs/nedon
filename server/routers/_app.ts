@@ -63,6 +63,45 @@ const configuration = new Configuration({
 
 const client = new PlaidApi(configuration);
 
+const setAccessToken = async ({
+  publicToken,
+  id,
+}: {
+  publicToken: string;
+  id: string;
+}) => {
+  const tokenResponse = await client.itemPublicTokenExchange({
+    public_token: publicToken,
+  });
+
+  const userUpdateData: Omit<User, "id" | "PAYMENT_ID"> = {
+    PUBLIC_TOKEN: publicToken,
+    ACCESS_TOKEN: tokenResponse.data.access_token,
+    ITEM_ID: tokenResponse.data.item_id,
+    TRANSFER_ID: null,
+  };
+
+  if (PLAID_PRODUCTS.includes(Products.Transfer)) {
+    userUpdateData.TRANSFER_ID = await authorizeAndCreateTransfer(
+      tokenResponse.data.item_id
+    );
+  }
+
+  const user = await db.user.update({
+    where: {
+      id,
+    },
+    data: { ...userUpdateData },
+  });
+
+  return {
+    // the 'access_token' is a private token, DO NOT pass this token to the frontend in your production environment
+    access_token: user.ACCESS_TOKEN,
+    item_id: user.ITEM_ID,
+    error: null,
+  };
+};
+
 export const appRouter = router({
   account: accountRouter,
 
@@ -95,6 +134,22 @@ export const appRouter = router({
     };
   }),
 
+  sandBoxAccess: procedure
+    .input(z.object({ instituteID: z.string(), id: z.string() }))
+    .query(async ({ input }) => {
+      const response = await client.sandboxPublicTokenCreate({
+        institution_id: input.instituteID, //"ins_56"
+        initial_products: PLAID_PRODUCTS,
+      });
+
+      const setAccessTokenResponse = await setAccessToken({
+        id: input.id,
+        publicToken: response.data.public_token,
+      });
+
+      return setAccessTokenResponse.access_token;
+    }),
+
   createLinkToken: procedure.input(z.void()).query(async () => {
     const response = await client.linkTokenCreate({
       user: {
@@ -116,36 +171,7 @@ export const appRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      const tokenResponse = await client.itemPublicTokenExchange({
-        public_token: input.publicToken,
-      });
-
-      const userUpdateData: Omit<User, "id" | "PAYMENT_ID"> = {
-        PUBLIC_TOKEN: input.publicToken,
-        ACCESS_TOKEN: tokenResponse.data.access_token,
-        ITEM_ID: tokenResponse.data.item_id,
-        TRANSFER_ID: null,
-      };
-
-      if (PLAID_PRODUCTS.includes(Products.Transfer)) {
-        userUpdateData.TRANSFER_ID = await authorizeAndCreateTransfer(
-          tokenResponse.data.item_id
-        );
-      }
-
-      const user = await db.user.update({
-        where: {
-          id: input.id,
-        },
-        data: { ...userUpdateData },
-      });
-
-      return {
-        // the 'access_token' is a private token, DO NOT pass this token to the frontend in your production environment
-        access_token: user.ACCESS_TOKEN,
-        item_id: user.ITEM_ID,
-        error: null,
-      };
+      return await setAccessToken(input);
     }),
 
   // Retrieve ACH or ETF Auth data for an Item's accounts

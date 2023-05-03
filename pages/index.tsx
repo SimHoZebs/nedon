@@ -20,31 +20,28 @@ const Home: NextPage = () => {
   const { setProducts, setLinkToken, setIsPaymentInitiation, setUser } =
     useStoreActions((actions) => actions);
 
-  const getInfo = async (user: User) => {
-    if (!user) {
-      console.log("no user");
-      return;
-    }
-
+  const prepareUserForLink = async (user: User) => {
     const info = await server.info.fetch(user.id);
     if (!info) {
       console.log(`info with user id ${user.id} not found`);
       return;
     }
 
-    const paymentInitiation = info.products.includes(
-      Products.PaymentInitiation
-    );
+    const isPaymentInit = info.products.includes(Products.PaymentInitiation);
 
     setProducts(info.products);
-    setIsPaymentInitiation(paymentInitiation);
+    setIsPaymentInitiation(isPaymentInit);
 
-    return { paymentInitiation };
-  };
+    // used to determine which path to take when generating token
+    // do not generate a new token for OAuth redirect; instead
+    // setLinkToken from localStorage
+    if (window.location.href.includes("?oauth_state_id=")) {
+      setLinkToken(localStorage.getItem("link_token"));
+      return;
+    }
 
-  const createToken = async () => {
     const linkToken = await createLinkToken.refetch();
-    console.log("createLinkToken", linkToken);
+    console.log("new link token", linkToken.data);
 
     if (linkToken.error || !linkToken.data) {
       setLinkToken(null);
@@ -80,15 +77,17 @@ const Home: NextPage = () => {
             <p>PUBLIC_TOKEN: {user.PUBLIC_TOKEN}</p>
             <Button
               onClick={async () => {
-                setUser(user);
-                const paymentInitation = await getInfo(user); // used to determine which path to take when generating token
-                // do not generate a new token for OAuth redirect; instead
-                // setLinkToken from localStorage
-                if (window.location.href.includes("?oauth_state_id=")) {
-                  setLinkToken(localStorage.getItem("link_token"));
+                if (!user) {
+                  console.log("no user");
                   return;
                 }
-                createToken();
+
+                setUser(user);
+                if (process.env.NODE_ENV == "development") {
+                  //use sandboxaccess instead
+                } else {
+                  prepareUserForLink(user);
+                }
               }}
             >
               Test with this user
