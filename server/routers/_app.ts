@@ -194,41 +194,52 @@ export const appRouter = router({
 
   // Retrieve Transactions for an Item
   // https://plaid.com/docs/#transactions
-  transactions: procedure.input(z.void()).mutation(async ({ input }) => {
-    // Set cursor to empty to receive all historical updates
-    let cursor = null;
+  transactions: procedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const user = await db.user.findFirst({
+        where: {
+          id: input.id,
+        },
+      });
+      if (!user || !user.ACCESS_TOKEN) return null;
 
-    // New transaction updates since "cursor"
-    let added: Transaction[] = [];
-    let modified: Transaction[] = [];
-    // Removed transaction ids
-    let removed: RemovedTransaction[] = [];
-    let hasMore = true;
-    // Iterate through each page of new transaction updates for item
-    while (hasMore) {
-      const request = {
-        access_token: ACCESS_TOKEN,
-        cursor: cursor,
-      };
-      const response = await client.transactionsSync(request);
-      const data = response.data;
-      // Add this page of results
-      added = added.concat(data.added);
-      modified = modified.concat(data.modified);
-      removed = removed.concat(data.removed);
-      hasMore = data.has_more;
-      // Update cursor to the next cursor
-      cursor = data.next_cursor;
-    }
+      // Set cursor to empty to receive all historical updates
+      let cursor = undefined;
 
-    const compareTxnsByDateAscending = (a, b) =>
-      (a.date > b.date) - (a.date < b.date);
-    // Return the 8 most recent transactions
-    const recently_added = [...added]
-      .sort(compareTxnsByDateAscending)
-      .slice(-8);
-    return { latest_transactions: recently_added };
-  }),
+      // New transaction updates since "cursor"
+      let added: Transaction[] = [];
+      let modified: Transaction[] = [];
+      // Removed transaction ids
+      let removed: RemovedTransaction[] = [];
+      let hasMore = true;
+
+      // Iterate through each page of new transaction updates for item
+      //A page contains maximum of 100 transactions
+      while (hasMore) {
+        const request = {
+          access_token: user.ACCESS_TOKEN,
+          cursor: cursor,
+        };
+
+        const response = await client.transactionsSync(request);
+        const data = response.data;
+        // Add this page of results
+        added = added.concat(data.added);
+        modified = modified.concat(data.modified);
+        removed = removed.concat(data.removed);
+
+        // hasMore = data.has_more;
+        hasMore = false; //disabling fetch for over 100 transactions
+
+        // Update cursor to the next cursor
+        cursor = data.next_cursor;
+      }
+
+      return added
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .slice(-8);
+    }),
 
   // Retrieve Investment Transactions for an Item
   // https://plaid.com/docs/#investments

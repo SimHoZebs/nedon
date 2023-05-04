@@ -29,32 +29,15 @@ import {
 import { useStoreState } from "../util/store";
 import { trpc } from "../util/trpc";
 import Button from "./Button";
+import { Transaction } from "plaid";
 
 const Products = () => {
-  const { products } = useStoreState((state) => state);
+  const { products, user } = useStoreState((state) => state);
   const server = trpc.useContext();
-  const [data, setData] = useState({});
+  const [data, setData] = useState<Transaction[]>([]);
 
   return (
     <ProductTypesContainer productType="Products">
-      <div className="flex w-full justify-between">
-        <div>
-          <p>Retrieve information about your latest payment.</p>
-          <Button
-            onClick={async () => {
-              const hello = await server.payment.fetch();
-              setData(hello);
-            }}
-          >
-            Payment
-          </Button>
-        </div>
-        <div>
-          <div>Response</div>
-          <div>{JSON.stringify(data)}</div>
-        </div>
-      </div>
-
       {products.includes("payment_initiation") && (
         <Endpoint
           endpoint="payment"
@@ -77,6 +60,32 @@ const Products = () => {
         />
       )}
 
+      <div className="flex w-full justify-between">
+        <div>
+          <p>
+            Retrieve transactions or incremental updates for credit and
+            depository accounts.
+          </p>
+
+          <Button
+            onClick={async () => {
+              const transactions = (await server.transactions.fetch({
+                id: user.id,
+              })) as Transaction[] | null;
+              if (!transactions) return;
+              setData(transactions);
+            }}
+          >
+            Transactions
+          </Button>
+        </div>
+
+        <div>
+          <div>Response</div>
+          <div>{JSON.stringify(data)}</div>
+        </div>
+      </div>
+
       {products.includes("transactions") && (
         <Endpoint
           endpoint="transactions"
@@ -87,6 +96,7 @@ const Products = () => {
           transformData={transformTransactionsData}
         />
       )}
+
       {products.includes("identity") && (
         <Endpoint
           endpoint="identity"
