@@ -403,17 +403,13 @@ export const transformAuthData = (data: AuthGetResponse) => {
   });
 };
 
-export const transformTransactionsData = (data: {
-  latest_transactions: Transaction[];
-}): Array<DataItem> => {
-  return data.latest_transactions!.map((t) => {
-    const item: DataItem = {
-      name: t.name!,
-      amount: formatCurrency(t.amount!, t.iso_currency_code),
-      date: t.date,
-    };
-    return item;
-  });
+export const transformTransactionsData = (data: Transaction[]) => {
+  return data.map((t) => ({
+    name: t.name,
+    amount: formatCurrency(t.amount, t.iso_currency_code),
+    date: t.date,
+    category: t.category,
+  }));
 };
 
 interface IdentityData {
@@ -605,7 +601,7 @@ export const transformTransferData = (
       transferId: transferData.id,
       amount: transferData.amount,
       type: transferData.type,
-      achClass: transferData.ach_class,
+      achClass: transferData.ach_class!,
       network: transferData.network,
       status: transferData.status,
     },

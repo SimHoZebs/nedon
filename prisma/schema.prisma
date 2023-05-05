@@ -6,17 +6,64 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id           String  @id @default(uuid())
-  ACCESS_TOKEN String?
-  PUBLIC_TOKEN String?
-  ITEM_ID      String?
-  // The transfer_id is only relevant for Transfer ACH product.
-  TRANSFER_ID  String?
-  // The payment_id is only relevant for the UK/EU Payment Initiation product.
-  PAYMENT_ID   String?
+  id                String   @id @default(uuid())
+  ACCESS_TOKEN      String?
+  PUBLIC_TOKEN      String?
+  ITEM_ID           String?
+  TRANSFER_ID       String? // The transfer_id is only relevant for Transfer ACH product.
+  PAYMENT_ID        String? // The payment_id is only relevant for the UK/EU Payment Initiation product.
+  linkedUserIDArray String[]
+}
+
+model Transaction {
+  transaction_id           String       @id
+  account_id               String
+  amount                   Float
+  iso_currency_code        String?
+  unofficial_currency_code String?
+  category                 String[]
+  category_id              String?
+  check_number             Int?
+  date                     DateTime
+  location                 Location?
+  name                     String
+  merchant_name            String?
+  payment_meta             PaymentMeta?
+  pending                  Boolean
+  pending_transaction_id   String?
+  authorized_date          DateTime
+  authorized_datetime      DateTime
+  payment_channel          String?
+  account_owner            String?
+}
+
+model Location {
+  transaction_id String      @unique
+  transaction    Transaction @relation(fields: [transaction_id], references: [transaction_id])
+  address        String?
+  city           String?
+  region         String?
+  postal_code    String?
+  country        String?
+  lat            String?
+  lon            String?
+  store_number   String?
+}
+
+model PaymentMeta {
+  transaction_id    String      @unique
+  transaction       Transaction @relation(fields: [transaction_id], references: [transaction_id])
+  by_order_of       String?
+  payee             String?
+  payer             String?
+  payment_method    String?
+  payment_processor String?
+  ppd_id            String?
+  reason            String?
+  reference_number  String?
 }
