@@ -4,7 +4,6 @@ import Button from "./Button";
 import Table from "./Table";
 import Error from "./Error";
 import { DataItem, Categories, ErrorDataItem, Data } from "../util/dataUtil";
-import Link from "next/link";
 
 interface Props {
   endpoint: string;
