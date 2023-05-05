@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
 import Endpoint from "./Endpoint";
-import ProductTypesContainer from "./ProductTypesContainer";
 import {
   transactionsCategories,
   authCategories,
@@ -25,6 +24,7 @@ import {
   transformAssetsData,
   transformTransferData,
   transformIncomePaystubsData,
+  Data,
 } from "../util/dataUtil";
 import { useStoreState } from "../util/store";
 import { trpc } from "../util/trpc";
@@ -35,9 +35,10 @@ const Products = () => {
   const { products, user } = useStoreState((state) => state);
   const server = trpc.useContext();
   const [data, setData] = useState<Transaction[]>([]);
+  const [transformedData, setTransformedData] = useState<Data>([]);
 
   return (
-    <ProductTypesContainer productType="Products">
+    <div>
       {products.includes("payment_initiation") && (
         <Endpoint
           endpoint="payment"
@@ -60,41 +61,39 @@ const Products = () => {
         />
       )}
 
-      <div className="flex w-full justify-between">
-        <div>
-          <p>
-            Retrieve transactions or incremental updates for credit and
-            depository accounts.
-          </p>
-
-          <Button
-            onClick={async () => {
-              const transactions = (await server.transactions.fetch({
-                id: user.id,
-              })) as Transaction[] | null;
-              if (!transactions) return;
-              setData(transactions);
-            }}
-          >
-            Transactions
-          </Button>
-        </div>
-
-        <div>
-          <div>Response</div>
-          <div>{JSON.stringify(data)}</div>
-        </div>
-      </div>
-
       {products.includes("transactions") && (
-        <Endpoint
-          endpoint="transactions"
-          name="Transactions"
-          categories={transactionsCategories}
-          schema="/transactions/sync/"
-          description="Retrieve transactions or incremental updates for credit and depository accounts."
-          transformData={transformTransactionsData}
-        />
+        <>
+          <div className="flex w-full justify-between">
+            <div>
+              <p>
+                Retrieve transactions or incremental updates for credit and
+                depository accounts.
+              </p>
+
+              <Button
+                onClick={async () => {
+                  const transactions = (await server.transactions.fetch({
+                    id: user.id,
+                  })) as Transaction[] | null;
+                  if (!transactions) return;
+                  setData(transactions);
+                  const transformedTranasctionData =
+                    transformTransactionsData(transactions);
+                  setTransformedData(transformedTranasctionData);
+                }}
+              >
+                Transactions
+              </Button>
+            </div>
+
+            <div>
+              <div>Response</div>
+              {transformedData.map((transaction, index) => (
+                <div key={index}>{JSON.stringify(transaction, null, 2)}</div>
+              ))}
+            </div>
+          </div>
+        </>
       )}
 
       {products.includes("identity") && (
@@ -108,6 +107,7 @@ const Products = () => {
           transformData={transformIdentityData}
         />
       )}
+
       {products.includes("assets") && (
         <Endpoint
           endpoint="assets"
@@ -180,7 +180,7 @@ const Products = () => {
           transformData={transformIncomePaystubsData}
         />
       )}
-    </ProductTypesContainer>
+    </div>
   );
 };
 
