@@ -2,7 +2,6 @@ import type { NextPage } from "next";
 import { trpc } from "../lib/util/trpc";
 import { Products } from "plaid";
 import { useStoreActions, useStoreState } from "../lib/util/store";
-import Header from "../lib/comp/Header";
 import Button from "../lib/comp/Button";
 import { UserClientSide } from "../lib/util/types";
 import { useRouter } from "next/router";
@@ -22,7 +21,7 @@ const Home: NextPage = () => {
   const { setProducts, setLinkToken, setIsPaymentInitiation, setUser } =
     useStoreActions((actions) => actions);
 
-  const setUpLink = async () => {
+  const setupLink = async () => {
     // used to determine which path to take when generating token
     // do not generate a new token for OAuth redirect; instead
     // setLinkToken from localStorage
@@ -45,10 +44,7 @@ const Home: NextPage = () => {
   };
 
   return (
-    <div className="flex flex-col p-3 gap-3">
-      <div>Current user: {globalUser ? globalUser.id : "none"}</div>
-      <Header />
-
+    <main className="flex flex-col p-3 gap-3">
       <Button
         onClick={async () => {
           const user = await createUser.refetch();
@@ -66,11 +62,13 @@ const Home: NextPage = () => {
       <h3 className="text-2xl">Available users</h3>
       {allUsers.data &&
         allUsers.data.map((user) => (
-          <div key={user.id} className="flex flex-col gap-y-2">
+          <section key={user.id} className="flex flex-col gap-y-2">
             <p>id: {user.id}</p>
             <p>PUBLIC_TOKEN: {user.PUBLIC_TOKEN}</p>
             <p>group Id array: {JSON.stringify(user.groupArray)}</p>
+
             <Button
+              disabled={user.id === globalUser.id}
               onClick={async () => {
                 const { ACCESS_TOKEN, ...rest } = user;
 
@@ -91,21 +89,18 @@ const Home: NextPage = () => {
                   hasAccessToken: ACCESS_TOKEN ? true : false,
                   ...rest,
                 };
-
                 setUser((prev) => userClientSide);
-                if (userClientSide.hasAccessToken) {
-                  router.push("/user");
-                } else {
-                  setUpLink();
-                }
+
+                setupLink();
+                router.push("/user");
               }}
             >
-              {globalUser.id ? "Log out" : "Log in as this user"}
+              Log in as this user
             </Button>
             <Button onClick={() => {}}>Add this user to group</Button>
-          </div>
+          </section>
         ))}
-    </div>
+    </main>
   );
 };
 

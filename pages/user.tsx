@@ -6,14 +6,17 @@ import ProductContainer from "../lib/comp/Products";
 import Items from "../lib/comp/Items";
 
 import Link from "next/link";
+import LinkBtn from "../lib/comp/LinkBtn";
 
 const User: NextPage = () => {
-  const { user, isPaymentInitiation } = useStoreState((state) => state);
+  const { user, linkToken, isPaymentInitiation } = useStoreState(
+    (state) => state
+  );
 
   return (
-    <>
-      {isPaymentInitiation ? (
-        <>
+    <main className="p-1">
+      {isPaymentInitiation && (
+        <section>
           <h4 className="">
             Congrats! Your payment is now confirmed.
             <p />
@@ -32,45 +35,61 @@ const User: NextPage = () => {
             Now that the payment id stored in your server, you can use it to
             access the payment information:
           </p>
-        </>
-      ) : (
-        /* If not using the payment_initiation product, show the item_id and access_token information */ <>
-          {user.ITEM_ID ? (
-            <h4 className="">
-              Congrats! By linking an account, you have created an{" "}
-              <Link
-                href="http://plaid.com/docs/quickstart/glossary/#item"
-                target="_blank"
-              >
-                Item
-              </Link>
-              .
-            </h4>
-          ) : (
-            <h4 className="">
-              <div className="border-red-500 border-dotted">
-                Unable to create an item. Please check your backend server
-              </div>
-            </h4>
-          )}
-
-          {user.ITEM_ID && (
-            <p className="">
-              Now that you have an access_token, you can make all of the
-              following requests:
-            </p>
-          )}
-
-          {isPaymentInitiation && <ProductContainer />}
-          {user.ITEM_ID && (
-            <>
-              <ProductContainer />
-              <Items />
-            </>
-          )}
-        </>
+        </section>
       )}
-    </>
+
+      {linkToken == null ? (
+        <section className="text-red-500 font-semibold text-lg">
+          <div>
+            Unable to fetch link_token: please make sure your backend server is
+            running and that your .env file has been configured correctly.
+          </div>
+          <div>
+            If you are on a Windows machine, please ensure that you have cloned
+            the repo with
+            <Link
+              href="https://github.com/plaid/quickstart#special-instructions-for-windows"
+              target="_blank"
+            >
+              symlinks turned on.
+            </Link>
+            You can also try checking your
+            <Link
+              href="https://dashboard.plaid.com/activity/logs"
+              target="_blank"
+            >
+              activity log
+            </Link>
+            on your Plaid dashboard.
+          </div>
+        </section>
+      ) : (
+        <div className="">
+          <LinkBtn />
+        </div>
+      )}
+
+      {user.ITEM_ID && (
+        <p className="">
+          Congrats! By linking an account, you have created an{" "}
+          <Link
+            href="http://plaid.com/docs/quickstart/glossary/#item"
+            target="_blank"
+          >
+            Item
+          </Link>
+          . Now that you have an access_token, you can make all of the following
+          requests:
+        </p>
+      )}
+
+      {user.ITEM_ID && (
+        <section>
+          <ProductContainer />
+          <Items />
+        </section>
+      )}
+    </main>
   );
 };
 

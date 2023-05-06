@@ -20,12 +20,6 @@ interface StoreModel {
   products: string[];
   setProducts: Action<StoreModel, string[]>;
 
-  linkTokenError: {
-    error_message: string;
-    error_code: string;
-    error_type: string;
-  };
-
   user: UserClientSide;
   setUser: Action<StoreModel, (user: UserClientSide) => UserClientSide>;
 }
@@ -60,12 +54,6 @@ const store = createStore<StoreModel>({
   setProducts: action((state, payload) => {
     state.products = payload;
   }),
-
-  linkTokenError: {
-    error_type: "",
-    error_code: "",
-    error_message: "",
-  },
 
   user: {
     id: "",
