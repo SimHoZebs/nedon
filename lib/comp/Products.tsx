@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 
 import Endpoint from "./Endpoint";
 import {
-  transactionsCategories,
   authCategories,
   identityCategories,
   balanceCategories,
@@ -24,18 +23,14 @@ import {
   transformAssetsData,
   transformTransferData,
   transformIncomePaystubsData,
-  Data,
 } from "../util/dataUtil";
 import { useStoreState } from "../util/store";
 import { trpc } from "../util/trpc";
-import Button from "./Button";
-import { Transaction } from "plaid";
+import NewEndpoint from "./NewEndpoint";
 
 const Products = () => {
   const { products, user } = useStoreState((state) => state);
   const server = trpc.useContext();
-  const [data, setData] = useState<Transaction[]>([]);
-  const [transformedData, setTransformedData] = useState<Data>([]);
 
   return (
     <div>
@@ -62,38 +57,14 @@ const Products = () => {
       )}
 
       {products.includes("transactions") && (
-        <>
-          <div className="flex w-full justify-between">
-            <div>
-              <p>
-                Retrieve transactions or incremental updates for credit and
-                depository accounts.
-              </p>
-
-              <Button
-                onClick={async () => {
-                  const transactions = (await server.transactions.fetch({
-                    id: user.id,
-                  })) as Transaction[] | null;
-                  if (!transactions) return;
-                  setData(transactions);
-                  const transformedTranasctionData =
-                    transformTransactionsData(transactions);
-                  setTransformedData(transformedTranasctionData);
-                }}
-              >
-                Transactions
-              </Button>
-            </div>
-
-            <div>
-              <div>Response</div>
-              {transformedData.map((transaction, index) => (
-                <div key={index}>{JSON.stringify(transaction, null, 2)}</div>
-              ))}
-            </div>
-          </div>
-        </>
+        <NewEndpoint
+          desc="Retrieve transactions or incremental updates for credit and depository accounts."
+          data={server.transactions.fetch({
+            id: user.id,
+          })}
+        >
+          Transactions
+        </NewEndpoint>
       )}
 
       {products.includes("identity") && (

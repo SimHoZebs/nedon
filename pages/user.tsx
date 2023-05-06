@@ -14,7 +14,7 @@ const User: NextPage = () => {
   );
 
   return (
-    <main className="p-1">
+    <main className="w-full overflow-auto p-2">
       {isPaymentInitiation && (
         <section>
           <h4 className="">
