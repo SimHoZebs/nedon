@@ -15,6 +15,7 @@ import {
 import { accountRouter } from "./account";
 import db from "../../lib/util/db";
 import { User } from "@prisma/client";
+import { groupRouter } from "./group";
 
 const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
@@ -104,23 +105,15 @@ const setAccessToken = async ({
 
 export const appRouter = router({
   account: accountRouter,
-
-  hello: procedure
-    .input(
-      z.object({
-        text: z.string(),
-      })
-    )
-    .query(({ input }) => {
-      return {
-        greeting: `hello ${input.text}`,
-      };
-    }),
+  group: groupRouter,
 
   info: procedure.input(z.string()).query(async ({ input }) => {
     const user = await db.user.findFirst({
       where: {
         id: input,
+      },
+      include: {
+        groupArray: true,
       },
     });
 
@@ -171,7 +164,7 @@ export const appRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      return await setAccessToken(input);
+      return setAccessToken(input);
     }),
 
   // Retrieve ACH or ETF Auth data for an Item's accounts

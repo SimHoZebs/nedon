@@ -18,7 +18,7 @@ const Home: NextPage = () => {
   const server = trpc.useContext();
   const router = useRouter();
 
-  const { user } = useStoreState((state) => state);
+  const { user: globalUser } = useStoreState((state) => state);
   const { setProducts, setLinkToken, setIsPaymentInitiation, setUser } =
     useStoreActions((actions) => actions);
 
@@ -46,7 +46,7 @@ const Home: NextPage = () => {
 
   return (
     <div className="flex flex-col p-3 gap-3">
-      <div>Current user: {user ? user.id : "none"}</div>
+      <div>Current user: {globalUser ? globalUser.id : "none"}</div>
       <Header />
 
       <Button
@@ -56,6 +56,8 @@ const Home: NextPage = () => {
             console.log(user.error);
             return;
           }
+
+          server.group.create.fetch({ id: user.data.id });
         }}
       >
         create new user
@@ -67,6 +69,7 @@ const Home: NextPage = () => {
           <div key={user.id} className="flex flex-col gap-y-2">
             <p>id: {user.id}</p>
             <p>PUBLIC_TOKEN: {user.PUBLIC_TOKEN}</p>
+            <p>group Id array: {JSON.stringify(user.groupArray)}</p>
             <Button
               onClick={async () => {
                 const { ACCESS_TOKEN, ...rest } = user;
@@ -97,8 +100,9 @@ const Home: NextPage = () => {
                 }
               }}
             >
-              Log in as this user
+              {globalUser.id ? "Log out" : "Log in as this user"}
             </Button>
+            <Button onClick={() => {}}>Add this user to group</Button>
           </div>
         ))}
     </div>

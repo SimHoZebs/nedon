@@ -4,11 +4,14 @@ import db from "../../lib/util/db";
 
 export const accountRouter = router({
   getAll: procedure.input(z.undefined()).query(async () => {
-    return db.user.findMany();
+    return db.user.findMany({
+      include: {
+        groupArray: true,
+      },
+    });
   }),
 
   create: procedure.input(z.undefined()).query(async () => {
-    console.log("user");
     const user = await db.user.create({
       data: {},
     });

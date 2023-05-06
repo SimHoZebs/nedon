@@ -1,5 +1,4 @@
 import { action, createStore, Action, createTypedHooks } from "easy-peasy";
-import { User } from "@prisma/client";
 import { UserClientSide } from "./types";
 
 interface StoreModel {
@@ -77,6 +76,7 @@ const store = createStore<StoreModel>({
     TRANSFER_ID: null,
     // The payment_id is only relevant for the UK/EU Payment Initiation product.
     PAYMENT_ID: null,
+    groupArray: [],
   },
 
   setUser: action((state, payload) => {
