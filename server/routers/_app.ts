@@ -232,8 +232,8 @@ export const appRouter = router({
       }
 
       return added
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-        .slice(-8);
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(-20);
     }),
 
   // Retrieve Investment Transactions for an Item

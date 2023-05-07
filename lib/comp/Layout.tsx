@@ -16,6 +16,9 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
         <Button onClick={() => router.push("/user")}>
           <Image src={home} width={24} height={24} alt="home button" />
         </Button>
+        <Button onClick={() => router.push("/transactions")}>
+          Transactions
+        </Button>
 
         <div>Current user: {user ? user.id.slice(0, 8) : "none"}</div>
       </nav>
