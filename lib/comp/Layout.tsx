@@ -11,7 +11,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   return (
     <div className="flex bg-zinc-950 text-zinc-300 w-screen h-screen">
-      <nav className="p-1 flex flex-col gap-y-2 items-start bg-zinc-900 w-56">
+      <nav className="p-2 flex flex-col gap-y-2 items-start bg-zinc-900 w-56">
         <Button onClick={() => router.push("/")}>user selection screen</Button>
         <Button onClick={() => router.push("/user")}>
           <Image src={home} width={24} height={24} alt="home button" />
@@ -19,7 +19,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
         <div>Current user: {user ? user.id.slice(0, 8) : "none"}</div>
       </nav>
-      {props.children}
+      <main className="w-full overflow-auto px-5 py-3">{props.children}</main>
     </div>
   );
 };

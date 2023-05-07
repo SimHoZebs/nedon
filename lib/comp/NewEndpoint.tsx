@@ -10,8 +10,8 @@ const NewEndpoint = (props: Props) => {
   const [data, setData] = useState<unknown>(undefined);
 
   return (
-    <div className="flex w-full justify-between">
-      <div className="">
+    <div className="flex w-full bg-zinc-900 p-2 divide-x-2 gap-x-1">
+      <div className="w-1/3">
         <p>{props.desc}</p>
         <Button
           onClick={async () => {
@@ -23,15 +23,19 @@ const NewEndpoint = (props: Props) => {
         </Button>
       </div>
 
-      <div className="">
+      <div className="w-2/3">
         <p>Response:</p>
-        <div className="flex flex-col gap-y-1 divide-y-2 overflow-scroll max-h-[60vh] overflow-x-hidden">
+        <div className="flex flex-col gap-y-1 divide-y-2 max-h-[60vh] overflow-y-scroll">
           {Array.isArray(data) ? (
             data.map((datum, index) => (
-              <pre key={index}>{JSON.stringify(datum, null, 2)}</pre>
+              <p className="break-words whitespace-pre-wrap" key={index}>
+                {JSON.stringify(datum, null, 2)}
+              </p>
             ))
           ) : (
-            <pre>{JSON.stringify(data, null, 2)}</pre>
+            <p className="break-words whitespace-pre-wrap">
+              {JSON.stringify(data, null, 2)}
+            </p>
           )}
         </div>
       </div>

@@ -33,7 +33,7 @@ const Products = () => {
   const server = trpc.useContext();
 
   return (
-    <div>
+    <section className="flex flex-col gap-y-3">
       {products.includes("payment_initiation") && (
         <Endpoint
           endpoint="payment"
@@ -46,14 +46,12 @@ const Products = () => {
       )}
 
       {products.includes("auth") && (
-        <Endpoint
-          endpoint="auth"
-          name="Auth"
-          categories={authCategories}
-          schema="/auth/get/"
-          description="Retrieve account and routing numbers for checking and savings accounts."
-          transformData={transformAuthData}
-        />
+        <NewEndpoint
+          desc="Retrieve account and routing numbers for checking and savings accounts."
+          data={server.auth.fetch({ id: user.id })}
+        >
+          Auth
+        </NewEndpoint>
       )}
 
       {products.includes("transactions") && (
@@ -151,7 +149,7 @@ const Products = () => {
           transformData={transformIncomePaystubsData}
         />
       )}
-    </div>
+    </section>
   );
 };
 

@@ -14,7 +14,7 @@ const User: NextPage = () => {
   );
 
   return (
-    <main className="w-full overflow-auto p-2">
+    <>
       {isPaymentInitiation && (
         <section>
           <h4 className="">
@@ -89,7 +89,7 @@ const User: NextPage = () => {
           <Items />
         </section>
       )}
-    </main>
+    </>
   );
 };
 

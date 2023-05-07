@@ -169,21 +169,23 @@ export const appRouter = router({
 
   // Retrieve ACH or ETF Auth data for an Item's accounts
   // https://plaid.com/docs/#auth
-  auth: procedure.input(z.string()).mutation(async ({ input }) => {
-    const user = await db.user.findFirst({
-      where: {
-        id: input,
-      },
-    });
+  auth: procedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const user = await db.user.findFirst({
+        where: {
+          id: input.id,
+        },
+      });
 
-    if (!user || !user.ACCESS_TOKEN) return null;
+      if (!user || !user.ACCESS_TOKEN) return null;
 
-    const authResponse = await client.authGet({
-      access_token: user.ACCESS_TOKEN,
-    });
+      const authResponse = await client.authGet({
+        access_token: user.ACCESS_TOKEN,
+      });
 
-    return authResponse.data;
-  }),
+      return authResponse.data;
+    }),
 
   // Retrieve Transactions for an Item
   // https://plaid.com/docs/#transactions

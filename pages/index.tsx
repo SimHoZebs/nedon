@@ -44,7 +44,7 @@ const Home: NextPage = () => {
   };
 
   return (
-    <main className="flex flex-col p-3 gap-3">
+    <>
       <Button
         onClick={async () => {
           const user = await createUser.refetch();
@@ -100,7 +100,7 @@ const Home: NextPage = () => {
             <Button onClick={() => {}}>Add this user to group</Button>
           </section>
         ))}
-    </main>
+    </>
   );
 };
 
