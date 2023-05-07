@@ -52,18 +52,18 @@ model Transaction {
   amount                   Float
   iso_currency_code        String?
   unofficial_currency_code String?
-  category                 String[]
+  category                 String[] //should be string[]|null
   category_id              String?
   check_number             Int?
-  date                     DateTime
+  date                     String
   location                 Location?
   name                     String
   merchant_name            String?
   payment_meta             PaymentMeta?
   pending                  Boolean
   pending_transaction_id   String?
-  authorized_date          DateTime
-  authorized_datetime      DateTime
+  authorized_date          String
+  authorized_datetime      String
   payment_channel          String?
   account_owner            String?
 }
