@@ -2,8 +2,31 @@ import { router, procedure } from "../trpc";
 import { z } from "zod";
 import db from "../../lib/util/db";
 import stripUserForClient from "../../lib/util/stripUserForClient";
+import { Products } from "plaid";
 
-export const accountRouter = router({
+const PLAID_PRODUCTS = (
+  process.env.PLAID_PRODUCTS || Products.Transactions
+).split(",") as Products[];
+
+const userRouter = router({
+  get: procedure.input(z.string()).query(async ({ input }) => {
+    const user = await db.user.findFirst({
+      where: {
+        id: input,
+      },
+      include: {
+        groupArray: true,
+      },
+    });
+
+    if (!user) return null;
+
+    return {
+      products: PLAID_PRODUCTS,
+      ...stripUserForClient(user),
+    };
+  }),
+
   getAll: procedure.input(z.undefined()).query(async () => {
     const userArray = await db.user.findMany({
       include: {
@@ -25,3 +48,4 @@ export const accountRouter = router({
     return stripUserForClient(user);
   }),
 });
+export default userRouter;

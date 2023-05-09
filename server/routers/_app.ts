@@ -12,7 +12,7 @@ import {
   Transaction,
   RemovedTransaction,
 } from "plaid";
-import { accountRouter } from "./account";
+import userRouter from "./user";
 import db from "../../lib/util/db";
 import { User } from "@prisma/client";
 import { groupRouter } from "./group";
@@ -105,26 +105,8 @@ const setAccessToken = async ({
 };
 
 export const appRouter = router({
-  account: accountRouter,
+  user: userRouter,
   group: groupRouter,
-
-  info: procedure.input(z.string()).query(async ({ input }) => {
-    const user = await db.user.findFirst({
-      where: {
-        id: input,
-      },
-      include: {
-        groupArray: true,
-      },
-    });
-
-    if (!user) return null;
-
-    return {
-      products: PLAID_PRODUCTS,
-      ...stripUserForClient(user),
-    };
-  }),
 
   sandBoxAccess: procedure
     .input(z.object({ instituteID: z.string(), id: z.string() }))

@@ -7,11 +7,11 @@ import { GroupClientSide, UserClientSide } from "../lib/util/types";
 import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
-  const allUsers = trpc.account.getAll.useQuery(undefined);
+  const allUsers = trpc.user.getAll.useQuery(undefined);
   const createLinkToken = trpc.createLinkToken.useQuery(undefined, {
     enabled: false,
   });
-  const createUser = trpc.account.create.useQuery(undefined, {
+  const createUser = trpc.user.create.useQuery(undefined, {
     enabled: false,
   });
   const server = trpc.useContext();
@@ -78,7 +78,7 @@ const Home: NextPage = () => {
             <Button
               disabled={user.id === globalUser.id}
               onClick={async () => {
-                const info = await server.info.fetch(user.id);
+                const info = await server.user.get.fetch(user.id);
                 if (!info) {
                   console.log(`info with user id ${user.id} not found`);
                   return;
