@@ -16,6 +16,7 @@ import { accountRouter } from "./account";
 import db from "../../lib/util/db";
 import { User } from "@prisma/client";
 import { groupRouter } from "./group";
+import stripUserForClient from "../../lib/util/stripUserForClient";
 
 const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
@@ -119,11 +120,9 @@ export const appRouter = router({
 
     if (!user) return null;
 
-    const { id, ...rest } = user;
-
     return {
       products: PLAID_PRODUCTS,
-      ...rest,
+      ...stripUserForClient(user),
     };
   }),
 
