@@ -1,5 +1,5 @@
 import { action, createStore, Action, createTypedHooks } from "easy-peasy";
-import { UserClientSide } from "./types";
+import { GroupClientSide, UserClientSide } from "./types";
 
 interface StoreModel {
   linkSuccess: boolean;
@@ -22,6 +22,12 @@ interface StoreModel {
 
   user: UserClientSide;
   setUser: Action<StoreModel, (user: UserClientSide) => UserClientSide>;
+
+  currentGroup?: GroupClientSide;
+  setCurrentGroup: Action<
+    StoreModel,
+    (group?: GroupClientSide) => GroupClientSide
+  >;
 }
 
 const store = createStore<StoreModel>({
@@ -64,11 +70,15 @@ const store = createStore<StoreModel>({
     TRANSFER_ID: null,
     // The payment_id is only relevant for the UK/EU Payment Initiation product.
     PAYMENT_ID: null,
-    groupArray: [],
+    groupArray: [{ id: "" }],
   },
-
   setUser: action((state, payload) => {
     state.user = { ...payload(state.user) };
+  }),
+
+  currentGroup: undefined,
+  setCurrentGroup: action((state, payload) => {
+    state.currentGroup = { ...payload(state.currentGroup) };
   }),
 });
 

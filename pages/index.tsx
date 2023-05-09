@@ -3,7 +3,7 @@ import { trpc } from "../lib/util/trpc";
 import { Products } from "plaid";
 import { useStoreActions, useStoreState } from "../lib/util/store";
 import Button from "../lib/comp/Button";
-import { UserClientSide } from "../lib/util/types";
+import { GroupClientSide, UserClientSide } from "../lib/util/types";
 import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
@@ -17,9 +17,15 @@ const Home: NextPage = () => {
   const server = trpc.useContext();
   const router = useRouter();
 
-  const { user: globalUser } = useStoreState((state) => state);
-  const { setProducts, setLinkToken, setIsPaymentInitiation, setUser } =
-    useStoreActions((actions) => actions);
+  const { user: globalUser, currentGroup } = useStoreState((state) => state);
+  const {
+    setProducts,
+    setLinkToken,
+    setIsPaymentInitiation,
+    setUser,
+    setCurrentGroup,
+  } = useStoreActions((actions) => actions);
+  const addUserToGroup = trpc.group.addUserToGroup.useMutation();
 
   const setupLink = async () => {
     // used to determine which path to take when generating token
@@ -65,13 +71,13 @@ const Home: NextPage = () => {
           <section key={user.id} className="flex flex-col gap-y-2">
             <p>id: {user.id}</p>
             <p>PUBLIC_TOKEN: {user.PUBLIC_TOKEN}</p>
-            <p>group Id array: {JSON.stringify(user.groupArray)}</p>
+            <pre>
+              group Id array: {JSON.stringify(user.groupArray, null, 2)}
+            </pre>
 
             <Button
               disabled={user.id === globalUser.id}
               onClick={async () => {
-                const { ACCESS_TOKEN, ...rest } = user;
-
                 const info = await server.info.fetch(user.id);
                 if (!info) {
                   console.log(`info with user id ${user.id} not found`);
@@ -85,11 +91,11 @@ const Home: NextPage = () => {
 
                 setProducts(info.products);
 
-                const userClientSide: UserClientSide = {
-                  hasAccessToken: ACCESS_TOKEN ? true : false,
-                  ...rest,
-                };
-                setUser((prev) => userClientSide);
+                setUser((prev) => user);
+                if (!user.groupArray) return;
+                const test = user.groupArray[0];
+
+                setCurrentGroup((prev) => test);
 
                 setupLink();
                 router.push("/user");
@@ -97,11 +103,40 @@ const Home: NextPage = () => {
             >
               Log in as this user
             </Button>
-            <Button onClick={() => {}}>Add this user to group</Button>
+
+            <Button
+              disabled={currentGroup && userInGroup(user, currentGroup)}
+              onClick={async () => {
+                if (!currentGroup) {
+                  console.log("no current group");
+                  return;
+                }
+                if (userInGroup(user, currentGroup)) {
+                  console.log("user already in group");
+                  return;
+                }
+                addUserToGroup.mutateAsync({
+                  userId: user.id,
+                  groupId: currentGroup.id,
+                });
+              }}
+            >
+              Add this user to group
+            </Button>
           </section>
         ))}
     </>
   );
 };
 
+const userInGroup = (user: UserClientSide, currentGroup: GroupClientSide) => {
+  if (!user.groupArray) return false;
+
+  for (const group of user.groupArray) {
+    if (group.id === currentGroup.id) {
+      return true;
+    }
+  }
+  return false;
+};
 export default Home;

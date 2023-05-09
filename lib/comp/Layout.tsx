@@ -7,7 +7,7 @@ import Image from "next/image";
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
-  const { user } = useStoreState((state) => state);
+  const { user, currentGroup } = useStoreState((state) => state);
 
   return (
     <div className="flex bg-zinc-950 text-zinc-300 w-screen h-screen">
@@ -21,6 +21,10 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
         </Button>
 
         <div>Current user: {user ? user.id.slice(0, 8) : "none"}</div>
+
+        <div>
+          Current group: {currentGroup ? currentGroup.id.slice(0, 8) : "none"}
+        </div>
       </nav>
       <main className="w-full overflow-auto px-5 py-3">{props.children}</main>
     </div>
