@@ -284,17 +284,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prisma/client@npm:^4.13.0":
-  version: 4.13.0
-  resolution: "@prisma/client@npm:4.13.0"
+"@prisma/client@npm:^4.14.0":
+  version: 4.14.0
+  resolution: "@prisma/client@npm:4.14.0"
   dependencies:
-    "@prisma/engines-version": 4.13.0-50.1e7af066ee9cb95cf3a403c78d9aab3e6b04f37a
+    "@prisma/engines-version": 4.14.0-67.d9a4c5988f480fa576d43970d5a23641aa77bc9c
   peerDependencies:
     prisma: "*"
   peerDependenciesMeta:
     prisma:
       optional: true
-  checksum: 74e2ede6308d6f70dc6244c34d13cf5f6c8da4f1a1ffe42a26192675ecac02733cb5482518d2a37fa057f160873fe8d42f5e3a08fc45d52b1eb386522bdbec0b
+  checksum: d0254f0858653d6ae3366704af0296fc739a06917c8d96b4dade293e2195b9a0633782714339d7d8813bc669aa92105151632b395d5c6b1fa226ca685aeee47d
   languageName: node
   linkType: hard
 
@@ -309,17 +309,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prisma/engines-version@npm:4.13.0-50.1e7af066ee9cb95cf3a403c78d9aab3e6b04f37a":
-  version: 4.13.0-50.1e7af066ee9cb95cf3a403c78d9aab3e6b04f37a
-  resolution: "@prisma/engines-version@npm:4.13.0-50.1e7af066ee9cb95cf3a403c78d9aab3e6b04f37a"
-  checksum: cc583fe956b65fd4548082917f14ccf1c3c54d6b26623583f5e63298a8b4b5a492ba90597123af1fc272115621cb7340e2d708d5b5e252f59139b35f0df00abe
+"@prisma/engines-version@npm:4.14.0-67.d9a4c5988f480fa576d43970d5a23641aa77bc9c":
+  version: 4.14.0-67.d9a4c5988f480fa576d43970d5a23641aa77bc9c
+  resolution: "@prisma/engines-version@npm:4.14.0-67.d9a4c5988f480fa576d43970d5a23641aa77bc9c"
+  checksum: 0df2c9e7434ced708a202cb572e5cf433aae55332819700edb394b7d9c29742a6d2fd65abb778e80f9b1cc1f90daae5e331f4acd070bed395982856ff5ceccee
   languageName: node
   linkType: hard
 
-"@prisma/engines@npm:4.13.0":
-  version: 4.13.0
-  resolution: "@prisma/engines@npm:4.13.0"
-  checksum: 6c2315dc1e1a8a07f02a074ee6898a66a96a3bbbb4341224cb1dc966da3959c2ee7557131a2ce37fd559c53d210b904b72c4559474e017438e6753d480c3cfe1
+"@prisma/engines@npm:4.14.0":
+  version: 4.14.0
+  resolution: "@prisma/engines@npm:4.14.0"
+  checksum: aef3c892923419c83475be37baabeb636c652fde1c00ad5a743784f834dcb1b872e6d16a891b69307d883823936dae11e1fcb5d177d8586af771dda5d7935f30
   languageName: node
   linkType: hard
 
@@ -408,49 +408,49 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trpc/client@npm:^10.25.0":
-  version: 10.25.0
-  resolution: "@trpc/client@npm:10.25.0"
+"@trpc/client@npm:^10.25.1":
+  version: 10.25.1
+  resolution: "@trpc/client@npm:10.25.1"
   peerDependencies:
-    "@trpc/server": 10.25.0
-  checksum: c9eae227e92b6685aa42c13b40cae6613025ecf7230af988ae39e158417de71d264354e911743779e5d064e28c0492df09096578757eb9a66d4e5e4d58b96a84
+    "@trpc/server": 10.25.1
+  checksum: 16ed6c7c5c75d30f4397faed6a4f2310a5953baad1e7e600e1b552effb30ca6ee1c95d2ebf70e8a73794d79deaaca4ab96dc86a889b0f3471d65847a4ce71758
   languageName: node
   linkType: hard
 
-"@trpc/next@npm:^10.25.0":
-  version: 10.25.0
-  resolution: "@trpc/next@npm:10.25.0"
+"@trpc/next@npm:^10.25.1":
+  version: 10.25.1
+  resolution: "@trpc/next@npm:10.25.1"
   dependencies:
     react-ssr-prepass: ^1.5.0
   peerDependencies:
     "@tanstack/react-query": ^4.18.0
-    "@trpc/client": 10.25.0
-    "@trpc/react-query": 10.25.0
-    "@trpc/server": 10.25.0
+    "@trpc/client": 10.25.1
+    "@trpc/react-query": 10.25.1
+    "@trpc/server": 10.25.1
     next: "*"
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: 700229f99d6efb6f00a1179f6a77bf0b68a5b7efcace67a31afd0b35af40fb5b4681805271dd3c32292acfd5deb6ea8303fb78b6ecf48eef69da1f32c6fe9ef1
+  checksum: 5ca88a443a907c36b14975359fecd7c2c1ec538b94b34ab39ac678c44d4dc3706994ec41dc907a809da1aafdbe6b34608645b1d2c91e59c77c3cabc4ac1af524
   languageName: node
   linkType: hard
 
-"@trpc/react-query@npm:^10.25.0":
-  version: 10.25.0
-  resolution: "@trpc/react-query@npm:10.25.0"
+"@trpc/react-query@npm:^10.25.1":
+  version: 10.25.1
+  resolution: "@trpc/react-query@npm:10.25.1"
   peerDependencies:
     "@tanstack/react-query": ^4.18.0
-    "@trpc/client": 10.25.0
-    "@trpc/server": 10.25.0
+    "@trpc/client": 10.25.1
+    "@trpc/server": 10.25.1
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: 9406f3cefa2bcbbf2814d817fbc0374940d1f9fca4c5c4b90a30e19fc935f2aa349a1e586491784819f514f770a7186a03c33658f17285ec0ab10731f0f7ff6d
+  checksum: 8b84964699ee70ae35284691b427d2db2b77c95e3628fa9a60f783847397d4813a3d21070410a2a740a5fa51640fb156eb5a8a9bbc0227018c39aee86276d31c
   languageName: node
   linkType: hard
 
-"@trpc/server@npm:^10.25.0":
-  version: 10.25.0
-  resolution: "@trpc/server@npm:10.25.0"
-  checksum: 89456165f66d894cf33296bf099aabf3c8494258fa264e5cba7f4e4d187e62b282ca3fd2919f7999ade7a930df28b50730ab6369f65bab2b25005a6275ef6a08
+"@trpc/server@npm:^10.25.1":
+  version: 10.25.1
+  resolution: "@trpc/server@npm:10.25.1"
+  checksum: 1a405276769726b11de427d1f62259524bdd92a0273cfa29e07e4102f6801e249f08dca3d7799f1e6b18e1b80d18218c712bb0054abce93bbb0c78985ef5709f
   languageName: node
   linkType: hard
 
@@ -505,10 +505,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:18.16.5":
-  version: 18.16.5
-  resolution: "@types/node@npm:18.16.5"
-  checksum: b6df96a76a7655cd944794197cf63f5269e5034041bc355f4f243cb3f185ad3e1948011b6f0ac66c22434e50bc53a20ec3a9d95ad284f0e3819813d309d1650b
+"@types/node@npm:18.16.7":
+  version: 18.16.7
+  resolution: "@types/node@npm:18.16.7"
+  checksum: dbff7d41a050557cc81aa37cb186aaf3a799b3001bc4bb1015b240398abde1f9d0ac1e943959bba7f2ab2701292ae407a9ee2fc0f735a05b28bfc97d0b2b5e91
   languageName: node
   linkType: hard
 
@@ -2905,14 +2905,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "nedon@workspace:."
   dependencies:
-    "@prisma/client": ^4.13.0
+    "@prisma/client": ^4.14.0
     "@tanstack/react-query": ^4.29.5
     "@tanstack/react-query-devtools": ^4.29.6
-    "@trpc/client": ^10.25.0
-    "@trpc/next": ^10.25.0
-    "@trpc/react-query": ^10.25.0
-    "@trpc/server": ^10.25.0
-    "@types/node": 18.16.5
+    "@trpc/client": ^10.25.1
+    "@trpc/next": ^10.25.1
+    "@trpc/react-query": ^10.25.1
+    "@trpc/server": ^10.25.1
+    "@types/node": 18.16.7
     "@types/react": 18.2.0
     "@types/react-dom": 18.2.0
     autoprefixer: ^10.4.14
@@ -2922,7 +2922,7 @@ __metadata:
     next: 13.4.1
     plaid: ^13.1.0
     postcss: ^8.4.23
-    prisma: ^4.13.0
+    prisma: ^4.14.0
     react: 18.2.0
     react-dom: 18.2.0
     react-plaid-link: ^3.4.0
@@ -3413,15 +3413,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prisma@npm:^4.13.0":
-  version: 4.13.0
-  resolution: "prisma@npm:4.13.0"
+"prisma@npm:^4.14.0":
+  version: 4.14.0
+  resolution: "prisma@npm:4.14.0"
   dependencies:
-    "@prisma/engines": 4.13.0
+    "@prisma/engines": 4.14.0
   bin:
     prisma: build/index.js
     prisma2: build/index.js
-  checksum: b735dd19842da1dfe5b3411551665db5f2a419ee5e67136dfc2c8cae3c7fe0f885b472b0f9decb3adb4af83260c51a605ecca8f2194805804e020c382096a75a
+  checksum: 4ce9429506620ac979edd6ad809c2bc7af8d96dcd812fe8f936c2cc62c0408046b30bc51ee354eebbf058e36ee72cfbbe222b23f0ab6a085baa8fab791c2d4cb
   languageName: node
   linkType: hard
 

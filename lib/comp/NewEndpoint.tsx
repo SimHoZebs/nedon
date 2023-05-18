@@ -24,20 +24,22 @@ const NewEndpoint = (props: Props) => {
       </div>
 
       <div className="w-2/3">
-        <p>Response:</p>
-        <div className="flex flex-col gap-y-1 divide-y-2 max-h-[60vh] overflow-y-scroll">
-          {Array.isArray(data) ? (
-            data.map((datum, index) => (
-              <p className="break-words whitespace-pre-wrap" key={index}>
-                {JSON.stringify(datum, null, 2)}
+        <details className="">
+          <summary className="">Response:</summary>
+          <div className="overflow-y-scroll max-h-[60vh] flex flex-col gap-y-1 divide-y-2">
+            {Array.isArray(data) ? (
+              data.map((datum, index) => (
+                <p className="break-words whitespace-pre-wrap" key={index}>
+                  {JSON.stringify(datum, null, 2)}
+                </p>
+              ))
+            ) : (
+              <p className="break-words whitespace-pre-wrap">
+                {JSON.stringify(data, null, 2)}
               </p>
-            ))
-          ) : (
-            <p className="break-words whitespace-pre-wrap">
-              {JSON.stringify(data, null, 2)}
-            </p>
-          )}
-        </div>
+            )}
+          </div>
+        </details>
       </div>
     </div>
   );
