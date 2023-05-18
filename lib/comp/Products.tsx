@@ -32,6 +32,15 @@ const Products = () => {
   const { products, user } = useStoreState((state) => state);
   const server = trpc.useContext();
 
+  const auth = trpc.auth.useQuery(
+    { id: user.id },
+    { staleTime: 3600000, enabled: false }
+  );
+  const getAllTransaction = trpc.transaction.getAll.useQuery(
+    { id: user.id },
+    { staleTime: 3600000, enabled: false }
+  );
+
   return (
     <section className="flex flex-col gap-y-3">
       {products.includes("payment_initiation") && (
@@ -48,7 +57,7 @@ const Products = () => {
       {products.includes("auth") && (
         <NewEndpoint
           desc="Retrieve account and routing numbers for checking and savings accounts."
-          data={server.auth.fetch({ id: user.id })}
+          getData={async () => (await auth.refetch()).data}
         >
           Auth
         </NewEndpoint>
@@ -57,11 +66,9 @@ const Products = () => {
       {products.includes("transactions") && (
         <NewEndpoint
           desc="Retrieve transactions or incremental updates for credit and depository accounts."
-          data={server.transactions.fetch({
-            id: user.id,
-          })}
+          getData={async () => (await getAllTransaction.refetch()).data}
         >
-          Transactions
+          Transaction
         </NewEndpoint>
       )}
 

@@ -6,7 +6,7 @@ import { Transaction } from "plaid";
 
 const Page: NextPage = () => {
   const { user } = useStoreState((state) => state);
-  const transactions = trpc.transactions.useQuery(
+  const getAllTransaction = trpc.transaction.getAll.useQuery(
     { id: user.id },
     { staleTime: 3600000 }
   );
@@ -51,8 +51,8 @@ const Page: NextPage = () => {
         </div>
       )}
 
-      {transactions.data ? (
-        transactions.data.map((transaction, i) => (
+      {getAllTransaction.data ? (
+        getAllTransaction.data.map((transaction, i) => (
           <button
             className="flex justify-between text-start bg-zinc-900 p-2"
             key={i}

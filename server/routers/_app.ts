@@ -1,69 +1,18 @@
 import { z } from "zod";
 import { procedure, router } from "../trpc";
 import {
-  Configuration,
   PlaidApi,
   Products,
-  PlaidEnvironments,
-  CountryCode,
   TransferType,
   TransferNetwork,
   ACHClass,
-  Transaction,
-  RemovedTransaction,
 } from "plaid";
 import userRouter from "./user";
 import db from "../../lib/util/db";
 import { User } from "@prisma/client";
 import { groupRouter } from "./group";
-import stripUserForClient from "../../lib/util/stripUserForClient";
-
-const APP_PORT = process.env.APP_PORT || 8000;
-const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
-const PLAID_SECRET = process.env.PLAID_SECRET;
-const PLAID_ENV = process.env.PLAID_ENV || "sandbox";
-
-// PLAID_PRODUCTS is a comma-separated list of products to use when initializing
-// Link. Note that this list must contain 'assets' in order for the app to be
-// able to create and retrieve asset reports.
-const PLAID_PRODUCTS = (
-  process.env.PLAID_PRODUCTS || Products.Transactions
-).split(",") as Products[];
-
-// PLAID_COUNTRY_CODES is a comma-separated list of countries for which users
-// will be able to select institutions from.
-const PLAID_COUNTRY_CODES = (
-  process.env.PLAID_COUNTRY_CODES || CountryCode.Us
-).split(",") as CountryCode[];
-
-// Parameters used for the OAuth redirect Link flow.
-//
-// Set PLAID_REDIRECT_URI to 'http://localhost:3000'
-// The OAuth redirect flow requires an endpoint on the developer's website
-// that the bank website should redirect to. You will need to configure
-// this redirect URI for your client ID through the Plaid developer dashboard
-// at https://dashboard.plaid.com/team/api.
-const PLAID_REDIRECT_URI = process.env.PLAID_REDIRECT_URI || "";
-
-// Parameter used for OAuth in Android. This should be the package name of your app,
-// e.g. com.plaid.linksample
-const PLAID_ANDROID_PACKAGE_NAME = process.env.PLAID_ANDROID_PACKAGE_NAME || "";
-
-// Initialize the Plaid client
-// Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
-
-const configuration = new Configuration({
-  basePath: PlaidEnvironments[PLAID_ENV],
-  baseOptions: {
-    headers: {
-      "PLAID-CLIENT-ID": PLAID_CLIENT_ID,
-      "PLAID-SECRET": PLAID_SECRET,
-      "Plaid-Version": "2020-09-14",
-    },
-  },
-});
-
-const client = new PlaidApi(configuration);
+import transactionRouter from "./transaction";
+import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS, client } from "../util";
 
 const setAccessToken = async ({
   publicToken,
@@ -168,54 +117,7 @@ export const appRouter = router({
       return authResponse.data;
     }),
 
-  // Retrieve Transactions for an Item
-  // https://plaid.com/docs/#transactions
-  transactions: procedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
-      const user = await db.user.findFirst({
-        where: {
-          id: input.id,
-        },
-      });
-      if (!user || !user.ACCESS_TOKEN) return null;
-
-      // Set cursor to empty to receive all historical updates
-      let cursor = undefined;
-
-      // New transaction updates since "cursor"
-      let added: Transaction[] = [];
-      let modified: Transaction[] = [];
-      // Removed transaction ids
-      let removed: RemovedTransaction[] = [];
-      let hasMore = true;
-
-      // Iterate through each page of new transaction updates for item
-      //A page contains maximum of 100 transactions
-      while (hasMore) {
-        const request = {
-          access_token: user.ACCESS_TOKEN,
-          cursor: cursor,
-        };
-
-        const response = await client.transactionsSync(request);
-        const data = response.data;
-        // Add this page of results
-        added = added.concat(data.added);
-        modified = modified.concat(data.modified);
-        removed = removed.concat(data.removed);
-
-        // hasMore = data.has_more;
-        hasMore = false; //disabling fetch for over 100 transactions
-
-        // Update cursor to the next cursor
-        cursor = data.next_cursor;
-      }
-
-      return added
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(-20);
-    }),
+  transaction: transactionRouter,
 
   // Retrieve Investment Transactions for an Item
   // https://plaid.com/docs/#investments

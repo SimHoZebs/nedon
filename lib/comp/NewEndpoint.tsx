@@ -3,7 +3,7 @@ import Button from "./Button";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   desc: string;
-  data: unknown;
+  getData: () => Promise<unknown>;
 }
 
 const NewEndpoint = (props: Props) => {
@@ -15,7 +15,7 @@ const NewEndpoint = (props: Props) => {
         <p>{props.desc}</p>
         <Button
           onClick={async () => {
-            const data = await props.data;
+            const data = await props.getData();
             setData(data);
           }}
         >
