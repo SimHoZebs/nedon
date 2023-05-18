@@ -3,10 +3,7 @@ import { z } from "zod";
 import db from "../../lib/util/db";
 import stripUserForClient from "../../lib/util/stripUserForClient";
 import { Products } from "plaid";
-
-const PLAID_PRODUCTS = (
-  process.env.PLAID_PRODUCTS || Products.Transactions
-).split(",") as Products[];
+import { PLAID_PRODUCTS } from "../util";
 
 const userRouter = router({
   get: procedure.input(z.string()).query(async ({ input }) => {
