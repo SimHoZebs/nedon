@@ -9,7 +9,7 @@ export const TransactionModel = z.object({
   unofficial_currency_code: z.string().nullish(),
   category: z.string().array(),
   category_id: z.string().nullish(),
-  check_number: z.number().int().nullish(),
+  check_number: z.string().nullish(),
   date: z.string(),
   name: z.string(),
   merchant_name: z.string().nullish(),
@@ -19,6 +19,8 @@ export const TransactionModel = z.object({
   authorized_datetime: z.string(),
   payment_channel: z.string().nullish(),
   account_owner: z.string().nullish(),
+  datetime: z.string().nullish(),
+  transaction_code: z.string().nullish(),
 })
 
 export interface CompleteTransaction extends z.infer<typeof TransactionModel> {

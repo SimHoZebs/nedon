@@ -8,6 +8,7 @@ export const UserModel = z.object({
   ITEM_ID: z.string().nullish(),
   TRANSFER_ID: z.string().nullish(),
   PAYMENT_ID: z.string().nullish(),
+  cursor: z.string().nullish(),
 })
 
 export interface CompleteUser extends z.infer<typeof UserModel> {

@@ -44,6 +44,7 @@ model User {
   TRANSFER_ID  String? // The transfer_id is only relevant for Transfer ACH product.
   PAYMENT_ID   String? // The payment_id is only relevant for the UK/EU Payment Initiation product.
   groupArray   Group[]
+  cursor       String?
 }
 
 model Transaction {
@@ -54,7 +55,7 @@ model Transaction {
   unofficial_currency_code String?
   category                 String[] //should be string[]|null
   category_id              String?
-  check_number             Int?
+  check_number             String?
   date                     String
   location                 Location?
   name                     String
@@ -66,6 +67,8 @@ model Transaction {
   authorized_datetime      String
   payment_channel          String?
   account_owner            String?
+  datetime                 String?
+  transaction_code         String?
 }
 
 model Location {
