@@ -5,13 +5,16 @@ import { useStoreState } from "../lib/util/store";
 import { Transaction } from "plaid";
 
 const Page: NextPage = () => {
-  const { user } = useStoreState((state) => state);
+  const { user, currentGroup } = useStoreState((state) => state);
   const getAllTransaction = trpc.transaction.getAll.useQuery(
     { id: user.id },
     { staleTime: 3600000 }
   );
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState<Transaction>();
+
+  const [userSplit, setUserSplit] = useState(100);
+  const [otherSplit, setOtherSplit] = useState(0);
 
   return (
     <div className="flex flex-col gap-y-3">
@@ -21,7 +24,7 @@ const Page: NextPage = () => {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-zinc-900 flex flex-col w-1/2 h-1/2"
+            className="bg-zinc-900 flex flex-col w-2/3 h-2/3 p-3"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between ">
@@ -39,6 +42,48 @@ const Page: NextPage = () => {
                 <div>{modalData.iso_currency_code}</div>
                 <div>{modalData.amount * -1}</div>
               </div>
+            </div>
+
+            <div>
+              {currentGroup?.userArray && (
+                <details>
+                  <summary>Split</summary>
+                  <div>
+                    <div className="">
+                      <div className="flex">
+                        <div>{userSplit}%</div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={userSplit}
+                          onChange={(e) => {
+                            setUserSplit(parseInt(e.currentTarget.value));
+                            setOtherSplit(
+                              100 - parseInt(e.currentTarget.value)
+                            );
+                          }}
+                        />
+                        <div>{currentGroup?.userArray[0].id.slice(0, 8)}</div>
+                      </div>
+                      <div className="flex ">
+                        <div>{otherSplit}%</div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={otherSplit}
+                          onChange={(e) => {
+                            setUserSplit(100 - parseInt(e.currentTarget.value));
+                            setOtherSplit(parseInt(e.currentTarget.value));
+                          }}
+                        />
+                        <div>{currentGroup?.userArray[1].id.slice(0, 8)}</div>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+              )}
             </div>
 
             <details className="overflow-y-scroll">

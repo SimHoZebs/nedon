@@ -93,9 +93,13 @@ const Home: NextPage = () => {
 
                 setUser((prev) => user);
                 if (!user.groupArray) return;
-                const test = user.groupArray[0];
+                const firstGroup = user.groupArray[0];
+                const currentGroup = await server.group.get.fetch({
+                  id: firstGroup.id,
+                });
+                if (!currentGroup) return;
 
-                setCurrentGroup((prev) => test);
+                setCurrentGroup((prev) => currentGroup);
 
                 setupLink();
                 router.push("/user");
