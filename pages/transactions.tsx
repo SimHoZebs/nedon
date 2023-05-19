@@ -51,32 +51,46 @@ const Page: NextPage = () => {
         </div>
       )}
 
-      {getAllTransaction.data ? (
-        getAllTransaction.data.map((transaction, i) => (
-          <button
-            className="flex justify-between text-start bg-zinc-900 p-2"
-            key={i}
-            onClick={() => {
-              setShowModal(true);
-              setModalData(transaction as Transaction); //Manual cast because trpc can't infer nested type
-            }}
-          >
-            <div>
-              <div>{transaction.name}</div>
-              <div className="font-light text-zinc-400 text-sm">
-                {transaction.merchant_name}
+      {getAllTransaction.data &&
+        getAllTransaction.data.map((year, i) => (
+          <div key={i}>
+            <div className="text-2xl">{year[0][0][0].date.slice(0, 4)}</div>
+            {year.map((month, j) => (
+              <div key={j}>
+                <div className="text-xl">{month[0][0].date.slice(5, 7)}</div>
+                {month.map((day, k) => (
+                  <div key={k}>
+                    <div className="text-lg">{day[0].date.slice(8)}</div>
+                    {day.map(
+                      (transaction, l) =>
+                        transaction && (
+                          <button
+                            className="flex justify-between text-start bg-zinc-900 p-2"
+                            key={l}
+                            onClick={() => {
+                              setShowModal(true);
+                              setModalData(transaction as Transaction); //Manual cast because trpc can't infer nested type
+                            }}
+                          >
+                            <div>
+                              <div>{transaction.name}</div>
+                              <div className="font-light text-zinc-400 text-sm">
+                                {transaction.merchant_name}
+                              </div>
+                            </div>
+                            <div className="flex gap-x-1">
+                              <div>{transaction.iso_currency_code}</div>
+                              <div>{transaction.amount * -1}</div>
+                            </div>
+                          </button>
+                        )
+                    )}
+                  </div>
+                ))}
               </div>
-              <div>{transaction.date}</div>
-            </div>
-            <div className="flex gap-x-1">
-              <div>{transaction.iso_currency_code}</div>
-              <div>{transaction.amount * -1}</div>
-            </div>
-          </button>
-        ))
-      ) : (
-        <div>loading...</div>
-      )}
+            ))}
+          </div>
+        ))}
     </div>
   );
 };

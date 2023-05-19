@@ -8,7 +8,7 @@ import { client } from "../util";
 // https://plaid.com/docs/#transactions
 const transactionRouter = router({
   getAll: procedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string(), size: z.number().or(z.undefined()) }))
     .query(async ({ input }) => {
       const user = await db.user.findFirst({
         where: {
@@ -49,11 +49,48 @@ const transactionRouter = router({
         cursor = data.next_cursor;
       }
 
-      return added;
-      // return added
-      //   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      //   .slice(-20);
+      return transactionOrganizedByTime(added).splice(0, input.size);
     }),
 });
+
+export const transactionOrganizedByTime = (transactionArray: Transaction[]) => {
+  const timeSortedTransaction = transactionArray.sort(
+    (a, b) =>
+      new Date(b.datetime ? b.datetime : b.date).getTime() -
+      new Date(a.datetime ? a.datetime : a.date).getTime()
+  );
+  //create an object called sortedTransaction.
+  const test: Transaction[][][][] = [[[[]]]];
+  let lastDate = new Date(0);
+  let yearIndex = -1;
+  let monthIndex = -1;
+  let dayIndex = -1;
+
+  timeSortedTransaction.forEach((transaction, i) => {
+    const date = new Date(transaction.date);
+
+    if (lastDate.getFullYear() !== date.getFullYear()) {
+      yearIndex++;
+      monthIndex = -1;
+      dayIndex = -1;
+      test[yearIndex] = [];
+    }
+    if (lastDate.getMonth() !== date.getMonth()) {
+      monthIndex++;
+      dayIndex = -1;
+      test[yearIndex][monthIndex] = [];
+    }
+    if (lastDate.getDate() !== date.getDate()) {
+      dayIndex++;
+      test[yearIndex][monthIndex][dayIndex] = [];
+    }
+
+    test[yearIndex][monthIndex][dayIndex].push(transaction);
+
+    lastDate = date;
+  });
+
+  return test;
+};
 
 export default transactionRouter;
