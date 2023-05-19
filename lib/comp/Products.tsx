@@ -36,7 +36,7 @@ const Products = () => {
     { id: user.id },
     { staleTime: 3600000, enabled: false }
   );
-  const getAllTransaction = trpc.transaction.getAll.useQuery(
+  const getAllTransaction = trpc.transaction.getDB.useQuery(
     { id: user.id },
     { staleTime: 3600000, enabled: false }
   );
