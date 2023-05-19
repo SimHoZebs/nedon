@@ -19,11 +19,20 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
         <Button onClick={() => router.push("/transactions")}>
           Transactions
         </Button>
+        <Button onClick={() => router.push("/analysis")}>Analysis</Button>
 
         <div>Current user: {user ? user.id.slice(0, 8) : "none"}</div>
 
         <div>
           Current group: {currentGroup ? currentGroup.id.slice(0, 8) : "none"}
+        </div>
+        <div>
+          Current group members:{" "}
+          {currentGroup?.userArray
+            ? currentGroup.userArray
+                .map((user) => user.id.slice(0, 8))
+                .join(", ")
+            : "none"}
         </div>
       </nav>
       <main className="w-full overflow-auto px-5 py-3">{props.children}</main>
