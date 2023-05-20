@@ -1,6 +1,6 @@
 import { Transaction } from "plaid";
 import React, { useState } from "react";
-import Modal from "./TransactionModal";
+import Modal from "./Modal";
 import Button from "./Button";
 import { useStoreState } from "../util/store";
 import UserSplit from "./UserSplit";

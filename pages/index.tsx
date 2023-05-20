@@ -54,7 +54,8 @@ const Home: NextPage = () => {
       <Button
         onClick={async () => {
           const user = await createUser.refetch();
-          if (user.error || !user.data) {
+          allUsers.refetch();
+          if (!user.data) {
             console.log(user.error);
             return;
           }
