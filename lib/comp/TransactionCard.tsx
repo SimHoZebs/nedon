@@ -9,6 +9,8 @@ interface Props {
   transaction: Transaction;
 }
 
+//This part is inefficient; Only one modal needs to open at one point.
+//Move it to transaction page and give card ability to change modal data.
 const TransactionCard = (props: Props) => {
   const [showModal, setShowModal] = useState(false);
   const { currentGroup } = useStoreState((state) => state);
@@ -33,6 +35,13 @@ const TransactionCard = (props: Props) => {
                   {user.id.slice(0, 8)}
                 </UserSplit>
               ))}
+          </div>
+
+          <div className="flex w-full justify-between">
+            <Button>Save Split</Button>
+            <Button className="bg-red-900" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
           </div>
         </Modal>
       )}
