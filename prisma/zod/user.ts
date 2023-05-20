@@ -1,5 +1,5 @@
 import * as z from "zod"
-import { CompleteGroup, RelatedGroupModel } from "./index"
+import { CompleteGroup, RelatedGroupModel, CompleteTransaction, RelatedTransactionModel } from "./index"
 
 export const UserModel = z.object({
   id: z.string(),
@@ -8,11 +8,11 @@ export const UserModel = z.object({
   ITEM_ID: z.string().nullish(),
   TRANSFER_ID: z.string().nullish(),
   PAYMENT_ID: z.string().nullish(),
-  cursor: z.string().nullish(),
 })
 
 export interface CompleteUser extends z.infer<typeof UserModel> {
   groupArray: CompleteGroup[]
+  splitTransactionID: CompleteTransaction[]
 }
 
 /**
@@ -22,4 +22,5 @@ export interface CompleteUser extends z.infer<typeof UserModel> {
  */
 export const RelatedUserModel: z.ZodSchema<CompleteUser> = z.lazy(() => UserModel.extend({
   groupArray: RelatedGroupModel.array(),
+  splitTransactionID: RelatedTransactionModel.array(),
 }))

@@ -1,31 +1,13 @@
 import * as z from "zod"
-import { CompleteLocation, RelatedLocationModel, CompletePaymentMeta, RelatedPaymentMetaModel } from "./index"
+import { CompleteUser, RelatedUserModel } from "./index"
 
 export const TransactionModel = z.object({
   transaction_id: z.string(),
-  account_id: z.string(),
-  amount: z.number(),
-  iso_currency_code: z.string().nullish(),
-  unofficial_currency_code: z.string().nullish(),
-  category: z.string().array(),
-  category_id: z.string().nullish(),
-  check_number: z.string().nullish(),
-  date: z.string(),
-  name: z.string(),
-  merchant_name: z.string().nullish(),
-  pending: z.boolean(),
-  pending_transaction_id: z.string().nullish(),
-  authorized_date: z.string(),
-  authorized_datetime: z.string(),
-  payment_channel: z.string().nullish(),
-  account_owner: z.string().nullish(),
-  datetime: z.string().nullish(),
-  transaction_code: z.string().nullish(),
+  splitAmount: z.number().array(),
 })
 
 export interface CompleteTransaction extends z.infer<typeof TransactionModel> {
-  location?: CompleteLocation | null
-  payment_meta?: CompletePaymentMeta | null
+  splitUserArray: CompleteUser[]
 }
 
 /**
@@ -34,6 +16,5 @@ export interface CompleteTransaction extends z.infer<typeof TransactionModel> {
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
 export const RelatedTransactionModel: z.ZodSchema<CompleteTransaction> = z.lazy(() => TransactionModel.extend({
-  location: RelatedLocationModel.nullish(),
-  payment_meta: RelatedPaymentMetaModel.nullish(),
+  splitUserArray: RelatedUserModel.array(),
 }))
