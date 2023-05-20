@@ -7,23 +7,23 @@ import TransactionCard from "../lib/comp/TransactionCard";
 
 const Page: NextPage = () => {
   const { user } = useStoreState((state) => state);
-  const getAllTransaction = trpc.transaction.getDB.useQuery(
+  const transactionArray = trpc.transaction.getAll.useQuery(
     { id: user.id },
     { staleTime: 3600000 }
   );
 
   return (
-    <div className="flex flex-col gap-y-3">
-      {getAllTransaction.data &&
-        getAllTransaction.data.map((year, i) => (
+    <div className="flex flex-col ">
+      {transactionArray.data &&
+        transactionArray.data.map((year, i) => (
           <div key={i}>
-            <div className="text-2xl">{year[0][0][0].date.slice(0, 4)}</div>
+            <div className="text-4xl">{year[0][0][0].date.slice(0, 4)}</div>
             {year.map((month, j) => (
               <div key={j}>
-                <div className="text-xl">{month[0][0].date.slice(5, 7)}</div>
+                <div className="text-3xl">{month[0][0].date.slice(5, 7)}</div>
                 {month.map((day, k) => (
-                  <div key={k}>
-                    <div className="text-lg">{day[0].date.slice(8)}</div>
+                  <div className="flex flex-col gap-y-3" key={k}>
+                    <div className="text-xl">{day[0].date.slice(8)}</div>
                     {day.map(
                       (transaction, l) =>
                         transaction && (

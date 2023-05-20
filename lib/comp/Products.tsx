@@ -12,8 +12,6 @@ import {
   assetsCategories,
   incomePaystubsCategories,
   transferCategories,
-  transformAuthData,
-  transformTransactionsData,
   transformBalanceData,
   transformInvestmentsData,
   transformInvestmentTransactionsData,
@@ -30,13 +28,12 @@ import NewEndpoint from "./NewEndpoint";
 
 const Products = () => {
   const { products, user } = useStoreState((state) => state);
-  const server = trpc.useContext();
 
   const auth = trpc.auth.useQuery(
     { id: user.id },
     { staleTime: 3600000, enabled: false }
   );
-  const getAllTransaction = trpc.transaction.getDB.useQuery(
+  const getAllTransaction = trpc.transaction.getAll.useQuery(
     { id: user.id },
     { staleTime: 3600000, enabled: false }
   );
