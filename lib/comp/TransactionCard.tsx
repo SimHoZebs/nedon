@@ -1,6 +1,9 @@
 import { Transaction } from "plaid";
 import React, { useState } from "react";
-import TransactionModal from "./TransactionModal";
+import Modal from "./TransactionModal";
+import Button from "./Button";
+import { useStoreState } from "../util/store";
+import UserSplit from "./UserSplit";
 
 interface Props {
   transaction: Transaction;
@@ -8,33 +11,61 @@ interface Props {
 
 const TransactionCard = (props: Props) => {
   const [showModal, setShowModal] = useState(false);
+  const { currentGroup } = useStoreState((state) => state);
+  const [splitArray, setSplitArray] = useState([50, 50]);
 
   return (
-    <button
-      className="flex justify-between text-start bg-zinc-900 p-2"
-      onClick={() => {
-        setShowModal(true);
-      }}
-    >
+    <div className="bg-zinc-900 p-2">
       {showModal && (
-        <TransactionModal
-          modalData={props.transaction}
-          setShowModal={setShowModal}
-        />
+        <Modal setShowModal={setShowModal}>
+          <div className="text-4xl">${props.transaction.amount * -1}</div>
+          <div>
+            {currentGroup?.userArray &&
+              currentGroup.userArray.length &&
+              currentGroup.userArray.map((user, i) => (
+                <UserSplit
+                  key={i}
+                  splitArray={splitArray}
+                  setSplitArray={setSplitArray}
+                  amount={props.transaction.amount}
+                  index={i}
+                >
+                  {user.id.slice(0, 8)}
+                </UserSplit>
+              ))}
+          </div>
+        </Modal>
       )}
 
-      <div>
-        <div>{props.transaction.name}</div>
-        <div className="font-light text-zinc-400 text-sm">
-          {props.transaction.merchant_name}
+      <div className="flex justify-between w-full text-start">
+        <div>
+          <div>{props.transaction.name}</div>
+          <div className="font-light text-zinc-400 text-sm">
+            {props.transaction.merchant_name}
+          </div>
+        </div>
+
+        <div className="flex gap-x-1">
+          <div>{props.transaction.iso_currency_code}</div>
+          <div>{props.transaction.amount * -1}</div>
         </div>
       </div>
 
-      <div className="flex gap-x-1">
-        <div>{props.transaction.iso_currency_code}</div>
-        <div>{props.transaction.amount * -1}</div>
-      </div>
-    </button>
+      <Button
+        onClick={() => {
+          setShowModal(true);
+        }}
+      >
+        Split
+      </Button>
+
+      <details className="">
+        <summary>Raw Data</summary>
+        <pre className="overflow-y-scroll whitespace-pre-wrap max-h-[50vh]">
+          {JSON.stringify(props.transaction, null, 2)}
+        </pre>
+      </details>
+    </div>
   );
 };
 
