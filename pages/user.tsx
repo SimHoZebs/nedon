@@ -7,11 +7,15 @@ import Items from "../lib/comp/Items";
 
 import Link from "next/link";
 import LinkBtn from "../lib/comp/LinkBtn";
+import { useRouter } from "next/router";
 
 const User: NextPage = () => {
   const { user, linkToken, isPaymentInitiation } = useStoreState(
     (state) => state
   );
+
+  const router = useRouter();
+  if (!user.hasAccessToken) router.push("/");
 
   return (
     <>

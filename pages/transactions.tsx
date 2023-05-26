@@ -7,16 +7,21 @@ import TransactionCard from "../lib/comp/TransactionCard";
 import Modal from "../lib/comp/Modal";
 import UserSplit from "../lib/comp/UserSplit";
 import Button from "../lib/comp/Button";
+import { useRouter } from "next/router";
 
 const Page: NextPage = () => {
   const { user } = useStoreState((state) => state);
+
+  const router = useRouter();
+  if (!user.hasAccessToken) router.push("/");
+
   const transactionArray = trpc.transaction.getAll.useQuery(
     { id: user.id },
-    { staleTime: 3600000 }
+    { staleTime: 3600000, enabled: user.hasAccessToken }
   );
   const transactionMetaArray = trpc.transaction.getMeta.useQuery(
     { id: user.id },
-    { staleTime: 3600000 }
+    { staleTime: 3600000, enabled: user.hasAccessToken }
   );
   const [showModal, setShowModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction>();
