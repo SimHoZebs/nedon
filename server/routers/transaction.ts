@@ -68,35 +68,60 @@ const transactionRouter = router({
       return transaction;
     }),
 
-  createSplit: procedure
+  updateMeta: procedure
     .input(
       z.object({
-        splitUserIdArray: z.array(z.string()),
         transactionId: z.string(),
         splitAmount: z.array(z.number()),
       })
     )
-    .query(async ({ input }) => {
-      const splitUserArray = await Promise.all(
-        input.splitUserIdArray.map(async (userId, i) => {
-          const user = await db.user.findFirst({
-            where: { id: userId },
-          });
-          if (!user) throw new Error();
-
-          return user;
-        })
-      );
-
-      db.transaction.create({
-        data: {
+    .mutation(async ({ input }) => {
+      const transaction = await db.transaction.update({
+        where: {
           transaction_id: input.transactionId,
-          splitUserArray: {
-            connect: [...splitUserArray],
-          }, //???
+        },
+        data: {
           splitAmount: input.splitAmount,
         },
       });
+
+      return transaction;
+    }),
+
+  createMeta: procedure
+    .input(
+      z.object({
+        groupId: z.string(),
+        transactionId: z.string(),
+        splitAmount: z.array(z.number()),
+      })
+    )
+    .mutation(async ({ input }) => {
+      console.log("mutating");
+
+      const splitUserArray = await db.user.findMany({
+        where: {
+          groupArray: {
+            some: {
+              id: input.groupId,
+            },
+          },
+        },
+      });
+
+      const test = await db.transaction.create({
+        data: {
+          transaction_id: input.transactionId,
+          splitUserArray: {
+            connect: splitUserArray.map((user) => ({
+              id: user.id,
+            })),
+          },
+          splitAmount: input.splitAmount,
+        },
+      });
+
+      return test;
     }),
 });
 

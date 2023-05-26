@@ -19,15 +19,17 @@ const Page: NextPage = () => {
     { staleTime: 3600000 }
   );
   const [showModal, setShowModal] = useState(false);
-  const [modalData, setModalData] = useState<Transaction>();
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction>();
   const [splitArray, setSplitArray] = useState<number[]>([100, 0]);
   const { currentGroup } = useStoreState((state) => state);
+  const createTransactionMeta = trpc.transaction.createMeta.useMutation();
+  const updateTransactionMeta = trpc.transaction.updateMeta.useMutation();
 
   return (
     <div className="flex flex-col ">
-      {showModal && modalData && (
+      {showModal && selectedTransaction && (
         <Modal setShowModal={setShowModal}>
-          <div className="text-4xl">${modalData.amount * -1}</div>
+          <div className="text-4xl">${selectedTransaction.amount * -1}</div>
           <div>
             {currentGroup?.userArray &&
               currentGroup.userArray.length &&
@@ -36,7 +38,7 @@ const Page: NextPage = () => {
                   key={i}
                   splitArray={splitArray}
                   setSplitArray={setSplitArray}
-                  amount={modalData.amount}
+                  amount={selectedTransaction.amount}
                   index={i}
                 >
                   {user.id.slice(0, 8)}
@@ -45,7 +47,31 @@ const Page: NextPage = () => {
           </div>
 
           <div className="flex w-full justify-between">
-            <Button>Save Split</Button>
+            <Button
+              onClick={async () => {
+                if (!user.groupArray) return;
+
+                const meta = transactionMetaArray.data?.find(
+                  (meta) =>
+                    meta.transaction_id === selectedTransaction.transaction_id
+                );
+
+                meta
+                  ? await updateTransactionMeta.mutateAsync({
+                      splitAmount: splitArray,
+                      transactionId: selectedTransaction.transaction_id,
+                    })
+                  : await createTransactionMeta.mutateAsync({
+                      groupId: user.groupArray[0].id,
+                      splitAmount: splitArray,
+                      transactionId: selectedTransaction.transaction_id,
+                    });
+
+                transactionMetaArray.refetch();
+              }}
+            >
+              Save Split
+            </Button>
             <Button className="bg-red-900" onClick={() => setShowModal(false)}>
               Cancel
             </Button>
@@ -69,7 +95,9 @@ const Page: NextPage = () => {
                           <TransactionCard
                             button={() => {
                               setShowModal(true);
-                              setModalData(transaction as Transaction);
+                              setSelectedTransaction(
+                                transaction as Transaction
+                              );
                               const meta = transactionMetaArray.data?.find(
                                 (meta) =>
                                   meta.transaction_id ===
