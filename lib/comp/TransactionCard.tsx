@@ -1,51 +1,17 @@
 import { Transaction } from "plaid";
-import React, { useState } from "react";
-import Modal from "./Modal";
+import React from "react";
 import Button from "./Button";
-import { useStoreState } from "../util/store";
-import UserSplit from "./UserSplit";
 
 interface Props {
   transaction: Transaction;
+  button: () => void;
 }
 
 //This part is inefficient; Only one modal needs to open at one point.
 //Move it to transaction page and give card ability to change modal data.
 const TransactionCard = (props: Props) => {
-  const [showModal, setShowModal] = useState(false);
-  const { currentGroup } = useStoreState((state) => state);
-  const [splitArray, setSplitArray] = useState([50, 50]);
-
   return (
     <div className="bg-zinc-900 p-2">
-      {showModal && (
-        <Modal setShowModal={setShowModal}>
-          <div className="text-4xl">${props.transaction.amount * -1}</div>
-          <div>
-            {currentGroup?.userArray &&
-              currentGroup.userArray.length &&
-              currentGroup.userArray.map((user, i) => (
-                <UserSplit
-                  key={i}
-                  splitArray={splitArray}
-                  setSplitArray={setSplitArray}
-                  amount={props.transaction.amount}
-                  index={i}
-                >
-                  {user.id.slice(0, 8)}
-                </UserSplit>
-              ))}
-          </div>
-
-          <div className="flex w-full justify-between">
-            <Button>Save Split</Button>
-            <Button className="bg-red-900" onClick={() => setShowModal(false)}>
-              Cancel
-            </Button>
-          </div>
-        </Modal>
-      )}
-
       <div className="flex justify-between w-full text-start">
         <div>
           <div>{props.transaction.name}</div>
@@ -60,13 +26,7 @@ const TransactionCard = (props: Props) => {
         </div>
       </div>
 
-      <Button
-        onClick={() => {
-          setShowModal(true);
-        }}
-      >
-        Split
-      </Button>
+      <Button onClick={props.button}>Split</Button>
 
       <details className="">
         <summary>Raw Data</summary>

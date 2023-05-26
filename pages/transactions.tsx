@@ -4,6 +4,9 @@ import { trpc } from "../lib/util/trpc";
 import { useStoreState } from "../lib/util/store";
 import { Transaction } from "plaid";
 import TransactionCard from "../lib/comp/TransactionCard";
+import Modal from "../lib/comp/Modal";
+import UserSplit from "../lib/comp/UserSplit";
+import Button from "../lib/comp/Button";
 
 const Page: NextPage = () => {
   const { user } = useStoreState((state) => state);
@@ -11,9 +14,45 @@ const Page: NextPage = () => {
     { id: user.id },
     { staleTime: 3600000 }
   );
+  const transactionMetaArray = trpc.transaction.getMeta.useQuery(
+    { id: user.id },
+    { staleTime: 3600000 }
+  );
+  const [showModal, setShowModal] = useState(false);
+  const [modalData, setModalData] = useState<Transaction>();
+  const [splitArray, setSplitArray] = useState<number[]>([100, 0]);
+  const { currentGroup } = useStoreState((state) => state);
 
   return (
     <div className="flex flex-col ">
+      {showModal && modalData && (
+        <Modal setShowModal={setShowModal}>
+          <div className="text-4xl">${modalData.amount * -1}</div>
+          <div>
+            {currentGroup?.userArray &&
+              currentGroup.userArray.length &&
+              currentGroup.userArray.map((user, i) => (
+                <UserSplit
+                  key={i}
+                  splitArray={splitArray}
+                  setSplitArray={setSplitArray}
+                  amount={modalData.amount}
+                  index={i}
+                >
+                  {user.id.slice(0, 8)}
+                </UserSplit>
+              ))}
+          </div>
+
+          <div className="flex w-full justify-between">
+            <Button>Save Split</Button>
+            <Button className="bg-red-900" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+          </div>
+        </Modal>
+      )}
+
       {transactionArray.data &&
         transactionArray.data.map((year, i) => (
           <div key={i}>
@@ -28,6 +67,16 @@ const Page: NextPage = () => {
                       (transaction, l) =>
                         transaction && (
                           <TransactionCard
+                            button={() => {
+                              setShowModal(true);
+                              setModalData(transaction as Transaction);
+                              const meta = transactionMetaArray.data?.find(
+                                (meta) =>
+                                  meta.transaction_id ===
+                                  transaction.transaction_id
+                              );
+                              setSplitArray(meta ? meta.splitAmount : [50, 50]);
+                            }}
                             transaction={transaction as Transaction}
                             key={l}
                           />

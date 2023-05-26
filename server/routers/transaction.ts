@@ -49,6 +49,55 @@ const transactionRouter = router({
 
       return organizeTransactionByTime(added);
     }),
+
+  getMeta: procedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const transaction = await db.transaction.findMany({
+        where: {
+          splitUserArray: {
+            some: {
+              id: input.id,
+            },
+          },
+        },
+      });
+
+      if (!transaction) return null;
+
+      return transaction;
+    }),
+
+  createSplit: procedure
+    .input(
+      z.object({
+        splitUserIdArray: z.array(z.string()),
+        transactionId: z.string(),
+        splitAmount: z.array(z.number()),
+      })
+    )
+    .query(async ({ input }) => {
+      const splitUserArray = await Promise.all(
+        input.splitUserIdArray.map(async (userId, i) => {
+          const user = await db.user.findFirst({
+            where: { id: userId },
+          });
+          if (!user) throw new Error();
+
+          return user;
+        })
+      );
+
+      db.transaction.create({
+        data: {
+          transaction_id: input.transactionId,
+          splitUserArray: {
+            connect: [...splitUserArray],
+          }, //???
+          splitAmount: input.splitAmount,
+        },
+      });
+    }),
 });
 
 export const organizeTransactionByTime = (transactionArray: Transaction[]) => {
