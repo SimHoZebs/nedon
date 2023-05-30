@@ -38,6 +38,7 @@ model Group {
 
 model User {
   id                 String        @id @default(uuid())
+  name               String        @default("")
   ACCESS_TOKEN       String?
   PUBLIC_TOKEN       String?
   ITEM_ID            String?
@@ -45,10 +46,17 @@ model User {
   PAYMENT_ID         String? // The payment_id is only relevant for the UK/EU Payment Initiation product.
   groupArray         Group[]
   splitTransactionID Transaction[]
+  friendArray        Friend[]
 }
 
 model Transaction {
   transaction_id String  @id
   splitUserArray User[]
   splitAmount    Float[]
+}
+
+model Friend {
+  id   String  @id @default(uuid())
+  data User    @relation(fields: [id], references: [id])
+  real Boolean
 }
