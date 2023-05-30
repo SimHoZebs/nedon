@@ -39,7 +39,7 @@ export const groupRouter = router({
       return stripGroupforClient(group);
     }),
 
-  addUserToGroup: procedure
+  addUser: procedure
     .input(z.object({ groupId: z.string(), userId: z.string() }))
     .mutation(async ({ input }) => {
       const group = await db.group.update({
@@ -49,6 +49,27 @@ export const groupRouter = router({
         data: {
           userArray: {
             connect: {
+              id: input.userId,
+            },
+          },
+        },
+        include: {
+          userArray: true,
+        },
+      });
+
+      return stripGroupforClient(group);
+    }),
+  removeUser: procedure
+    .input(z.object({ groupId: z.string(), userId: z.string() }))
+    .mutation(async ({ input }) => {
+      const group = await db.group.update({
+        where: {
+          id: input.groupId,
+        },
+        data: {
+          userArray: {
+            disconnect: {
               id: input.userId,
             },
           },

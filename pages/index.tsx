@@ -4,7 +4,9 @@ import { Products } from "plaid";
 import { useStoreActions, useStoreState } from "../lib/util/store";
 import Button from "../lib/comp/Button";
 import { GroupClientSide, UserClientSide } from "../lib/util/types";
-import { useRouter } from "next/router";
+import addUser from "../public/add-user.svg";
+import removeUser from "../public/remove-user.svg";
+import Image from "next/image";
 
 const Home: NextPage = () => {
   const allUsers = trpc.user.getAll.useQuery(undefined);
@@ -15,7 +17,6 @@ const Home: NextPage = () => {
     enabled: false,
   });
   const server = trpc.useContext();
-  const router = useRouter();
 
   const { user: globalUser, currentGroup } = useStoreState((state) => state);
   const {
@@ -25,7 +26,9 @@ const Home: NextPage = () => {
     setUser,
     setCurrentGroup,
   } = useStoreActions((actions) => actions);
-  const addUserToGroup = trpc.group.addUserToGroup.useMutation();
+
+  const addUserToGroup = trpc.group.addUser.useMutation();
+  const removeUserFromGroup = trpc.group.removeUser.useMutation();
 
   const setupLink = async () => {
     // used to determine which path to take when generating token
@@ -50,34 +53,13 @@ const Home: NextPage = () => {
   };
 
   return (
-    <>
-      <Button
-        onClick={async () => {
-          const user = await createUser.refetch();
-          allUsers.refetch();
-          if (!user.data) {
-            console.log(user.error);
-            return;
-          }
-
-          server.group.create.fetch({ id: user.data.id });
-        }}
-      >
-        create new user
-      </Button>
-
-      <h3 className="text-2xl">Available users</h3>
-      {allUsers.data &&
-        allUsers.data.map((user) => (
-          <section key={user.id} className="flex flex-col gap-y-2">
-            <p>id: {user.id}</p>
-            <p>PUBLIC_TOKEN: {user.PUBLIC_TOKEN}</p>
-            <pre>
-              group Id array: {JSON.stringify(user.groupArray, null, 2)}
-            </pre>
-
-            <Button
-              disabled={user.id === globalUser.id}
+    <section className="flex h-full w-full flex-col items-center justify-center">
+      <div className="flex w-2/3 flex-col items-center rounded-md border border-zinc-600">
+        {allUsers.data &&
+          allUsers.data.map((user) => (
+            <div
+              key={user.id}
+              className="flex w-full justify-between gap-y-2 border-b border-zinc-600 p-3 hover:cursor-pointer"
               onClick={async () => {
                 const info = await server.user.get.fetch(user.id);
                 if (!info) {
@@ -103,34 +85,59 @@ const Home: NextPage = () => {
                 setCurrentGroup((prev) => currentGroup);
 
                 setupLink();
-                router.push("/user");
               }}
             >
-              Log in as this user
-            </Button>
+              <div>
+                <p>userId: {user.id}</p>
+                <p>hasAccessToken: {user.hasAccessToken ? "true" : "false"}</p>
+              </div>
 
-            <Button
-              disabled={currentGroup && userInGroup(user, currentGroup)}
-              onClick={async () => {
-                if (!currentGroup) {
-                  console.log("no current group");
-                  return;
-                }
-                if (userInGroup(user, currentGroup)) {
-                  console.log("user already in group");
-                  return;
-                }
-                addUserToGroup.mutateAsync({
-                  userId: user.id,
-                  groupId: currentGroup.id,
-                });
-              }}
-            >
-              Add this user to group
-            </Button>
-          </section>
-        ))}
-    </>
+              {currentGroup && (
+                <Button
+                  disabled={globalUser.id == user.id}
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    const updatedGroup = userInGroup(user, currentGroup)
+                      ? await removeUserFromGroup.mutateAsync({
+                          userId: user.id,
+                          groupId: currentGroup.id,
+                        })
+                      : await addUserToGroup.mutateAsync({
+                          userId: user.id,
+                          groupId: currentGroup.id,
+                        });
+
+                    setCurrentGroup((prev) => updatedGroup);
+                  }}
+                >
+                  <Image
+                    src={userInGroup(user, currentGroup) ? removeUser : addUser}
+                    height={24}
+                    width={24}
+                    alt=""
+                  />
+                </Button>
+              )}
+            </div>
+          ))}
+
+        <Button
+          className="w-full rounded-none rounded-b-md text-xl"
+          onClick={async () => {
+            const user = await createUser.refetch();
+            allUsers.refetch();
+            if (!user.data) {
+              console.log(user.error);
+              return;
+            }
+
+            server.group.create.fetch({ id: user.data.id });
+          }}
+        >
+          create new user
+        </Button>
+      </div>
+    </section>
   );
 };
 
