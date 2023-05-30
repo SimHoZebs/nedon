@@ -1,5 +1,6 @@
 import { action, createStore, Action, createTypedHooks } from "easy-peasy";
 import { GroupClientSide, UserClientSide } from "./types";
+import { emptyUser } from "./user";
 
 interface StoreModel {
   linkSuccess: boolean;
@@ -61,17 +62,7 @@ const store = createStore<StoreModel>({
     state.products = payload;
   }),
 
-  user: {
-    id: "",
-    hasAccessToken: false,
-    PUBLIC_TOKEN: null,
-    ITEM_ID: null,
-    // The transfer_id is only relevant for Transfer ACH product.
-    TRANSFER_ID: null,
-    // The payment_id is only relevant for the UK/EU Payment Initiation product.
-    PAYMENT_ID: null,
-    groupArray: [{ id: "" }],
-  },
+  user: emptyUser,
   setUser: action((state, payload) => {
     state.user = { ...payload(state.user) };
   }),

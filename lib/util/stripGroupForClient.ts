@@ -1,12 +1,12 @@
 import { Group, User } from "@prisma/client";
-import stripUserForClient from "./stripUserForClient";
+import stripUserSecrets from "./stripUserForClient";
 import { GroupClientSide, UserClientSide } from "./types";
 
 const stripGroupforClient = (
   group: Group & { userArray: User[] }
 ): GroupClientSide => {
   const userClientSideArray: UserClientSide[] = group.userArray.map((user) =>
-    stripUserForClient(user)
+    stripUserSecrets(user)
   );
 
   const clientSideGroup: GroupClientSide = {

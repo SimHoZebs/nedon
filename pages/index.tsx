@@ -29,6 +29,7 @@ const Home: NextPage = () => {
 
   const addUserToGroup = trpc.group.addUser.useMutation();
   const removeUserFromGroup = trpc.group.removeUser.useMutation();
+  const addUserAsFriend = trpc.user.addFriend.useMutation();
 
   const setupLink = async () => {
     // used to determine which path to take when generating token
@@ -75,7 +76,7 @@ const Home: NextPage = () => {
                 setProducts(info.products);
 
                 setUser((prev) => user);
-                if (!user.groupArray) return;
+                if (!user.groupArray || user.groupArray.length === 0) return;
                 const firstGroup = user.groupArray[0];
                 const currentGroup = await server.group.get.fetch({
                   id: firstGroup.id,
@@ -118,6 +119,17 @@ const Home: NextPage = () => {
                   />
                 </Button>
               )}
+
+              <Button
+                onClick={() => {
+                  addUserAsFriend.mutateAsync({
+                    userId: globalUser.id,
+                    friendId: user.id,
+                  });
+                }}
+              >
+                Add friend
+              </Button>
             </div>
           ))}
 
