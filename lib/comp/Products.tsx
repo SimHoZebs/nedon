@@ -33,11 +33,6 @@ const Products = () => {
     { id: user.id },
     { staleTime: 3600000, enabled: false }
   );
-  const getAllTransaction = trpc.transaction.getAll.useQuery(
-    { id: user.id },
-    { staleTime: 3600000, enabled: false }
-  );
-
   return (
     <section className="flex flex-col gap-y-3">
       {products.includes("payment_initiation") && (
@@ -57,15 +52,6 @@ const Products = () => {
           getData={async () => (await auth.refetch()).data}
         >
           Auth
-        </NewEndpoint>
-      )}
-
-      {products.includes("transactions") && (
-        <NewEndpoint
-          desc="Retrieve transactions or incremental updates for credit and depository accounts."
-          getData={async () => (await getAllTransaction.refetch()).data}
-        >
-          Transaction
         </NewEndpoint>
       )}
 

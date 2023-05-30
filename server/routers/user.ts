@@ -2,7 +2,6 @@ import { router, procedure } from "../trpc";
 import { z } from "zod";
 import db from "../../lib/util/db";
 import stripUserForClient from "../../lib/util/stripUserForClient";
-import { Products } from "plaid";
 import { PLAID_PRODUCTS } from "../util";
 
 const userRouter = router({
