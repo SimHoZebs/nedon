@@ -1,34 +1,23 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+The project is extremly early in development and does not have a production build at the moment.
 
-## Getting Started
+# Problems the project aims to solve
 
-First, run the development server:
+### 1. Splitting transaction categories
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+Nobody just shops groceries on a Walmart visit. However, most finance apps categorize this transaction in a single category. Sure, they allow you to manually split it, but it’s not user friendly or simply annoying.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+With Nedon, this is automatic. Simply link it to your e-receipt emails/messages, or upload an image of the physical receipt! **Nedon’s algorithm/AI will read it and generate the additional categories for you**. You can also manually choose the additional category and use the built-in calculator to automatically add up the spending.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+### 2. Splitting with other users
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+You eat out with your friend and want to split the amount. Or perhaps you don’t care to split it, you just want to keep track of how much you spent on them (are they really worth your $45 this month?) Maybe you have roommates sharing living expenses and you want to make sure its managed fairly.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+Nedon allows you to assign portions of spending to any arbitrary user or with a whole group! This will reflect on your total spending records, correcting that that $110 dinner down to what it should be. The amount split with others is tracked and can be found in respective user profile or group profile. You can send them an automatic text message, or if they have a Nedon account, notify them within the app!
 
-## Learn More
+### 3. Financial planning
 
-To learn more about Next.js, take a look at the following resources:
+So many apps claim to help you manage your finance, but what have they actually done? Sure, they let you keep track of your past spending and organize them. You can set monthly budgets too, but come on - when I say $100 monthly budget for gifts, I don’t mean to spend $100 every month, I want that to roll over to the next month. On top of that, none of them actually provide easy tools to visualize trends, abnormalities, and future prospect. Not Nedon.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+(Write about interest/investment management, performance review, trend analysis, budget rollovers, etc.)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+### 4. Group spending management
