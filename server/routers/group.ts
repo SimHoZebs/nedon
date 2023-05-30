@@ -1,7 +1,7 @@
 import { router, procedure } from "../trpc";
 import { z } from "zod";
 import db from "../../lib/util/db";
-import stripGroupforClient from "../../lib/util/stripGroupForClient";
+import stripUserSecretsFromGroup from "../../lib/util/stripUserSecretsFromGroup";
 
 export const groupRouter = router({
   get: procedure
@@ -17,7 +17,7 @@ export const groupRouter = router({
       });
 
       if (!group) return null;
-      return stripGroupforClient(group);
+      return stripUserSecretsFromGroup(group);
     }),
 
   create: procedure
@@ -36,7 +36,7 @@ export const groupRouter = router({
         },
       });
 
-      return stripGroupforClient(group);
+      return stripUserSecretsFromGroup(group);
     }),
 
   addUser: procedure
@@ -58,7 +58,7 @@ export const groupRouter = router({
         },
       });
 
-      return stripGroupforClient(group);
+      return stripUserSecretsFromGroup(group);
     }),
   removeUser: procedure
     .input(z.object({ groupId: z.string(), userId: z.string() }))
@@ -79,6 +79,6 @@ export const groupRouter = router({
         },
       });
 
-      return stripGroupforClient(group);
+      return stripUserSecretsFromGroup(group);
     }),
 });
