@@ -10,8 +10,8 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const { user, currentGroup } = useStoreState((state) => state);
 
   return (
-    <div className="flex bg-zinc-950 text-zinc-300 w-screen h-screen">
-      <nav className="p-2 flex flex-col gap-y-2 items-start bg-zinc-900 w-56">
+    <div className="flex h-screen w-screen bg-zinc-950 text-zinc-300">
+      <nav className="flex w-56 flex-col items-start gap-y-2 bg-zinc-900 p-2">
         <Button onClick={() => router.push("/")}>user selection screen</Button>
         <Button onClick={() => router.push("/user")}>
           <Image src={home} width={24} height={24} alt="home button" />

@@ -12,10 +12,10 @@ interface Props {
 const TransactionCard = (props: Props) => {
   return (
     <div className="bg-zinc-900 p-2">
-      <div className="flex justify-between w-full text-start">
+      <div className="flex w-full justify-between text-start">
         <div>
           <div>{props.transaction.name}</div>
-          <div className="font-light text-zinc-400 text-sm">
+          <div className="text-sm font-light text-zinc-400">
             {props.transaction.merchant_name}
           </div>
         </div>
@@ -30,7 +30,7 @@ const TransactionCard = (props: Props) => {
 
       <details className="">
         <summary>Raw Data</summary>
-        <pre className="overflow-y-scroll whitespace-pre-wrap max-h-[50vh]">
+        <pre className="max-h-[50vh] overflow-y-scroll whitespace-pre-wrap">
           {JSON.stringify(props.transaction, null, 2)}
         </pre>
       </details>

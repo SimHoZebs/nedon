@@ -15,7 +15,6 @@ const User: NextPage = () => {
   );
 
   const router = useRouter();
-  if (!user.hasAccessToken) router.push("/");
 
   return (
     <>
@@ -24,7 +23,7 @@ const User: NextPage = () => {
           <h4 className="">
             Congrats! Your payment is now confirmed.
             <p />
-            <div className="border-red-500 border-dotted">
+            <div className="border-dotted border-red-500">
               You can see information of all your payments in the
               <Link
                 href="https://dashboard.plaid.com/activity/payments"
@@ -43,7 +42,7 @@ const User: NextPage = () => {
       )}
 
       {linkToken == null ? (
-        <section className="text-red-500 font-semibold text-lg">
+        <section className="text-lg font-semibold text-red-500">
           <div>
             Unable to fetch link_token: please make sure your backend server is
             running and that your .env file has been configured correctly.

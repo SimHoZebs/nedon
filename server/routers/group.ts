@@ -22,7 +22,7 @@ export const groupRouter = router({
 
   create: procedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       const group = await db.group.create({
         data: {
           userArray: {

@@ -23,12 +23,13 @@ const Page: NextPage = () => {
     { id: user.id },
     { staleTime: 3600000, enabled: user.hasAccessToken }
   );
+  const createTransactionMeta = trpc.transaction.createMeta.useMutation();
+  const updateTransactionMeta = trpc.transaction.updateMeta.useMutation();
+
   const [showModal, setShowModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction>();
   const [splitArray, setSplitArray] = useState<number[]>([100, 0]);
   const { currentGroup } = useStoreState((state) => state);
-  const createTransactionMeta = trpc.transaction.createMeta.useMutation();
-  const updateTransactionMeta = trpc.transaction.updateMeta.useMutation();
 
   return (
     <div className="flex flex-col ">

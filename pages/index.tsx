@@ -21,12 +21,12 @@ const Home: NextPage = () => {
   const server = trpc.useContext();
   const deleteUser = trpc.user.delete.useMutation();
 
-  const { user: globalUser } = useStoreState((state) => state);
+  const { user: appUser } = useStoreState((state) => state);
   const {
     setProducts,
     setLinkToken,
     setIsPaymentInitiation,
-    setUser: setGlobalUser,
+    setUser: setAppuser,
   } = useStoreActions((actions) => actions);
 
   const addUserAsFriend = trpc.user.addFriend.useMutation();
@@ -77,7 +77,7 @@ const Home: NextPage = () => {
 
                 setProducts(info.products);
 
-                setGlobalUser((prev) => user);
+                setAppuser((prev) => user);
 
                 setupLink();
               }}
@@ -88,12 +88,12 @@ const Home: NextPage = () => {
               </div>
 
               <div className="flex flex-col gap-y-2">
-                {globalUser.id !== user.id && (
+                {appUser.id !== user.id && (
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
                       addUserAsFriend.mutateAsync({
-                        userId: globalUser.id,
+                        userId: appUser.id,
                         friendId: user.id,
                       });
                     }}
@@ -119,8 +119,8 @@ const Home: NextPage = () => {
                     e.stopPropagation();
                     await deleteUser.mutateAsync(user.id);
                     allUsers.refetch();
-                    if (globalUser.id === user.id) {
-                      setGlobalUser(() => emptyUser);
+                    if (appUser.id === user.id) {
+                      setAppuser(() => emptyUser);
                     }
                   }}
                 >

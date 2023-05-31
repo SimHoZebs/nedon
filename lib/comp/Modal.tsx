@@ -7,14 +7,14 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 const Modal = (props: Props) => {
   return (
     <div
-      className="absolute z-10 w-screen bg-opacity-70 backdrop-blur-sm h-screen top-0 left-0 bg-zinc-900 flex items-center justify-center"
+      className="absolute left-0 top-0 z-10 flex h-screen w-screen items-center justify-center bg-zinc-900 bg-opacity-70 backdrop-blur-sm"
       onClick={(e) => {
         props.setShowModal(false);
         e.stopPropagation();
       }}
     >
       <div
-        className="bg-zinc-900 flex flex-col w-1/2 h-1/2 p-3 shadow-lg shadow-zinc-950 gap-y-3"
+        className="flex h-1/2 w-1/2 flex-col gap-y-3 bg-zinc-900 p-3 shadow-lg shadow-zinc-950"
         onClick={(e) => {
           e.stopPropagation();
         }}

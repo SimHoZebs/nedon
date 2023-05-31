@@ -9,7 +9,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 
 const UserSplit = (props: Props) => {
   return (
-    <div className="flex gap-x-2 w-full justify-between">
+    <div className="flex w-full justify-between gap-x-2">
       <div>
         $ {Math.round(props.amount * props.splitArray[props.index]) / 100}
       </div>
