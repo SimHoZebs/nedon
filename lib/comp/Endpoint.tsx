@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Button from "./Button";
 
-import Table from "./Table";
 import Error from "./Error";
 import { DataItem, Categories, ErrorDataItem, Data } from "../util/dataUtil";
 
@@ -15,8 +14,6 @@ interface Props {
 }
 
 const Endpoint = (props: Props) => {
-  const [showTable, setShowTable] = useState(false);
-  const [transformedData, setTransformedData] = useState<Data>([]);
   const [pdf, setPdf] = useState<string | null>(null);
   const [error, setError] = useState<ErrorDataItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,11 +32,9 @@ const Endpoint = (props: Props) => {
       return;
     }
 
-    setTransformedData(props.transformData(data)); // transform data into proper format for each individual product
     if (data.pdf != null) {
       setPdf(data.pdf);
     }
-    setShowTable(true);
     setIsLoading(false);
   };
 
@@ -67,13 +62,6 @@ const Endpoint = (props: Props) => {
           )}
         </div>
       </div>
-      {showTable && (
-        <Table
-          categories={props.categories}
-          data={transformedData}
-          isIdentity={props.endpoint === "identity"}
-        />
-      )}
       {error != null && <Error error={error} />}
     </>
   );
