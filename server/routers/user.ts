@@ -45,6 +45,16 @@ const userRouter = router({
     return stripUserSecrets(user);
   }),
 
+  delete: procedure.input(z.string()).mutation(async ({ input }) => {
+    const user = await db.user.delete({
+      where: {
+        id: input,
+      },
+    });
+
+    return user;
+  }),
+
   addFriend: procedure
     .input(
       z.object({ userId: z.string(), friendId: z.string().or(z.undefined()) })

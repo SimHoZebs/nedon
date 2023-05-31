@@ -4,9 +4,11 @@ import { Products } from "plaid";
 import { useStoreActions, useStoreState } from "../lib/util/store";
 import Button from "../lib/comp/Button";
 import { GroupClientSide, UserClientSide } from "../lib/util/types";
-import addUser from "../public/add-user.svg";
-import removeUser from "../public/remove-user.svg";
+import addUserIcon from "../public/add-user.svg";
+import removeUserIcon from "../public/remove-user.svg";
 import Image from "next/image";
+import { emptyUser } from "../lib/util/user";
+import deleteIcon from "../public/delete.svg";
 
 const Home: NextPage = () => {
   const allUsers = trpc.user.getAll.useQuery(undefined);
@@ -17,18 +19,16 @@ const Home: NextPage = () => {
     enabled: false,
   });
   const server = trpc.useContext();
+  const deleteUser = trpc.user.delete.useMutation();
 
-  const { user: globalUser, currentGroup } = useStoreState((state) => state);
+  const { user: globalUser } = useStoreState((state) => state);
   const {
     setProducts,
     setLinkToken,
     setIsPaymentInitiation,
-    setUser,
-    setCurrentGroup,
+    setUser: setGlobalUser,
   } = useStoreActions((actions) => actions);
 
-  const addUserToGroup = trpc.group.addUser.useMutation();
-  const removeUserFromGroup = trpc.group.removeUser.useMutation();
   const addUserAsFriend = trpc.user.addFriend.useMutation();
 
   const setupLink = async () => {
@@ -54,14 +54,16 @@ const Home: NextPage = () => {
   };
 
   return (
-    <section className="flex h-full w-full flex-col items-center justify-center">
+    <section className="flex h-full w-full flex-col items-center justify-center gap-y-3">
+      <h1 className="text-3xl">Choose an account</h1>
+
       <div className="flex w-2/3 flex-col items-center rounded-md border border-zinc-600">
         {allUsers.data &&
           allUsers.data.map((user) => (
             <div
               key={user.id}
               className="flex w-full justify-between gap-y-2 border-b border-zinc-600 p-3 hover:cursor-pointer"
-              onClick={async () => {
+              onClick={async (e) => {
                 const info = await server.user.get.fetch(user.id);
                 if (!info) {
                   console.log(`info with user id ${user.id} not found`);
@@ -75,15 +77,7 @@ const Home: NextPage = () => {
 
                 setProducts(info.products);
 
-                setUser((prev) => user);
-                if (!user.groupArray || user.groupArray.length === 0) return;
-                const firstGroup = user.groupArray[0];
-                const currentGroup = await server.group.get.fetch({
-                  id: firstGroup.id,
-                });
-                if (!currentGroup) return;
-
-                setCurrentGroup((prev) => currentGroup);
+                setGlobalUser((prev) => user);
 
                 setupLink();
               }}
@@ -93,57 +87,59 @@ const Home: NextPage = () => {
                 <p>hasAccessToken: {user.hasAccessToken ? "true" : "false"}</p>
               </div>
 
-              {currentGroup && (
+              <div className="flex flex-col gap-y-2">
+                {globalUser.id !== user.id && (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addUserAsFriend.mutateAsync({
+                        userId: globalUser.id,
+                        friendId: user.id,
+                      });
+                    }}
+                  >
+                    {user.friendArray?.find(
+                      (friend) => friend.id === user.id
+                    ) ? (
+                      <Image
+                        src={removeUserIcon}
+                        height={24}
+                        width={24}
+                        alt=""
+                      />
+                    ) : (
+                      <Image src={addUserIcon} height={24} width={24} alt="" />
+                    )}
+                  </Button>
+                )}
+
                 <Button
-                  disabled={globalUser.id == user.id}
+                  className="bg-red-800"
                   onClick={async (e) => {
                     e.stopPropagation();
-                    const updatedGroup = userInGroup(user, currentGroup)
-                      ? await removeUserFromGroup.mutateAsync({
-                          userId: user.id,
-                          groupId: currentGroup.id,
-                        })
-                      : await addUserToGroup.mutateAsync({
-                          userId: user.id,
-                          groupId: currentGroup.id,
-                        });
-
-                    setCurrentGroup((prev) => updatedGroup);
+                    await deleteUser.mutateAsync(user.id);
+                    allUsers.refetch();
+                    if (globalUser.id === user.id) {
+                      setGlobalUser(() => emptyUser);
+                    }
                   }}
                 >
-                  <Image
-                    src={userInGroup(user, currentGroup) ? removeUser : addUser}
-                    height={24}
-                    width={24}
-                    alt=""
-                  />
+                  <Image src={deleteIcon} height={24} width={24} alt="" />
                 </Button>
-              )}
-
-              <Button
-                onClick={() => {
-                  addUserAsFriend.mutateAsync({
-                    userId: globalUser.id,
-                    friendId: user.id,
-                  });
-                }}
-              >
-                Add friend
-              </Button>
+              </div>
             </div>
           ))}
 
         <Button
           className="w-full rounded-none rounded-b-md text-xl"
-          onClick={async () => {
+          onClick={async (e) => {
+            e.stopPropagation();
             const user = await createUser.refetch();
             allUsers.refetch();
             if (!user.data) {
               console.log(user.error);
               return;
             }
-
-            server.group.create.fetch({ id: user.data.id });
           }}
         >
           create new user
