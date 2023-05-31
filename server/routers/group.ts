@@ -25,6 +25,11 @@ export const groupRouter = router({
     .mutation(async ({ input }) => {
       const group = await db.group.create({
         data: {
+          groupOwner: {
+            connect: {
+              id: input.id,
+            },
+          },
           userArray: {
             connect: {
               id: input.id,
@@ -60,6 +65,7 @@ export const groupRouter = router({
 
       return stripUserSecretsFromGroup(group);
     }),
+
   removeUser: procedure
     .input(z.object({ groupId: z.string(), userId: z.string() }))
     .mutation(async ({ input }) => {

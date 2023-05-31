@@ -58,12 +58,12 @@ const Page: NextPage = () => {
                 if (!user.groupArray) return;
 
                 const meta = transactionMetaArray.data?.find(
-                  (meta) =>
-                    meta.transaction_id === selectedTransaction.transaction_id
+                  (meta) => meta.id === selectedTransaction.transaction_id
                 );
 
                 meta
                   ? await updateTransactionMeta.mutateAsync({
+                      //FIX: splitAmount is no longer an array
                       splitAmount: splitArray,
                       transactionId: selectedTransaction.transaction_id,
                     })
@@ -105,10 +105,9 @@ const Page: NextPage = () => {
                                 transaction as Transaction
                               );
                               const meta = transactionMetaArray.data?.find(
-                                (meta) =>
-                                  meta.transaction_id ===
-                                  transaction.transaction_id
+                                (meta) => meta.id === transaction.transaction_id
                               );
+                              //FIX: splitAmount is no longer an array
                               setSplitArray(meta ? meta.splitAmount : [50, 50]);
                             }}
                             transaction={transaction as Transaction}

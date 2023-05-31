@@ -1,13 +1,14 @@
 import * as z from "zod"
-import { CompleteUser, RelatedUserModel } from "./index"
+import { CompleteUser, RelatedUserModel, CompleteSplit, RelatedSplitModel } from "./index"
 
 export const TransactionModel = z.object({
-  transaction_id: z.string(),
-  splitAmount: z.number().array(),
+  id: z.string(),
+  ownerId: z.string(),
 })
 
 export interface CompleteTransaction extends z.infer<typeof TransactionModel> {
-  splitUserArray: CompleteUser[]
+  owner: CompleteUser
+  split: CompleteSplit[]
 }
 
 /**
@@ -16,5 +17,6 @@ export interface CompleteTransaction extends z.infer<typeof TransactionModel> {
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
 export const RelatedTransactionModel: z.ZodSchema<CompleteTransaction> = z.lazy(() => TransactionModel.extend({
-  splitUserArray: RelatedUserModel.array(),
+  owner: RelatedUserModel,
+  split: RelatedSplitModel.array(),
 }))

@@ -32,31 +32,40 @@ datasource db {
 }
 
 model Group {
-  id        String @id @default(uuid())
-  userArray User[]
+  id         String @id
+  groupOwner User   @relation("mygroup", fields: [id], references: [id])
+  userArray  User[]
 }
 
 model User {
-  id                 String        @id @default(uuid())
-  name               String        @default("")
-  ACCESS_TOKEN       String?
-  PUBLIC_TOKEN       String?
-  ITEM_ID            String?
-  TRANSFER_ID        String? // The transfer_id is only relevant for Transfer ACH product.
-  PAYMENT_ID         String? // The payment_id is only relevant for the UK/EU Payment Initiation product.
-  groupArray         Group[]
-  splitTransactionID Transaction[]
-  friendArray        Friend[]
+  id           String  @id @default(uuid())
+  name         String  @default("")
+  ACCESS_TOKEN String?
+  PUBLIC_TOKEN String?
+  ITEM_ID      String?
+  TRANSFER_ID  String? // The transfer_id is only relevant for Transfer ACH product.
+  PAYMENT_ID   String? // The payment_id is only relevant for the UK/EU Payment Initiation product.
+
+  transactionArray Transaction[]
+  splitArray       Split[] //a user can be part of a transaction split they do not own
+
+  myGroup    Group[] @relation("mygroup") //groups I own
+  groupArray Group[] //array of groups this user is included in
 }
 
 model Transaction {
-  transaction_id String  @id
-  splitUserArray User[]
-  splitAmount    Float[]
+  id      String  @id //transaction_id
+  ownerId String
+  owner   User    @relation(fields: [ownerId], references: [id])
+  split   Split[]
 }
 
-model Friend {
-  id   String  @id @default(uuid())
-  data User    @relation(fields: [id], references: [id])
-  real Boolean
+model Split {
+  id          String       @id //transaction_id
+  transaction Transaction? @relation(fields: [id], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  amount Float
 }

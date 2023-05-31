@@ -3,6 +3,7 @@ import { z } from "zod";
 import db from "../../lib/util/db";
 import { RemovedTransaction, Transaction } from "plaid";
 import { client } from "../util";
+import { SplitModel } from "../../prisma/zod";
 
 // Retrieve Transactions for an Item
 // https://plaid.com/docs/#transactions
@@ -55,11 +56,7 @@ const transactionRouter = router({
     .query(async ({ input }) => {
       const transaction = await db.transaction.findMany({
         where: {
-          splitUserArray: {
-            some: {
-              id: input.id,
-            },
-          },
+          ownerId: input.id,
         },
       });
 
@@ -68,26 +65,35 @@ const transactionRouter = router({
       return transaction;
     }),
 
+  //FIX: updateMeta needs to update many splits. Look into $transactions
   updateMeta: procedure
     .input(
       z.object({
         transactionId: z.string(),
-        splitAmount: z.array(z.number()),
+        split: SplitModel,
       })
     )
     .mutation(async ({ input }) => {
       const transaction = await db.transaction.update({
         where: {
-          transaction_id: input.transactionId,
+          id: input.transactionId,
         },
         data: {
-          splitAmount: input.splitAmount,
+          split: {
+            updateMany: {
+              where: {
+                id: input.split.id,
+              },
+              data: {},
+            },
+          },
         },
       });
 
       return transaction;
     }),
 
+  //FIX: multiple splits expected to be created and connected to Transaction
   createMeta: procedure
     .input(
       z.object({
@@ -111,7 +117,7 @@ const transactionRouter = router({
 
       const test = await db.transaction.create({
         data: {
-          transaction_id: input.transactionId,
+          id: input.transactionId,
           splitUserArray: {
             connect: splitUserArray.map((user) => ({
               id: user.id,

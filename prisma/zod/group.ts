@@ -6,6 +6,7 @@ export const GroupModel = z.object({
 })
 
 export interface CompleteGroup extends z.infer<typeof GroupModel> {
+  groupOwner: CompleteUser
   userArray: CompleteUser[]
 }
 
@@ -15,5 +16,6 @@ export interface CompleteGroup extends z.infer<typeof GroupModel> {
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
 export const RelatedGroupModel: z.ZodSchema<CompleteGroup> = z.lazy(() => GroupModel.extend({
+  groupOwner: RelatedUserModel,
   userArray: RelatedUserModel.array(),
 }))

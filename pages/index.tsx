@@ -15,21 +15,21 @@ const Home: NextPage = () => {
   const createLinkToken = trpc.createLinkToken.useQuery(undefined, {
     enabled: false,
   });
-  const createUser = trpc.user.create.useQuery(undefined, {
-    enabled: false,
-  });
+  const createUser = trpc.user.create.useMutation();
   const server = trpc.useContext();
   const deleteUser = trpc.user.delete.useMutation();
+  const createGroup = trpc.group.create.useMutation();
 
-  const { user: appUser } = useStoreState((state) => state);
+  const { user: appUser, currentGroup } = useStoreState((state) => state);
   const {
     setProducts,
     setLinkToken,
     setIsPaymentInitiation,
     setUser: setAppuser,
+    setCurrentGroup,
   } = useStoreActions((actions) => actions);
 
-  const addUserAsFriend = trpc.user.addFriend.useMutation();
+  const addUserToGroup = trpc.group.addUser.useMutation();
 
   const setupLink = async () => {
     // used to determine which path to take when generating token
@@ -88,13 +88,13 @@ const Home: NextPage = () => {
               </div>
 
               <div className="flex flex-col gap-y-2">
-                {appUser.id !== user.id && (
+                {appUser.id !== user.id && currentGroup && (
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      addUserAsFriend.mutateAsync({
+                      addUserToGroup.mutateAsync({
                         userId: appUser.id,
-                        friendId: user.id,
+                        groupId: currentGroup.id,
                       });
                     }}
                   >
@@ -134,12 +134,11 @@ const Home: NextPage = () => {
           className="w-full rounded-none rounded-b-md text-xl"
           onClick={async (e) => {
             e.stopPropagation();
-            const user = await createUser.refetch();
+            const user = await createUser.mutateAsync();
             allUsers.refetch();
-            if (!user.data) {
-              console.log(user.error);
-              return;
-            }
+
+            const group = await createGroup.mutateAsync({ id: user.id });
+            setCurrentGroup(() => group);
           }}
         >
           create new user
