@@ -1,30 +1,31 @@
+import { Split } from "@prisma/client";
 import React from "react";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
-  splitArray: number[];
+  splitArray: Split[];
   index: number;
   amount: number;
-  setSplitArray: React.Dispatch<React.SetStateAction<number[]>>;
+  setSplitArray: React.Dispatch<React.SetStateAction<Split[]>>;
 }
 
 const UserSplit = (props: Props) => {
+  const split = props.splitArray[props.index];
+
   return (
     <div className="flex w-full justify-between gap-x-2">
-      <div>
-        $ {Math.round(props.amount * props.splitArray[props.index]) / 100}
-      </div>
-      <div>{props.splitArray[props.index]}%</div>
+      <div>$ split.amount</div>
+      <div>{Math.round((split.amount / props.amount) * 100) / 100}%</div>
       <input
         type="range"
         min={0}
-        max={100}
-        value={props.splitArray[props.index]}
+        max={split.amount}
+        value={split.amount}
         onChange={(e) => {
           const newValue = parseInt(e.target.value);
-          const newSplit = [...props.splitArray];
-          newSplit[props.index] = newValue;
-          newSplit[props.index === 0 ? 1 : 0] = 100 - newValue;
-          props.setSplitArray(newSplit);
+          const newSplit = { ...split, amount: newValue };
+          const newSplitArray = [...props.splitArray];
+          newSplitArray[props.index] = newSplit;
+          props.setSplitArray(newSplitArray);
         }}
       />
       <div>{props.children}</div>

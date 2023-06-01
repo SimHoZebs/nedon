@@ -58,6 +58,9 @@ const transactionRouter = router({
         where: {
           ownerId: input.id,
         },
+        include: {
+          split: true,
+        },
       });
 
       if (!transaction) return null;
@@ -65,69 +68,58 @@ const transactionRouter = router({
       return transaction;
     }),
 
-  //FIX: updateMeta needs to update many splits. Look into $transactions
   updateMeta: procedure
     .input(
       z.object({
         transactionId: z.string(),
-        split: SplitModel,
+        splitArray: z.array(SplitModel),
       })
     )
     .mutation(async ({ input }) => {
-      const transaction = await db.transaction.update({
-        where: {
-          id: input.transactionId,
-        },
+      const updatedTransactionArray = await db.$transaction(
+        input.splitArray.map((split) =>
+          db.split.update({
+            where: {
+              id: input.transactionId,
+            },
+            data: split,
+          })
+        )
+      );
+
+      return updatedTransactionArray;
+    }),
+
+  createMeta: procedure
+    .input(
+      z.object({
+        userId: z.string(),
+        transactionId: z.string(),
+        splitArray: z.array(SplitModel),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const transaction = await db.transaction.create({
         data: {
+          owner: {
+            connect: {
+              id: input.userId,
+            },
+          },
+          id: input.transactionId,
           split: {
-            updateMany: {
-              where: {
-                id: input.split.id,
-              },
-              data: {},
+            createMany: {
+              data: input.splitArray.map((split) => ({
+                id: input.transactionId,
+                amount: split.amount,
+                userId: input.userId,
+              })),
             },
           },
         },
       });
 
       return transaction;
-    }),
-
-  //FIX: multiple splits expected to be created and connected to Transaction
-  createMeta: procedure
-    .input(
-      z.object({
-        groupId: z.string(),
-        transactionId: z.string(),
-        splitAmount: z.array(z.number()),
-      })
-    )
-    .mutation(async ({ input }) => {
-      console.log("mutating");
-
-      const splitUserArray = await db.user.findMany({
-        where: {
-          groupArray: {
-            some: {
-              id: input.groupId,
-            },
-          },
-        },
-      });
-
-      const test = await db.transaction.create({
-        data: {
-          id: input.transactionId,
-          splitUserArray: {
-            connect: splitUserArray.map((user) => ({
-              id: user.id,
-            })),
-          },
-          splitAmount: input.splitAmount,
-        },
-      });
-
-      return test;
     }),
 });
 
