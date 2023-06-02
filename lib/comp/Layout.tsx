@@ -7,7 +7,7 @@ import Image from "next/image";
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
-  const { user, currentGroup } = useStoreState((state) => state);
+  const { appUser, appGroup } = useStoreState((state) => state);
 
   return (
     <div className="flex h-screen w-screen bg-zinc-950 text-zinc-300">
@@ -21,17 +21,13 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
         </Button>
         <Button onClick={() => router.push("/analysis")}>Analysis</Button>
 
-        <div>Current user: {user ? user.id.slice(0, 8) : "none"}</div>
+        <div>Current user: {appUser ? appUser.id.slice(0, 8) : "none"}</div>
 
-        <div>
-          Current group: {currentGroup ? currentGroup.id.slice(0, 8) : "none"}
-        </div>
+        <div>Current group: {appGroup ? appGroup.id.slice(0, 8) : "none"}</div>
         <div>
           Current group members:{" "}
-          {currentGroup?.userArray
-            ? currentGroup.userArray
-                .map((user) => user.id.slice(0, 8))
-                .join(", ")
+          {appGroup?.userArray
+            ? appGroup.userArray.map((user) => user.id.slice(0, 8)).join(", ")
             : "none"}
         </div>
       </nav>

@@ -2,7 +2,6 @@ import React from "react";
 
 import Endpoint from "./Endpoint";
 import {
-  authCategories,
   identityCategories,
   balanceCategories,
   investmentsCategories,
@@ -27,10 +26,10 @@ import { trpc } from "../util/trpc";
 import NewEndpoint from "./NewEndpoint";
 
 const Products = () => {
-  const { products, user } = useStoreState((state) => state);
+  const { products, appUser } = useStoreState((state) => state);
 
   const auth = trpc.auth.useQuery(
-    { id: user.id },
+    { id: appUser.id },
     { staleTime: 3600000, enabled: false }
   );
   return (

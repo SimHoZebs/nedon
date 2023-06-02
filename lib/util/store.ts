@@ -15,14 +15,11 @@ interface StoreModel {
   products: string[];
   setProducts: Action<StoreModel, string[]>;
 
-  user: UserClientSide;
-  setUser: Action<StoreModel, (user: UserClientSide) => UserClientSide>;
+  appUser: UserClientSide;
+  setAppUser: Action<StoreModel, (user: UserClientSide) => UserClientSide>;
 
-  currentGroup?: GroupClientSide;
-  setCurrentGroup: Action<
-    StoreModel,
-    (group?: GroupClientSide) => GroupClientSide
-  >;
+  appGroup?: GroupClientSide;
+  setAppGroup: Action<StoreModel, (group?: GroupClientSide) => GroupClientSide>;
 }
 
 const store = createStore<StoreModel>({
@@ -46,14 +43,14 @@ const store = createStore<StoreModel>({
     state.products = payload;
   }),
 
-  user: emptyUser,
-  setUser: action((state, payload) => {
-    state.user = { ...payload(state.user) };
+  appUser: emptyUser,
+  setAppUser: action((state, payload) => {
+    state.appUser = { ...payload(state.appUser) };
   }),
 
-  currentGroup: undefined,
-  setCurrentGroup: action((state, payload) => {
-    state.currentGroup = { ...payload(state.currentGroup) };
+  appGroup: undefined,
+  setAppGroup: action((state, payload) => {
+    state.appGroup = { ...payload(state.appGroup) };
   }),
 });
 

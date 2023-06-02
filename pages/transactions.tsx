@@ -11,18 +11,18 @@ import { useRouter } from "next/router";
 import { Split } from "@prisma/client";
 
 const Page: NextPage = () => {
-  const { user, currentGroup } = useStoreState((state) => state);
+  const { appUser, appGroup } = useStoreState((state) => state);
 
   const router = useRouter();
-  if (!user.hasAccessToken) router.push("/");
+  if (!appUser.hasAccessToken) router.push("/");
 
   const transactionArray = trpc.transaction.getAll.useQuery(
-    { id: user.id },
-    { staleTime: 3600000, enabled: user.hasAccessToken }
+    { id: appUser.id },
+    { staleTime: 3600000, enabled: appUser.hasAccessToken }
   );
   const transactionMetaArray = trpc.transaction.getMeta.useQuery(
-    { id: user.id },
-    { staleTime: 3600000, enabled: user.hasAccessToken }
+    { id: appUser.id },
+    { staleTime: 3600000, enabled: appUser.hasAccessToken }
   );
   const createTransactionMeta = trpc.transaction.createMeta.useMutation();
   const updateTransactionMeta = trpc.transaction.updateMeta.useMutation();
@@ -52,17 +52,15 @@ const Page: NextPage = () => {
           </div>
 
           <div>
-            {currentGroup?.userArray &&
-              currentGroup.userArray.length &&
-              currentGroup.userArray.map((user, i) => (
-                <div key={i}>{user.id}</div>
-              ))}
+            {appGroup?.userArray &&
+              appGroup.userArray.length &&
+              appGroup.userArray.map((user, i) => <div key={i}>{user.id}</div>)}
           </div>
 
           <div className="flex w-full justify-between">
             <Button
               onClick={async () => {
-                if (!user.groupArray) return;
+                if (!appUser.groupArray) return;
 
                 const meta = transactionMetaArray.data?.find(
                   (meta) => meta.id === selectedTransaction.transaction_id
@@ -75,7 +73,7 @@ const Page: NextPage = () => {
                     })
                   : await createTransactionMeta.mutateAsync({
                       splitArray: splitArray,
-                      userId: user.id,
+                      userId: appUser.id,
                       transactionId: selectedTransaction.transaction_id,
                     });
 
@@ -120,7 +118,7 @@ const Page: NextPage = () => {
                                 : [
                                     {
                                       id: transaction.transaction_id,
-                                      userId: user.id,
+                                      userId: appUser.id,
                                       amount: transaction.amount,
                                     },
                                   ];

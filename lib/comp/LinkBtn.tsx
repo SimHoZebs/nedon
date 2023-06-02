@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { usePlaidLink } from "react-plaid-link";
 
 import { useStoreActions, useStoreState } from "../util/store";
@@ -7,8 +7,8 @@ import { useRouter } from "next/router";
 import Button from "./Button";
 
 const LinkBtn = () => {
-  const { user: appUser } = useStoreState((state) => state);
-  const { setUser } = useStoreActions((actions) => actions);
+  const { appUser } = useStoreState((state) => state);
+  const { setAppUser } = useStoreActions((actions) => actions);
   const setAccessToken = trpc.setAccessToken.useMutation();
   const linkToken = trpc.createLinkToken.useQuery(undefined, {
     staleTime: 360000,
@@ -29,7 +29,7 @@ const LinkBtn = () => {
           console.log("error setting access token from server");
         }
 
-        setUser((prev) => ({
+        setAppUser((prev) => ({
           ...user,
         }));
       };
@@ -38,7 +38,7 @@ const LinkBtn = () => {
 
       router.push("/user");
     },
-    [appUser.id, router, setAccessToken, setUser]
+    [appUser.id, router, setAccessToken, setAppUser]
   );
 
   let isOauth = false;

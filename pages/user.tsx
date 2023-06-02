@@ -10,7 +10,7 @@ import LinkBtn from "../lib/comp/LinkBtn";
 import { useRouter } from "next/router";
 
 const User: NextPage = () => {
-  const { user, linkToken, isPaymentInitiation } = useStoreState(
+  const { appUser, linkToken, isPaymentInitiation } = useStoreState(
     (state) => state
   );
 
@@ -72,7 +72,7 @@ const User: NextPage = () => {
         </div>
       )}
 
-      {user.ITEM_ID && (
+      {appUser.ITEM_ID && (
         <p className="">
           Congrats! By linking an account, you have created an{" "}
           <Link
@@ -86,7 +86,7 @@ const User: NextPage = () => {
         </p>
       )}
 
-      {user.ITEM_ID && (
+      {appUser.ITEM_ID && (
         <section>
           <ProductContainer />
           <Items />

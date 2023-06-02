@@ -17,10 +17,9 @@ const Home: NextPage = () => {
   const deleteUser = trpc.user.delete.useMutation();
   const createGroup = trpc.group.create.useMutation();
 
-  const { user: appUser, currentGroup } = useStoreState((state) => state);
-  const { setUser: setAppUser, setCurrentGroup } = useStoreActions(
-    (actions) => actions
-  );
+  const { appUser, appGroup } = useStoreState((state) => state);
+  const { setAppUser: setAppUser, setAppGroup: setCurrentGroup } =
+    useStoreActions((actions) => actions);
 
   const addUserToGroup = trpc.group.addUser.useMutation();
 
@@ -54,13 +53,13 @@ const Home: NextPage = () => {
               </div>
 
               <div className="flex flex-col gap-y-2">
-                {appUser.id && appUser.id !== user.id && currentGroup && (
+                {appUser.id && appUser.id !== user.id && appGroup && (
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
                       addUserToGroup.mutateAsync({
                         userId: appUser.id,
-                        groupId: currentGroup.id,
+                        groupId: appGroup.id,
                       });
                     }}
                   >
