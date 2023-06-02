@@ -7,58 +7,34 @@ import { useRouter } from "next/router";
 import Button from "./Button";
 
 const LinkBtn = () => {
-  const { linkToken, isPaymentInitiation, user } = useStoreState(
-    (state) => state
-  );
-  const { setIsItemAccess, setItemId, setUser, setLinkSuccess } =
-    useStoreActions((actions) => actions);
-  const setAccessTokenServer = trpc.setAccessToken.useMutation();
+  const { linkToken, user: appUser } = useStoreState((state) => state);
+  const { setUser } = useStoreActions((actions) => actions);
+  const setAccessToken = trpc.setAccessToken.useMutation();
   const router = useRouter();
 
   const onSuccess = React.useCallback(
     (public_token: string) => {
       // If the access_token is needed, send public_token to server
-      const exchangePublicTokenForAccessToken = async () => {
-        const response = await setAccessTokenServer.mutateAsync({
+      const getUserAccessToken = async () => {
+        const user = await setAccessToken.mutateAsync({
           publicToken: public_token,
-          id: user.id,
+          id: appUser.id,
         });
 
-        if (response.error) {
+        if (!user.hasAccessToken) {
           console.log("error setting access token from server");
-          setItemId(`no item_id retrieved`);
-          setIsItemAccess(false);
-          return;
         }
 
-        setItemId(response.item_id);
-        setUser((user) => ({
+        setUser((prev) => ({
           ...user,
-          hasAccessToken: response.access_token ? true : false,
         }));
-        setIsItemAccess(true);
       };
 
-      // 'payment_initiation' products do not require the public_token to be exchanged for an access_token.
-      if (isPaymentInitiation) {
-        setIsItemAccess(false);
-      } else {
-        exchangePublicTokenForAccessToken();
-      }
+      getUserAccessToken();
 
-      setLinkSuccess(true);
       router.push("/user");
     },
-    [
-      isPaymentInitiation,
-      router,
-      setAccessTokenServer,
-      setIsItemAccess,
-      setItemId,
-      setLinkSuccess,
-      setUser,
-      user.id,
-    ]
+    [appUser.id, router, setAccessToken, setUser]
   );
 
   let isOauth = false;

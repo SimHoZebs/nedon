@@ -13,6 +13,7 @@ import { User } from "@prisma/client";
 import { groupRouter } from "./group";
 import transactionRouter from "./transaction";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS, client } from "../util";
+import stripUserSecrets from "../../lib/util/stripUserSecrets";
 
 const setAccessToken = async ({
   publicToken,
@@ -21,20 +22,20 @@ const setAccessToken = async ({
   publicToken: string;
   id: string;
 }) => {
-  const tokenResponse = await client.itemPublicTokenExchange({
+  const exchangeResponse = await client.itemPublicTokenExchange({
     public_token: publicToken,
   });
 
   const userUpdateData: Partial<User> = {
     PUBLIC_TOKEN: publicToken,
-    ACCESS_TOKEN: tokenResponse.data.access_token,
-    ITEM_ID: tokenResponse.data.item_id,
+    ACCESS_TOKEN: exchangeResponse.data.access_token,
+    ITEM_ID: exchangeResponse.data.item_id,
     TRANSFER_ID: null,
   };
 
   if (PLAID_PRODUCTS.includes(Products.Transfer)) {
     userUpdateData.TRANSFER_ID = await authorizeAndCreateTransfer(
-      tokenResponse.data.item_id
+      exchangeResponse.data.item_id
     );
   }
 
@@ -45,12 +46,7 @@ const setAccessToken = async ({
     data: { ...userUpdateData },
   });
 
-  return {
-    // the 'access_token' is a private token, DO NOT pass this token to the frontend in your production environment
-    access_token: user.ACCESS_TOKEN,
-    item_id: user.ITEM_ID,
-    error: null,
-  };
+  return stripUserSecrets(user);
 };
 
 export const appRouter = router({
@@ -65,12 +61,12 @@ export const appRouter = router({
         initial_products: PLAID_PRODUCTS,
       });
 
-      const setAccessTokenResponse = await setAccessToken({
+      const user = await setAccessToken({
         id: input.id,
         publicToken: response.data.public_token,
       });
 
-      return setAccessTokenResponse.access_token;
+      return user;
     }),
 
   createLinkToken: procedure.input(z.void()).query(async () => {

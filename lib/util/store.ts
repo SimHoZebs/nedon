@@ -3,9 +3,6 @@ import { GroupClientSide, UserClientSide } from "./types";
 import { emptyUser } from "./user";
 
 interface StoreModel {
-  linkSuccess: boolean;
-  setLinkSuccess: Action<StoreModel, boolean>;
-
   isItemAccess: boolean;
   setIsItemAccess: Action<StoreModel, boolean>;
 
@@ -14,9 +11,6 @@ interface StoreModel {
 
   linkToken: string | null;
   setLinkToken: Action<StoreModel, string | null>;
-
-  itemId: string | null;
-  setItemId: Action<StoreModel, string | null>;
 
   products: string[];
   setProducts: Action<StoreModel, string[]>;
@@ -32,11 +26,6 @@ interface StoreModel {
 }
 
 const store = createStore<StoreModel>({
-  linkSuccess: false,
-  setLinkSuccess: action((state, payload) => {
-    state.linkSuccess = payload;
-  }),
-
   isItemAccess: true,
   setIsItemAccess: action((state, payload) => {
     state.isItemAccess = payload;
@@ -52,12 +41,7 @@ const store = createStore<StoreModel>({
     state.linkToken = payload;
   }),
 
-  itemId: null,
-  setItemId: action((state, payload) => {
-    state.itemId = payload;
-  }),
-
-  products: ["transactions"],
+  products: ["auth", "transactions"],
   setProducts: action((state, payload) => {
     state.products = payload;
   }),
