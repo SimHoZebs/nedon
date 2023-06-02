@@ -22,10 +22,8 @@ const Home: NextPage = () => {
 
   const { user: appUser, currentGroup } = useStoreState((state) => state);
   const {
-    setProducts,
     setLinkToken,
-    setIsPaymentInitiation,
-    setUser: setAppuser,
+    setUser: setAppUser,
     setCurrentGroup,
   } = useStoreActions((actions) => actions);
 
@@ -64,22 +62,18 @@ const Home: NextPage = () => {
               key={user.id}
               className="flex w-full justify-between gap-y-2 border-b border-zinc-600 p-3 hover:cursor-pointer"
               onClick={async (e) => {
-                const info = await server.user.get.fetch(user.id);
-                if (!info) {
-                  console.log(`info with user id ${user.id} not found`);
-                  return;
-                }
+                // const isPaymentInit = user.products.includes(
+                //   Products.PaymentInitiation
+                // );
+                // setIsPaymentInitiation(isPaymentInit);
 
-                const isPaymentInit = info.products.includes(
-                  Products.PaymentInitiation
-                );
-                setIsPaymentInitiation(isPaymentInit);
-
-                setProducts(info.products);
-
-                setAppuser((prev) => user);
+                setAppUser((prev) => user);
 
                 setupLink();
+                const group = await server.group.get.fetch({ id: user.id });
+
+                if (!group) return;
+                setCurrentGroup((prev) => group);
               }}
             >
               <div>
@@ -88,7 +82,7 @@ const Home: NextPage = () => {
               </div>
 
               <div className="flex flex-col gap-y-2">
-                {appUser.id !== user.id && currentGroup && (
+                {appUser.id && appUser.id !== user.id && currentGroup && (
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -98,7 +92,7 @@ const Home: NextPage = () => {
                       });
                     }}
                   >
-                    {user.friendArray?.find(
+                    {user.groupArray?.find(
                       (friend) => friend.id === user.id
                     ) ? (
                       <Image
@@ -120,7 +114,7 @@ const Home: NextPage = () => {
                     await deleteUser.mutateAsync(user.id);
                     allUsers.refetch();
                     if (appUser.id === user.id) {
-                      setAppuser(() => emptyUser);
+                      setAppUser(() => emptyUser);
                     }
                   }}
                 >
@@ -137,8 +131,7 @@ const Home: NextPage = () => {
             const user = await createUser.mutateAsync();
             allUsers.refetch();
 
-            const group = await createGroup.mutateAsync({ id: user.id });
-            setCurrentGroup(() => group);
+            await createGroup.mutateAsync({ id: user.id });
           }}
         >
           create new user

@@ -11,5 +11,4 @@ export const emptyUser: UserClientSide = {
   // The payment_id is only relevant for the UK/EU Payment Initiation product.
   PAYMENT_ID: null,
   groupArray: [{ id: "" }],
-  friendArray: [],
 };
