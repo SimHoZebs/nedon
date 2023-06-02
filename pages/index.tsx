@@ -18,10 +18,12 @@ const Home: NextPage = () => {
   const createGroup = trpc.group.create.useMutation();
 
   const { appUser, appGroup } = useStoreState((state) => state);
-  const { setAppUser: setAppUser, setAppGroup: setCurrentGroup } =
-    useStoreActions((actions) => actions);
+  const { setAppUser: setAppUser, setAppGroup } = useStoreActions(
+    (actions) => actions
+  );
 
   const addUserToGroup = trpc.group.addUser.useMutation();
+  const removeUserFromGroup = trpc.group.removeUser.useMutation();
 
   return (
     <section className="flex h-full w-full flex-col items-center justify-center gap-y-3">
@@ -44,7 +46,7 @@ const Home: NextPage = () => {
                 const group = await server.group.get.fetch({ id: user.id });
 
                 if (!group) return;
-                setCurrentGroup((prev) => group);
+                setAppGroup((prev) => group);
               }}
             >
               <div>
@@ -55,16 +57,28 @@ const Home: NextPage = () => {
               <div className="flex flex-col gap-y-2">
                 {appUser.id && appUser.id !== user.id && appGroup && (
                   <Button
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       e.stopPropagation();
-                      addUserToGroup.mutateAsync({
-                        userId: appUser.id,
-                        groupId: appGroup.id,
-                      });
+
+                      const updatedAppGroup = appGroup.userArray?.find(
+                        (groupUser) => groupUser.id === user.id
+                      )
+                        ? await removeUserFromGroup.mutateAsync({
+                            groupId: appGroup.id,
+                            userId: user.id,
+                          })
+                        : await addUserToGroup.mutateAsync({
+                            userId: user.id,
+                            groupId: appGroup.id,
+                          });
+
+                      console.log(updatedAppGroup);
+
+                      setAppGroup((prev) => updatedAppGroup);
                     }}
                   >
-                    {user.groupArray?.find(
-                      (friend) => friend.id === user.id
+                    {appGroup.userArray?.find(
+                      (groupUser) => groupUser.id === user.id
                     ) ? (
                       <Image
                         src={removeUserIcon}
