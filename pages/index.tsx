@@ -12,44 +12,17 @@ import deleteIcon from "../public/delete.svg";
 
 const Home: NextPage = () => {
   const allUsers = trpc.user.getAll.useQuery(undefined);
-  const createLinkToken = trpc.createLinkToken.useQuery(undefined, {
-    enabled: false,
-  });
   const createUser = trpc.user.create.useMutation();
   const server = trpc.useContext();
   const deleteUser = trpc.user.delete.useMutation();
   const createGroup = trpc.group.create.useMutation();
 
   const { user: appUser, currentGroup } = useStoreState((state) => state);
-  const {
-    setLinkToken,
-    setUser: setAppUser,
-    setCurrentGroup,
-  } = useStoreActions((actions) => actions);
+  const { setUser: setAppUser, setCurrentGroup } = useStoreActions(
+    (actions) => actions
+  );
 
   const addUserToGroup = trpc.group.addUser.useMutation();
-
-  const setupLink = async () => {
-    // used to determine which path to take when generating token
-    // do not generate a new token for OAuth redirect; instead
-    // setLinkToken from localStorage
-    if (window.location.href.includes("?oauth_state_id=")) {
-      setLinkToken(localStorage.getItem("link_token"));
-      return;
-    }
-
-    const linkToken = await createLinkToken.refetch();
-    console.log("new link token", linkToken.data);
-
-    if (linkToken.error || !linkToken.data) {
-      setLinkToken(null);
-      console.log(linkToken.error);
-      return;
-    }
-
-    setLinkToken(linkToken.data);
-    localStorage.setItem("link_token", linkToken.data);
-  };
 
   return (
     <section className="flex h-full w-full flex-col items-center justify-center gap-y-3">
@@ -69,7 +42,6 @@ const Home: NextPage = () => {
 
                 setAppUser((prev) => user);
 
-                setupLink();
                 const group = await server.group.get.fetch({ id: user.id });
 
                 if (!group) return;

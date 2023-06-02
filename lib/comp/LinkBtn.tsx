@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 
 import { useStoreActions, useStoreState } from "../util/store";
@@ -7,9 +7,13 @@ import { useRouter } from "next/router";
 import Button from "./Button";
 
 const LinkBtn = () => {
-  const { linkToken, user: appUser } = useStoreState((state) => state);
+  const { user: appUser } = useStoreState((state) => state);
   const { setUser } = useStoreActions((actions) => actions);
   const setAccessToken = trpc.setAccessToken.useMutation();
+  const linkToken = trpc.createLinkToken.useQuery(undefined, {
+    staleTime: 360000,
+  });
+
   const router = useRouter();
 
   const onSuccess = React.useCallback(
@@ -38,8 +42,9 @@ const LinkBtn = () => {
   );
 
   let isOauth = false;
+
   const config: Parameters<typeof usePlaidLink>[0] = {
-    token: linkToken!,
+    token: linkToken.data ? linkToken.data : null,
     onSuccess,
   };
 
@@ -61,7 +66,7 @@ const LinkBtn = () => {
 
   return (
     <Button onClick={() => open()}>
-      {linkToken ? "Link a bank account" : "Waiting for link token..."}
+      {linkToken.data ? "Link a bank account" : "Waiting for link token..."}
     </Button>
   );
 };
