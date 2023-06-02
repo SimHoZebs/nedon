@@ -111,11 +111,12 @@ const Page: NextPage = () => {
                               setSelectedTransaction(
                                 transaction as Transaction
                               );
+
                               const meta = transactionMetaArray.data?.find(
                                 (meta) => meta.id === transaction.transaction_id
                               );
-                              const split = meta
-                                ? meta.split
+                              const splitArray = meta
+                                ? meta.splitArray
                                 : [
                                     {
                                       id: transaction.transaction_id,
@@ -123,7 +124,7 @@ const Page: NextPage = () => {
                                       amount: transaction.amount,
                                     },
                                   ];
-                              setSplitArray(split);
+                              setSplitArray(splitArray);
                             }}
                             transaction={transaction as Transaction}
                             key={l}

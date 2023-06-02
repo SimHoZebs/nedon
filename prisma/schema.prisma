@@ -32,7 +32,7 @@ datasource db {
 }
 
 model Group {
-  id         String @id
+  id         String @id //User's id
   groupOwner User   @relation("mygroup", fields: [id], references: [id])
   userArray  User[]
 }
@@ -54,10 +54,10 @@ model User {
 }
 
 model Transaction {
-  id      String  @id //transaction_id
-  ownerId String
-  owner   User    @relation(fields: [ownerId], references: [id])
-  split   Split[]
+  id         String  @id //transaction_id
+  ownerId    String
+  owner      User    @relation(fields: [ownerId], references: [id])
+  splitArray Split[]
 }
 
 model Split {

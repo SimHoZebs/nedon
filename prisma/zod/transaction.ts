@@ -8,7 +8,7 @@ export const TransactionModel = z.object({
 
 export interface CompleteTransaction extends z.infer<typeof TransactionModel> {
   owner: CompleteUser
-  split: CompleteSplit[]
+  splitArray: CompleteSplit[]
 }
 
 /**
@@ -18,5 +18,5 @@ export interface CompleteTransaction extends z.infer<typeof TransactionModel> {
  */
 export const RelatedTransactionModel: z.ZodSchema<CompleteTransaction> = z.lazy(() => TransactionModel.extend({
   owner: RelatedUserModel,
-  split: RelatedSplitModel.array(),
+  splitArray: RelatedSplitModel.array(),
 }))

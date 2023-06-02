@@ -59,7 +59,7 @@ const transactionRouter = router({
           ownerId: input.id,
         },
         include: {
-          split: true,
+          splitArray: true,
         },
       });
 
@@ -107,7 +107,7 @@ const transactionRouter = router({
             },
           },
           id: input.transactionId,
-          split: {
+          splitArray: {
             createMany: {
               data: input.splitArray.map((split) => ({
                 id: input.transactionId,
