@@ -1,5 +1,5 @@
 import { NextPage } from "next";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { trpc } from "../lib/util/trpc";
 import { useStoreState } from "../lib/util/store";
 import { Transaction as PlaidTransaction } from "plaid";
@@ -33,6 +33,7 @@ const Page: NextPage = () => {
   const [selectedTransactionMeta, setSelectedTransactionMeta] =
     useState<TransactionMeta>();
   const [splitArray, setSplitArray] = useState<Split[]>([]);
+  const [totalSplit, setTotalSplit] = useState(0);
 
   return (
     <div className="flex flex-col ">
@@ -43,13 +44,25 @@ const Page: NextPage = () => {
           {splitArray?.map((split, i) => (
             <div key={i}>
               <UserSplit
-                splitArray={splitArray}
-                setSplitArray={setSplitArray}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const value = parseInt(e.target.value) / 100;
+                  const updatedSplit: Split = { ...split, amount: value };
+                  const updatedSplitArray = [...splitArray];
+                  updatedSplitArray[i] = updatedSplit;
+                  setSplitArray(updatedSplitArray);
+
+                  const updatedTotalSplit = updatedSplitArray.reduce(
+                    (amount, split) => amount + split.amount,
+                    0
+                  );
+                  setTotalSplit(updatedTotalSplit);
+                }}
                 amount={selectedTransaction.amount}
-                index={i}
+                split={split}
               >
                 {split.userId.slice(0, 8)}
               </UserSplit>
+
               {/**FIX: if selectedTransaction is from your acc, you shouldn't be able to remove yourself */}
               {selectedTransaction.account_id === appUser.ITEM_ID ? null : (
                 <Button
@@ -64,6 +77,18 @@ const Page: NextPage = () => {
               )}
             </div>
           ))}
+
+          {totalSplit > selectedTransaction.amount ? (
+            <div className="text-red-900">
+              Split is greater than transaction amount (
+              {`totalSplit ${totalSplit}`})
+            </div>
+          ) : totalSplit < selectedTransaction.amount ? (
+            <div className="text-red-900">
+              Split is less than transaction amount (
+              {`totalSplit ${totalSplit}`})
+            </div>
+          ) : null}
 
           <div>
             {appGroup?.userArray &&
@@ -92,6 +117,7 @@ const Page: NextPage = () => {
 
           <div className="flex w-full justify-between">
             <Button
+              disabled={totalSplit !== selectedTransaction.amount}
               onClick={async () => {
                 if (!appUser.groupArray) return;
 
@@ -156,6 +182,11 @@ const Page: NextPage = () => {
                                     },
                                   ];
 
+                              const totalSplit = splitArray.reduce(
+                                (amount, split) => amount + split.amount,
+                                0
+                              );
+                              setTotalSplit(totalSplit);
                               setSelectedTransactionMeta(meta);
                               setSplitArray(splitArray);
                             }}
