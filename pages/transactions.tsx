@@ -35,6 +35,14 @@ const Page: NextPage = () => {
   const [splitArray, setSplitArray] = useState<Split[]>([]);
   const [totalSplit, setTotalSplit] = useState(0);
 
+  useEffect(() => {
+    const updatedTotalSplit =
+      Math.floor(
+        splitArray.reduce((amount, split) => amount + split.amount, 0) * 100
+      ) / 100;
+    setTotalSplit(updatedTotalSplit);
+  }, [splitArray]);
+
   return (
     <div className="flex flex-col ">
       {showModal && selectedTransaction && (
@@ -50,12 +58,6 @@ const Page: NextPage = () => {
                   const updatedSplitArray = [...splitArray];
                   updatedSplitArray[i] = updatedSplit;
                   setSplitArray(updatedSplitArray);
-
-                  const updatedTotalSplit = updatedSplitArray.reduce(
-                    (amount, split) => amount + split.amount,
-                    0
-                  );
-                  setTotalSplit(updatedTotalSplit);
                 }}
                 amount={selectedTransaction.amount}
                 split={split}
@@ -73,6 +75,26 @@ const Page: NextPage = () => {
                   }}
                 >
                   Remove
+                </Button>
+              )}
+
+              {totalSplit !== selectedTransaction.amount && (
+                <Button
+                  onClick={() => {
+                    const newSplitArray = [...splitArray];
+                    const newSplitAmount =
+                      Math.floor(
+                        (split.amount -
+                          totalSplit +
+                          selectedTransaction.amount) *
+                          100
+                      ) / 100;
+
+                    newSplitArray[i].amount = newSplitAmount;
+                    setSplitArray(newSplitArray);
+                  }}
+                >
+                  Even out
                 </Button>
               )}
             </div>
@@ -182,11 +204,6 @@ const Page: NextPage = () => {
                                     },
                                   ];
 
-                              const totalSplit = splitArray.reduce(
-                                (amount, split) => amount + split.amount,
-                                0
-                              );
-                              setTotalSplit(totalSplit);
                               setSelectedTransactionMeta(meta);
                               setSplitArray(splitArray);
                             }}
