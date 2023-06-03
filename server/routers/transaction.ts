@@ -1,7 +1,7 @@
 import { router, procedure } from "../trpc";
 import { z } from "zod";
 import db from "../../lib/util/db";
-import { RemovedTransaction, Transaction } from "plaid";
+import { RemovedTransaction, Transaction as PlaidTransaction } from "plaid";
 import { client } from "../util";
 import { SplitModel } from "../../prisma/zod";
 
@@ -19,8 +19,8 @@ const transactionRouter = router({
       if (!user || !user.ACCESS_TOKEN) return null;
 
       // New transaction updates since "cursor"
-      let added: Transaction[] = [];
-      let modified: Transaction[] = [];
+      let added: PlaidTransaction[] = [];
+      let modified: PlaidTransaction[] = [];
       // Removed transaction ids
       let removed: RemovedTransaction[] = [];
       let hasMore = true;
@@ -123,14 +123,16 @@ const transactionRouter = router({
     }),
 });
 
-export const organizeTransactionByTime = (transactionArray: Transaction[]) => {
+export const organizeTransactionByTime = (
+  transactionArray: PlaidTransaction[]
+) => {
   const timeSortedTransaction = transactionArray.sort(
     (a, b) =>
       new Date(b.datetime ? b.datetime : b.date).getTime() -
       new Date(a.datetime ? a.datetime : a.date).getTime()
   );
   //create an object called sortedTransaction.
-  const test: Transaction[][][][] = [[[[]]]];
+  const test: PlaidTransaction[][][][] = [[[[]]]];
   let lastDate = new Date(0);
   let yearIndex = -1;
   let monthIndex = -1;

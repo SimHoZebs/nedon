@@ -1,9 +1,9 @@
-import { Transaction } from "plaid";
+import { Transaction as PlaidTransaction } from "plaid";
 import React from "react";
 import Button from "./Button";
 
 interface Props {
-  transaction: Transaction;
+  transaction: PlaidTransaction;
   button: () => void;
 }
 

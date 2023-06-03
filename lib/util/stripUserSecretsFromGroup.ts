@@ -9,12 +9,12 @@ const stripUserSecretsFromGroup = (
     stripUserSecrets(user)
   );
 
-  const clientSideGroup: GroupClientSide = {
+  const groupClientSide: GroupClientSide = {
     ...group,
     userArray: userClientSideArray,
   };
 
-  return clientSideGroup;
+  return groupClientSide;
 };
 
 export default stripUserSecretsFromGroup;
