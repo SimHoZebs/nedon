@@ -2,13 +2,13 @@ import { NextPage } from "next";
 import React, { useState } from "react";
 import { trpc } from "../lib/util/trpc";
 import { useStoreState } from "../lib/util/store";
-import { Transaction } from "plaid";
+import { Transaction as PlaidTransaction } from "plaid";
 import TransactionCard from "../lib/comp/TransactionCard";
 import Modal from "../lib/comp/Modal";
 import UserSplit from "../lib/comp/UserSplit";
 import Button from "../lib/comp/Button";
 import { useRouter } from "next/router";
-import { Split } from "@prisma/client";
+import { Split, Transaction as TransactionMeta } from "@prisma/client";
 
 const Page: NextPage = () => {
   const { appUser, appGroup } = useStoreState((state) => state);
@@ -28,7 +28,10 @@ const Page: NextPage = () => {
   const updateTransactionMeta = trpc.transaction.updateMeta.useMutation();
 
   const [showModal, setShowModal] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction>();
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<PlaidTransaction>();
+  const [selectedTransactionMeta, setSelectedTransactionMeta] =
+    useState<TransactionMeta>();
   const [splitArray, setSplitArray] = useState<Split[]>([]);
 
   return (
@@ -37,10 +40,9 @@ const Page: NextPage = () => {
         <Modal setShowModal={setShowModal}>
           <div className="text-4xl">${selectedTransaction.amount * -1}</div>
 
-          <div>
-            {splitArray?.map((split, i) => (
+          {splitArray?.map((split, i) => (
+            <div key={i}>
               <UserSplit
-                key={i}
                 splitArray={splitArray}
                 setSplitArray={setSplitArray}
                 amount={selectedTransaction.amount}
@@ -48,13 +50,44 @@ const Page: NextPage = () => {
               >
                 {split.userId.slice(0, 8)}
               </UserSplit>
-            ))}
-          </div>
+              {/**FIX: if selectedTransaction is from your acc, you shouldn't be able to remove yourself */}
+              {selectedTransaction.account_id === appUser.ITEM_ID ? null : (
+                <Button
+                  onClick={() => {
+                    const newSplitArray = [...splitArray];
+                    newSplitArray.splice(i, 1);
+                    setSplitArray(newSplitArray);
+                  }}
+                >
+                  Remove
+                </Button>
+              )}
+            </div>
+          ))}
 
           <div>
             {appGroup?.userArray &&
               appGroup.userArray.length &&
-              appGroup.userArray.map((user, i) => <div key={i}>{user.id}</div>)}
+              appGroup.userArray.map((user, i) =>
+                splitArray.find((split) => split.userId === user.id) ? null : (
+                  <div key={i} className="flex">
+                    <div>{user.id}</div>
+                    <Button
+                      onClick={() => {
+                        const newSplitArray = [...splitArray];
+                        newSplitArray.push({
+                          id: selectedTransaction.transaction_id,
+                          userId: user.id,
+                          amount: 0,
+                        });
+                        setSplitArray(newSplitArray);
+                      }}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                )
+              )}
           </div>
 
           <div className="flex w-full justify-between">
@@ -107,7 +140,7 @@ const Page: NextPage = () => {
                             button={() => {
                               setShowModal(true);
                               setSelectedTransaction(
-                                transaction as Transaction
+                                transaction as PlaidTransaction
                               );
 
                               const meta = transactionMetaArray.data?.find(
@@ -122,9 +155,11 @@ const Page: NextPage = () => {
                                       amount: transaction.amount,
                                     },
                                   ];
+
+                              setSelectedTransactionMeta(meta);
                               setSplitArray(splitArray);
                             }}
-                            transaction={transaction as Transaction}
+                            transaction={transaction as PlaidTransaction}
                             key={l}
                           />
                         )

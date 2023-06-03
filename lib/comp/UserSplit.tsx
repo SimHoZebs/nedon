@@ -13,16 +13,18 @@ const UserSplit = (props: Props) => {
 
   return (
     <div className="flex w-full justify-between gap-x-2">
-      <div>$ split.amount</div>
-      <div>{Math.round((split.amount / props.amount) * 100) / 100}%</div>
+      <div className="flex w-1/3 justify-between">
+        <div>$ {split.amount}</div>
+        <div>{Math.floor((split.amount / props.amount) * 10000) / 100}%</div>
+      </div>
       <input
         type="range"
         min={0}
-        max={split.amount}
-        value={split.amount}
+        max={props.amount * 100}
+        value={split.amount * 100}
         onChange={(e) => {
           const newValue = parseInt(e.target.value);
-          const newSplit = { ...split, amount: newValue };
+          const newSplit: Split = { ...split, amount: newValue / 100 };
           const newSplitArray = [...props.splitArray];
           newSplitArray[props.index] = newSplit;
           props.setSplitArray(newSplitArray);
