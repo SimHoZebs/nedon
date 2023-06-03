@@ -52,9 +52,8 @@ const Page: NextPage = () => {
           {splitArray?.map((split, i) => (
             <div key={i}>
               <UserSplit
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const value = parseInt(e.target.value) / 100;
-                  const updatedSplit: Split = { ...split, amount: value };
+                onAmountChange={(amount: number) => {
+                  const updatedSplit: Split = { ...split, amount };
                   const updatedSplitArray = [...splitArray];
                   updatedSplitArray[i] = updatedSplit;
                   setSplitArray(updatedSplitArray);
