@@ -3,6 +3,7 @@ import { CompleteUser, RelatedUserModel } from "./index"
 
 export const GroupModel = z.object({
   id: z.string(),
+  ownerId: z.string(),
 })
 
 export interface CompleteGroup extends z.infer<typeof GroupModel> {

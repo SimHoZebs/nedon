@@ -3,6 +3,7 @@ import { CompleteTransaction, RelatedTransactionModel, CompleteUser, RelatedUser
 
 export const SplitModel = z.object({
   id: z.string(),
+  transactionId: z.string(),
   userId: z.string(),
   amount: z.number(),
 })
