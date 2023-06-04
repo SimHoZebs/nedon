@@ -10,5 +10,5 @@ export const emptyUser: UserClientSide = {
   TRANSFER_ID: null,
   // The payment_id is only relevant for the UK/EU Payment Initiation product.
   PAYMENT_ID: null,
-  groupArray: [{ id: "" }],
+  groupArray: [{ id: "", ownerId: "" }],
 };

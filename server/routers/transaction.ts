@@ -72,18 +72,22 @@ const transactionRouter = router({
     .input(
       z.object({
         transactionId: z.string(),
-        splitArray: z.array(SplitModel),
+        splitArray: z.array(SplitModel.extend({ id: z.string().nullable() })),
       })
     )
     .mutation(async ({ input }) => {
       const updatedTransactionArray = await db.$transaction(
-        input.splitArray.map((split) =>
-          db.split.update({
-            where: {
-              id: input.transactionId,
-            },
-            data: split,
-          })
+        input.splitArray.map(({ id, ...rest }) =>
+          id === null
+            ? db.split.create({
+                data: rest,
+              })
+            : db.split.update({
+                where: {
+                  id,
+                },
+                data: rest,
+              })
         )
       );
 
@@ -95,7 +99,7 @@ const transactionRouter = router({
       z.object({
         userId: z.string(),
         transactionId: z.string(),
-        splitArray: z.array(SplitModel),
+        splitArray: z.array(SplitModel.extend({ id: z.string().nullable() })),
       })
     )
     .mutation(async ({ input }) => {
@@ -107,16 +111,13 @@ const transactionRouter = router({
             },
           },
           id: input.transactionId,
-          splitArray: {
-            createMany: {
-              data: input.splitArray.map((split) => ({
-                id: input.transactionId,
-                amount: split.amount,
-                userId: input.userId,
-              })),
-            },
-          },
         },
+      });
+
+      await db.split.createMany({
+        data: input.splitArray.map(({ id, ...rest }) => ({
+          ...rest,
+        })),
       });
 
       return transaction;

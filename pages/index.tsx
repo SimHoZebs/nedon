@@ -43,7 +43,11 @@ const Home: NextPage = () => {
 
                 setAppUser((prev) => user);
 
-                const group = await server.group.get.fetch({ id: user.id });
+                if (!user.groupArray) return;
+                const group = await server.group.get.fetch({
+                  id: user.groupArray[0].id,
+                });
+                console.log("group", group);
 
                 if (!group) return;
                 setAppGroup((prev) => group);

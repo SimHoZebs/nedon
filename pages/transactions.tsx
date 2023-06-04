@@ -8,7 +8,8 @@ import Modal from "../lib/comp/Modal";
 import UserSplit from "../lib/comp/UserSplit";
 import Button from "../lib/comp/Button";
 import { useRouter } from "next/router";
-import { Split, Transaction as TransactionMeta } from "@prisma/client";
+import { Transaction as TransactionMeta } from "@prisma/client";
+import { SplitClientSide } from "../lib/util/types";
 
 const Page: NextPage = () => {
   const { appUser, appGroup } = useStoreState((state) => state);
@@ -32,7 +33,7 @@ const Page: NextPage = () => {
     useState<PlaidTransaction>();
   const [selectedTransactionMeta, setSelectedTransactionMeta] =
     useState<TransactionMeta>();
-  const [splitArray, setSplitArray] = useState<Split[]>([]);
+  const [splitArray, setSplitArray] = useState<SplitClientSide[]>([]);
   const [totalSplit, setTotalSplit] = useState(0);
 
   useEffect(() => {
@@ -53,7 +54,10 @@ const Page: NextPage = () => {
             <div key={i}>
               <UserSplit
                 onAmountChange={(amount: number) => {
-                  const updatedSplit: Split = { ...split, amount };
+                  const updatedSplit: SplitClientSide = {
+                    ...split,
+                    amount,
+                  };
                   const updatedSplitArray = [...splitArray];
                   updatedSplitArray[i] = updatedSplit;
                   setSplitArray(updatedSplitArray);
@@ -122,7 +126,8 @@ const Page: NextPage = () => {
                       onClick={() => {
                         const newSplitArray = [...splitArray];
                         newSplitArray.push({
-                          id: selectedTransaction.transaction_id,
+                          id: null,
+                          transactionId: selectedTransaction.transaction_id,
                           userId: user.id,
                           amount: 0,
                         });
@@ -197,7 +202,8 @@ const Page: NextPage = () => {
                                 ? meta.splitArray
                                 : [
                                     {
-                                      id: transaction.transaction_id,
+                                      id: null,
+                                      transactionId: transaction.transaction_id,
                                       userId: appUser.id,
                                       amount: transaction.amount,
                                     },

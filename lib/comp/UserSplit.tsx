@@ -1,8 +1,8 @@
-import { Split } from "@prisma/client";
 import React from "react";
+import { SplitClientSide } from "../util/types";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
-  split: Split;
+  split: SplitClientSide;
   amount: number;
   onAmountChange: (amount: number) => void;
 }
