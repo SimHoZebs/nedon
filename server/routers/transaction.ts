@@ -35,7 +35,7 @@ const transactionRouter = router({
         const request: TransactionsSyncRequest = {
           access_token: user.ACCESS_TOKEN,
           cursor: cursor,
-          count: 30,
+          count: 50,
         };
 
         const response = await client.transactionsSync(request);
@@ -52,7 +52,7 @@ const transactionRouter = router({
         cursor = data.next_cursor;
       }
 
-      return organizeTransactionByTime(added);
+      return added;
     }),
 
   getMeta: procedure
@@ -127,47 +127,5 @@ const transactionRouter = router({
       return transaction;
     }),
 });
-
-export const organizeTransactionByTime = (
-  transactionArray: PlaidTransaction[]
-) => {
-  const timeSortedTransaction = transactionArray.sort(
-    (a, b) =>
-      new Date(b.datetime ? b.datetime : b.date).getTime() -
-      new Date(a.datetime ? a.datetime : a.date).getTime()
-  );
-  //create an object called sortedTransaction.
-  const test: PlaidTransaction[][][][] = [[[[]]]];
-  let lastDate = new Date(0);
-  let yearIndex = -1;
-  let monthIndex = -1;
-  let dayIndex = -1;
-
-  timeSortedTransaction.forEach((transaction, i) => {
-    const date = new Date(transaction.date);
-
-    if (lastDate.getFullYear() !== date.getFullYear()) {
-      yearIndex++;
-      monthIndex = -1;
-      dayIndex = -1;
-      test[yearIndex] = [];
-    }
-    if (lastDate.getMonth() !== date.getMonth()) {
-      monthIndex++;
-      dayIndex = -1;
-      test[yearIndex][monthIndex] = [];
-    }
-    if (lastDate.getDate() !== date.getDate()) {
-      dayIndex++;
-      test[yearIndex][monthIndex][dayIndex] = [];
-    }
-
-    test[yearIndex][monthIndex][dayIndex].push(transaction);
-
-    lastDate = date;
-  });
-
-  return test;
-};
 
 export default transactionRouter;
