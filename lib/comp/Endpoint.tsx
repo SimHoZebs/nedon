@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Button from "./Button";
 
 import Error from "./Error";
-import { DataItem, Categories, ErrorDataItem, Data } from "../util/dataUtil";
+import { DataItem, Categories, ErrorDataItem } from "../util/dataUtil";
 
 interface Props {
   endpoint: string;

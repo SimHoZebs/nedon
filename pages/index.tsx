@@ -1,9 +1,7 @@
 import type { NextPage } from "next";
 import { trpc } from "../lib/util/trpc";
-import { Products } from "plaid";
 import { useStoreActions, useStoreState } from "../lib/util/store";
 import Button from "../lib/comp/Button";
-import { GroupClientSide, UserClientSide } from "../lib/util/types";
 import addUserIcon from "../public/add-user.svg";
 import removeUserIcon from "../public/remove-user.svg";
 import Image from "next/image";
@@ -130,14 +128,4 @@ const Home: NextPage = () => {
   );
 };
 
-const userInGroup = (user: UserClientSide, currentGroup: GroupClientSide) => {
-  if (!user.groupArray) return false;
-
-  for (const group of user.groupArray) {
-    if (group.id === currentGroup.id) {
-      return true;
-    }
-  }
-  return false;
-};
 export default Home;

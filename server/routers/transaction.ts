@@ -1,7 +1,11 @@
 import { router, procedure } from "../trpc";
 import { z } from "zod";
 import db from "../../lib/util/db";
-import { RemovedTransaction, Transaction as PlaidTransaction } from "plaid";
+import {
+  RemovedTransaction,
+  Transaction as PlaidTransaction,
+  TransactionsSyncRequest,
+} from "plaid";
 import { client } from "../util";
 import { SplitModel } from "../../prisma/zod";
 
@@ -27,11 +31,11 @@ const transactionRouter = router({
       let cursor = input.cursor;
 
       // Iterate through each page of new transaction updates for item
-      //A page contains maximum of 100 transactions
       while (hasMore) {
-        const request = {
+        const request: TransactionsSyncRequest = {
           access_token: user.ACCESS_TOKEN,
           cursor: cursor,
+          count: 30,
         };
 
         const response = await client.transactionsSync(request);
