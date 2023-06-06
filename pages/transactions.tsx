@@ -85,7 +85,7 @@ const Page: NextPage = () => {
                 <Button
                   onClick={() => {
                     const newSplitArray = [...splitArray];
-                    const newSplitAmount =
+                    let newSplitAmount =
                       Math.floor(
                         (split.amount -
                           totalSplit +
@@ -93,11 +93,13 @@ const Page: NextPage = () => {
                           100
                       ) / 100;
 
+                    if (newSplitAmount < 0) newSplitAmount = 0;
+
                     newSplitArray[i].amount = newSplitAmount;
                     setSplitArray(newSplitArray);
                   }}
                 >
-                  Even out
+                  Auto adjust
                 </Button>
               )}
             </div>
