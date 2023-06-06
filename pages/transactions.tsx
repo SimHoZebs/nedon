@@ -31,8 +31,6 @@ const Page: NextPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] =
     useState<PlaidTransaction>();
-  const [selectedTransactionMeta, setSelectedTransactionMeta] =
-    useState<TransactionMeta>();
   const [splitArray, setSplitArray] = useState<SplitClientSide[]>([]);
   const [totalSplit, setTotalSplit] = useState(0);
 
@@ -211,10 +209,14 @@ const Page: NextPage = () => {
                                     },
                                   ];
 
-                              setSelectedTransactionMeta(meta);
                               setSplitArray(splitArray);
                             }}
                             transaction={transaction as PlaidTransaction}
+                            splitArray={
+                              transactionMetaArray.data?.find(
+                                (meta) => meta.id === transaction.transaction_id
+                              )?.splitArray
+                            }
                             key={l}
                           />
                         )
