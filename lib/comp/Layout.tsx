@@ -5,12 +5,22 @@ import { useRouter } from "next/router";
 import { useStoreState } from "../util/store";
 import Image from "next/image";
 
+import { Inter } from "next/font/google";
+
+const noto_sans = Inter({
+  subsets: ["latin"],
+  variable: "--font-noto-sans",
+});
+
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
   const { appUser, appGroup } = useStoreState((state) => state);
 
   return (
-    <div className="flex h-screen w-screen bg-zinc-950 text-zinc-300">
+    <div
+      className={`flex h-screen w-screen bg-zinc-950 text-zinc-300 
+      ${noto_sans.variable} font-sans font-normal`}
+    >
       <nav className="flex w-56 flex-col items-start gap-y-2 bg-zinc-900 p-2">
         <Button onClick={() => router.push("/")}>user selection screen</Button>
         <Button onClick={() => router.push("/user")}>

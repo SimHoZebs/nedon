@@ -24,6 +24,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@iconify/react": "^4.1.0",
     "@tanstack/react-query-devtools": "^4.29.12",
     "@types/node": "18.16.16",
     "@types/react": "18.2.0",

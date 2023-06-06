@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useRef } from "react";
 import Button from "./Button";
 
 import { Transaction as PlaidTransaction } from "plaid";
 import { Split } from "@prisma/client";
 import { useStoreState } from "../util/store";
+import { Icon } from "@iconify/react";
 
 interface Props {
   transaction: PlaidTransaction;
@@ -15,6 +16,13 @@ interface Props {
 //Move it to transaction page and give card ability to change modal data.
 const TransactionCard = (props: Props) => {
   const { appUser } = useStoreState((state) => state);
+  const icon = useRef<{ [key: string]: string }>({
+    Travel: "mdi:car-outline",
+    "Food and Drink": "fluent:food-24-regular",
+    Shops: "mdi:shopping-outline",
+    Payment: "mdi:exchange",
+    Transfer: "mdi:exchange",
+  });
 
   const splitAmount = props.splitArray?.find(
     (split) =>
@@ -23,15 +31,31 @@ const TransactionCard = (props: Props) => {
   )?.amount;
 
   return (
-    <div className="bg-zinc-900 p-2">
-      <div className="flex w-full justify-between text-start">
-        <div>
-          <div className="text-lg">{props.transaction.name}</div>
+    <div
+      className="flex h-[64px] w-full justify-between rounded-md bg-zinc-800 p-2 text-start hover:cursor-pointer"
+      onClick={props.button}
+    >
+      <div className="flex w-[300px] items-center gap-x-2">
+        <div className="w-9">
+          <Icon
+            className="rounded-full bg-zinc-400 p-1 text-zinc-800"
+            icon={
+              icon.current[
+                props.transaction.category ? props.transaction.category[0] : ""
+              ]
+            }
+            width={36}
+          />
+        </div>
+        <div className="flex-start flex h-full flex-col truncate">
+          <p className="truncate text-lg">{props.transaction.name}</p>
           <div className="text-sm font-light text-zinc-400">
             {props.transaction.merchant_name}
           </div>
         </div>
+      </div>
 
+      <div className="flex h-fit items-center gap-x-1">
         <div
           className={`flex gap-x-1 text-lg ${
             props.transaction.amount > 0 ? "" : "text-green-300"
@@ -42,16 +66,10 @@ const TransactionCard = (props: Props) => {
           </div>
           <div>{props.transaction.iso_currency_code}</div>
         </div>
+        {splitAmount && (
+          <Icon icon="lucide:split" width={16} className="text-zinc-400" />
+        )}
       </div>
-
-      <Button onClick={props.button}>Split</Button>
-
-      <details className="">
-        <summary>Raw Data</summary>
-        <pre className="max-h-[50vh] overflow-y-scroll whitespace-pre-wrap">
-          {JSON.stringify(props.transaction, null, 2)}
-        </pre>
-      </details>
     </div>
   );
 };

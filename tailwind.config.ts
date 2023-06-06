@@ -6,7 +6,11 @@ export default {
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ["var(--font-noto-sans)"],
+      },
+    },
   },
   plugins: [],
 } satisfies Config;
