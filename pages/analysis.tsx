@@ -22,18 +22,7 @@ const Page = () => {
     );
   }, [transactionArray.data]);
 
-  const test = organizedTransactionArray.map((category) => ({
-    name: category.name,
-    amount:
-      Math.floor(
-        category.transactionArray.reduce(
-          (amount, transaction) => amount + transaction.amount,
-          0
-        ) * 100
-      ) / 100,
-  }));
-
-  return <pre>{JSON.stringify(test, null, 2)}</pre>;
+  return <pre>{JSON.stringify(organizedTransactionArray, null, 2)}</pre>;
 };
 
 export default Page;
