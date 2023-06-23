@@ -1,6 +1,6 @@
 import { Transaction as PlaidTransaction } from "plaid";
 
-type Category = {
+export type Category = {
   name: string;
   transactionArray: PlaidTransaction[];
   subCategory: Category[];
@@ -12,18 +12,13 @@ export const organizeTransactionByCategory = (
   const categoryArray: Category[] = [];
 
   transactionArray.forEach((transaction) => {
-    const transactionCopy = { ...transaction };
-    recursive(categoryArray, transactionCopy);
+    fillCategoryArray(categoryArray, { ...transaction });
   });
-
-  console.log("final:", categoryArray);
 
   return categoryArray;
 };
 
-//result is categoryArray
-//if array has item, check if the first item has the same name as other categories in result
-const recursive = (
+const fillCategoryArray = (
   categoryArray: Category[],
   transaction: PlaidTransaction
 ): Category[] => {
@@ -56,8 +51,8 @@ const recursive = (
   } else {
     transaction.category = slicedCategoryArray;
 
-    //somewhat inefficient for cases where parent category did not exist since then the subcategory's existence doesn't need to be checked.
-    categoryArray[index].subCategory = recursive(
+    //inefficient for cases where parent category did not exist; subcategory's existence doesn't need to be checked.
+    categoryArray[index].subCategory = fillCategoryArray(
       categoryArray[index].subCategory,
       transaction
     );
