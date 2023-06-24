@@ -48,7 +48,25 @@ const Page = () => {
     );
   }, [transactionArray.data]);
 
-  return render(categorizedTransactionArray);
+  //transactionMeta has info about owed money
+  //all transactionMeta that the user is associated with should be called
+  const test = transactionMetaArray.data;
+  return (
+    <div>
+      <div>
+        {transactionMetaArray.data &&
+          transactionMetaArray.data.map((transaction, i) => (
+            <pre key={i}>{JSON.stringify(transaction, null, 2)}</pre>
+          ))}
+      </div>
+      <div>
+        {categorizedTransactionArray.map((category, i) => (
+          <div key={i} style={{ width: `%` }}></div>
+        ))}
+      </div>
+      {render(categorizedTransactionArray)}
+    </div>
+  );
 };
 
 export default Page;

@@ -5,6 +5,7 @@ import { GroupClientSide, UserClientSide } from "./types";
 const stripUserSecretsFromGroup = (
   group: Group & { userArray: User[] }
 ): GroupClientSide => {
+  //TODO Check on this later
   const userClientSideArray: UserClientSide[] = group.userArray.map((user) =>
     stripUserSecrets(user)
   );
