@@ -43,6 +43,9 @@ const setAccessToken = async ({
     where: {
       id,
     },
+    include: {
+      groupArray: true,
+    },
     data: { ...userUpdateData },
   });
 
