@@ -29,9 +29,7 @@ const LinkBtn = () => {
           console.log("error setting access token from server");
         }
 
-        setAppUser((prev) => ({
-          ...user,
-        }));
+        setAppUser((prev) => ({ ...user }));
       };
 
       getUserAccessToken();

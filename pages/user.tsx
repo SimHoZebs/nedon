@@ -6,8 +6,8 @@ import ProductContainer from "../lib/comp/Products";
 import Items from "../lib/comp/Items";
 
 import Link from "next/link";
-import LinkBtn from "../lib/comp/LinkBtn";
 import { useRouter } from "next/router";
+import SanboxLink from "../lib/comp/SanboxLinkBtn";
 
 const User: NextPage = () => {
   const { appUser, linkToken, isPaymentInitiation } = useStoreState(
@@ -68,7 +68,7 @@ const User: NextPage = () => {
         </section>
       ) : (
         <div className="">
-          <LinkBtn />
+          <SanboxLink />
         </div>
       )}
 

@@ -54,19 +54,15 @@ export const appRouter = router({
   group: groupRouter,
 
   sandBoxAccess: procedure
-    .input(z.object({ instituteID: z.string(), id: z.string() }))
+    .input(z.object({ instituteID: z.string().nullish() }))
     .query(async ({ input }) => {
       const response = await client.sandboxPublicTokenCreate({
-        institution_id: input.instituteID, //"ins_56"
+        // institution_id: input.instituteID,
+        institution_id: "ins_56",
         initial_products: PLAID_PRODUCTS,
       });
 
-      const user = await setAccessToken({
-        id: input.id,
-        publicToken: response.data.public_token,
-      });
-
-      return user;
+      return response.data.public_token;
     }),
 
   createLinkToken: procedure.input(z.void()).query(async () => {
