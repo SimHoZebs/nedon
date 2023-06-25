@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Button from "./Button";
+import Button from "../../Button";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   desc: string;

@@ -1,6 +1,6 @@
 import React from "react";
 
-import Endpoint from "./Endpoint";
+import Endpoint from "../Endpoint";
 import {
   identityCategories,
   balanceCategories,
@@ -20,9 +20,9 @@ import {
   transformAssetsData,
   transformTransferData,
   transformIncomePaystubsData,
-} from "../util/dataUtil";
-import { useStoreState } from "../util/store";
-import { trpc } from "../util/trpc";
+} from "../../../util/dataUtil";
+import { useStoreState } from "../../../util/store";
+import { trpc } from "../../../util/trpc";
 import NewEndpoint from "./NewEndpoint";
 
 const Products = () => {

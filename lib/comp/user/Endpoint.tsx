@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import Button from "./Button";
+import Button from "../Button";
 
-import Error from "./Error";
-import { DataItem, Categories, ErrorDataItem } from "../util/dataUtil";
+import { DataItem, Categories, ErrorDataItem } from "../../util/dataUtil";
 
 interface Props {
   endpoint: string;
@@ -62,7 +61,7 @@ const Endpoint = (props: Props) => {
           )}
         </div>
       </div>
-      {error != null && <Error error={error} />}
+      {error != null && <pre>{JSON.stringify(error, null, 2)}</pre>}
     </>
   );
 };

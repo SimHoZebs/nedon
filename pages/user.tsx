@@ -2,12 +2,12 @@ import React from "react";
 import { useStoreState } from "../lib/util/store";
 import { NextPage } from "next";
 
-import ProductContainer from "../lib/comp/Products";
-import Items from "../lib/comp/Items";
+import ProductContainer from "../lib/comp/user/Products";
+import Items from "../lib/comp/user/Items";
 
 import Link from "next/link";
 import { useRouter } from "next/router";
-import SanboxLink from "../lib/comp/SanboxLinkBtn";
+import SanboxLink from "../lib/comp/user/SanboxLinkBtn";
 
 const User: NextPage = () => {
   const { appUser, linkToken, isPaymentInitiation } = useStoreState(

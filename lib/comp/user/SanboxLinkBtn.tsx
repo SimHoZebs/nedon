@@ -1,7 +1,7 @@
 import React from "react";
-import { trpc } from "../util/trpc";
-import Button from "./Button";
-import { useStoreState, useStoreActions } from "../util/store";
+import { trpc } from "../../util/trpc";
+import Button from "../Button";
+import { useStoreState, useStoreActions } from "../../util/store";
 
 const SanboxLink = () => {
   const sandboxPublicToken = trpc.sandBoxAccess.useQuery(

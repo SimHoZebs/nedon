@@ -1,5 +1,5 @@
 import React from "react";
-import { SplitClientSide } from "../util/types";
+import { SplitClientSide } from "../../../util/types";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   split: SplitClientSide;

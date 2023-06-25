@@ -6,7 +6,7 @@ import {
   transformAccountsData,
   itemCategories,
   accountsCategories,
-} from "../util/dataUtil";
+} from "../../util/dataUtil";
 
 const Items = () => (
   <div>

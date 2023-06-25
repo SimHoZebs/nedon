@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import Modal from "./Modal";
-import { SplitClientSide } from "../util/types";
+import Modal from "../../Modal";
+import { SplitClientSide } from "../../../util/types";
 import UserSplit from "./UserSplit";
-import Button from "./Button";
-import { useStoreState } from "../util/store";
-import { trpc } from "../util/trpc";
+import Button from "../../Button";
+import { useStoreState } from "../../../util/store";
+import { trpc } from "../../../util/trpc";
 import { Transaction as PlaidTransaction } from "plaid";
 
 interface Props {

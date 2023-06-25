@@ -3,11 +3,11 @@ import React, { useMemo, useState } from "react";
 import { trpc } from "../lib/util/trpc";
 import { useStoreState } from "../lib/util/store";
 import { Transaction as PlaidTransaction } from "plaid";
-import TransactionCard from "../lib/comp/TransactionCard";
+import TransactionCard from "../lib/comp/transaction/TransactionCard";
 import { useRouter } from "next/router";
 import { SplitClientSide } from "../lib/util/types";
 import { organizeTransactionByTime } from "../lib/util/transaction";
-import TransactionModal from "../lib/comp/TransactionModal";
+import TransactionModal from "../lib/comp/transaction/TransactionModal";
 
 const Page: NextPage = () => {
   const { appUser } = useStoreState((state) => state);
