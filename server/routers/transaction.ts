@@ -55,10 +55,11 @@ const transactionRouter = router({
       return added;
     }),
 
+  //only transactions owned by user
   getMeta: procedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
-      const transaction = await db.transaction.findMany({
+      return db.transaction.findMany({
         where: {
           ownerId: input.id,
         },
@@ -66,10 +67,25 @@ const transactionRouter = router({
           splitArray: true,
         },
       });
+    }),
 
-      if (!transaction) return null;
+  //all transaction meta including the user
+  getAssociatedMeta: procedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      return db.transaction.findMany({
+        where: {
+          splitArray: {
+            some: {
+              userId: input.id,
+            },
+          },
+        },
 
-      return transaction;
+        include: {
+          splitArray: true,
+        },
+      });
     }),
 
   updateMeta: procedure
