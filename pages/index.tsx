@@ -57,7 +57,7 @@ const Home: NextPage = () => {
               </div>
 
               <div className="flex flex-col gap-y-2">
-                {appUser.id && appUser.id !== user.id && appGroup && (
+                {appUser && appUser.id !== user.id && appGroup && (
                   <Button
                     onClick={async (e) => {
                       e.stopPropagation();
@@ -100,7 +100,7 @@ const Home: NextPage = () => {
                     e.stopPropagation();
                     await deleteUser.mutateAsync(user.id);
                     allUsers.refetch();
-                    if (appUser.id === user.id) {
+                    if (appUser && appUser.id === user.id) {
                       setAppUser(() => emptyUser);
                     }
                   }}

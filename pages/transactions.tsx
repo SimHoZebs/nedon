@@ -13,15 +13,15 @@ const Page: NextPage = () => {
   const { appUser } = useStoreState((state) => state);
 
   const router = useRouter();
-  if (!appUser.hasAccessToken) router.push("/");
+  if (!appUser?.groupArray) router.push("/");
 
   const transactionArray = trpc.transaction.getAll.useQuery(
-    { id: appUser.id },
-    { staleTime: 3600000, enabled: appUser.hasAccessToken }
+    { id: appUser ? appUser.id : "" },
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
   );
   const transactionMetaArray = trpc.transaction.getMeta.useQuery(
-    { id: appUser.id },
-    { staleTime: 3600000, enabled: appUser.hasAccessToken }
+    { id: appUser ? appUser.id : "" },
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
   );
 
   const [showModal, setShowModal] = useState(false);
@@ -63,6 +63,8 @@ const Page: NextPage = () => {
                         transaction && (
                           <TransactionCard
                             button={() => {
+                              if (!appUser) return;
+
                               setShowModal(true);
                               setSelectedTransaction(
                                 transaction as PlaidTransaction

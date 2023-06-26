@@ -29,7 +29,7 @@ const Products = () => {
   const { products, appUser } = useStoreState((state) => state);
 
   const auth = trpc.auth.useQuery(
-    { id: appUser.id },
+    { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: false }
   );
   return (

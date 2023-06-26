@@ -33,12 +33,12 @@ const render = (categoryArray: Category[]) =>
 const Page = () => {
   const { appUser } = useStoreState((state) => state);
   const transactionArray = trpc.transaction.getAll.useQuery(
-    { id: appUser.id },
-    { staleTime: 3600000, enabled: appUser.hasAccessToken }
+    { id: appUser ? appUser.id : "" },
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
   );
   const associatedMetaArray = trpc.transaction.getAssociatedMeta.useQuery(
-    { id: appUser.id },
-    { staleTime: 3600000, enabled: appUser.hasAccessToken }
+    { id: appUser ? appUser.id : "" },
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
   );
 
   //useMemo is probably unnecessary since this page doesn't re-render that much.
@@ -54,6 +54,8 @@ const Page = () => {
     const oweGroup: { [userId: string]: number } = {};
 
     associatedMetaArray.data.forEach((transaction) => {
+      if (!appUser) return;
+
       transaction.splitArray.forEach((split) => {
         if (transaction.ownerId === appUser.id) {
           if (split.userId === appUser.id) return;
@@ -74,7 +76,7 @@ const Page = () => {
     });
 
     return oweGroup;
-  }, [appUser.id, associatedMetaArray.data]);
+  }, [appUser, associatedMetaArray.data]);
 
   //transactionMeta has info about owed money
   //all transactionMeta that the user is associated with should be called
@@ -84,7 +86,7 @@ const Page = () => {
         {calcOweGroup &&
           Object.keys(calcOweGroup).map((userId, index) => (
             <div key={index} className="flex flex-row gap-x-2">
-              <div>{userId}:</div>
+              <div>{userId.slice(0, 8)}:</div>
               <div>
                 {calcOweGroup[userId] < 0 ? "You owe them " : "They owe you "}
                 {Math.abs(Math.floor(calcOweGroup[userId] * 100) / 100)}

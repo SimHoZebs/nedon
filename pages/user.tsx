@@ -72,7 +72,7 @@ const User: NextPage = () => {
         </div>
       )}
 
-      {appUser.ITEM_ID && (
+      {appUser && appUser.ITEM_ID && (
         <p className="">
           Congrats! By linking an account, you have created an{" "}
           <Link
@@ -86,7 +86,7 @@ const User: NextPage = () => {
         </p>
       )}
 
-      {appUser.ITEM_ID && (
+      {appUser && appUser.ITEM_ID && (
         <section>
           <ProductContainer />
           <Items />

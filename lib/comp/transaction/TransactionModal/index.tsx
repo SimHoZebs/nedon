@@ -17,8 +17,8 @@ interface Props {
 const TransactionModal = (props: Props) => {
   const { appUser, appGroup } = useStoreState((state) => state);
   const transactionMetaArray = trpc.transaction.getMeta.useQuery(
-    { id: appUser.id },
-    { staleTime: 3600000, enabled: appUser.hasAccessToken }
+    { id: appUser ? appUser.id : "" },
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
   );
   const createTransactionMeta = trpc.transaction.createMeta.useMutation();
   const updateTransactionMeta = trpc.transaction.updateMeta.useMutation();
@@ -56,7 +56,8 @@ const TransactionModal = (props: Props) => {
           </UserSplit>
 
           {/**FIX: if selectedTransaction is from your acc, you shouldn't be able to remove yourself */}
-          {props.selectedTransaction.account_id === appUser.ITEM_ID ? null : (
+          {appUser &&
+          props.selectedTransaction.account_id === appUser.ITEM_ID ? null : (
             <Button
               onClick={() => {
                 const newSplitArray = [...props.splitArray];
@@ -137,7 +138,7 @@ const TransactionModal = (props: Props) => {
         <Button
           disabled={totalSplit !== props.selectedTransaction.amount}
           onClick={async () => {
-            if (!appUser.groupArray) return;
+            if (!appUser) return;
 
             const meta = transactionMetaArray.data?.find(
               (meta) => meta.id === props.selectedTransaction.transaction_id

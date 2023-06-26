@@ -1,5 +1,4 @@
 import React, { useRef } from "react";
-import Button from "../Button";
 
 import { Transaction as PlaidTransaction } from "plaid";
 import { Split } from "@prisma/client";
@@ -27,7 +26,7 @@ const TransactionCard = (props: Props) => {
   const splitAmount = props.splitArray?.find(
     (split) =>
       split.transactionId === props.transaction.transaction_id &&
-      split.userId === appUser.id
+      split.userId === appUser?.id
   )?.amount;
 
   return (

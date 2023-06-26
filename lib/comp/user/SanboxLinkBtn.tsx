@@ -16,7 +16,7 @@ const SanboxLink = () => {
     <Button
       disabled={!sandboxPublicToken.data}
       onClick={async () => {
-        if (!sandboxPublicToken.data) return;
+        if (!sandboxPublicToken.data || !appUser) return;
 
         const user = await setAccessToken.mutateAsync({
           publicToken: sandboxPublicToken.data,

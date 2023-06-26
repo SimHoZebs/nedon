@@ -2,7 +2,7 @@ import { User, Group, Split } from "@prisma/client";
 
 export interface UserClientSide extends Omit<User, "ACCESS_TOKEN"> {
   hasAccessToken: boolean;
-  groupArray: Group[];
+  groupArray?: Group[]; //user loaded from groups
 }
 
 export interface GroupClientSide extends Group {

@@ -20,6 +20,8 @@ const LinkBtn = () => {
     (public_token: string) => {
       // If the access_token is needed, send public_token to server
       const getUserAccessToken = async () => {
+        if (!appUser) return;
+
         const user = await setAccessToken.mutateAsync({
           publicToken: public_token,
           id: appUser.id,
@@ -36,7 +38,7 @@ const LinkBtn = () => {
 
       router.push("/user");
     },
-    [appUser.id, router, setAccessToken, setAppUser]
+    [appUser, router, setAccessToken, setAppUser]
   );
 
   let isOauth = false;
