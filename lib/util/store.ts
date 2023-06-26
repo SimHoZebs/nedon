@@ -18,8 +18,11 @@ interface StoreModel {
   appUser: UserClientSide;
   setAppUser: Action<StoreModel, (user: UserClientSide) => UserClientSide>;
 
-  appGroup?: GroupClientSide;
-  setAppGroup: Action<StoreModel, (group?: GroupClientSide) => GroupClientSide>;
+  appGroup: GroupClientSide | undefined;
+  setAppGroup: Action<
+    StoreModel,
+    (group: GroupClientSide | undefined) => GroupClientSide | undefined
+  >;
 }
 
 const store = createStore<StoreModel>({
@@ -45,12 +48,12 @@ const store = createStore<StoreModel>({
 
   appUser: emptyUser,
   setAppUser: action((state, payload) => {
-    state.appUser = { ...payload(state.appUser) };
+    state.appUser = payload(state.appUser);
   }),
 
   appGroup: undefined,
   setAppGroup: action((state, payload) => {
-    state.appGroup = { ...payload(state.appGroup) };
+    state.appGroup = payload(state.appGroup);
   }),
 });
 
