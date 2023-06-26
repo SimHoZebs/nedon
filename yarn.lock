@@ -95,14 +95,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@iconify/react@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "@iconify/react@npm:4.1.0"
+"@iconify-icon/react@npm:^1.0.8":
+  version: 1.0.8
+  resolution: "@iconify-icon/react@npm:1.0.8"
   dependencies:
-    "@iconify/types": ^2.0.0
+    iconify-icon: ^1.0.8
   peerDependencies:
     react: ">=16"
-  checksum: 50de9d5bf191bc4a002c1a6763c7a8294fb88d5509cf347e8f037bf903ec344dded6ed0c50a190d18ca7c6b5293d4b7d950f636f3e1471115feffc3845b585f9
+  checksum: ee6f120b76055b0897e730355aa583661dcdaa049572ae3096b5e490e403c3d742613ef4bf638265b3c835b6e5039085e7c1f0640f21cce7fcd5293d86948da1
   languageName: node
   linkType: hard
 
@@ -2221,6 +2221,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"iconify-icon@npm:^1.0.8":
+  version: 1.0.8
+  resolution: "iconify-icon@npm:1.0.8"
+  dependencies:
+    "@iconify/types": ^2.0.0
+  checksum: 40bb2087032957d4821c9a17cdcc8a1af1018292b2dde636ee2c1f4af60410da23f77b0a9e99ecaf9154b1fef7a6b33f454079a8e66a7187556faee1a489ce3b
+  languageName: node
+  linkType: hard
+
 "iconv-lite@npm:^0.6.2":
   version: 0.6.3
   resolution: "iconv-lite@npm:0.6.3"
@@ -2915,7 +2924,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "nedon@workspace:."
   dependencies:
-    "@iconify/react": ^4.1.0
+    "@iconify-icon/react": ^1.0.8
     "@prisma/client": ^4.15.0
     "@tanstack/react-query": ^4.29.12
     "@tanstack/react-query-devtools": ^4.29.12

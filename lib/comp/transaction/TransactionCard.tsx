@@ -4,7 +4,7 @@ import Button from "../Button";
 import { Transaction as PlaidTransaction } from "plaid";
 import { Split } from "@prisma/client";
 import { useStoreState } from "../../util/store";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify-icon/react";
 
 interface Props {
   transaction: PlaidTransaction;
