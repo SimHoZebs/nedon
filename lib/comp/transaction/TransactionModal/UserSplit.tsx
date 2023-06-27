@@ -11,6 +11,17 @@ const UserSplit = (props: Props) => {
   //FIX: Performance is trash
   return (
     <div className="flex w-full justify-between gap-x-2">
+      <div>{props.children}</div>
+
+      <input
+        type="range"
+        min={0}
+        max={props.amount}
+        value={props.split.amount}
+        onChange={(e) => props.onAmountChange(parseFloat(e.target.value))}
+        step={0.01}
+      />
+
       <div className="flex justify-between">
         $
         <input
@@ -45,15 +56,6 @@ const UserSplit = (props: Props) => {
         />
         %
       </div>
-      <input
-        type="range"
-        min={0}
-        max={props.amount}
-        value={props.split.amount}
-        onChange={(e) => props.onAmountChange(parseFloat(e.target.value))}
-        step={0.01}
-      />
-      <div>{props.children}</div>
     </div>
   );
 };

@@ -35,64 +35,65 @@ const TransactionModal = (props: Props) => {
 
   return (
     <Modal setShowModal={props.setShowModal}>
-      <div className="text-4xl">${props.selectedTransaction.amount * -1}</div>
+      <div className="text-2xl">{props.selectedTransaction.name}</div>
+      <div className="text-2xl">${props.selectedTransaction.amount * -1}</div>
 
-      {props.splitArray?.map((split, i) => (
-        <div key={i}>
-          <UserSplit
-            onAmountChange={(amount: number) => {
-              const updatedSplit: SplitClientSide = {
-                ...split,
-                amount,
-              };
-              const updatedSplitArray = [...props.splitArray];
-              updatedSplitArray[i] = updatedSplit;
-              props.setSplitArray(updatedSplitArray);
-            }}
-            amount={props.selectedTransaction.amount}
-            split={split}
-          >
-            {split.userId.slice(0, 8)}
-          </UserSplit>
-
-          {/**FIX: if selectedTransaction is from your acc, you shouldn't be able to remove yourself */}
-          {appUser &&
-          props.selectedTransaction.account_id === appUser.ITEM_ID ? null : (
-            <Button
-              onClick={() => {
-                const newSplitArray = [...props.splitArray];
-                newSplitArray.splice(i, 1);
-                props.setSplitArray(newSplitArray);
+      {props.splitArray.length > 1 &&
+        props.splitArray?.map((split, i) => (
+          <div key={i}>
+            <UserSplit
+              onAmountChange={(amount: number) => {
+                const updatedSplit: SplitClientSide = {
+                  ...split,
+                  amount,
+                };
+                const updatedSplitArray = [...props.splitArray];
+                updatedSplitArray[i] = updatedSplit;
+                props.setSplitArray(updatedSplitArray);
               }}
+              amount={props.selectedTransaction.amount}
+              split={split}
             >
-              Remove
-            </Button>
-          )}
+              {split.userId.slice(0, 8)}
+            </UserSplit>
 
-          {totalSplit !== props.selectedTransaction.amount && (
-            <Button
-              onClick={() => {
-                const newSplitArray = [...props.splitArray];
-                let newSplitAmount =
-                  Math.floor(
-                    (split.amount -
-                      totalSplit +
-                      props.selectedTransaction.amount) *
-                      100
-                  ) / 100;
+            {/**FIX: if selectedTransaction is from your acc, you shouldn't be able to remove yourself */}
+            {appUser && split.userId === appUser.id ? null : (
+              <Button
+                onClick={() => {
+                  const newSplitArray = [...props.splitArray];
+                  newSplitArray.splice(i, 1);
+                  props.setSplitArray(newSplitArray);
+                }}
+              >
+                Remove
+              </Button>
+            )}
 
-                if (newSplitAmount < 0) newSplitAmount = 0;
+            {totalSplit !== props.selectedTransaction.amount && (
+              <Button
+                onClick={() => {
+                  const newSplitArray = [...props.splitArray];
+                  let newSplitAmount =
+                    Math.floor(
+                      (split.amount -
+                        totalSplit +
+                        props.selectedTransaction.amount) *
+                        100
+                    ) / 100;
 
-                newSplitArray[i].amount = newSplitAmount;
-                props.setSplitArray(newSplitArray);
-              }}
-            >
-              adjust
-            </Button>
-            //ADD: SCALE ICON
-          )}
-        </div>
-      ))}
+                  if (newSplitAmount < 0) newSplitAmount = 0;
+
+                  newSplitArray[i].amount = newSplitAmount;
+                  props.setSplitArray(newSplitArray);
+                }}
+              >
+                adjust
+              </Button>
+              //ADD: SCALE ICON
+            )}
+          </div>
+        ))}
 
       {totalSplit > props.selectedTransaction.amount ? (
         <div className="text-red-900">
@@ -107,6 +108,7 @@ const TransactionModal = (props: Props) => {
       ) : null}
 
       <div>
+        <div>Friends</div>
         {appGroup?.userArray &&
           appGroup.userArray.length &&
           appGroup.userArray.map((user, i) =>
@@ -114,7 +116,7 @@ const TransactionModal = (props: Props) => {
               (split) => split.userId === user.id
             ) ? null : (
               <div key={i} className="flex">
-                <div>{user.id}</div>
+                <div>{user.id.slice(0, 8)}</div>
                 <Button
                   onClick={() => {
                     const newSplitArray = [...props.splitArray];
@@ -127,7 +129,7 @@ const TransactionModal = (props: Props) => {
                     props.setSplitArray(newSplitArray);
                   }}
                 >
-                  Add
+                  Split
                 </Button>
               </div>
             )
@@ -158,11 +160,11 @@ const TransactionModal = (props: Props) => {
             transactionMetaArray.refetch();
           }}
         >
-          Save Split
+          Save changes
         </Button>
 
         <Button
-          className="bg-red-900"
+          className="bg-red-900 hover:bg-red-800"
           onClick={() => props.setShowModal(false)}
         >
           Cancel

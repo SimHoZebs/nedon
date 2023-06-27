@@ -7,6 +7,7 @@ import Image from "next/image";
 
 import { Inter } from "next/font/google";
 import { emptyUser } from "../util/user";
+import NavButton from "./NavButton";
 
 const noto_sans = Inter({
   subsets: ["latin"],
@@ -24,42 +25,47 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       ${noto_sans.variable} font-sans font-normal`}
     >
       <nav className="flex w-56 flex-col justify-between bg-zinc-900 p-2 pb-20">
-        <div className="flex flex-col items-start gap-y-2 ">
-          <Button onClick={() => router.push("/")}>
-            user selection screen
-          </Button>
-          <Button onClick={() => router.push("/user")}>
+        <div className="flex flex-col items-start gap-y-2">
+          <NavButton router={router} route="/user">
             <Image src={home} width={24} height={24} alt="home button" />
-          </Button>
-          <Button onClick={() => router.push("/transactions")}>
+          </NavButton>
+
+          <NavButton router={router} route="/transactions">
             Transactions
-          </Button>
-          <Button onClick={() => router.push("/analysis")}>Analysis</Button>
+          </NavButton>
 
-          <div>Current user: {appUser ? appUser.id.slice(0, 8) : "none"}</div>
-
-          <div>
-            Current group: {appGroup ? appGroup.id.slice(0, 8) : "none"}
-          </div>
-          <div>
-            Current group members:{" "}
-            {appGroup?.userArray
-              ? appGroup.userArray.map((user) => user.id.slice(0, 8)).join(", ")
-              : "none"}
-          </div>
+          <NavButton router={router} route="analysis">
+            Analysis
+          </NavButton>
         </div>
 
-        <div>
-          <Button
-            onClick={() => {
-              setAppUser(() => emptyUser);
-              setAppGroup(() => undefined);
-              router.push("/");
-            }}
-          >
-            Logout
-          </Button>
-        </div>
+        {appUser && (
+          <div>
+            <div>userId: {appUser.id.slice(0, 8)}</div>
+            <div>groupId: {appGroup ? appGroup.id.slice(0, 8) : "none"}</div>
+            <div>
+              group members:{" "}
+              {appGroup?.userArray
+                ? appGroup.userArray
+                    .map((user) => user.id.slice(0, 8))
+                    .join(", ")
+                : "none"}
+            </div>
+
+            <div className="flex gap-x-2">
+              <Button>Profile</Button>
+              <Button
+                onClick={() => {
+                  setAppUser(() => emptyUser);
+                  setAppGroup(() => undefined);
+                  router.push("/");
+                }}
+              >
+                Logout
+              </Button>
+            </div>
+          </div>
+        )}
       </nav>
       <main className="w-full overflow-auto px-5 py-3">{props.children}</main>
     </div>

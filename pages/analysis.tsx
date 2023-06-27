@@ -86,9 +86,9 @@ const Page = () => {
         {calcOweGroup &&
           Object.keys(calcOweGroup).map((userId, index) => (
             <div key={index} className="flex flex-row gap-x-2">
-              <div>{userId.slice(0, 8)}:</div>
+              <div>{userId.slice(0, 8)}</div>
               <div>
-                {calcOweGroup[userId] < 0 ? "You owe them " : "They owe you "}
+                {calcOweGroup[userId] < 0 ? "You owe: " : "They owe: "}$
                 {Math.abs(Math.floor(calcOweGroup[userId] * 100) / 100)}
               </div>
             </div>

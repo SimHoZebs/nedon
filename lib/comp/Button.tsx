@@ -6,7 +6,7 @@ const Button = (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
   return (
     <button
       className={
-        "w-fit rounded-lg bg-blue-500 p-2 font-semibold text-zinc-900 disabled:bg-zinc-400 " +
+        "w-fit rounded-lg bg-blue-500 p-2 font-semibold text-zinc-900 hover:bg-blue-400 hover:text-zinc-950 disabled:bg-zinc-400 " +
         className
       }
       {...rest}

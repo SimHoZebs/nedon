@@ -53,7 +53,7 @@ const Page: NextPage = () => {
           <div className="flex flex-col items-center text-4xl">
             <p>{year[0][0][0].date.slice(0, 4)}</p>
             {year.map((month, j) => (
-              <div key={j} className="flex-col gap-y-2 text-3xl">
+              <div key={j} className="w-full flex-col gap-y-2 text-3xl">
                 <p>{month[0][0].date.slice(5, 7)}</p>
                 {month.map((day, k) => (
                   <div className="flex flex-col gap-y-3" key={k}>
