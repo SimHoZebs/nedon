@@ -25,7 +25,7 @@ const UserSplit = (props: Props) => {
       <div className="flex justify-between">
         $
         <input
-          className="bg-zinc-800"
+          className="w-20 bg-zinc-800"
           type="number"
           min={0}
           max={props.amount}
@@ -37,7 +37,7 @@ const UserSplit = (props: Props) => {
 
       <div className="flex">
         <input
-          className="bg-zinc-800 "
+          className="w-16 bg-zinc-800 "
           type="number"
           min={0}
           max={100}

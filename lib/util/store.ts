@@ -51,12 +51,15 @@ const store = createStore<StoreModel>({
 
   appUser: undefined,
   setAppUser: action((state, payload) => {
-    state.appUser = payload(state.appUser);
+    const newState = payload(state.appUser);
+
+    state.appUser = newState ? { ...newState } : newState;
   }),
 
   appGroup: undefined,
   setAppGroup: action((state, payload) => {
-    state.appGroup = payload(state.appGroup);
+    const newState = payload(state.appGroup);
+    state.appGroup = newState ? { ...newState } : newState;
   }),
 });
 

@@ -13,23 +13,32 @@ const SanboxLink = () => {
   const { setAppUser } = useStoreActions((action) => action);
 
   return (
-    <Button
-      disabled={!sandboxPublicToken.data}
-      onClick={async () => {
-        if (!sandboxPublicToken.data || !appUser) return;
+    <div>
+      <Button
+        disabled={!sandboxPublicToken.data}
+        onClick={async () => {
+          if (!sandboxPublicToken.data || !appUser) return;
 
-        const user = await setAccessToken.mutateAsync({
-          publicToken: sandboxPublicToken.data,
-          id: appUser.id,
-        });
+          const user = await setAccessToken.mutateAsync({
+            publicToken: sandboxPublicToken.data,
+            id: appUser.id,
+          });
 
-        setAppUser((prev) => ({ ...user }));
-      }}
-    >
-      {sandboxPublicToken.data
-        ? "Link bank account (Sandbox)"
-        : "Waiting for public token..."}
-    </Button>
+          setAppUser((prev) => ({ ...user }));
+        }}
+      >
+        Link bank account (Sandbox)
+      </Button>
+      <p
+        className={`text-sm ${
+          sandboxPublicToken.error ? "text-red-400" : "text-zinc-400"
+        }`}
+      >
+        {sandboxPublicToken.isFetching && "Loading..."}
+        {sandboxPublicToken.error &&
+          "Plaid or your internet is down. Check Plaid's uptime or your internet."}
+      </p>
+    </div>
   );
 };
 

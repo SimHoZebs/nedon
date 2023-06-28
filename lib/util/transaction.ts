@@ -24,7 +24,6 @@ const fillCategoryArray = (
 ): Category[] => {
   const category = transaction.category;
 
-  //error case
   if (!category) return categoryArray;
 
   const firstCategory = category[0];
@@ -64,41 +63,43 @@ const fillCategoryArray = (
 export const organizeTransactionByTime = (
   transactionArray: PlaidTransaction[]
 ) => {
-  const timeSortedTransaction = transactionArray.sort(
+  const dateSortedTransactionArray = transactionArray.sort(
     (a, b) =>
       new Date(b.datetime ? b.datetime : b.date).getTime() -
       new Date(a.datetime ? a.datetime : a.date).getTime()
   );
-  //create an object called sortedTransaction.
-  const test: PlaidTransaction[][][][] = [[[[]]]];
+  const timeSortedTransactionArray: PlaidTransaction[][][][] = [[[[]]]];
+
   let lastDate = new Date(0);
   let yearIndex = -1;
   let monthIndex = -1;
   let dayIndex = -1;
 
-  timeSortedTransaction.forEach((transaction, i) => {
+  dateSortedTransactionArray.forEach((transaction, i) => {
     const date = new Date(transaction.date);
 
     if (lastDate.getFullYear() !== date.getFullYear()) {
       yearIndex++;
       monthIndex = -1;
       dayIndex = -1;
-      test[yearIndex] = [];
+      timeSortedTransactionArray[yearIndex] = [];
     }
     if (lastDate.getMonth() !== date.getMonth()) {
       monthIndex++;
       dayIndex = -1;
-      test[yearIndex][monthIndex] = [];
+      timeSortedTransactionArray[yearIndex][monthIndex] = [];
     }
     if (lastDate.getDate() !== date.getDate()) {
       dayIndex++;
-      test[yearIndex][monthIndex][dayIndex] = [];
+      timeSortedTransactionArray[yearIndex][monthIndex][dayIndex] = [];
     }
 
-    test[yearIndex][monthIndex][dayIndex].push(transaction);
+    timeSortedTransactionArray[yearIndex][monthIndex][dayIndex].push(
+      transaction
+    );
 
     lastDate = date;
   });
 
-  return test;
+  return timeSortedTransactionArray;
 };

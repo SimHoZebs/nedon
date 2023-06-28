@@ -11,8 +11,6 @@ interface Props {
   button: () => void;
 }
 
-//This part is inefficient; Only one modal needs to open at one point.
-//Move it to transaction page and give card ability to change modal data.
 const TransactionCard = (props: Props) => {
   const { appUser } = useStoreState((state) => state);
   const icon = useRef<{ [key: string]: string }>({

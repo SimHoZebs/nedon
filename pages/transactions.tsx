@@ -38,7 +38,7 @@ const Page: NextPage = () => {
   }, [transactionArray.data]);
 
   return (
-    <div className="flex flex-col ">
+    <section className="flex flex-col items-center">
       {showModal && selectedTransaction && (
         <TransactionModal
           setShowModal={setShowModal}
@@ -48,9 +48,9 @@ const Page: NextPage = () => {
         />
       )}
 
-      {sortedTransactionArray.map((year, i) => (
-        <section className="flex w-full flex-col items-center" key={i}>
-          <div className="flex flex-col items-center text-4xl">
+      <div className="flex w-fit flex-col items-center gap-y-2 text-4xl">
+        {sortedTransactionArray.map((year, i) => (
+          <div className="flex w-full flex-col items-center text-4xl" key={i}>
             <p>{year[0][0][0].date.slice(0, 4)}</p>
             {year.map((month, j) => (
               <div key={j} className="w-full flex-col gap-y-2 text-3xl">
@@ -101,9 +101,9 @@ const Page: NextPage = () => {
               </div>
             ))}
           </div>
-        </section>
-      ))}
-    </div>
+        ))}
+      </div>
+    </section>
   );
 };
 

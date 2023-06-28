@@ -45,7 +45,6 @@ const Home: NextPage = () => {
                 const group = await server.group.get.fetch({
                   id: user.groupArray[0].id,
                 });
-                console.log("group", group);
 
                 if (!group) return;
                 setAppGroup((prev) => group);
@@ -74,8 +73,6 @@ const Home: NextPage = () => {
                             groupId: appGroup.id,
                           });
 
-                      console.log(updatedAppGroup);
-
                       setAppGroup((prev) => updatedAppGroup);
                     }}
                   >
@@ -95,7 +92,7 @@ const Home: NextPage = () => {
                 )}
 
                 <Button
-                  className="bg-red-800"
+                  className="bg-red-800 hover:bg-red-700"
                   onClick={async (e) => {
                     e.stopPropagation();
                     await deleteUser.mutateAsync(user.id);

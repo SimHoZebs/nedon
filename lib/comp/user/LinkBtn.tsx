@@ -18,7 +18,6 @@ const LinkBtn = () => {
 
   const onSuccess = React.useCallback(
     (public_token: string) => {
-      // If the access_token is needed, send public_token to server
       const getUserAccessToken = async () => {
         if (!appUser) return;
 

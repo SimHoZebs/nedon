@@ -34,7 +34,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             Transactions
           </NavButton>
 
-          <NavButton router={router} route="analysis">
+          <NavButton router={router} route="/analysis">
             Analysis
           </NavButton>
         </div>
@@ -53,7 +53,9 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             </div>
 
             <div className="flex gap-x-2">
-              <Button>Profile</Button>
+              <NavButton router={router} route="/Profile">
+                Profile
+              </NavButton>
               <Button
                 onClick={() => {
                   setAppUser(() => emptyUser);

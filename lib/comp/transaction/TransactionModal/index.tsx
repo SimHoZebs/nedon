@@ -6,6 +6,7 @@ import Button from "../../Button";
 import { useStoreState } from "../../../util/store";
 import { trpc } from "../../../util/trpc";
 import { Transaction as PlaidTransaction } from "plaid";
+import { Icon } from "@iconify-icon/react";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -35,12 +36,34 @@ const TransactionModal = (props: Props) => {
 
   return (
     <Modal setShowModal={props.setShowModal}>
-      <div className="text-2xl">{props.selectedTransaction.name}</div>
-      <div className="text-2xl">${props.selectedTransaction.amount * -1}</div>
+      <div className="flex justify-between">
+        <h3 className="text-2xl">{props.selectedTransaction.name}</h3>
+        <h3 className="text-2xl">${props.selectedTransaction.amount * -1}</h3>
+      </div>
 
       {props.splitArray.length > 1 &&
         props.splitArray?.map((split, i) => (
-          <div key={i}>
+          <div key={i} className="flex w-full items-center gap-x-3">
+            {appUser && split.userId === appUser.id ? (
+              <div className="w-5"></div>
+            ) : (
+              <button
+                className="flex"
+                onClick={() => {
+                  const newSplitArray = [...props.splitArray];
+                  newSplitArray.splice(i, 1);
+                  props.setSplitArray(newSplitArray);
+                }}
+              >
+                <Icon
+                  icon="clarity:remove-line"
+                  className="text-zinc-500 hover:text-zinc-400"
+                  width={20}
+                  height={20}
+                />
+              </button>
+            )}
+
             <UserSplit
               onAmountChange={(amount: number) => {
                 const updatedSplit: SplitClientSide = {
@@ -57,21 +80,9 @@ const TransactionModal = (props: Props) => {
               {split.userId.slice(0, 8)}
             </UserSplit>
 
-            {/**FIX: if selectedTransaction is from your acc, you shouldn't be able to remove yourself */}
-            {appUser && split.userId === appUser.id ? null : (
-              <Button
-                onClick={() => {
-                  const newSplitArray = [...props.splitArray];
-                  newSplitArray.splice(i, 1);
-                  props.setSplitArray(newSplitArray);
-                }}
-              >
-                Remove
-              </Button>
-            )}
-
             {totalSplit !== props.selectedTransaction.amount && (
               <Button
+                className="flex gap-x-1 text-sm"
                 onClick={() => {
                   const newSplitArray = [...props.splitArray];
                   let newSplitAmount =
@@ -88,24 +99,20 @@ const TransactionModal = (props: Props) => {
                   props.setSplitArray(newSplitArray);
                 }}
               >
+                <Icon icon="cil:balance-scale" width={16} height={16} />
                 adjust
               </Button>
-              //ADD: SCALE ICON
             )}
           </div>
         ))}
 
-      {totalSplit > props.selectedTransaction.amount ? (
-        <div className="text-red-900">
-          Split is greater than transaction amount (
-          {`props.totalSplit${totalSplit}`})
+      {totalSplit !== props.selectedTransaction.amount && (
+        <div className="text-red-800">
+          Split is{" "}
+          {totalSplit > props.selectedTransaction.amount ? "greater " : "less "}
+          than the transaction amount ({`props.totalSplit $${totalSplit}`})
         </div>
-      ) : totalSplit < props.selectedTransaction.amount ? (
-        <div className="text-red-900">
-          Split is less than transaction amount (
-          {`props.totalSplit${totalSplit}`})
-        </div>
-      ) : null}
+      )}
 
       <div>
         <div>Friends</div>
