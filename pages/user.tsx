@@ -2,17 +2,34 @@ import React from "react";
 import { useStoreState } from "../lib/util/store";
 import { NextPage } from "next";
 
-import ProductContainer from "../lib/comp/user/Products";
-import Items from "../lib/comp/user/Items";
-
 import Link from "next/link";
 import SanboxLink from "../lib/comp/user/SanboxLinkBtn";
+import { trpc } from "../lib/util/trpc";
+import { AuthGetResponse } from "plaid";
 
 const User: NextPage = () => {
   const { appUser, isPaymentInitiation } = useStoreState((state) => state);
 
+  const auth = trpc.auth.useQuery(
+    { id: appUser ? appUser.id : "" },
+    { staleTime: 3600000 }
+  );
+
   return (
     <section>
+      <SanboxLink />
+
+      {auth.data && (
+        <div>
+          {(auth.data as AuthGetResponse).accounts.map((account, index) => (
+            <pre key={index}>{JSON.stringify(account, null, 2)}</pre>
+          ))}
+          <pre>
+            {JSON.stringify((auth.data as AuthGetResponse).item, null, 2)}
+          </pre>
+        </div>
+      )}
+
       {isPaymentInitiation && (
         <div>
           <h4 className="">
@@ -34,28 +51,6 @@ const User: NextPage = () => {
             access the payment information:
           </p>
         </div>
-      )}
-
-      <SanboxLink />
-      {appUser && appUser.ITEM_ID && (
-        <>
-          <p className="">
-            Congrats! By linking an account, you have created an{" "}
-            <Link
-              href="http://plaid.com/docs/quickstart/glossary/#item"
-              target="_blank"
-            >
-              Item
-            </Link>
-            . Now that you have an access_token, you can make all of the
-            following requests:
-          </p>
-
-          <div>
-            <ProductContainer />
-            <Items />
-          </div>
-        </>
       )}
     </section>
   );
