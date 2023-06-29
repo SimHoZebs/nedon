@@ -1,33 +1,56 @@
-import React from "react";
+import React, { useState } from "react";
 import { useStoreState } from "../lib/util/store";
 import { NextPage } from "next";
 
 import Link from "next/link";
 import SanboxLink from "../lib/comp/user/SanboxLinkBtn";
 import { trpc } from "../lib/util/trpc";
-import { AuthGetResponse } from "plaid";
+import { AccountBase, AuthGetResponse } from "plaid";
+import Modal from "../lib/comp/Modal";
 
 const User: NextPage = () => {
   const { appUser, isPaymentInitiation } = useStoreState((state) => state);
+  const [showModal, setShowModal] = useState(false);
+  const [clickedAccount, setClickedAccount] = useState<AccountBase>();
 
-  const auth = trpc.auth.useQuery(
+  const auth = trpc.auth.useQuery<AuthGetResponse | null>(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000 }
   );
 
   return (
-    <section>
+    <section className="flex h-full w-full flex-col gap-y-3">
       <SanboxLink />
 
+      {showModal && (
+        <Modal setShowModal={setShowModal}>
+          <pre>{JSON.stringify(clickedAccount, null, 2)}</pre>
+        </Modal>
+      )}
+
       {auth.data && (
-        <div>
-          {(auth.data as AuthGetResponse).accounts.map((account, index) => (
-            <pre key={index}>{JSON.stringify(account, null, 2)}</pre>
-          ))}
+        <>
+          {auth.data.accounts.map(
+            (account, index) =>
+              account.balances.available && (
+                <div
+                  key={index}
+                  className="flex justify-between rounded-md bg-zinc-800 p-3 text-lg hover:bg-zinc-700 hover:text-zinc-100"
+                  onClick={() => {
+                    setClickedAccount(account);
+                    setShowModal(true);
+                  }}
+                >
+                  <div>{account.name}</div>
+                  <div>${account.balances.available}</div>
+                </div>
+              )
+          )}
+
           <pre>
             {JSON.stringify((auth.data as AuthGetResponse).item, null, 2)}
           </pre>
-        </div>
+        </>
       )}
 
       {isPaymentInitiation && (
