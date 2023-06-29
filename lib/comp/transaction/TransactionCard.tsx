@@ -19,6 +19,7 @@ const TransactionCard = (props: Props) => {
     Shops: "mdi:shopping-outline",
     Payment: "mdi:exchange",
     Transfer: "mdi:exchange",
+    "Gyms and Fitness Centers": "mingcute:fitness-line",
   });
 
   const splitAmount = props.splitArray?.find(

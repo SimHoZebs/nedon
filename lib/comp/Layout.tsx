@@ -1,9 +1,7 @@
 import React from "react";
 import Button from "./Button";
-import home from "../../public/home-line.svg";
 import { useRouter } from "next/router";
 import { useStoreActions, useStoreState } from "../util/store";
-import Image from "next/image";
 
 import { Inter } from "next/font/google";
 import { emptyUser } from "../util/user";
@@ -21,13 +19,13 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   return (
     <div
-      className={`flex h-screen w-screen bg-zinc-950 text-zinc-300 
+      className={`flex h-screen w-screen flex-col-reverse bg-zinc-950 text-zinc-300 sm:flex-row
       ${noto_sans.variable} font-sans font-normal`}
     >
-      <nav className="flex w-56 flex-col justify-between bg-zinc-900 p-2 pb-20">
-        <div className="flex flex-col items-start gap-y-2">
+      <nav className="flex h-20 w-full justify-between bg-zinc-900 p-2 pb-20 sm:h-full sm:w-56 sm:flex-col">
+        <div className="flex items-start gap-y-2 sm:flex-col ">
           <NavButton router={router} route="/user">
-            <Image src={home} width={24} height={24} alt="home button" />
+            Home
           </NavButton>
 
           <NavButton router={router} route="/transactions">
