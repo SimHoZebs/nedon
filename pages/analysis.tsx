@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { trpc } from "../lib/util/trpc";
 import { useStoreState } from "../lib/util/store";
 import {
@@ -6,6 +6,8 @@ import {
   organizeTransactionByCategory,
 } from "../lib/util/transaction";
 import { Transaction as PlaidTransaction } from "plaid";
+import Button from "../lib/comp/Button";
+import SettleModal from "../lib/comp/analysis/SettleModal";
 
 const categoryTotalSpending = (category: Category): number => {
   let amount = category.transactionArray.reduce((total, transaction) => {
@@ -32,6 +34,9 @@ const render = (categoryArray: Category[]) =>
 
 const Page = () => {
   const { appUser } = useStoreState((state) => state);
+  const [showModal, setShowModal] = useState(false);
+  const [oweUser, setOweUser] = useState<{ id: string; amount: number }>();
+
   const transactionArray = trpc.transaction.getAll.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: appUser?.hasAccessToken }
@@ -81,7 +86,11 @@ const Page = () => {
   //transactionMeta has info about owed money
   //all transactionMeta that the user is associated with should be called
   return (
-    <div className="flex flex-col gap-y-4">
+    <section className="flex flex-col gap-y-4">
+      {showModal && (
+        <SettleModal oweUser={oweUser} setShowModal={setShowModal} />
+      )}
+
       <div>
         {calcOweGroup &&
           Object.keys(calcOweGroup).map((userId, index) => (
@@ -91,6 +100,17 @@ const Page = () => {
                 {calcOweGroup[userId] < 0 ? "You owe: " : "They owe: "}$
                 {Math.abs(Math.floor(calcOweGroup[userId] * 100) / 100)}
               </div>
+              <Button
+                onClick={() => {
+                  setShowModal(true);
+                  setOweUser({
+                    id: userId,
+                    amount: Math.floor(calcOweGroup[userId] * 100) / 100,
+                  });
+                }}
+              >
+                Manually settle
+              </Button>
             </div>
           ))}
       </div>
@@ -101,7 +121,7 @@ const Page = () => {
         ))}
       </div>
       {render(categorizedTransactionArray)}
-    </div>
+    </section>
   );
 };
 

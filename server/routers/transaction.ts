@@ -142,6 +142,40 @@ const transactionRouter = router({
 
       return transaction;
     }),
+
+  //createMeta could've been modified instead but this avoids accidentally missing transactionId for Plaid transactions.
+  createManualTransaction: procedure
+    .input(
+      z.object({
+        userId: z.string(),
+        splitArray: z.array(
+          SplitModel.extend({
+            id: z.undefined(),
+            transactionId: z.undefined(),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const transaction = await db.transaction.create({
+        data: {
+          owner: {
+            connect: {
+              id: input.userId,
+            },
+          },
+        },
+      });
+
+      await db.split.createMany({
+        data: input.splitArray.map(({ id, ...rest }) => ({
+          ...rest,
+          transactionId: transaction.id,
+        })),
+      });
+
+      return transaction;
+    }),
 });
 
 export default transactionRouter;
