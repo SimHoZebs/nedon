@@ -9,7 +9,7 @@ interface Props extends React.HtmlHTMLAttributes<HTMLButtonElement> {
 const NavButton = (props: Props) => {
   return (
     <button
-      className={`hover: flex w-full rounded-md p-2 text-zinc-100 hover:bg-zinc-800 ${
+      className={`flex w-fit justify-center rounded-md p-2 text-zinc-100 hover:bg-zinc-800 sm:w-full sm:justify-start ${
         props.router.pathname === props.route ? "bg-zinc-800 text-zinc-100" : ""
       }`}
       onClick={() => props.router.push(props.route)}
