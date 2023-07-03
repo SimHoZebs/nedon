@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../Modal";
 import { SplitClientSide } from "../../../util/types";
 import UserSplit from "./UserSplit";
-import Button from "../../Button";
+import Button from "../../Button/PrimaryBtn";
 import { useStoreState } from "../../../util/store";
 import { trpc } from "../../../util/trpc";
 import { PlaidTransaction } from "../../../util/types";
 import { Icon } from "@iconify-icon/react";
+import NegativeBtn from "../../Button/NegativeBtn";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -170,12 +171,12 @@ const TransactionModal = (props: Props) => {
           Save changes
         </Button>
 
-        <Button
+        <NegativeBtn
           className="bg-red-900 hover:bg-red-800"
           onClick={() => props.setShowModal(false)}
         >
           Cancel
-        </Button>
+        </NegativeBtn>
       </div>
 
       <details className="" onClick={(e) => e.stopPropagation()}>

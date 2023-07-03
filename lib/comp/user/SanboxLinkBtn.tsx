@@ -1,6 +1,6 @@
 import React from "react";
 import { trpc } from "../../util/trpc";
-import Button from "../Button";
+import Button from "../Button/PrimaryBtn";
 import { useStoreState, useStoreActions } from "../../util/store";
 
 const SanboxLink = () => {

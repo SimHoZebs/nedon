@@ -1,22 +1,23 @@
 import React from "react";
 import { NextRouter } from "next/router";
+import Button from ".";
 
 interface Props extends React.HtmlHTMLAttributes<HTMLButtonElement> {
   router: NextRouter;
   route: string;
 }
 
-const NavButton = (props: Props) => {
+const NavBtn = (props: Props) => {
   return (
-    <button
-      className={`flex w-fit justify-center rounded-md p-2 text-zinc-100 hover:bg-zinc-800 sm:w-full sm:justify-start ${
-        props.router.pathname === props.route ? "bg-zinc-800 text-zinc-100" : ""
+    <Button
+      className={`flex justify-center text-zinc-200 hover:bg-zinc-800 sm:w-full sm:justify-start ${
+        props.router.pathname === props.route && "bg-zinc-800 text-zinc-100"
       }`}
       onClick={() => props.router.push(props.route)}
     >
       {props.children}
-    </button>
+    </Button>
   );
 };
 
-export default NavButton;
+export default NavBtn;

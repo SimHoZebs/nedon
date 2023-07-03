@@ -1,6 +1,6 @@
 import React from "react";
 import { useStoreState } from "../lib/util/store";
-import Button from "../lib/comp/Button";
+import Button from "../lib/comp/Button/PrimaryBtn";
 
 const Page = () => {
   const { appUser } = useStoreState((state) => state);

@@ -5,7 +5,7 @@ import {
   Category,
   organizeTransactionByCategory,
 } from "../lib/util/transaction";
-import Button from "../lib/comp/Button";
+import Button from "../lib/comp/Button/PrimaryBtn";
 import SettleModal from "../lib/comp/analysis/SettleModal";
 
 const categoryTotalSpending = (category: Category): number => {

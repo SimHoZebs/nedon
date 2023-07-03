@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useStoreActions, useStoreState } from "../util/store";
 
 import { Inter } from "next/font/google";
-import NavButton from "./NavButton";
+import NavBtn from "./Button/NavBtn";
 import { Icon } from "@iconify-icon/react";
 
 const noto_sans = Inter({
@@ -24,7 +24,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       {appUser && (
         <nav className="flex h-20 w-full items-center justify-between gap-y-2 bg-zinc-900 p-2 sm:h-full sm:w-56 sm:flex-col sm:justify-start sm:pb-20">
           <div className="flex items-center gap-x-1">
-            <NavButton router={router} route="/Profile">
+            <NavBtn router={router} route="/Profile">
               <div className="flex w-full items-center gap-x-2">
                 <div className="flex rounded-full border-2 border-zinc-300 bg-zinc-800 p-1 sm:p-2">
                   <Icon
@@ -37,7 +37,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
                 <p className="hidden sm:block">{appUser.id.slice(0, 8)}</p>
               </div>
-            </NavButton>
+            </NavBtn>
 
             <button
               className="group flex p-2 hover:cursor-pointer"
@@ -55,17 +55,17 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             </button>
           </div>
 
-          <NavButton router={router} route="/user">
+          <NavBtn router={router} route="/user">
             Home
-          </NavButton>
+          </NavBtn>
 
-          <NavButton router={router} route="/transactions">
+          <NavBtn router={router} route="/transactions">
             Transactions
-          </NavButton>
+          </NavBtn>
 
-          <NavButton router={router} route="/analysis">
+          <NavBtn router={router} route="/analysis">
             Analysis
-          </NavButton>
+          </NavBtn>
         </nav>
       )}
 

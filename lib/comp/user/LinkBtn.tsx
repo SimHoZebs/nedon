@@ -4,7 +4,7 @@ import { usePlaidLink } from "react-plaid-link";
 import { useStoreActions, useStoreState } from "../../util/store";
 import { trpc } from "../../util/trpc";
 import { useRouter } from "next/router";
-import Button from "../Button";
+import Button from "../Button/PrimaryBtn";
 
 const LinkBtn = () => {
   const { appUser } = useStoreState((state) => state);
