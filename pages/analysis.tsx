@@ -5,7 +5,6 @@ import {
   Category,
   organizeTransactionByCategory,
 } from "../lib/util/transaction";
-import { Transaction as PlaidTransaction } from "plaid";
 import Button from "../lib/comp/Button";
 import SettleModal from "../lib/comp/analysis/SettleModal";
 
@@ -49,9 +48,7 @@ const Page = () => {
   //useMemo is probably unnecessary since this page doesn't re-render that much.
   const categorizedTransactionArray = useMemo(() => {
     if (!transactionArray.data) return [];
-    return organizeTransactionByCategory(
-      transactionArray.data as PlaidTransaction[]
-    );
+    return organizeTransactionByCategory(transactionArray.data);
   }, [transactionArray.data]);
 
   const calcOweGroup = useMemo(() => {

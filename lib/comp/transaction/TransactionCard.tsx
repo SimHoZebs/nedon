@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 
-import { Transaction as PlaidTransaction } from "plaid";
+import { PlaidTransaction } from "../../util/types";
 import { Split } from "@prisma/client";
 import { useStoreState } from "../../util/store";
 import { Icon } from "@iconify-icon/react";
@@ -20,6 +20,7 @@ const TransactionCard = (props: Props) => {
     Payment: "mdi:exchange",
     Transfer: "mdi:exchange",
     "Gyms and Fitness Centers": "mingcute:fitness-line",
+    Recreation: "material-symbols:relax-outline",
   });
 
   const splitAmount = props.splitArray?.find(

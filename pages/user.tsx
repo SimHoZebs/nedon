@@ -13,7 +13,7 @@ const User: NextPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [clickedAccount, setClickedAccount] = useState<AccountBase>();
 
-  const auth = trpc.auth.useQuery<AuthGetResponse | null>(
+  const auth = trpc.auth.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000 }
   );
@@ -30,7 +30,7 @@ const User: NextPage = () => {
 
       {auth.data && (
         <>
-          {auth.data.accounts.map(
+          {(auth.data as unknown as AuthGetResponse).accounts.map(
             (account, index) =>
               account.balances.available && (
                 <div
@@ -48,7 +48,11 @@ const User: NextPage = () => {
           )}
 
           <pre>
-            {JSON.stringify((auth.data as AuthGetResponse).item, null, 2)}
+            {JSON.stringify(
+              (auth.data as unknown as AuthGetResponse).item,
+              null,
+              2
+            )}
           </pre>
         </>
       )}

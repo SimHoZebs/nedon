@@ -1,4 +1,4 @@
-import { Transaction as PlaidTransaction } from "plaid";
+import { PlaidTransaction } from "./types";
 
 export type Category = {
   name: string;

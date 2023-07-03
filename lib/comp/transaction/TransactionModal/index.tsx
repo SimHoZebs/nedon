@@ -5,7 +5,7 @@ import UserSplit from "./UserSplit";
 import Button from "../../Button";
 import { useStoreState } from "../../../util/store";
 import { trpc } from "../../../util/trpc";
-import { Transaction as PlaidTransaction } from "plaid";
+import { PlaidTransaction } from "../../../util/types";
 import { Icon } from "@iconify-icon/react";
 
 interface Props {

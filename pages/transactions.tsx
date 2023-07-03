@@ -32,9 +32,7 @@ const Page: NextPage = () => {
   //organizeTransactionByTime is computationally expensive
   const sortedTransactionArray = useMemo(() => {
     if (!transactionArray.data) return [];
-    return organizeTransactionByTime(
-      transactionArray.data as PlaidTransaction[]
-    );
+    return organizeTransactionByTime(transactionArray.data);
   }, [transactionArray.data]);
 
   return (
@@ -66,9 +64,7 @@ const Page: NextPage = () => {
                               if (!appUser) return;
 
                               setShowModal(true);
-                              setSelectedTransaction(
-                                transaction as PlaidTransaction
-                              );
+                              setSelectedTransaction(transaction);
 
                               const meta = transactionMetaArray.data?.find(
                                 (meta) => meta.id === transaction.transaction_id
@@ -86,7 +82,7 @@ const Page: NextPage = () => {
 
                               setSplitArray(splitArray);
                             }}
-                            transaction={transaction as PlaidTransaction}
+                            transaction={transaction}
                             splitArray={
                               transactionMetaArray.data?.find(
                                 (meta) => meta.id === transaction.transaction_id

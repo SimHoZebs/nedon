@@ -290,9 +290,7 @@ export const appRouter = router({
     }),
 });
 
-// export type definition of API
 export type AppRouter = typeof appRouter;
-
 // This is a helper function to poll for the completion of an Asset Report and
 // then send it in the response to the client. Alternatively, you can provide a
 // webhook in the `options` object in your `/asset_report/create` request to be
