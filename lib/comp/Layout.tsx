@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useStoreActions, useStoreState } from "../util/store";
 
@@ -15,6 +15,18 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
   const { appUser } = useStoreState((state) => state);
   const { setAppUser, setAppGroup } = useStoreActions((actions) => actions);
+
+  useEffect(() => {
+    if (!appUser && router.pathname !== "/") {
+      console.log(
+        "User is on path:" +
+          router.pathname +
+          " but did not log in. Sending to basePath."
+      );
+
+      router.push("/");
+    }
+  }, [appUser, router]);
 
   return (
     <div

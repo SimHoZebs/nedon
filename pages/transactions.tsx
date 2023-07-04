@@ -11,9 +11,7 @@ import TransactionModal from "../lib/comp/transaction/TransactionModal";
 
 const Page: NextPage = () => {
   const { appUser } = useStoreState((state) => state);
-
   const router = useRouter();
-  if (!appUser?.groupArray) router.push("/");
 
   const transactionArray = trpc.transaction.getAll.useQuery(
     { id: appUser ? appUser.id : "" },
