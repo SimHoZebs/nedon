@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import { SplitClientSide } from "../lib/util/types";
 import { organizeTransactionByTime } from "../lib/util/transaction";
 import TransactionModal from "../lib/comp/transaction/TransactionModal";
+import SanboxLink from "../lib/comp/user/SanboxLinkBtn";
 
 const Page: NextPage = () => {
   const { appUser } = useStoreState((state) => state);
@@ -33,8 +34,13 @@ const Page: NextPage = () => {
     return organizeTransactionByTime(transactionArray.data);
   }, [transactionArray.data]);
 
-  return (
-    <section className="flex flex-col items-center">
+  return appUser && !appUser.hasAccessToken ? (
+    <section className="flex h-full flex-col items-center justify-center gap-y-3">
+      <h1 className="text-3xl">{"No bank account linked to this user."}</h1>
+      <SanboxLink />
+    </section>
+  ) : (
+    <section className="flex w-full flex-col items-center">
       {showModal && selectedTransaction && (
         <TransactionModal
           setShowModal={setShowModal}
@@ -44,7 +50,7 @@ const Page: NextPage = () => {
         />
       )}
 
-      <div className="flex w-fit flex-col items-center gap-y-2 text-4xl">
+      <div className="flex w-full max-w-md flex-col items-center gap-y-2 text-4xl ">
         {sortedTransactionArray.map((year, i) => (
           <div className="flex w-full flex-col items-center text-4xl" key={i}>
             <p>{year[0][0][0].date.slice(0, 4)}</p>
@@ -52,7 +58,7 @@ const Page: NextPage = () => {
               <div key={j} className="w-full flex-col gap-y-2 text-3xl">
                 <p>{month[0][0].date.slice(5, 7)}</p>
                 {month.map((day, k) => (
-                  <div className="flex flex-col gap-y-3" key={k}>
+                  <div className="flex w-full flex-col gap-y-3" key={k}>
                     <p className="text-xl">{day[0].date.slice(8)}</p>
                     {day.map(
                       (transaction, l) =>

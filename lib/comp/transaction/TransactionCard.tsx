@@ -34,7 +34,7 @@ const TransactionCard = (props: Props) => {
       className="flex h-[64px] w-full justify-between rounded-md bg-zinc-800 p-2 text-start hover:cursor-pointer hover:bg-zinc-700"
       onClick={props.button}
     >
-      <div className="flex w-[300px] items-center gap-x-4">
+      <div className="flex items-center gap-x-4 ">
         <div className="flex w-fit">
           <Icon
             className="rounded-full bg-zinc-400 p-1 text-zinc-800"
@@ -47,7 +47,7 @@ const TransactionCard = (props: Props) => {
           />
         </div>
 
-        <div className="flex-start flex h-full flex-col truncate">
+        <div className="flex-start flex h-full max-w-[30vw] flex-col truncate">
           <p className="truncate text-lg">{props.transaction.name}</p>
           <div className="text-sm font-light text-zinc-400">
             {props.transaction.merchant_name}
