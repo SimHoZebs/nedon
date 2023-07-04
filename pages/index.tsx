@@ -7,8 +7,10 @@ import removeUserIcon from "../public/remove-user.svg";
 import Image from "next/image";
 import { emptyUser } from "../lib/util/user";
 import deleteIcon from "../public/delete.svg";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
+  const router = useRouter();
   const allUsers = trpc.user.getAll.useQuery(undefined);
   const createUser = trpc.user.create.useMutation();
   const server = trpc.useContext();
@@ -48,6 +50,7 @@ const Home: NextPage = () => {
 
                 if (!group) return;
                 setAppGroup((prev) => group);
+                router.push("/home");
               }}
             >
               <div>

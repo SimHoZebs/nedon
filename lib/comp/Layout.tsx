@@ -67,7 +67,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             </button>
           </div>
 
-          <NavBtn router={router} route="/user">
+          <NavBtn router={router} route="/home">
             Home
           </NavBtn>
 

@@ -35,7 +35,7 @@ const LinkBtn = () => {
 
       getUserAccessToken();
 
-      router.push("/user");
+      router.push("/home");
     },
     [appUser, router, setAccessToken, setAppUser]
   );
