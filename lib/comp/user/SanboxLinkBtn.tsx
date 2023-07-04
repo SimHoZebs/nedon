@@ -1,7 +1,8 @@
 import React from "react";
 import { trpc } from "../../util/trpc";
-import Button from "../Button/PrimaryBtn";
+import PrimaryBtn from "../Button/PrimaryBtn";
 import { useStoreState, useStoreActions } from "../../util/store";
+import { Icon } from "@iconify-icon/react";
 
 const SanboxLink = () => {
   const sandboxPublicToken = trpc.sandBoxAccess.useQuery(
@@ -14,7 +15,7 @@ const SanboxLink = () => {
 
   return (
     <div>
-      <Button
+      <PrimaryBtn
         disabled={!sandboxPublicToken.data}
         onClick={async () => {
           if (!sandboxPublicToken.data || !appUser) return;
@@ -27,8 +28,17 @@ const SanboxLink = () => {
           setAppUser((prev) => ({ ...user }));
         }}
       >
-        Link bank account (Sandbox)
-      </Button>
+        <div className="flex gap-x-2">
+          Link bank account (Sandbox)
+          <Icon
+            className={
+              sandboxPublicToken.isFetching ? "animate-spin" : "hidden"
+            }
+            width={16}
+            icon="mdi:loading"
+          />
+        </div>
+      </PrimaryBtn>
       <p
         className={`text-sm ${
           sandboxPublicToken.error ? "text-red-400" : "text-zinc-400"

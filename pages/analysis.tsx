@@ -7,6 +7,7 @@ import {
 } from "../lib/util/transaction";
 import Button from "../lib/comp/Button/PrimaryBtn";
 import SettleModal from "../lib/comp/analysis/SettleModal";
+import SanboxLink from "../lib/comp/user/SanboxLinkBtn";
 
 const categoryTotalSpending = (category: Category): number => {
   let amount = category.transactionArray.reduce((total, transaction) => {
@@ -82,7 +83,12 @@ const Page = () => {
 
   //transactionMeta has info about owed money
   //all transactionMeta that the user is associated with should be called
-  return (
+  return appUser && !appUser.hasAccessToken ? (
+    <section className="flex h-full flex-col items-center justify-center gap-y-3">
+      <h1 className="text-3xl">{"No bank account linked to this user."}</h1>
+      <SanboxLink />
+    </section>
+  ) : (
     <section className="flex flex-col gap-y-4">
       {showModal && (
         <SettleModal oweUser={oweUser} setShowModal={setShowModal} />

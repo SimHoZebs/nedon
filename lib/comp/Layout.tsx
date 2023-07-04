@@ -36,7 +36,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       {appUser && (
         <nav className="flex h-20 w-full items-center justify-between gap-y-2 bg-zinc-900 p-2 sm:h-full sm:w-56 sm:flex-col sm:justify-start sm:pb-20">
           <div className="flex items-center gap-x-1">
-            <NavBtn router={router} route="/Profile">
+            <NavBtn router={router} route="/profile">
               <div className="flex w-full items-center gap-x-2">
                 <div className="flex rounded-full border-2 border-zinc-300 bg-zinc-800 p-1 sm:p-2">
                   <Icon
@@ -81,7 +81,9 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
         </nav>
       )}
 
-      <main className="w-full overflow-auto px-5 py-3">{props.children}</main>
+      <main className="h-full w-full overflow-auto px-5 py-3">
+        {props.children}
+      </main>
     </div>
   );
 };
