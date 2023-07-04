@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useStoreState } from "../lib/util/store";
 import { NextPage } from "next";
 
@@ -7,6 +7,7 @@ import SanboxLink from "../lib/comp/user/SanboxLinkBtn";
 import { trpc } from "../lib/util/trpc";
 import { AccountBase, AuthGetResponse } from "plaid";
 import Modal from "../lib/comp/Modal";
+import AccountCard from "../lib/comp/user/AccountCard";
 
 const User: NextPage = () => {
   const { appUser, isPaymentInitiation } = useStoreState((state) => state);
@@ -18,14 +19,32 @@ const User: NextPage = () => {
     { staleTime: 3600000 }
   );
 
-  return (
-    <section className="flex h-full w-full flex-col gap-y-3">
-      <SanboxLink />
+  const loading = useRef(
+    <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700"></div>
+  );
 
+  return appUser && !appUser.hasAccessToken ? (
+    <section className="flex h-full flex-col items-center justify-center gap-y-3">
+      <h1 className="text-3xl">{"No bank account linked to this user."}</h1>
+      <SanboxLink />
+    </section>
+  ) : (
+    <section className="flex h-full w-full flex-col gap-y-3">
       {showModal && (
         <Modal setShowModal={setShowModal}>
           <pre>{JSON.stringify(clickedAccount, null, 2)}</pre>
         </Modal>
+      )}
+
+      {auth.isLoading && (
+        <>
+          {Array.from({ length: 3 }).map((val, index) => (
+            <AccountCard key={index} disabled={true}>
+              {loading.current}
+              {loading.current}
+            </AccountCard>
+          ))}
+        </>
       )}
 
       {auth.data && (
@@ -33,9 +52,8 @@ const User: NextPage = () => {
           {(auth.data as unknown as AuthGetResponse).accounts.map(
             (account, index) =>
               account.balances.available && (
-                <div
+                <AccountCard
                   key={index}
-                  className="flex justify-between rounded-md bg-zinc-800 p-3 text-lg hover:bg-zinc-700 hover:text-zinc-100"
                   onClick={() => {
                     setClickedAccount(account);
                     setShowModal(true);
@@ -43,7 +61,7 @@ const User: NextPage = () => {
                 >
                   <div>{account.name}</div>
                   <div>${account.balances.available}</div>
-                </div>
+                </AccountCard>
               )
           )}
 
