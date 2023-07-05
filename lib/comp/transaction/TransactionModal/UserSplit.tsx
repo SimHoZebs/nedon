@@ -10,10 +10,11 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 const UserSplit = (props: Props) => {
   //FIX: Performance is trash
   return (
-    <div className="flex w-full justify-between gap-x-2">
+    <div className="flex w-full items-center justify-between gap-x-2">
       <div>{props.children}</div>
 
       <input
+        className="w-20"
         type="range"
         min={0}
         max={props.amount}
@@ -22,10 +23,10 @@ const UserSplit = (props: Props) => {
         step={0.01}
       />
 
-      <div className="flex justify-between">
+      <div className="flex items-center justify-between">
         $
         <input
-          className="w-20 bg-zinc-800"
+          className="w-20 rounded-lg bg-zinc-800 p-1"
           type="number"
           min={0}
           max={props.amount}
@@ -35,9 +36,9 @@ const UserSplit = (props: Props) => {
         />
       </div>
 
-      <div className="flex">
+      <div className="flex items-center">
         <input
-          className="w-16 bg-zinc-800 "
+          className="w-16 rounded-lg bg-zinc-800 p-1"
           type="number"
           min={0}
           max={100}

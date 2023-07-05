@@ -44,12 +44,12 @@ const TransactionModal = (props: Props) => {
 
       {props.splitArray.length > 1 &&
         props.splitArray?.map((split, i) => (
-          <div key={i} className="flex w-full items-center gap-x-3">
+          <div key={i} className="flex w-full items-center gap-x-2 sm:gap-x-3">
             {appUser && split.userId === appUser.id ? (
               <div className="w-5"></div>
             ) : (
               <button
-                className="flex"
+                className="group flex"
                 onClick={() => {
                   const newSplitArray = [...props.splitArray];
                   newSplitArray.splice(i, 1);
@@ -58,7 +58,7 @@ const TransactionModal = (props: Props) => {
               >
                 <Icon
                   icon="clarity:remove-line"
-                  className="text-zinc-500 hover:text-zinc-400"
+                  className="text-zinc-500 group-hover:text-pink-400"
                   width={20}
                   height={20}
                 />
