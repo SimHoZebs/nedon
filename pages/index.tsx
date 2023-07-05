@@ -29,97 +29,109 @@ const Home: NextPage = () => {
 
   return (
     <section className="flex h-full w-full flex-col items-center justify-center gap-y-3">
-      <h1 className="text-3xl">Choose an account</h1>
+      {allUsers.isLoading && <h1 className="text-3xl">Loading...</h1>}
 
-      <div className="flex flex-col items-center rounded-md border border-zinc-600 sm:w-2/3">
-        {allUsers.data &&
-          allUsers.data.map((user) => (
-            <div
-              key={user.id}
-              className="flex w-full justify-between gap-y-2 border-b border-zinc-600 p-3 hover:cursor-pointer"
-              onClick={async (e) => {
-                // const isPaymentInit = user.products.includes(
-                //   Products.PaymentInitiation
-                // );
-                // setIsPaymentInitiation(isPaymentInit);
+      {allUsers.data && (
+        <>
+          <h1 className="text-3xl">Choose an account</h1>
 
-                setAppUser((prev) => user);
+          <div className="flex flex-col items-center rounded-md border border-zinc-600 sm:w-2/3">
+            {allUsers.data.map((user) => (
+              <div
+                key={user.id}
+                className="flex w-full justify-between gap-y-2 border-b border-zinc-600 p-3 hover:cursor-pointer"
+                onClick={async (e) => {
+                  // const isPaymentInit = user.products.includes(
+                  //   Products.PaymentInitiation
+                  // );
+                  // setIsPaymentInitiation(isPaymentInit);
 
-                if (!user.groupArray) return;
-                const group = await server.group.get.fetch({
-                  id: user.groupArray[0].id,
-                });
+                  setAppUser((prev) => user);
 
-                if (!group) return;
-                setAppGroup((prev) => group);
-                router.push("/home");
-              }}
-            >
-              <div className="flex flex-col">
-                <p>userId: {user.id}</p>
-                <p>hasAccessToken: {user.hasAccessToken ? "true" : "false"}</p>
-              </div>
+                  if (!user.groupArray) return;
+                  const group = await server.group.get.fetch({
+                    id: user.groupArray[0].id,
+                  });
 
-              <div className="flex h-full min-w-fit items-center">
-                {appUser && appUser.id !== user.id && appGroup && (
-                  <PrimaryBtn
+                  if (!group) return;
+                  setAppGroup((prev) => group);
+                  router.push("/home");
+                }}
+              >
+                <div className="flex flex-col">
+                  <p>userId: {user.id}</p>
+                  <p>
+                    hasAccessToken: {user.hasAccessToken ? "true" : "false"}
+                  </p>
+                </div>
+
+                <div className="flex h-full min-w-fit items-center">
+                  {appUser && appUser.id !== user.id && appGroup && (
+                    <PrimaryBtn
+                      onClick={async (e) => {
+                        e.stopPropagation();
+
+                        const updatedAppGroup = appGroup.userArray?.find(
+                          (groupUser) => groupUser.id === user.id
+                        )
+                          ? await removeUserFromGroup.mutateAsync({
+                              groupId: appGroup.id,
+                              userId: user.id,
+                            })
+                          : await addUserToGroup.mutateAsync({
+                              userId: user.id,
+                              groupId: appGroup.id,
+                            });
+
+                        setAppGroup((prev) => updatedAppGroup);
+                      }}
+                    >
+                      {appGroup.userArray?.find(
+                        (groupUser) => groupUser.id === user.id
+                      ) ? (
+                        <Icon icon={"mdi:delete-outline"} width={24} />
+                      ) : (
+                        <Image
+                          src={addUserIcon}
+                          height={24}
+                          width={24}
+                          alt=""
+                        />
+                      )}
+                    </PrimaryBtn>
+                  )}
+
+                  <NegativeBtn
                     onClick={async (e) => {
                       e.stopPropagation();
-
-                      const updatedAppGroup = appGroup.userArray?.find(
-                        (groupUser) => groupUser.id === user.id
-                      )
-                        ? await removeUserFromGroup.mutateAsync({
-                            groupId: appGroup.id,
-                            userId: user.id,
-                          })
-                        : await addUserToGroup.mutateAsync({
-                            userId: user.id,
-                            groupId: appGroup.id,
-                          });
-
-                      setAppGroup((prev) => updatedAppGroup);
+                      await deleteUser.mutateAsync(user.id);
+                      allUsers.refetch();
+                      if (appUser && appUser.id === user.id) {
+                        setAppUser(() => emptyUser);
+                      }
                     }}
                   >
-                    {appGroup.userArray?.find(
-                      (groupUser) => groupUser.id === user.id
-                    ) ? (
-                      <Icon icon={"mdi:delete-outline"} width={24} />
-                    ) : (
-                      <Image src={addUserIcon} height={24} width={24} alt="" />
-                    )}
-                  </PrimaryBtn>
-                )}
-
-                <NegativeBtn
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    await deleteUser.mutateAsync(user.id);
-                    allUsers.refetch();
-                    if (appUser && appUser.id === user.id) {
-                      setAppUser(() => emptyUser);
-                    }
-                  }}
-                >
-                  <Image src={deleteIcon} height={16} alt="" />
-                </NegativeBtn>
+                    <Image src={deleteIcon} height={16} alt="" />
+                  </NegativeBtn>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-        <Button
-          className="w-full rounded-none rounded-b-md text-xl"
-          onClick={async (e) => {
-            e.stopPropagation();
-            const user = await createUser.mutateAsync();
-            allUsers.refetch();
+            <Button
+              className="w-full rounded-none rounded-b-md text-xl"
+              onClick={async (e) => {
+                e.stopPropagation();
+                const user = await createUser.mutateAsync();
+                allUsers.refetch();
 
-            await createGroup.mutateAsync({ id: user.id });
-          }}
-        >
-          create new user
-        </Button>
-      </div>
+                await createGroup.mutateAsync({ id: user.id });
+              }}
+            >
+              create new user
+            </Button>
+          </div>
+        </>
+      )}
     </section>
   );
 };
