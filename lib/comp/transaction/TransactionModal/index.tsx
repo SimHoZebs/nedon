@@ -171,10 +171,7 @@ const TransactionModal = (props: Props) => {
           Save changes
         </Button>
 
-        <NegativeBtn
-          className="bg-red-900 hover:bg-red-800"
-          onClick={() => props.setShowModal(false)}
-        >
+        <NegativeBtn onClick={() => props.setShowModal(false)}>
           Cancel
         </NegativeBtn>
       </div>

@@ -3,11 +3,11 @@ import { useStoreState } from "../lib/util/store";
 import { NextPage } from "next";
 
 import Link from "next/link";
-import SanboxLink from "../lib/comp/user/SanboxLinkBtn";
+import SanboxLink from "../lib/comp/analysis/SanboxLinkBtn";
 import { trpc } from "../lib/util/trpc";
 import { AccountBase, AuthGetResponse } from "plaid";
 import Modal from "../lib/comp/Modal";
-import AccountCard from "../lib/comp/user/AccountCard";
+import AccountCard from "../lib/comp/home/AccountCard";
 
 const User: NextPage = () => {
   const { appUser, isPaymentInitiation } = useStoreState((state) => state);
@@ -65,7 +65,7 @@ const User: NextPage = () => {
               )
           )}
 
-          <pre>
+          <pre className="whitespace-pre-wrap">
             {JSON.stringify(
               (auth.data as unknown as AuthGetResponse).item,
               null,

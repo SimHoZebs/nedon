@@ -7,7 +7,7 @@ import {
 } from "../lib/util/transaction";
 import Button from "../lib/comp/Button/PrimaryBtn";
 import SettleModal from "../lib/comp/analysis/SettleModal";
-import SanboxLink from "../lib/comp/user/SanboxLinkBtn";
+import SanboxLink from "../lib/comp/analysis/SanboxLinkBtn";
 
 const categoryTotalSpending = (category: Category): number => {
   let amount = category.transactionArray.reduce((total, transaction) => {

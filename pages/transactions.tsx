@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import { SplitClientSide } from "../lib/util/types";
 import { organizeTransactionByTime } from "../lib/util/transaction";
 import TransactionModal from "../lib/comp/transaction/TransactionModal";
-import SanboxLink from "../lib/comp/user/SanboxLinkBtn";
+import SanboxLink from "../lib/comp/analysis/SanboxLinkBtn";
 
 const Page: NextPage = () => {
   const { appUser } = useStoreState((state) => state);
