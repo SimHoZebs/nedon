@@ -5,6 +5,7 @@ import { useStoreActions, useStoreState } from "../util/store";
 import { Inter } from "next/font/google";
 import NavBtn from "./Button/NavBtn";
 import { Icon } from "@iconify-icon/react";
+import Button from "./Button";
 
 const noto_sans = Inter({
   subsets: ["latin"],
@@ -34,9 +35,12 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       ${noto_sans.variable} font-sans font-normal`}
     >
       {appUser && (
-        <nav className="flex h-20 w-full items-center justify-between gap-y-2 bg-zinc-900 p-2 sm:h-full sm:w-56 sm:flex-col sm:justify-start sm:pb-20">
+        <nav className="flex h-20 w-full items-center justify-between gap-y-2 bg-zinc-900 p-2 px-10 sm:h-full sm:w-56 sm:flex-col sm:justify-start sm:px-2 sm:pb-20">
           <div className="flex items-center gap-x-1">
-            <NavBtn router={router} route="/profile">
+            <Button
+              className="hover:bg-zinc-800 hover:text-zinc-200"
+              onClick={() => router.push("/profile")}
+            >
               <div className="flex w-full items-center gap-x-2">
                 <div className="flex rounded-full border-2 border-zinc-300 bg-zinc-800 p-1 sm:p-2">
                   <Icon
@@ -49,14 +53,14 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
                 <p className="hidden sm:block">{appUser.id.slice(0, 8)}</p>
               </div>
-            </NavBtn>
+            </Button>
 
             <button
               className="group flex p-2 hover:cursor-pointer"
               onClick={() => {
+                router.push("/");
                 setAppUser(() => undefined);
                 setAppGroup(() => undefined);
-                router.push("/");
               }}
             >
               <Icon
@@ -67,15 +71,19 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             </button>
           </div>
 
-          <NavBtn router={router} route="/home">
+          <NavBtn router={router} route="/home" icon="mdi:home-variant-outline">
             Home
           </NavBtn>
 
-          <NavBtn router={router} route="/transactions">
+          <NavBtn
+            router={router}
+            route="/transactions"
+            icon="mdi:swap-horizontal"
+          >
             Transactions
           </NavBtn>
 
-          <NavBtn router={router} route="/analysis">
+          <NavBtn router={router} route="/analysis" icon="mdi:google-analytics">
             Analysis
           </NavBtn>
         </nav>
