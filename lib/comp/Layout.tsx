@@ -30,7 +30,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   return (
     <div
-      className={`flex h-screen w-screen flex-col-reverse bg-zinc-950 text-sm text-zinc-300 sm:flex-row sm:text-base
+      className={`flex h-[100dvh] w-[100dvw] flex-col-reverse bg-zinc-950 text-sm text-zinc-300 sm:flex-row sm:text-base
       ${noto_sans.variable} font-sans font-normal`}
     >
       {appUser && (
