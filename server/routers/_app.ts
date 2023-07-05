@@ -14,6 +14,7 @@ import { groupRouter } from "./group";
 import transactionRouter from "./transaction";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS, client } from "../util";
 import stripUserSecrets from "../../lib/util/stripUserSecrets";
+import { convertPlaidCategoriesToCategoryArray } from "../../lib/util/transaction";
 
 const setAccessToken = async ({
   publicToken,
@@ -55,6 +56,7 @@ const setAccessToken = async ({
 export const appRouter = router({
   user: userRouter,
   group: groupRouter,
+  transaction: transactionRouter,
 
   sandBoxAccess: procedure
     .input(z.object({ instituteID: z.string().nullish() }))
@@ -112,7 +114,10 @@ export const appRouter = router({
       return authResponse.data;
     }),
 
-  transaction: transactionRouter,
+  getCategoryArray: procedure.input(z.undefined()).query(async () => {
+    const response = await client.categoriesGet({});
+    return convertPlaidCategoriesToCategoryArray(response.data.categories);
+  }),
 });
 
 export type AppRouter = typeof appRouter;

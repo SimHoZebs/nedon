@@ -1,15 +1,21 @@
 import { PlaidTransaction } from "./types";
+import { Category as PlaidCategory } from "plaid";
+
+export type CategoryWithTransactionArray = {
+  name: string;
+  transactionArray: PlaidTransaction[];
+  subCategory: CategoryWithTransactionArray[];
+};
 
 export type Category = {
   name: string;
-  transactionArray: PlaidTransaction[];
   subCategory: Category[];
 };
 
 export const organizeTransactionByCategory = (
   transactionArray: PlaidTransaction[]
 ) => {
-  const categoryArray: Category[] = [];
+  const categoryArray: CategoryWithTransactionArray[] = [];
 
   transactionArray.forEach((transaction) => {
     fillCategoryArray(categoryArray, { ...transaction });
@@ -18,10 +24,58 @@ export const organizeTransactionByCategory = (
   return categoryArray;
 };
 
-const fillCategoryArray = (
+export const convertPlaidCategoriesToCategoryArray = (
+  categories: PlaidCategory[]
+) => {
+  const categoryArray: Category[] = [];
+  categories.forEach((category) => {
+    test(categoryArray, { ...category });
+  });
+  return categoryArray;
+};
+
+const test = (
   categoryArray: Category[],
-  transaction: PlaidTransaction
+  plaidCategory: PlaidCategory
 ): Category[] => {
+  const category = plaidCategory.hierarchy;
+
+  const firstCategory = category[0];
+
+  let index = categoryArray.findIndex(
+    (category) => category.name === firstCategory
+  );
+
+  if (index === -1) {
+    //if the category doesn't exist, then create it.
+    categoryArray.push({
+      name: firstCategory,
+      subCategory: [],
+    });
+
+    index = categoryArray.length - 1;
+  }
+
+  const slicedCategoryArray = category.slice(1);
+
+  if (slicedCategoryArray.length === 0) {
+    return categoryArray;
+  } else {
+    plaidCategory.hierarchy = slicedCategoryArray;
+
+    categoryArray[index].subCategory = test(
+      categoryArray[index].subCategory,
+      plaidCategory
+    );
+  }
+
+  return categoryArray;
+};
+
+const fillCategoryArray = (
+  categoryArray: CategoryWithTransactionArray[],
+  transaction: PlaidTransaction
+): CategoryWithTransactionArray[] => {
   const category = transaction.category;
 
   if (!category) return categoryArray;

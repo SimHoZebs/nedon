@@ -24,7 +24,13 @@ const TransactionModal = (props: Props) => {
   );
   const createTransactionMeta = trpc.transaction.createMeta.useMutation();
   const updateTransactionMeta = trpc.transaction.updateMeta.useMutation();
+  const categoryArray = trpc.getCategoryArray.useQuery();
   const [totalSplit, setTotalSplit] = useState(0);
+
+  const [currentCategoryArray, setCurrentCategoryArray] = useState(() =>
+    categoryArray.data ? categoryArray.data : []
+  );
+  const [categoryTree, setCategoryTree] = useState<string[]>([]);
 
   useEffect(() => {
     const updatedTotalSplit =
@@ -37,75 +43,126 @@ const TransactionModal = (props: Props) => {
 
   return (
     <Modal setShowModal={props.setShowModal}>
-      <div className="flex justify-between">
-        <h3 className="text-2xl">{props.selectedTransaction.name}</h3>
-        <h3 className="text-2xl">${props.selectedTransaction.amount * -1}</h3>
+      <div className="flex flex-col">
+        <div className="flex justify-between font-semibold">
+          <h3 className="text-2xl">{props.selectedTransaction.name}</h3>
+          <h3 className="text-2xl">${props.selectedTransaction.amount * -1}</h3>
+        </div>
+
+        <div className="flex w-full items-center gap-x-1 text-sm text-zinc-400">
+          <button className="flex rounded-full p-2 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-400">
+            <Icon icon="mdi:shape-plus-outline" height={16} />
+          </button>
+
+          <div className="relative w-full">
+            <button>{props.selectedTransaction.category?.join(" > ")}</button>
+
+            <div className="absolute left-0 flex max-h-[50vh] w-fit flex-col items-start gap-y-2 rounded-md border border-zinc-700 bg-zinc-800 p-2">
+              <div className="flex items-center">
+                <button
+                  className="flex"
+                  onClick={() => {
+                    setCurrentCategoryArray(categoryArray.data || []);
+                    setCategoryTree([]);
+                  }}
+                >
+                  <Icon icon="mdi:chevron-left" height={24} />
+                </button>
+                <p>{categoryTree.join(" > ")}</p>
+              </div>
+
+              <div className="grid auto-cols-fr grid-cols-4 gap-2 overflow-x-hidden overflow-y-scroll bg-zinc-800 py-1 text-xs">
+                {currentCategoryArray.map((category, i) => (
+                  <button
+                    onClick={() => {
+                      setCurrentCategoryArray(category.subCategory);
+                      setCategoryTree((prev) => [...prev, category.name]);
+                    }}
+                    key={i}
+                    className="flex h-[84px] w-[84px] items-center justify-center hyphens-auto  rounded-lg border p-1 text-center"
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex w-full justify-between">
+                <button>save</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {props.splitArray.length > 1 &&
-        props.splitArray?.map((split, i) => (
-          <div key={i} className="flex w-full items-center gap-x-2 sm:gap-x-3">
-            {appUser && split.userId === appUser.id ? (
-              <div className="w-5"></div>
-            ) : (
-              <button
-                className="group flex"
-                onClick={() => {
-                  const newSplitArray = [...props.splitArray];
-                  newSplitArray.splice(i, 1);
-                  props.setSplitArray(newSplitArray);
-                }}
-              >
-                <Icon
-                  icon="clarity:remove-line"
-                  className="text-zinc-500 group-hover:text-pink-400"
-                  width={20}
-                  height={20}
-                />
-              </button>
-            )}
-
-            <UserSplit
-              onAmountChange={(amount: number) => {
-                const updatedSplit: SplitClientSide = {
-                  ...split,
-                  amount,
-                };
-                const updatedSplitArray = [...props.splitArray];
-                updatedSplitArray[i] = updatedSplit;
-                props.setSplitArray(updatedSplitArray);
-              }}
-              amount={props.selectedTransaction.amount}
-              split={split}
+      <div className="flex w-full flex-col gap-y-1">
+        {props.splitArray.length > 1 &&
+          props.splitArray?.map((split, i) => (
+            <div
+              key={i}
+              className="flex w-full items-center gap-x-2 sm:gap-x-3"
             >
-              {split.userId.slice(0, 8)}
-            </UserSplit>
+              {appUser && split.userId === appUser.id ? (
+                <div className="w-5"></div>
+              ) : (
+                <button
+                  className="group flex"
+                  onClick={() => {
+                    const newSplitArray = [...props.splitArray];
+                    newSplitArray.splice(i, 1);
+                    props.setSplitArray(newSplitArray);
+                  }}
+                >
+                  <Icon
+                    icon="clarity:remove-line"
+                    className="text-zinc-500 group-hover:text-pink-400"
+                    width={20}
+                    height={20}
+                  />
+                </button>
+              )}
 
-            {totalSplit !== props.selectedTransaction.amount && (
-              <Button
-                className="flex gap-x-1 text-sm"
-                onClick={() => {
-                  const newSplitArray = [...props.splitArray];
-                  let newSplitAmount =
-                    Math.floor(
-                      (split.amount -
-                        totalSplit +
-                        props.selectedTransaction.amount) *
-                        100
-                    ) / 100;
-
-                  if (newSplitAmount < 0) newSplitAmount = 0;
-
-                  newSplitArray[i].amount = newSplitAmount;
-                  props.setSplitArray(newSplitArray);
+              <UserSplit
+                onAmountChange={(amount: number) => {
+                  const updatedSplit: SplitClientSide = {
+                    ...split,
+                    amount,
+                  };
+                  const updatedSplitArray = [...props.splitArray];
+                  updatedSplitArray[i] = updatedSplit;
+                  props.setSplitArray(updatedSplitArray);
                 }}
+                amount={props.selectedTransaction.amount}
+                split={split}
               >
-                <Icon icon="cil:balance-scale" width={16} height={16} />
-                adjust
-              </Button>
-            )}
-          </div>
-        ))}
+                {split.userId.slice(0, 8)}
+              </UserSplit>
+
+              {totalSplit !== props.selectedTransaction.amount && (
+                <Button
+                  className="flex gap-x-1 text-sm"
+                  onClick={() => {
+                    const newSplitArray = [...props.splitArray];
+                    let newSplitAmount =
+                      Math.floor(
+                        (split.amount -
+                          totalSplit +
+                          props.selectedTransaction.amount) *
+                          100
+                      ) / 100;
+
+                    if (newSplitAmount < 0) newSplitAmount = 0;
+
+                    newSplitArray[i].amount = newSplitAmount;
+                    props.setSplitArray(newSplitArray);
+                  }}
+                >
+                  <Icon icon="cil:balance-scale" width={16} height={16} />
+                  adjust
+                </Button>
+              )}
+            </div>
+          ))}
+      </div>
 
       {totalSplit !== props.selectedTransaction.amount && (
         <div className="text-red-800">
@@ -116,7 +173,7 @@ const TransactionModal = (props: Props) => {
       )}
 
       <div>
-        <div>Friends</div>
+        <h3 className="font-semibold">Friends</h3>
         {appGroup?.userArray &&
           appGroup.userArray.length &&
           appGroup.userArray.map((user, i) =>
@@ -179,6 +236,7 @@ const TransactionModal = (props: Props) => {
       <details className="" onClick={(e) => e.stopPropagation()}>
         <summary>Raw Data</summary>
         <pre className="max-h-[50vh] overflow-y-scroll whitespace-pre-wrap">
+          {JSON.stringify(categoryArray, null, 2)}
           {JSON.stringify(props.selectedTransaction, null, 2)}
         </pre>
       </details>

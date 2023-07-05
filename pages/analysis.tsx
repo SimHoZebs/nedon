@@ -2,14 +2,16 @@ import React, { useMemo, useState } from "react";
 import { trpc } from "../lib/util/trpc";
 import { useStoreState } from "../lib/util/store";
 import {
-  Category,
+  CategoryWithTransactionArray,
   organizeTransactionByCategory,
 } from "../lib/util/transaction";
 import Button from "../lib/comp/Button/PrimaryBtn";
 import SettleModal from "../lib/comp/analysis/SettleModal";
 import SanboxLink from "../lib/comp/analysis/SanboxLinkBtn";
 
-const categoryTotalSpending = (category: Category): number => {
+const categoryTotalSpending = (
+  category: CategoryWithTransactionArray
+): number => {
   let amount = category.transactionArray.reduce((total, transaction) => {
     return total + transaction.amount;
   }, 0);
@@ -21,7 +23,7 @@ const categoryTotalSpending = (category: Category): number => {
   return amount;
 };
 
-const render = (categoryArray: Category[]) =>
+const render = (categoryArray: CategoryWithTransactionArray[]) =>
   categoryArray.map((category, i) => (
     <div key={i} className="border">
       <div>{category.name}</div>
