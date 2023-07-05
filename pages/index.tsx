@@ -1,13 +1,15 @@
 import type { NextPage } from "next";
 import { trpc } from "../lib/util/trpc";
 import { useStoreActions, useStoreState } from "../lib/util/store";
-import Button from "../lib/comp/Button";
+import NegativeBtn from "../lib/comp/Button/NegativeBtn";
 import addUserIcon from "../public/add-user.svg";
-import removeUserIcon from "../public/remove-user.svg";
 import Image from "next/image";
 import { emptyUser } from "../lib/util/user";
 import deleteIcon from "../public/delete.svg";
 import { useRouter } from "next/router";
+import { Icon } from "@iconify-icon/react";
+import PrimaryBtn from "../lib/comp/Button/PrimaryBtn";
+import Button from "../lib/comp/Button";
 
 const Home: NextPage = () => {
   const router = useRouter();
@@ -29,7 +31,7 @@ const Home: NextPage = () => {
     <section className="flex h-full w-full flex-col items-center justify-center gap-y-3">
       <h1 className="text-3xl">Choose an account</h1>
 
-      <div className="flex w-2/3 flex-col items-center rounded-md border border-zinc-600">
+      <div className="flex flex-col items-center rounded-md border border-zinc-600 sm:w-2/3">
         {allUsers.data &&
           allUsers.data.map((user) => (
             <div
@@ -53,14 +55,14 @@ const Home: NextPage = () => {
                 router.push("/home");
               }}
             >
-              <div>
+              <div className="flex flex-col">
                 <p>userId: {user.id}</p>
                 <p>hasAccessToken: {user.hasAccessToken ? "true" : "false"}</p>
               </div>
 
-              <div className="flex flex-col gap-y-2">
+              <div className="flex h-full min-w-fit items-center">
                 {appUser && appUser.id !== user.id && appGroup && (
-                  <Button
+                  <PrimaryBtn
                     onClick={async (e) => {
                       e.stopPropagation();
 
@@ -82,20 +84,14 @@ const Home: NextPage = () => {
                     {appGroup.userArray?.find(
                       (groupUser) => groupUser.id === user.id
                     ) ? (
-                      <Image
-                        src={removeUserIcon}
-                        height={24}
-                        width={24}
-                        alt=""
-                      />
+                      <Icon icon={"mdi:delete-outline"} width={24} />
                     ) : (
                       <Image src={addUserIcon} height={24} width={24} alt="" />
                     )}
-                  </Button>
+                  </PrimaryBtn>
                 )}
 
-                <Button
-                  className="bg-red-800 hover:bg-red-700"
+                <NegativeBtn
                   onClick={async (e) => {
                     e.stopPropagation();
                     await deleteUser.mutateAsync(user.id);
@@ -105,8 +101,8 @@ const Home: NextPage = () => {
                     }
                   }}
                 >
-                  <Image src={deleteIcon} height={24} width={24} alt="" />
-                </Button>
+                  <Image src={deleteIcon} height={16} alt="" />
+                </NegativeBtn>
               </div>
             </div>
           ))}

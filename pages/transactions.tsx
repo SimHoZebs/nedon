@@ -52,14 +52,19 @@ const Page: NextPage = () => {
 
       <div className="flex w-full max-w-md flex-col items-center gap-y-2 text-4xl ">
         {sortedTransactionArray.map((year, i) => (
-          <div className="flex w-full flex-col items-center text-4xl" key={i}>
-            <p>{year[0][0][0].date.slice(0, 4)}</p>
+          <div className="flex w-full flex-col items-center " key={i}>
+            <p className="text-3xl sm:text-4xl">
+              {year[0][0][0].date.slice(0, 4)}
+            </p>
             {year.map((month, j) => (
-              <div key={j} className="w-full flex-col gap-y-2 text-3xl">
+              <div
+                key={j}
+                className="w-full flex-col gap-y-2 text-2xl sm:text-3xl"
+              >
                 <p>{month[0][0].date.slice(5, 7)}</p>
                 {month.map((day, k) => (
                   <div className="flex w-full flex-col gap-y-3" key={k}>
-                    <p className="text-xl">{day[0].date.slice(8)}</p>
+                    <p className="text-lg sm:text-xl">{day[0].date.slice(8)}</p>
                     {day.map(
                       (transaction, l) =>
                         transaction && (

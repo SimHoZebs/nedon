@@ -31,33 +31,33 @@ const TransactionCard = (props: Props) => {
 
   return (
     <div
-      className="flex h-[64px] w-full justify-between rounded-md bg-zinc-800 p-2 text-start hover:cursor-pointer hover:bg-zinc-700"
+      className="flex h-[64px] w-full justify-between gap-x-4 rounded-md bg-zinc-800 p-2 text-start hover:cursor-pointer hover:bg-zinc-700"
       onClick={props.button}
     >
-      <div className="flex items-center gap-x-4 ">
-        <div className="flex w-fit">
-          <Icon
-            className="rounded-full bg-zinc-400 p-1 text-zinc-800"
-            icon={
-              icon.current[
-                props.transaction.category ? props.transaction.category[0] : ""
-              ]
-            }
-            width={36}
-          />
-        </div>
+      <div className="flex w-fit items-center gap-x-2 truncate sm:gap-x-4">
+        <Icon
+          className="rounded-full bg-zinc-400 p-1 text-zinc-800"
+          icon={
+            icon.current[
+              props.transaction.category ? props.transaction.category[0] : ""
+            ]
+          }
+          width={36}
+        />
 
-        <div className="flex-start flex h-full max-w-[30vw] flex-col truncate">
-          <p className="truncate text-lg">{props.transaction.name}</p>
-          <div className="text-sm font-light text-zinc-400">
+        <div className="flex-start flex h-full flex-col justify-center truncate">
+          <p className="truncate text-base sm:text-lg">
+            {props.transaction.name}
+          </p>
+          <p className="h-4 truncate text-xs font-light text-zinc-400 sm:h-5 sm:text-sm">
             {props.transaction.merchant_name}
-          </div>
+          </p>
         </div>
       </div>
 
-      <div className="flex h-fit items-center gap-x-1">
+      <div className="flex h-fit min-w-fit items-center gap-x-1">
         <div
-          className={`flex gap-x-1 text-lg ${
+          className={`flex gap-x-1 text-base sm:text-lg ${
             props.transaction.amount > 0 ? "" : "text-green-300"
           }`}
         >
