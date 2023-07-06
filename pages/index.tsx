@@ -122,9 +122,8 @@ const Home: NextPage = () => {
               onClick={async (e) => {
                 e.stopPropagation();
                 const user = await createUser.mutateAsync();
-                allUsers.refetch();
-
                 await createGroup.mutateAsync({ id: user.id });
+                allUsers.refetch();
               }}
             >
               create new user

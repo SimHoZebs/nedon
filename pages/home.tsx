@@ -16,7 +16,7 @@ const User: NextPage = () => {
 
   const auth = trpc.auth.useQuery(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000 }
+    { staleTime: 3600000, enabled: !!appUser }
   );
 
   const loading = useRef(

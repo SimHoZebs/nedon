@@ -16,10 +16,11 @@ const SettleModal = (props: Props) => {
 
   const createManualTransaction =
     trpc.transaction.createManualTransaction.useMutation();
-  const associatedMetaArray = trpc.transaction.getAssociatedMeta.useQuery(
-    { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: !!appUser }
-  );
+  const associatedTransactionArray =
+    trpc.transaction.getAssociatedTransactionArray.useQuery(
+      { id: appUser ? appUser.id : "" },
+      { staleTime: 3600000, enabled: !!appUser }
+    );
 
   return appUser && props.oweUser ? (
     <Modal setShowModal={props.setShowModal}>
@@ -69,7 +70,7 @@ const SettleModal = (props: Props) => {
             ],
           });
 
-          associatedMetaArray.refetch();
+          associatedTransactionArray.refetch();
           props.setShowModal(false);
         }}
       >

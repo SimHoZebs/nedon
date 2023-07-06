@@ -19,12 +19,13 @@ interface Props {
 
 const TransactionModal = (props: Props) => {
   const { appUser, appGroup } = useStoreState((state) => state);
-  const transactionMetaArray = trpc.transaction.getMeta.useQuery(
+  const transactionArray = trpc.transaction.getTransactionArray.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: appUser?.hasAccessToken }
   );
-  const createTransactionMeta = trpc.transaction.createMeta.useMutation();
-  const updateTransactionMeta = trpc.transaction.updateSplit.useMutation();
+  const createTransaction =
+    trpc.transaction.createTransaction.useMutation();
+  const updateSplit = trpc.transaction.updateSplit.useMutation();
   const [totalSplit, setTotalSplit] = useState(0);
 
   useEffect(() => {
@@ -166,23 +167,24 @@ const TransactionModal = (props: Props) => {
           onClick={async () => {
             if (!appUser) return;
 
-            const meta = transactionMetaArray.data?.find(
-              (meta) => meta.id === props.selectedTransaction.transaction_id
+            const transaction = transactionArray.data?.find(
+              (transaction) =>
+                transaction.id === props.selectedTransaction.transaction_id
             );
 
-            meta
-              ? await updateTransactionMeta.mutateAsync({
+            transaction
+              ? await updateSplit.mutateAsync({
                   splitArray: props.splitArray,
                   transactionId: props.selectedTransaction.transaction_id,
                 })
-              : await createTransactionMeta.mutateAsync({
+              : await createTransaction.mutateAsync({
                   splitArray: props.splitArray,
                   userId: appUser.id,
                   transactionId: props.selectedTransaction.transaction_id,
                   categoryArray: props.selectedTransaction.category || [],
                 });
 
-            transactionMetaArray.refetch();
+            transactionArray.refetch();
           }}
         >
           Save changes

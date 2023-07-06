@@ -14,12 +14,12 @@ interface Props {
 const CategoryPicker = (props: Props) => {
   const { appUser } = useStoreState((state) => state);
   const categoryArray = trpc.getCategoryArray.useQuery(undefined, {});
-  const metaArray = trpc.transaction.getMeta.useQuery(
+  const transactionArray = trpc.transaction.getTransactionArray.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: appUser?.hasAccessToken }
   );
   const updateCategory = trpc.transaction.updateCategory.useMutation();
-  const createMeta = trpc.transaction.createMeta.useMutation();
+  const createTransaction = trpc.transaction.createTransaction.useMutation();
 
   const [categoryTree, setCategoryTree] = useState<string[]>([]);
   const [selectedCategoryArray, setSelectedCategoryArray] = useState<
@@ -27,13 +27,13 @@ const CategoryPicker = (props: Props) => {
   >([]);
 
   const currentCategoryArray = () => {
-    const transactionMeta = metaArray.data?.find(
+    const transaction = transactionArray.data?.find(
       (transaction) =>
         transaction.id === props.selectedTransaction.transaction_id
     );
 
-    return transactionMeta
-      ? transactionMeta.categoryArray
+    return transaction
+      ? transaction.categoryArray
       : props.selectedTransaction.category;
   };
 
@@ -43,14 +43,15 @@ const CategoryPicker = (props: Props) => {
     const newCategoryArray = [...categoryTree];
     category && newCategoryArray.push(category.name);
 
-    metaArray.data?.find(
-      (meta) => meta.id === props.selectedTransaction.transaction_id
+    transactionArray.data?.find(
+      (transaction) =>
+        transaction.id === props.selectedTransaction.transaction_id
     )
       ? await updateCategory.mutateAsync({
           transactionId: props.selectedTransaction.transaction_id,
           categoryArray: newCategoryArray,
         })
-      : await createMeta.mutateAsync({
+      : await createTransaction.mutateAsync({
           userId: appUser.id,
           transactionId: props.selectedTransaction.transaction_id,
           categoryArray: newCategoryArray,
@@ -59,7 +60,7 @@ const CategoryPicker = (props: Props) => {
     setCategoryTree([]);
     setSelectedCategoryArray(categoryArray.data);
     props.setShowCategoryPicker(false);
-    metaArray.refetch();
+    transactionArray.refetch();
   };
 
   useEffect(() => {

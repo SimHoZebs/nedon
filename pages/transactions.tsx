@@ -14,11 +14,12 @@ const Page: NextPage = () => {
   const { appUser } = useStoreState((state) => state);
   const router = useRouter();
 
-  const transactionArray = trpc.transaction.getAll.useQuery(
-    { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
-  );
-  const transactionMetaArray = trpc.transaction.getMeta.useQuery(
+  const plaidTransactionArray =
+    trpc.transaction.getPlaidTransactionArray.useQuery(
+      { id: appUser ? appUser.id : "" },
+      { staleTime: 3600000, enabled: appUser?.hasAccessToken }
+    );
+  const transactionArray = trpc.transaction.getTransactionArray.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: appUser?.hasAccessToken }
   );
@@ -30,9 +31,9 @@ const Page: NextPage = () => {
 
   //organizeTransactionByTime is computationally expensive
   const sortedTransactionArray = useMemo(() => {
-    if (!transactionArray.data) return [];
-    return organizeTransactionByTime(transactionArray.data);
-  }, [transactionArray.data]);
+    if (!plaidTransactionArray.data) return [];
+    return organizeTransactionByTime(plaidTransactionArray.data);
+  }, [plaidTransactionArray.data]);
 
   return appUser && !appUser.hasAccessToken ? (
     <section className="flex h-full flex-col items-center justify-center gap-y-3">
@@ -75,7 +76,7 @@ const Page: NextPage = () => {
                               setShowModal(true);
                               setSelectedTransaction(transaction);
 
-                              const meta = transactionMetaArray.data?.find(
+                              const meta = transactionArray.data?.find(
                                 (meta) => meta.id === transaction.transaction_id
                               );
                               const splitArray = meta
@@ -93,7 +94,7 @@ const Page: NextPage = () => {
                             }}
                             transaction={transaction}
                             splitArray={
-                              transactionMetaArray.data?.find(
+                              transactionArray.data?.find(
                                 (meta) => meta.id === transaction.transaction_id
                               )?.splitArray
                             }

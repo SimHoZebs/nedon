@@ -9,7 +9,7 @@ import { SplitModel } from "../../prisma/zod";
 // Retrieve Transactions for an Item
 // https://plaid.com/docs/#transactions
 const transactionRouter = router({
-  getAll: procedure
+  getPlaidTransactionArray: procedure
     .input(z.object({ id: z.string(), cursor: z.string().optional() }))
     .query(async ({ input }) => {
       const user = await db.user.findFirst({
@@ -53,7 +53,7 @@ const transactionRouter = router({
     }),
 
   //only transactions owned by user
-  getMeta: procedure
+  getTransactionArray: procedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       return db.transaction.findMany({
@@ -67,7 +67,7 @@ const transactionRouter = router({
     }),
 
   //all transaction meta including the user
-  getAssociatedMeta: procedure
+  getAssociatedTransactionArray: procedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       return db.transaction.findMany({
@@ -131,7 +131,7 @@ const transactionRouter = router({
       return updatedTransactionArray;
     }),
 
-  createMeta: procedure
+  createTransaction: procedure
     .input(
       z.object({
         userId: z.string(),

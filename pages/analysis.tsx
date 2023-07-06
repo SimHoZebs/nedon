@@ -39,14 +39,15 @@ const Page = () => {
   const [showModal, setShowModal] = useState(false);
   const [oweUser, setOweUser] = useState<{ id: string; amount: number }>();
 
-  const transactionArray = trpc.transaction.getAll.useQuery(
+  const transactionArray = trpc.transaction.getPlaidTransactionArray.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: appUser?.hasAccessToken }
   );
-  const associatedMetaArray = trpc.transaction.getAssociatedMeta.useQuery(
-    { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
-  );
+  const associatedTransactionArray =
+    trpc.transaction.getAssociatedTransactionArray.useQuery(
+      { id: appUser ? appUser.id : "" },
+      { staleTime: 3600000, enabled: appUser?.hasAccessToken }
+    );
 
   //useMemo is probably unnecessary since this page doesn't re-render that much.
   const categorizedTransactionArray = useMemo(() => {
@@ -55,10 +56,10 @@ const Page = () => {
   }, [transactionArray.data]);
 
   const calcOweGroup = useMemo(() => {
-    if (!associatedMetaArray.data) return;
+    if (!associatedTransactionArray.data) return;
     const oweGroup: { [userId: string]: number } = {};
 
-    associatedMetaArray.data.forEach((transaction) => {
+    associatedTransactionArray.data.forEach((transaction) => {
       if (!appUser) return;
 
       transaction.splitArray.forEach((split) => {
@@ -81,10 +82,8 @@ const Page = () => {
     });
 
     return oweGroup;
-  }, [appUser, associatedMetaArray.data]);
+  }, [appUser, associatedTransactionArray.data]);
 
-  //transactionMeta has info about owed money
-  //all transactionMeta that the user is associated with should be called
   return appUser && !appUser.hasAccessToken ? (
     <section className="flex h-full flex-col items-center justify-center gap-y-3">
       <h1 className="text-3xl">{"No bank account linked to this user."}</h1>
