@@ -10,12 +10,17 @@ import { useRouter } from "next/router";
 import { Icon } from "@iconify-icon/react";
 import PrimaryBtn from "../lib/comp/Button/PrimaryBtn";
 import Button from "../lib/comp/Button";
+import { useEffect, useState } from "react";
 
 const Home: NextPage = () => {
   const router = useRouter();
-  const allUsers = trpc.user.getAll.useQuery(undefined);
-  const createUser = trpc.user.create.useMutation();
   const server = trpc.useContext();
+  const [userIdArray, setUserIdArray] = useState<string[]>([]);
+
+  const allUsers = trpc.user.getAll.useQuery(userIdArray, {
+    staleTime: 60 * 60,
+  });
+  const createUser = trpc.user.create.useMutation();
   const deleteUser = trpc.user.delete.useMutation();
   const createGroup = trpc.group.create.useMutation();
 
@@ -26,6 +31,12 @@ const Home: NextPage = () => {
 
   const addUserToGroup = trpc.group.addUser.useMutation();
   const removeUserFromGroup = trpc.group.removeUser.useMutation();
+
+  useEffect(() => {
+    const userIdArray = localStorage.getItem("userIdArray");
+
+    if (userIdArray) setUserIdArray(userIdArray.split(","));
+  }, []);
 
   return (
     <section className="flex h-full w-full flex-col items-center justify-center gap-y-3">
@@ -122,6 +133,11 @@ const Home: NextPage = () => {
               onClick={async (e) => {
                 e.stopPropagation();
                 const user = await createUser.mutateAsync();
+                const userIdArray = localStorage.getItem("userIdArray");
+                localStorage.setItem(
+                  "userIdArray",
+                  userIdArray ? `${userIdArray},${user.id}` : user.id
+                );
                 await createGroup.mutateAsync({ id: user.id });
                 allUsers.refetch();
               }}

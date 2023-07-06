@@ -3,6 +3,8 @@ import { z } from "zod";
 import db from "../../lib/util/db";
 import stripUserSecrets from "../../lib/util/stripUserSecrets";
 import { PLAID_PRODUCTS } from "../util";
+import { Group, User } from "@prisma/client";
+import { UserClientSide } from "../../lib/util/types";
 
 const userRouter = router({
   get: procedure.input(z.string()).query(async ({ input }) => {
@@ -23,15 +25,37 @@ const userRouter = router({
     };
   }),
 
-  getAll: procedure.input(z.undefined()).query(async () => {
-    const userArray = await db.user.findMany({
-      include: {
-        groupArray: true,
-      },
-    });
+  getAll: procedure
+    .input(z.array(z.string()).nullable())
+    .query(async ({ input: userIdArray }) => {
+      let userArray: ((User & { groupArray: Group[] }) | null)[] = [];
 
-    return userArray.map((user) => stripUserSecrets(user));
-  }),
+      if (process.env.NODE_ENV === "production") {
+        userIdArray
+          ? (userArray = await db.$transaction(
+              userIdArray.map((id) =>
+                db.user.findFirst({
+                  where: { id },
+                  include: { groupArray: true },
+                })
+              )
+            ))
+          : [];
+      } else {
+        //developers get to see all accounts
+        userArray = await db.user.findMany({
+          include: {
+            groupArray: true,
+          },
+        });
+      }
+
+      const clientSideUserArray = userArray.map(
+        (user) => user && stripUserSecrets(user)
+      );
+
+      return clientSideUserArray.filter((user) => !!user) as UserClientSide[];
+    }),
 
   create: procedure.input(z.undefined()).mutation(async () => {
     const user = await db.user.create({
