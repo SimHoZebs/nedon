@@ -8,6 +8,7 @@ import { trpc } from "../../../util/trpc";
 import { PlaidTransaction } from "../../../util/types";
 import { Icon } from "@iconify-icon/react";
 import NegativeBtn from "../../Button/NegativeBtn";
+import Category from "./Category";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -23,14 +24,8 @@ const TransactionModal = (props: Props) => {
     { staleTime: 3600000, enabled: appUser?.hasAccessToken }
   );
   const createTransactionMeta = trpc.transaction.createMeta.useMutation();
-  const updateTransactionMeta = trpc.transaction.updateMeta.useMutation();
-  const categoryArray = trpc.getCategoryArray.useQuery();
+  const updateTransactionMeta = trpc.transaction.updateSplit.useMutation();
   const [totalSplit, setTotalSplit] = useState(0);
-
-  const [currentCategoryArray, setCurrentCategoryArray] = useState(() =>
-    categoryArray.data ? categoryArray.data : []
-  );
-  const [categoryTree, setCategoryTree] = useState<string[]>([]);
 
   useEffect(() => {
     const updatedTotalSplit =
@@ -54,43 +49,7 @@ const TransactionModal = (props: Props) => {
             <Icon icon="mdi:shape-plus-outline" height={16} />
           </button>
 
-          <div className="relative w-full">
-            <button>{props.selectedTransaction.category?.join(" > ")}</button>
-
-            <div className="absolute left-0 flex max-h-[50vh] w-fit flex-col items-start gap-y-2 rounded-md border border-zinc-700 bg-zinc-800 p-2">
-              <div className="flex items-center">
-                <button
-                  className="flex"
-                  onClick={() => {
-                    setCurrentCategoryArray(categoryArray.data || []);
-                    setCategoryTree([]);
-                  }}
-                >
-                  <Icon icon="mdi:chevron-left" height={24} />
-                </button>
-                <p>{categoryTree.join(" > ")}</p>
-              </div>
-
-              <div className="grid auto-cols-fr grid-cols-4 gap-2 overflow-x-hidden overflow-y-scroll bg-zinc-800 py-1 text-xs">
-                {currentCategoryArray.map((category, i) => (
-                  <button
-                    onClick={() => {
-                      setCurrentCategoryArray(category.subCategory);
-                      setCategoryTree((prev) => [...prev, category.name]);
-                    }}
-                    key={i}
-                    className="flex h-[84px] w-[84px] items-center justify-center hyphens-auto  rounded-lg border p-1 text-center"
-                  >
-                    {category.name}
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex w-full justify-between">
-                <button>save</button>
-              </div>
-            </div>
-          </div>
+          <Category selectedTransaction={props.selectedTransaction} />
         </div>
       </div>
 
@@ -220,6 +179,7 @@ const TransactionModal = (props: Props) => {
                   splitArray: props.splitArray,
                   userId: appUser.id,
                   transactionId: props.selectedTransaction.transaction_id,
+                  categoryArray: props.selectedTransaction.category || [],
                 });
 
             transactionMetaArray.refetch();
@@ -236,7 +196,6 @@ const TransactionModal = (props: Props) => {
       <details className="" onClick={(e) => e.stopPropagation()}>
         <summary>Raw Data</summary>
         <pre className="max-h-[50vh] overflow-y-scroll whitespace-pre-wrap">
-          {JSON.stringify(categoryArray, null, 2)}
           {JSON.stringify(props.selectedTransaction, null, 2)}
         </pre>
       </details>

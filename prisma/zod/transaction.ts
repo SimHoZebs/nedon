@@ -4,6 +4,7 @@ import { CompleteUser, RelatedUserModel, CompleteSplit, RelatedSplitModel } from
 export const TransactionModel = z.object({
   id: z.string(),
   ownerId: z.string(),
+  categoryArray: z.string().array(),
 })
 
 export interface CompleteTransaction extends z.infer<typeof TransactionModel> {
