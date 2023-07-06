@@ -23,6 +23,7 @@ const Home: NextPage = () => {
   const createUser = trpc.user.create.useMutation();
   const deleteUser = trpc.user.delete.useMutation();
   const createGroup = trpc.group.create.useMutation();
+  const deleteGroup = trpc.group.delete.useMutation();
 
   const { appUser, appGroup } = useStoreState((state) => state);
   const { setAppUser: setAppUser, setAppGroup } = useStoreActions(
@@ -115,6 +116,10 @@ const Home: NextPage = () => {
                   <NegativeBtn
                     onClick={async (e) => {
                       e.stopPropagation();
+                      if (!user.groupArray) return;
+                      await deleteGroup.mutateAsync({
+                        id: user.groupArray[0].id,
+                      });
                       await deleteUser.mutateAsync(user.id);
                       allUsers.refetch();
                       if (appUser && appUser.id === user.id) {

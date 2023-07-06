@@ -44,6 +44,18 @@ export const groupRouter = router({
       return stripUserSecretsFromGroup(group);
     }),
 
+  delete: procedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      const group = await db.group.delete({
+        where: {
+          id: input.id,
+        },
+      });
+
+      return group ? true : false;
+    }),
+
   addUser: procedure
     .input(z.object({ groupId: z.string(), userId: z.string() }))
     .mutation(async ({ input }) => {
