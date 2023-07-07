@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../Modal";
 import { SplitClientSide } from "../../../util/types";
 import UserSplit from "./UserSplit";
-import Button from "../../Button/PrimaryBtn";
+import Button from "../../Button/ActionBtn";
 import { useStoreState } from "../../../util/store";
 import { trpc } from "../../../util/trpc";
 import { PlaidTransaction } from "../../../util/types";
 import { Icon } from "@iconify-icon/react";
-import NegativeBtn from "../../Button/NegativeBtn";
+import ActionBtn from "../../Button/ActionBtn";
 import Category from "./Category";
 
 interface Props {
@@ -23,8 +23,7 @@ const TransactionModal = (props: Props) => {
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: appUser?.hasAccessToken }
   );
-  const createTransaction =
-    trpc.transaction.createTransaction.useMutation();
+  const createTransaction = trpc.transaction.createTransaction.useMutation();
   const updateSplit = trpc.transaction.updateSplit.useMutation();
   const [totalSplit, setTotalSplit] = useState(0);
 
@@ -190,9 +189,9 @@ const TransactionModal = (props: Props) => {
           Save changes
         </Button>
 
-        <NegativeBtn onClick={() => props.setShowModal(false)}>
+        <ActionBtn variant="negative" onClick={() => props.setShowModal(false)}>
           Cancel
-        </NegativeBtn>
+        </ActionBtn>
       </div>
 
       <details className="" onClick={(e) => e.stopPropagation()}>

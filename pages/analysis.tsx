@@ -5,7 +5,7 @@ import {
   CategoryWithTransactionArray,
   organizeTransactionByCategory,
 } from "../lib/util/transaction";
-import Button from "../lib/comp/Button/PrimaryBtn";
+import Button from "../lib/comp/Button/ActionBtn";
 import SettleModal from "../lib/comp/analysis/SettleModal";
 
 const categoryTotalSpending = (

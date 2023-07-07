@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Modal from "../Modal";
 import { useStoreState } from "../../util/store";
 import { Icon } from "@iconify-icon/react";
-import Button from "../Button/PrimaryBtn";
+import Button from "../Button/ActionBtn";
 import { trpc } from "../../util/trpc";
 
 interface Props {
