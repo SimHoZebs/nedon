@@ -16,7 +16,6 @@ const noto_sans = Inter({
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
   const { appUser } = useStoreState((state) => state);
-  const { setAppUser, setAppGroup } = useStoreActions((actions) => actions);
 
   useEffect(() => {
     if (!appUser && router.pathname !== "/") {
@@ -36,10 +35,10 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       ${noto_sans.variable} font-sans font-normal`}
     >
       {appUser && (
-        <nav className="flex h-20 w-full items-center justify-between gap-y-2 bg-zinc-900 p-2 px-10 sm:h-full sm:w-56 sm:flex-col sm:justify-start sm:px-2 sm:pb-20">
-          <div className="flex items-center gap-x-1">
+        <nav className="flex h-20 w-full items-center justify-between gap-y-2 bg-zinc-900 p-2 px-5 sm:h-full sm:w-56 sm:flex-col sm:justify-start sm:px-2 ">
+          <div className="sm:w-full">
             <Button
-              className="hover:bg-zinc-800 hover:text-zinc-200"
+              className="gap-x-1 pr-3 hover:bg-zinc-800 hover:text-zinc-200"
               onClick={() => router.push("/profile")}
             >
               <div className="flex w-full items-center gap-x-2">
@@ -55,23 +54,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
                 <p className="hidden sm:block">{appUser.id.slice(0, 8)}</p>
               </div>
             </Button>
-
-            <button
-              className="group flex p-2 hover:cursor-pointer"
-              onClick={() => {
-                router.push("/");
-                setAppUser(() => undefined);
-                setAppGroup(() => undefined);
-              }}
-            >
-              <Icon
-                className="text-zinc-600 group-hover:text-zinc-500"
-                icon="mdi:logout"
-                width={16}
-              />
-            </button>
           </div>
-
           <NavBtn router={router} route="/home" icon="mdi:home-variant-outline">
             Home
           </NavBtn>
@@ -88,7 +71,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             Analysis
           </NavBtn>
 
-          <div className="w-full">
+          <div className="sm:w-full">
             <ActionBtn onClick={() => router.push("/")}>
               <div className="flex items-center gap-x-2">
                 <Icon icon="mdi:user-add-outline" height={24} />
