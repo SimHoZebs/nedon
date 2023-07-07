@@ -9,6 +9,7 @@ import { PlaidTransaction } from "../../../util/types";
 import { Icon } from "@iconify-icon/react";
 import ActionBtn from "../../Button/ActionBtn";
 import Category from "./Category";
+import categoryStyle from "../../../util/categoryStyle";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -21,7 +22,7 @@ const TransactionModal = (props: Props) => {
   const { appUser, appGroup } = useStoreState((state) => state);
   const transactionArray = trpc.transaction.getTransactionArray.useQuery(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken },
   );
   const createTransaction = trpc.transaction.createTransaction.useMutation();
   const updateSplit = trpc.transaction.updateSplit.useMutation();
@@ -31,26 +32,40 @@ const TransactionModal = (props: Props) => {
     const updatedTotalSplit =
       Math.floor(
         props.splitArray.reduce((amount, split) => amount + split.amount, 0) *
-          100
+          100,
       ) / 100;
     setTotalSplit(updatedTotalSplit);
   }, [props.splitArray]);
 
+  const lastCategory = props.selectedTransaction.category?.slice(-1)[0];
+  const thisCategoryStyle = lastCategory && categoryStyle[lastCategory];
+
   return (
     <Modal setShowModal={props.setShowModal}>
-      <div className="flex flex-col">
-        <div className="flex justify-between font-semibold">
+      <div className="flex flex-col ">
+        <div className="flex justify-between font-semibold ">
           <h3 className="text-2xl">{props.selectedTransaction.name}</h3>
           <h3 className="text-2xl">${props.selectedTransaction.amount * -1}</h3>
         </div>
 
-        <div className="flex w-full items-center gap-x-1 text-sm text-zinc-400">
-          <button className="flex rounded-full p-2 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-400">
-            <Icon icon="mdi:shape-plus-outline" height={16} />
-          </button>
+        <button className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800">
+          <div
+            className={`flex rounded-full p-1 text-zinc-700 ${
+              (thisCategoryStyle && thisCategoryStyle.color) ||
+              "bg-zinc-900 hover:bg-zinc-800 "
+            }`}
+          >
+            <Icon
+              icon={
+                (thisCategoryStyle && thisCategoryStyle.icon) ||
+                "mdi:shape-plus-outline"
+              }
+              height={24}
+            />
+          </div>
 
           <Category selectedTransaction={props.selectedTransaction} />
-        </div>
+        </button>
       </div>
 
       <div className="flex w-full flex-col gap-y-1">
@@ -106,7 +121,7 @@ const TransactionModal = (props: Props) => {
                         (split.amount -
                           totalSplit +
                           props.selectedTransaction.amount) *
-                          100
+                          100,
                       ) / 100;
 
                     if (newSplitAmount < 0) newSplitAmount = 0;
@@ -137,7 +152,7 @@ const TransactionModal = (props: Props) => {
           appGroup.userArray.length &&
           appGroup.userArray.map((user, i) =>
             props.splitArray.find(
-              (split) => split.userId === user.id
+              (split) => split.userId === user.id,
             ) ? null : (
               <div key={i} className="flex">
                 <div>{user.id.slice(0, 8)}</div>
@@ -156,7 +171,7 @@ const TransactionModal = (props: Props) => {
                   Split
                 </Button>
               </div>
-            )
+            ),
           )}
       </div>
 
@@ -168,7 +183,7 @@ const TransactionModal = (props: Props) => {
 
             const transaction = transactionArray.data?.find(
               (transaction) =>
-                transaction.id === props.selectedTransaction.transaction_id
+                transaction.id === props.selectedTransaction.transaction_id,
             );
 
             transaction

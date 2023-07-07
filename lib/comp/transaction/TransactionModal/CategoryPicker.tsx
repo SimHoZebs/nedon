@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { trpc } from "../../../util/trpc";
 import { Icon } from "@iconify-icon/react";
 import { PlaidTransaction } from "../../../util/types";
@@ -16,7 +16,7 @@ const CategoryPicker = (props: Props) => {
   const categoryArray = trpc.getCategoryArray.useQuery(undefined, {});
   const transactionArray = trpc.transaction.getTransactionArray.useQuery(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken },
   );
   const updateCategory = trpc.transaction.updateCategory.useMutation();
   const createTransaction = trpc.transaction.createTransaction.useMutation();
@@ -29,7 +29,7 @@ const CategoryPicker = (props: Props) => {
   const currentCategoryArray = () => {
     const transaction = transactionArray.data?.find(
       (transaction) =>
-        transaction.id === props.selectedTransaction.transaction_id
+        transaction.id === props.selectedTransaction.transaction_id,
     );
 
     return transaction
@@ -45,7 +45,7 @@ const CategoryPicker = (props: Props) => {
 
     transactionArray.data?.find(
       (transaction) =>
-        transaction.id === props.selectedTransaction.transaction_id
+        transaction.id === props.selectedTransaction.transaction_id,
     )
       ? await updateCategory.mutateAsync({
           transactionId: props.selectedTransaction.transaction_id,
@@ -69,15 +69,18 @@ const CategoryPicker = (props: Props) => {
 
   return appUser ? (
     <>
-      <button className={categoryTree.length > 0 ? "animate-pulse" : ""}>
-        {categoryTree.length === 0
-          ? currentCategoryArray()?.join(" > ")
-          : categoryTree.join(" > ")}
-      </button>
-
+      <div className="flex gap-x-2 items-center">
+        <button
+          className={"" + (categoryTree.length > 0 ? "animate-pulse" : "")}
+        >
+          {categoryTree.length === 0
+            ? currentCategoryArray()?.join(" > ")
+            : categoryTree.join(" > ")}
+        </button>
+      </div>
       {categoryArray.data && props.showCategoryPicker && (
         <div
-          className="absolute left-0 flex max-h-[50vh] w-fit flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 p-2 text-zinc-300"
+          className="absolute left-0 flex max-h-[50vh] w-[400px] flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 p-2 text-zinc-300"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex w-full justify-between">

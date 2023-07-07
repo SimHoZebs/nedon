@@ -11,7 +11,7 @@ const Category = (props: Props) => {
 
   return (
     <div
-      className="relative w-full"
+      className="relative "
       onClick={() => {
         setShowCategoryPicker((prev) => !prev);
       }}
