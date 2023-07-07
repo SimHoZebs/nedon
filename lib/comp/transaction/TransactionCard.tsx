@@ -11,38 +11,63 @@ interface Props {
   button: () => void;
 }
 
+const icon: {
+  [key: string]: {
+    icon: string;
+    color: string;
+  };
+} = {
+  Travel: { icon: "mdi:car-outline", color: "bg-yellow-300" },
+  Taxi: { icon: "bx:taxi", color: "bg-yellow-300" },
+  "Fast Food": { icon: "mdi:food", color: "bg-red-300" },
+  "Food and Drink": {
+    icon: "fluent:food-24-regular",
+    color: "bg-blue-300",
+  },
+  "Airlines and Aviation Services": {
+    icon: "mdi:airplane",
+    color: "bg-teal-300",
+  },
+  "Coffee Shop": { icon: "mdi:coffee", color: "bg-orange-300" },
+  Shops: { icon: "mdi:shopping-outline", color: "bg-green-300" },
+  Payment: { icon: "mdi:exchange", color: "bg-green-300" },
+  Transfer: { icon: "mdi:exchange", color: "bg-green-300" },
+  "Gyms and Fitness Centers": {
+    icon: "mingcute:fitness-line",
+    color: "bg-green-300",
+  },
+  Recreation: {
+    icon: "material-symbols:relax-outline",
+    color: "bg-green-300",
+  },
+};
+
 const TransactionCard = (props: Props) => {
   const { appUser } = useStoreState((state) => state);
-  const icon = useRef<{ [key: string]: string }>({
-    Travel: "mdi:car-outline",
-    "Food and Drink": "fluent:food-24-regular",
-    Shops: "mdi:shopping-outline",
-    Payment: "mdi:exchange",
-    Transfer: "mdi:exchange",
-    "Gyms and Fitness Centers": "mingcute:fitness-line",
-    Recreation: "material-symbols:relax-outline",
-  });
+  const category = props.transaction.category;
 
   const splitAmount = props.splitArray?.find(
     (split) =>
       split.transactionId === props.transaction.transaction_id &&
       split.userId === appUser?.id
   )?.amount;
+  console.log(icon["Misc"]);
 
   return (
     <div
       className="flex h-[64px] w-full justify-between gap-x-4 rounded-md bg-zinc-800 p-2 text-start hover:cursor-pointer hover:bg-zinc-700"
       onClick={props.button}
     >
-      <div className="flex w-fit items-center gap-x-2 truncate sm:gap-x-4">
+      <div className={`flex w-fit items-center gap-x-2 truncate sm:gap-x-4`}>
         <Icon
-          className="rounded-full bg-zinc-400 p-1 text-zinc-800"
+          className={`rounded-full bg-zinc-400 p-2 text-zinc-800 ${
+            category && icon[category[category.length - 1]]?.color
+          }`}
           icon={
-            icon.current[
-              props.transaction.category ? props.transaction.category[0] : ""
-            ]
+            (category && icon[category[category.length - 1]]?.icon) ||
+            "mdi:shape-outline"
           }
-          width={36}
+          width={30}
         />
 
         <div className="flex-start flex h-full flex-col justify-center truncate">
