@@ -54,7 +54,7 @@ const Home: NextPage = () => {
 
                 if (!group) return;
                 setAppGroup((prev) => group);
-                router.push("/home");
+                router.push("/transactions");
               }}
             >
               <div className="flex gap-x-2">
@@ -97,6 +97,7 @@ const Home: NextPage = () => {
                         <Icon icon="mdi:user-add-outline" width={20} />
                       )}
                     </Button>
+
                     <div className="flex h-full w-px bg-zinc-500"></div>
                   </>
                 )}
