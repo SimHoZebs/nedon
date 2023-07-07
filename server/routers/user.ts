@@ -26,21 +26,22 @@ const userRouter = router({
   }),
 
   getAll: procedure
-    .input(z.array(z.string()).nullable())
+    .input(z.array(z.string()))
     .query(async ({ input: userIdArray }) => {
       let userArray: ((User & { groupArray: Group[] }) | null)[] = [];
 
       if (process.env.NODE_ENV === "production") {
-        userIdArray
-          ? (userArray = await db.$transaction(
-              userIdArray.map((id) =>
-                db.user.findFirst({
-                  where: { id },
-                  include: { groupArray: true },
-                })
+        userArray =
+          userIdArray.length > 0
+            ? await db.$transaction(
+                userIdArray.map((id) =>
+                  db.user.findFirst({
+                    where: { id },
+                    include: { groupArray: true },
+                  })
+                )
               )
-            ))
-          : [];
+            : [];
       } else {
         //developers get to see all accounts
         userArray = await db.user.findMany({

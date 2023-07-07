@@ -11,10 +11,47 @@ const Home: NextPage = () => {
   const router = useRouter();
   const server = trpc.useContext();
   const [userIdArray, setUserIdArray] = useState<string[]>([]);
-
   const allUsers = trpc.user.getAll.useQuery(userIdArray, {
-    staleTime: 60 * 60,
+    staleTime: Infinity,
   });
+
+  useEffect(() => {
+    const localStorageUserIdArray = localStorage.getItem("userIdArray");
+    if (!localStorageUserIdArray) return;
+
+    //initial load of browser with users
+    console.log("syncing local state using local storage");
+
+    setUserIdArray(() => localStorageUserIdArray.split(","));
+  }, []);
+
+  useEffect(() => {
+    const refetchAllUsersAndSyncLocalStorage = async () => {
+      console.log("refetching to sync local storage and local state");
+
+      const userArray = await allUsers.refetch();
+      if (!userArray.data) throw new Error("no data");
+
+      const newUserIdArray = userArray.data.map((user) => user.id);
+      setUserIdArray(() => newUserIdArray);
+      localStorage.setItem("userIdArray", newUserIdArray.join(","));
+    };
+
+    if (
+      userIdArray.length === 0 ||
+      localStorage.getItem("userIdArray") === userIdArray.join(",")
+    ) {
+      console.log("local storage and local state are already synced");
+
+      return;
+    }
+
+    console.log("syncing local storage using local state");
+
+    localStorage.setItem("userIdArray", userIdArray.join(","));
+    refetchAllUsersAndSyncLocalStorage();
+  }, [allUsers, userIdArray]);
+
   const deleteUser = trpc.user.delete.useMutation();
   const deleteGroup = trpc.group.delete.useMutation();
 
@@ -26,19 +63,13 @@ const Home: NextPage = () => {
   const addUserToGroup = trpc.group.addUser.useMutation();
   const removeUserFromGroup = trpc.group.removeUser.useMutation();
 
-  useEffect(() => {
-    const userIdArray = localStorage.getItem("userIdArray");
-
-    if (userIdArray) setUserIdArray(userIdArray.split(","));
-  }, []);
-
   return (
     <section className="flex h-full w-full flex-col items-center justify-center gap-y-3">
       <h1 className="text-3xl">
         {allUsers.isLoading ? "Loading" : "Choose an account"}
       </h1>
 
-      {allUsers.data && (
+      {allUsers.data && !allUsers.isRefetching && (
         <div className="flex flex-col items-center rounded-md border border-zinc-600 ">
           {allUsers.data.map((user) => (
             <div
@@ -102,6 +133,7 @@ const Home: NextPage = () => {
                   </>
                 )}
                 <Button
+                  title="Delete user"
                   className="text-pink-300"
                   onClick={async (e) => {
                     e.stopPropagation();
@@ -110,7 +142,10 @@ const Home: NextPage = () => {
                       id: user.groupArray[0].id,
                     });
                     await deleteUser.mutateAsync(user.id);
-                    allUsers.refetch();
+                    setUserIdArray((prev) =>
+                      prev.filter((userId) => userId !== user.id)
+                    );
+
                     if (appUser && appUser.id === user.id) {
                       setAppUser(() => emptyUser);
                     }
@@ -122,7 +157,7 @@ const Home: NextPage = () => {
             </div>
           ))}
 
-          <CreateUserBtn userIdArray={userIdArray} />
+          <CreateUserBtn setUserIdArray={setUserIdArray} />
         </div>
       )}
     </section>
@@ -130,13 +165,10 @@ const Home: NextPage = () => {
 };
 
 interface Props {
-  userIdArray: string[];
+  setUserIdArray: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const CreateUserBtn = (props: Props) => {
-  const allUsers = trpc.user.getAll.useQuery(props.userIdArray, {
-    enabled: false,
-  });
   const createUser = trpc.user.create.useMutation();
   const createGroup = trpc.group.create.useMutation();
 
@@ -159,22 +191,12 @@ const CreateUserBtn = (props: Props) => {
         const publicToken = await sandboxPublicToken.refetch();
         if (!publicToken.data) throw new Error("no public token");
 
-        await setAccessToken.mutateAsync({
+        const userWithAccessToken = await setAccessToken.mutateAsync({
           publicToken: publicToken.data,
           id: user.id,
         });
 
-        const userIdArray = localStorage.getItem("userIdArray");
-        localStorage.setItem(
-          "userIdArray",
-          userIdArray ? `${userIdArray},${user.id}` : user.id
-        );
-
-        const userArray = await allUsers.refetch();
-        localStorage.setItem(
-          "userIdArray",
-          userArray.data ? userArray.data.join(",") : ""
-        );
+        props.setUserIdArray((prev) => [...prev, userWithAccessToken.id]);
         setLoading(false);
       }}
     >
