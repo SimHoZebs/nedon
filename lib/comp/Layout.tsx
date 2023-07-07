@@ -6,6 +6,7 @@ import { Inter } from "next/font/google";
 import NavBtn from "./Button/NavBtn";
 import { Icon } from "@iconify-icon/react";
 import Button from "./Button";
+import ActionBtn from "./Button/ActionBtn";
 
 const noto_sans = Inter({
   subsets: ["latin"],
@@ -86,6 +87,15 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
           <NavBtn router={router} route="/analysis" icon="mdi:google-analytics">
             Analysis
           </NavBtn>
+
+          <div className="w-full">
+            <ActionBtn onClick={() => router.push("/")}>
+              <div className="flex items-center gap-x-2">
+                <Icon icon="mdi:user-add-outline" height={24} />
+                <p>Add friend</p>
+              </div>
+            </ActionBtn>
+          </div>
         </nav>
       )}
 
