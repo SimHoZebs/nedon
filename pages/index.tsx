@@ -20,9 +20,7 @@ const Home: NextPage = () => {
   const allUsers = trpc.user.getAll.useQuery(userIdArray, {
     staleTime: 60 * 60,
   });
-  const createUser = trpc.user.create.useMutation();
   const deleteUser = trpc.user.delete.useMutation();
-  const createGroup = trpc.group.create.useMutation();
   const deleteGroup = trpc.group.delete.useMutation();
 
   const { appUser, appGroup } = useStoreState((state) => state);
@@ -133,26 +131,66 @@ const Home: NextPage = () => {
               </div>
             ))}
 
-            <Button
-              className="w-full rounded-none rounded-b-md text-xl"
-              onClick={async (e) => {
-                e.stopPropagation();
-                const user = await createUser.mutateAsync();
-                const userIdArray = localStorage.getItem("userIdArray");
-                localStorage.setItem(
-                  "userIdArray",
-                  userIdArray ? `${userIdArray},${user.id}` : user.id
-                );
-                await createGroup.mutateAsync({ id: user.id });
-                allUsers.refetch();
-              }}
-            >
-              create new user
-            </Button>
+            <CreateUserBtn userIdArray={userIdArray} />
           </div>
         </>
       )}
     </section>
+  );
+};
+
+interface Props {
+  userIdArray: string[];
+}
+
+const CreateUserBtn = (props: Props) => {
+  const allUsers = trpc.user.getAll.useQuery(props.userIdArray, {
+    enabled: false,
+  });
+  const createUser = trpc.user.create.useMutation();
+  const createGroup = trpc.group.create.useMutation();
+
+  const sandboxPublicToken = trpc.sandBoxAccess.useQuery(
+    { instituteID: undefined },
+    { staleTime: 360000, enabled: false }
+  );
+  const setAccessToken = trpc.setAccessToken.useMutation();
+  const [loading, setLoading] = useState(false);
+
+  return (
+    <Button
+      className="flex w-full items-center justify-center gap-x-2 rounded-none rounded-b-md text-xl"
+      onClick={async (e) => {
+        setLoading(true);
+        e.stopPropagation();
+        const user = await createUser.mutateAsync();
+        await createGroup.mutateAsync({ id: user.id });
+
+        const publicToken = await sandboxPublicToken.refetch();
+        if (!publicToken.data) throw new Error("no public token");
+
+        await setAccessToken.mutateAsync({
+          publicToken: publicToken.data,
+          id: user.id,
+        });
+
+        const userIdArray = localStorage.getItem("userIdArray");
+        localStorage.setItem(
+          "userIdArray",
+          userIdArray ? `${userIdArray},${user.id}` : user.id
+        );
+
+        const userArray = await allUsers.refetch();
+        localStorage.setItem(
+          "userIdArray",
+          userArray.data ? userArray.data.join(",") : ""
+        );
+        setLoading(false);
+      }}
+    >
+      create new user
+      {loading && <Icon className="animate-spin" icon="mdi:loading" />}
+    </Button>
   );
 };
 

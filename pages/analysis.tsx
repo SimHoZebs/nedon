@@ -7,7 +7,6 @@ import {
 } from "../lib/util/transaction";
 import Button from "../lib/comp/Button/PrimaryBtn";
 import SettleModal from "../lib/comp/analysis/SettleModal";
-import SanboxLink from "../lib/comp/analysis/SanboxLinkBtn";
 
 const categoryTotalSpending = (
   category: CategoryWithTransactionArray
@@ -84,12 +83,7 @@ const Page = () => {
     return oweGroup;
   }, [appUser, associatedTransactionArray.data]);
 
-  return appUser && !appUser.hasAccessToken ? (
-    <section className="flex h-full flex-col items-center justify-center gap-y-3">
-      <h1 className="text-3xl">{"No bank account linked to this user."}</h1>
-      <SanboxLink />
-    </section>
-  ) : (
+  return appUser ? (
     <section className="flex flex-col gap-y-4">
       {showModal && (
         <SettleModal oweUser={oweUser} setShowModal={setShowModal} />
@@ -126,7 +120,7 @@ const Page = () => {
       </div>
       {render(categorizedTransactionArray)}
     </section>
-  );
+  ) : null;
 };
 
 export default Page;

@@ -8,7 +8,6 @@ import { useRouter } from "next/router";
 import { SplitClientSide } from "../lib/util/types";
 import { organizeTransactionByTime } from "../lib/util/transaction";
 import TransactionModal from "../lib/comp/transaction/TransactionModal";
-import SanboxLink from "../lib/comp/analysis/SanboxLinkBtn";
 
 const Page: NextPage = () => {
   const { appUser } = useStoreState((state) => state);
@@ -35,12 +34,7 @@ const Page: NextPage = () => {
     return organizeTransactionByTime(plaidTransactionArray.data);
   }, [plaidTransactionArray.data]);
 
-  return appUser && !appUser.hasAccessToken ? (
-    <section className="flex h-full flex-col items-center justify-center gap-y-3">
-      <h1 className="text-3xl">{"No bank account linked to this user."}</h1>
-      <SanboxLink />
-    </section>
-  ) : (
+  return appUser ? (
     <section className="flex w-full flex-col items-center">
       {showModal && selectedTransaction && (
         <TransactionModal
@@ -110,7 +104,7 @@ const Page: NextPage = () => {
         ))}
       </div>
     </section>
-  );
+  ) : null;
 };
 
 export default Page;

@@ -3,7 +3,6 @@ import { useStoreState } from "../lib/util/store";
 import { NextPage } from "next";
 
 import Link from "next/link";
-import SanboxLink from "../lib/comp/analysis/SanboxLinkBtn";
 import { trpc } from "../lib/util/trpc";
 import { AccountBase, AuthGetResponse } from "plaid";
 import Modal from "../lib/comp/Modal";
@@ -23,12 +22,7 @@ const User: NextPage = () => {
     <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700"></div>
   );
 
-  return appUser && !appUser.hasAccessToken ? (
-    <section className="flex h-full flex-col items-center justify-center gap-y-3">
-      <h1 className="text-3xl">{"No bank account linked to this user."}</h1>
-      <SanboxLink />
-    </section>
-  ) : (
+  return appUser ? (
     <section className="flex h-full w-full flex-col gap-y-3">
       {showModal && (
         <Modal setShowModal={setShowModal}>
@@ -98,7 +92,7 @@ const User: NextPage = () => {
         </div>
       )}
     </section>
-  );
+  ) : null;
 };
 
 export default User;
