@@ -1,15 +1,16 @@
 import React, { useMemo, useState } from "react";
 import { trpc } from "../lib/util/trpc";
 import { useStoreState } from "../lib/util/store";
-import {
-  CategoryWithTransactionArray,
-  organizeTransactionByCategory,
-} from "../lib/util/transaction";
+import { organizeTransactionByCategory } from "../lib/util/transaction";
 import Button from "../lib/comp/Button/ActionBtn";
 import SettleModal from "../lib/comp/analysis/SettleModal";
+import {
+  CategoryWithTransactionArray,
+  FullTransaction,
+} from "../lib/util/types";
 
 const categoryTotalSpending = (
-  category: CategoryWithTransactionArray
+  category: CategoryWithTransactionArray,
 ): number => {
   let amount = category.transactionArray.reduce((total, transaction) => {
     return total + transaction.amount;
@@ -38,14 +39,16 @@ const Page = () => {
   const [showModal, setShowModal] = useState(false);
   const [oweUser, setOweUser] = useState<{ id: string; amount: number }>();
 
-  const transactionArray = trpc.transaction.getPlaidTransactionArray.useQuery(
+  const transactionArray = trpc.transaction.getTransactionArray.useQuery<
+    FullTransaction[]
+  >(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken },
   );
   const associatedTransactionArray =
     trpc.transaction.getAssociatedTransactionArray.useQuery(
       { id: appUser ? appUser.id : "" },
-      { staleTime: 3600000, enabled: appUser?.hasAccessToken }
+      { staleTime: 3600000, enabled: appUser?.hasAccessToken },
     );
 
   //useMemo is probably unnecessary since this page doesn't re-render that much.

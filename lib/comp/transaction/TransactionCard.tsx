@@ -1,14 +1,12 @@
 import React from "react";
 
-import { PlaidTransaction } from "../../util/types";
-import { Split } from "@prisma/client";
 import { useStoreState } from "../../util/store";
 import { Icon } from "@iconify-icon/react";
 import categoryStyle from "../../util/categoryStyle";
+import { FullTransaction } from "../../util/types";
 
 interface Props {
-  transaction: PlaidTransaction;
-  splitArray?: Split[];
+  transaction: FullTransaction;
   button: () => void;
 }
 
@@ -17,10 +15,10 @@ const TransactionCard = (props: Props) => {
   const lastCategory =
     props.transaction.category?.[props.transaction.category.length - 1];
 
-  const splitAmount = props.splitArray?.find(
+  const splitAmount = props.transaction.splitArray?.find(
     (split) =>
       split.transactionId === props.transaction.transaction_id &&
-      split.userId === appUser?.id
+      split.userId === appUser?.id,
   )?.amount;
 
   return (

@@ -1,41 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { trpc } from "../../../util/trpc";
 import { Icon } from "@iconify-icon/react";
-import { PlaidTransaction } from "../../../util/types";
-import { Category } from "../../../util/transaction";
 import { useStoreState } from "../../../util/store";
+import { Category, FullTransaction } from "../../../util/types";
 
 interface Props {
-  selectedTransaction: PlaidTransaction;
+  transaction: FullTransaction;
+  setTransaction: React.Dispatch<
+    React.SetStateAction<FullTransaction | undefined>
+  >;
   setShowCategoryPicker: React.Dispatch<React.SetStateAction<boolean>>;
   showCategoryPicker: boolean;
 }
 
 const CategoryPicker = (props: Props) => {
   const { appUser } = useStoreState((state) => state);
-  const categoryArray = trpc.getCategoryArray.useQuery(undefined, {});
-  const transactionArray = trpc.transaction.getTransactionArray.useQuery(
-    { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken },
-  );
+  const categoryArray = trpc.getCategoryArray.useQuery(undefined, {
+    staleTime: Infinity,
+  });
   const updateCategory = trpc.transaction.updateCategory.useMutation();
   const createTransaction = trpc.transaction.createTransaction.useMutation();
+  const queryClient = trpc.useContext();
 
   const [categoryTree, setCategoryTree] = useState<string[]>([]);
   const [selectedCategoryArray, setSelectedCategoryArray] = useState<
     Category[]
   >([]);
-
-  const currentCategoryArray = () => {
-    const transaction = transactionArray.data?.find(
-      (transaction) =>
-        transaction.id === props.selectedTransaction.transaction_id,
-    );
-
-    return transaction
-      ? transaction.categoryArray
-      : props.selectedTransaction.category;
-  };
 
   const setCategory = async (category?: Category) => {
     if (!appUser || !categoryArray.data) return;
@@ -43,24 +33,26 @@ const CategoryPicker = (props: Props) => {
     const newCategoryArray = [...categoryTree];
     category && newCategoryArray.push(category.name);
 
-    transactionArray.data?.find(
-      (transaction) =>
-        transaction.id === props.selectedTransaction.transaction_id,
-    )
+    props.transaction.inDB
       ? await updateCategory.mutateAsync({
-          transactionId: props.selectedTransaction.transaction_id,
+          transactionId: props.transaction.transaction_id,
           categoryArray: newCategoryArray,
         })
       : await createTransaction.mutateAsync({
           userId: appUser.id,
-          transactionId: props.selectedTransaction.transaction_id,
+          transactionId: props.transaction.transaction_id,
           categoryArray: newCategoryArray,
         });
 
     setCategoryTree([]);
     setSelectedCategoryArray(categoryArray.data);
+    props.setTransaction({
+      ...props.transaction,
+      category: newCategoryArray,
+    });
+
+    queryClient.transaction.getTransactionArray.refetch();
     props.setShowCategoryPicker(false);
-    transactionArray.refetch();
   };
 
   useEffect(() => {
@@ -74,7 +66,7 @@ const CategoryPicker = (props: Props) => {
           className={"" + (categoryTree.length > 0 ? "animate-pulse" : "")}
         >
           {categoryTree.length === 0
-            ? currentCategoryArray()?.join(" > ")
+            ? props.transaction.category?.join(" > ")
             : categoryTree.join(" > ")}
         </button>
       </div>

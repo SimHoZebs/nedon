@@ -1,19 +1,12 @@
-import { PlaidTransaction } from "./types";
+import {
+  Category,
+  CategoryWithTransactionArray,
+  FullTransaction,
+} from "./types";
 import { Category as PlaidCategory } from "plaid";
 
-export type CategoryWithTransactionArray = {
-  name: string;
-  transactionArray: PlaidTransaction[];
-  subCategory: CategoryWithTransactionArray[];
-};
-
-export type Category = {
-  name: string;
-  subCategory: Category[];
-};
-
 export const organizeTransactionByCategory = (
-  transactionArray: PlaidTransaction[]
+  transactionArray: FullTransaction[],
 ) => {
   const categoryArray: CategoryWithTransactionArray[] = [];
 
@@ -25,7 +18,7 @@ export const organizeTransactionByCategory = (
 };
 
 export const convertPlaidCategoriesToCategoryArray = (
-  categories: PlaidCategory[]
+  categories: PlaidCategory[],
 ) => {
   const categoryArray: Category[] = [];
   categories.forEach((category) => {
@@ -36,14 +29,14 @@ export const convertPlaidCategoriesToCategoryArray = (
 
 const test = (
   categoryArray: Category[],
-  plaidCategory: PlaidCategory
+  plaidCategory: PlaidCategory,
 ): Category[] => {
   const category = plaidCategory.hierarchy;
 
   const firstCategory = category[0];
 
   let index = categoryArray.findIndex(
-    (category) => category.name === firstCategory
+    (category) => category.name === firstCategory,
   );
 
   if (index === -1) {
@@ -65,7 +58,7 @@ const test = (
 
     categoryArray[index].subCategory = test(
       categoryArray[index].subCategory,
-      plaidCategory
+      plaidCategory,
     );
   }
 
@@ -74,7 +67,7 @@ const test = (
 
 const fillCategoryArray = (
   categoryArray: CategoryWithTransactionArray[],
-  transaction: PlaidTransaction
+  transaction: FullTransaction,
 ): CategoryWithTransactionArray[] => {
   const category = transaction.category;
 
@@ -83,7 +76,7 @@ const fillCategoryArray = (
   const firstCategory = category[0];
 
   let index = categoryArray.findIndex(
-    (category) => category.name === firstCategory
+    (category) => category.name === firstCategory,
   );
 
   if (index === -1) {
@@ -107,7 +100,7 @@ const fillCategoryArray = (
     //inefficient for cases where parent category did not exist; subcategory's existence doesn't need to be checked.
     categoryArray[index].subCategory = fillCategoryArray(
       categoryArray[index].subCategory,
-      transaction
+      transaction,
     );
   }
 
@@ -115,14 +108,14 @@ const fillCategoryArray = (
 };
 
 export const organizeTransactionByTime = (
-  transactionArray: PlaidTransaction[]
+  transactionArray: FullTransaction[],
 ) => {
   const dateSortedTransactionArray = transactionArray.sort(
     (a, b) =>
       new Date(b.datetime ? b.datetime : b.date).getTime() -
-      new Date(a.datetime ? a.datetime : a.date).getTime()
+      new Date(a.datetime ? a.datetime : a.date).getTime(),
   );
-  const timeSortedTransactionArray: PlaidTransaction[][][][] = [[[[]]]];
+  const timeSortedTransactionArray: FullTransaction[][][][] = [[[[]]]];
 
   let lastDate = new Date(0);
   let yearIndex = -1;
@@ -149,7 +142,7 @@ export const organizeTransactionByTime = (
     }
 
     timeSortedTransactionArray[yearIndex][monthIndex][dayIndex].push(
-      transaction
+      transaction,
     );
 
     lastDate = date;

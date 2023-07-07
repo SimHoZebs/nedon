@@ -14,8 +14,24 @@ export interface SplitClientSide extends Omit<Split, "id"> {
   id: string | null;
 }
 
+export interface FullTransaction extends PlaidTransaction {
+  splitArray: SplitClientSide[];
+  inDB: boolean;
+}
+
+export type CategoryWithTransactionArray = {
+  name: string;
+  transactionArray: FullTransaction[];
+  subCategory: CategoryWithTransactionArray[];
+};
+
+export type Category = {
+  name: string;
+  subCategory: Category[];
+};
+
 //temporary workaround for failing trpc queries
-export interface PlaidTransaction extends Transaction {
+interface PlaidTransaction extends Transaction {
   location: {
     /**
      * The street address where the transaction occurred.

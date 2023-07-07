@@ -1,15 +1,19 @@
 import { router, procedure } from "../trpc";
 import { z } from "zod";
 import db from "../../lib/util/db";
-import { RemovedTransaction, TransactionsSyncRequest } from "plaid";
-import { PlaidTransaction } from "../../lib/util/types";
+import {
+  RemovedTransaction,
+  Transaction,
+  TransactionsSyncRequest,
+} from "plaid";
+import { FullTransaction } from "../../lib/util/types";
 import { client } from "../util";
 import { SplitModel } from "../../prisma/zod";
 
 // Retrieve Transactions for an Item
 // https://plaid.com/docs/#transactions
 const transactionRouter = router({
-  getPlaidTransactionArray: procedure
+  getTransactionArray: procedure
     .input(z.object({ id: z.string(), cursor: z.string().optional() }))
     .query(async ({ input }) => {
       const user = await db.user.findFirst({
@@ -20,8 +24,8 @@ const transactionRouter = router({
       if (!user || !user.ACCESS_TOKEN) return null;
 
       // New transaction updates since "cursor"
-      let added: PlaidTransaction[] = [];
-      let modified: PlaidTransaction[] = [];
+      let added: Transaction[] = [];
+      let modified: Transaction[] = [];
       // Removed transaction ids
       let removed: RemovedTransaction[] = [];
       let hasMore = true;
@@ -49,14 +53,7 @@ const transactionRouter = router({
         cursor = data.next_cursor;
       }
 
-      return added;
-    }),
-
-  //only transactions owned by user
-  getTransactionArray: procedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
-      return db.transaction.findMany({
+      const transactionArray = await db.transaction.findMany({
         where: {
           ownerId: input.id,
         },
@@ -64,6 +61,28 @@ const transactionRouter = router({
           splitArray: true,
         },
       });
+
+      const fullTransactionArray: FullTransaction[] = added.map(
+        (transaction) => {
+          const meta = transactionArray.find(
+            (t) => t.id === transaction.transaction_id,
+          );
+
+          if (meta) {
+            const { id, ownerId, categoryArray, ...rest } = meta;
+            return {
+              ...transaction,
+              inDB: true,
+              category: categoryArray,
+              ...rest,
+            };
+          } else {
+            return { ...transaction, splitArray: [], inDB: false };
+          }
+        },
+      );
+
+      return fullTransactionArray;
     }),
 
   //all transaction meta including the user
@@ -90,7 +109,7 @@ const transactionRouter = router({
       z.object({
         transactionId: z.string(),
         categoryArray: z.array(z.string()),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const updatedTransaction = await db.transaction.update({
@@ -110,7 +129,7 @@ const transactionRouter = router({
       z.object({
         transactionId: z.string(),
         splitArray: z.array(SplitModel.extend({ id: z.string().nullable() })),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const updatedTransactionArray = await db.$transaction(
@@ -124,8 +143,8 @@ const transactionRouter = router({
                   id,
                 },
                 data: rest,
-              })
-        )
+              }),
+        ),
       );
 
       return updatedTransactionArray;
@@ -140,7 +159,7 @@ const transactionRouter = router({
           .array(SplitModel.extend({ id: z.string().nullable() }))
           .optional(),
         categoryArray: z.array(z.string()),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const transaction = await db.transaction.create({
@@ -174,9 +193,9 @@ const transactionRouter = router({
           SplitModel.extend({
             id: z.undefined(),
             transactionId: z.undefined(),
-          })
+          }),
         ),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const transaction = await db.transaction.create({
