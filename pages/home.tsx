@@ -2,14 +2,13 @@ import React, { useRef, useState } from "react";
 import { useStoreState } from "../lib/util/store";
 import { NextPage } from "next";
 
-import Link from "next/link";
 import { trpc } from "../lib/util/trpc";
 import { AccountBase, AuthGetResponse } from "plaid";
 import Modal from "../lib/comp/Modal";
 import AccountCard from "../lib/comp/home/AccountCard";
 
 const User: NextPage = () => {
-  const { appUser, isPaymentInitiation } = useStoreState((state) => state);
+  const { appUser } = useStoreState((state) => state);
   const [showModal, setShowModal] = useState(false);
   const [clickedAccount, setClickedAccount] = useState<AccountBase>();
 
@@ -41,56 +40,22 @@ const User: NextPage = () => {
         </>
       )}
 
-      {auth.data && (
-        <>
-          {(auth.data as unknown as AuthGetResponse).accounts.map(
-            (account, index) =>
-              account.balances.available && (
-                <AccountCard
-                  key={index}
-                  onClick={() => {
-                    setClickedAccount(account);
-                    setShowModal(true);
-                  }}
-                >
-                  <div>{account.name}</div>
-                  <div>${account.balances.available}</div>
-                </AccountCard>
-              )
-          )}
-
-          <pre className="whitespace-pre-wrap">
-            {JSON.stringify(
-              (auth.data as unknown as AuthGetResponse).item,
-              null,
-              2
-            )}
-          </pre>
-        </>
-      )}
-
-      {isPaymentInitiation && (
-        <div>
-          <h4 className="">
-            Congrats! Your payment is now confirmed.
-            <p />
-            <div className="border-dotted border-red-500">
-              You can see information of all your payments in the
-              <Link
-                href="https://dashboard.plaid.com/activity/payments"
-                target="_blank"
+      {auth.data &&
+        (auth.data as unknown as AuthGetResponse).accounts.map(
+          (account, index) =>
+            account.balances.available && (
+              <AccountCard
+                key={index}
+                onClick={() => {
+                  setClickedAccount(account);
+                  setShowModal(true);
+                }}
               >
-                Payments Dashboard
-              </Link>
-              .
-            </div>
-          </h4>
-          <p className="">
-            Now that the payment id stored in your server, you can use it to
-            access the payment information:
-          </p>
-        </div>
-      )}
+                <div>{account.name}</div>
+                <div>${account.balances.available}</div>
+              </AccountCard>
+            )
+        )}
     </section>
   ) : null;
 };

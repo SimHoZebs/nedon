@@ -45,11 +45,6 @@ const Home: NextPage = () => {
               key={user.id}
               className="flex w-full items-center justify-between border-b border-zinc-600 p-3 hover:cursor-pointer sm:gap-x-16"
               onClick={async (e) => {
-                // const isPaymentInit = user.products.includes(
-                //   Products.PaymentInitiation
-                // );
-                // setIsPaymentInitiation(isPaymentInit);
-
                 setAppUser((prev) => user);
 
                 if (!user.groupArray) return;

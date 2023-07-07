@@ -5,7 +5,7 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "negative";
 }
 const ActionBtn = (props: Props) => {
-  const { children, variant, ...rest } = props;
+  const { children, className, variant, ...rest } = props;
 
   return (
     <Button
@@ -13,7 +13,7 @@ const ActionBtn = (props: Props) => {
         variant === "negative"
           ? "bg-pink-300 hover:bg-pink-400"
           : "bg-indigo-400 hover:bg-indigo-500"
-      }`}
+      } ${className}`}
       {...rest}
     >
       {children}
