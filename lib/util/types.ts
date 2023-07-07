@@ -1,6 +1,5 @@
 import { User, Group, Split } from "@prisma/client";
 import { CounterpartyType, Transaction } from "plaid";
-import { z } from "zod";
 
 export interface UserClientSide extends Omit<User, "ACCESS_TOKEN"> {
   hasAccessToken: boolean;
