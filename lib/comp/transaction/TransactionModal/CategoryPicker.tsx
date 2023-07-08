@@ -72,7 +72,7 @@ const CategoryPicker = (props: Props) => {
       </div>
       {categoryArray.data && props.showCategoryPicker && (
         <div
-          className="absolute left-0 flex max-h-[50vh] w-[400px] flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 p-2 text-zinc-300"
+          className="absolute left-0 flex max-h-[50vh] w-full sm:min-w-max flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 p-2 text-zinc-300"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex w-full justify-between">
@@ -112,7 +112,7 @@ const CategoryPicker = (props: Props) => {
 
           <hr className="w-full border-zinc-700" />
 
-          <div className="grid auto-cols-fr grid-cols-4 gap-2 overflow-x-hidden overflow-y-scroll bg-zinc-800 py-1 text-xs">
+          <div className="grid w-full auto-cols-fr grid-cols-4 gap-2 overflow-x-hidden overflow-y-scroll bg-zinc-800 py-1 text-xs">
             {selectedCategoryArray.map((category, i) => (
               <button
                 onClick={async () => {
@@ -125,7 +125,7 @@ const CategoryPicker = (props: Props) => {
                 }}
                 key={i}
                 className={
-                  "flex h-[84px] w-[84px] items-center justify-center hyphens-auto  rounded-lg border  border-zinc-400 p-1 text-center " +
+                  "flex aspect-square items-center justify-center hyphens-auto  rounded-lg border  border-zinc-400 p-1 text-center " +
                   (category.subCategory.length > 0 ? "" : "bg-green-700")
                 }
               >

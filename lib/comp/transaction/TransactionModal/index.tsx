@@ -43,12 +43,12 @@ const TransactionModal = (props: Props) => {
   return (
     <Modal setShowModal={props.setShowModal}>
       <div className="flex flex-col ">
-        <div className="flex justify-between font-semibold ">
-          <h3 className="text-2xl">{props.transaction.name}</h3>
-          <h3 className="text-2xl">${amount * -1}</h3>
+        <div className="flex justify-between font-semibold text-xl sm:text-2xl">
+          <h3>{props.transaction.name}</h3>
+          <h3>${amount * -1}</h3>
         </div>
 
-        <div className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800">
+        <div className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800">
           <div
             className={`flex rounded-full p-1 text-zinc-700 ${
               (thisCategoryStyle && thisCategoryStyle.color) ||
@@ -247,7 +247,6 @@ const TransactionModal = (props: Props) => {
                 ) {
                   await updateSplit.mutateAsync({
                     split: unsavedSplit,
-                    transactionId: props.transaction.transaction_id,
                   });
                 } else {
                   await createSplit.mutateAsync({

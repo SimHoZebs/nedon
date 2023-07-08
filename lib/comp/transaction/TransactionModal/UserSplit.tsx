@@ -8,7 +8,6 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const UserSplit = (props: Props) => {
-  //FIX: Performance is trash
   return (
     <div className="flex w-full items-center justify-between gap-x-2">
       <div>{props.children}</div>
@@ -26,7 +25,7 @@ const UserSplit = (props: Props) => {
       <div className="flex items-center justify-between">
         $
         <input
-          className="w-20 rounded-lg bg-zinc-800 p-1"
+          className="w-12 sm:w-20 rounded-lg bg-zinc-800 p-1"
           type="number"
           min={0}
           max={props.amount}
@@ -38,14 +37,14 @@ const UserSplit = (props: Props) => {
 
       <div className="flex items-center">
         <input
-          className="w-16 rounded-lg bg-zinc-800 p-1"
+          className="w-12 sm:w-16 rounded-lg bg-zinc-800 p-1"
           type="number"
           min={0}
           max={100}
           value={Math.floor((props.split.amount / props.amount) * 10000) / 100}
           onChange={(e) => {
             let newAmount = Math.floor(
-              parseFloat(e.target.value) * props.amount
+              parseFloat(e.target.value) * props.amount,
             );
 
             //0.01 percentage increments are negated in Math.floor, requiring manual increment
