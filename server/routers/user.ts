@@ -33,14 +33,10 @@ const userRouter = router({
       if (process.env.NODE_ENV === "production") {
         userArray =
           userIdArray.length > 0
-            ? await db.$transaction(
-                userIdArray.map((id) =>
-                  db.user.findFirst({
-                    where: { id },
-                    include: { groupArray: true },
-                  })
-                )
-              )
+            ? await db.user.findMany({
+                where: { id: { in: userIdArray } },
+                include: { groupArray: true },
+              })
             : [];
       } else {
         //developers get to see all accounts
@@ -52,7 +48,7 @@ const userRouter = router({
       }
 
       const clientSideUserArray = userArray.map(
-        (user) => user && stripUserSecrets(user)
+        (user) => user && stripUserSecrets(user),
       );
 
       return clientSideUserArray.filter((user) => !!user) as UserClientSide[];

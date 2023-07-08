@@ -20,20 +20,23 @@ interface Props {
 
 const TransactionModal = (props: Props) => {
   const { appUser, appGroup } = useStoreState((state) => state);
+  const { amount } = props.transaction;
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [unsavedSplitArray, setSplitArr] = useState<SplitClientSide[]>(
+    props.transaction.splitArray,
+  );
+
   const createTransaction = trpc.transaction.createTransaction.useMutation();
   const updateSplit = trpc.transaction.updateSplit.useMutation();
-  const [totalSplit, setTotalSplit] = useState(0);
-  const { splitArray, amount } = props.transaction;
-  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const createSplit = trpc.transaction.createSplit.useMutation();
+  const removeSplit = trpc.transaction.removeSplit.useMutation();
+  const queryClient = trpc.useContext();
 
-  useEffect(() => {
-    const updatedTotalSplit =
-      Math.floor(
-        splitArray.reduce((amount, split) => amount + split.amount, 0) * 100,
-      ) / 100;
-    setTotalSplit(updatedTotalSplit);
-  }, [splitArray]);
-
+  let updatedTotalSplit =
+    Math.floor(
+      unsavedSplitArray.reduce((amount, split) => amount + split.amount, 0) *
+        100,
+    ) / 100;
   const lastCategory = props.transaction.category?.slice(-1)[0];
   const thisCategoryStyle = lastCategory && categoryStyle[lastCategory];
 
@@ -62,7 +65,7 @@ const TransactionModal = (props: Props) => {
           </div>
 
           <div
-            className="relative "
+            className="sm:relative"
             onClick={() => {
               setShowCategoryPicker((prev) => !prev);
             }}
@@ -78,33 +81,84 @@ const TransactionModal = (props: Props) => {
       </div>
 
       <div className="flex w-full flex-col gap-y-1">
-        {splitArray.length > 1 &&
-          splitArray.map((split, i) => (
+        {unsavedSplitArray.length > 1 &&
+          unsavedSplitArray.map((split, i) => (
             <div
               key={i}
               className="flex w-full items-center gap-x-2 sm:gap-x-3"
             >
-              {appUser && split.userId === appUser.id ? (
-                <div className="w-5"></div>
-              ) : (
+              {appUser &&
+                (split.userId === appUser.id ? (
+                  <div className="w-5 aspect-square"></div>
+                ) : (
+                  <button
+                    title="Remove user from split"
+                    className="group flex w-5"
+                    onClick={async () => {
+                      if (!split.id) {
+                        console.log("split id does not exist:", split.id);
+                        return;
+                      }
+
+                      const updatedSplitArray = [...unsavedSplitArray];
+                      await removeSplit.mutateAsync({
+                        transactionId: props.transaction.transaction_id,
+                        userId: split.userId,
+                      });
+
+                      updatedSplitArray.splice(i, 1);
+
+                      if (updatedSplitArray.length === 1) {
+                        updatedSplitArray.pop();
+                        await removeSplit.mutateAsync({
+                          transactionId: props.transaction.transaction_id,
+                          userId: appUser.id,
+                        });
+                      }
+
+                      queryClient.transaction.getTransactionArray.refetch();
+
+                      setSplitArr(updatedSplitArray);
+                      console.log("updatedSplitArray:", updatedSplitArray);
+                      props.setTransaction({
+                        ...props.transaction,
+                        splitArray: updatedSplitArray,
+                      });
+                    }}
+                  >
+                    <Icon
+                      icon="clarity:remove-line"
+                      className="text-zinc-500 group-hover:text-pink-400"
+                      width={20}
+                      height={20}
+                    />
+                  </button>
+                ))}
+
+              {updatedTotalSplit !== amount ? (
                 <button
-                  className="group flex"
+                  className="flex min-h-[20px] aspect-square"
                   onClick={() => {
-                    const updatedSplitArray = [...splitArray];
-                    updatedSplitArray.splice(i, 1);
-                    props.setTransaction({
-                      ...props.transaction,
-                      splitArray: updatedSplitArray,
-                    });
+                    const updatedSplitArray = [...unsavedSplitArray];
+                    let newSplitAmount =
+                      Math.floor(
+                        (split.amount - updatedTotalSplit + amount) * 100,
+                      ) / 100;
+
+                    if (newSplitAmount < 0) newSplitAmount = 0;
+
+                    updatedSplitArray[i].amount = newSplitAmount;
+                    setSplitArr(updatedSplitArray);
                   }}
                 >
                   <Icon
-                    icon="clarity:remove-line"
-                    className="text-zinc-500 group-hover:text-pink-400"
+                    className="text-blue-300"
+                    icon="cil:balance-scale"
                     width={20}
-                    height={20}
                   />
                 </button>
+              ) : (
+                <div className="min-h-[20px] aspect-square"></div>
               )}
 
               <UserSplit
@@ -113,73 +167,55 @@ const TransactionModal = (props: Props) => {
                     ...split,
                     amount,
                   };
-                  const updatedSplitArray = [...splitArray];
+                  const updatedSplitArray = [...unsavedSplitArray];
                   updatedSplitArray[i] = updatedSplit;
-                  props.setTransaction({
-                    ...props.transaction,
-                    splitArray: updatedSplitArray,
-                  });
+                  setSplitArr(updatedSplitArray);
                 }}
                 amount={amount}
                 split={split}
               >
                 {split.userId.slice(0, 8)}
               </UserSplit>
-
-              {totalSplit !== amount && (
-                <Button
-                  className="flex gap-x-1 text-sm"
-                  onClick={() => {
-                    const updatedSplitArray = [...splitArray];
-                    let newSplitAmount =
-                      Math.floor((split.amount - totalSplit + amount) * 100) /
-                      100;
-
-                    if (newSplitAmount < 0) newSplitAmount = 0;
-
-                    updatedSplitArray[i].amount = newSplitAmount;
-                    props.setTransaction({
-                      ...props.transaction,
-                      splitArray: updatedSplitArray,
-                    });
-                  }}
-                >
-                  <Icon icon="cil:balance-scale" width={16} height={16} />
-                  adjust
-                </Button>
-              )}
             </div>
           ))}
       </div>
 
-      {totalSplit !== amount && (
-        <div className="text-red-800">
-          Split is {totalSplit > amount ? "greater " : "less "}
-          than the amount ({`props.totalSplit $${totalSplit}`})
-        </div>
-      )}
+      <div className="text-red-800 h-5">
+        {updatedTotalSplit !== amount &&
+          unsavedSplitArray.length > 0 &&
+          `Split is ${updatedTotalSplit > amount ? "greater " : "less "}
+          than the amount (${`props.totalSplit $${updatedTotalSplit}`})`}
+      </div>
 
       <div>
         <h3 className="font-semibold">Friends</h3>
-        {appGroup?.userArray &&
-          appGroup.userArray.length &&
+        {appUser &&
+          appGroup?.userArray &&
           appGroup.userArray.map((user, i) =>
-            splitArray.find((split) => split.userId === user.id) ? null : (
+            //Don't show users that are already splitting
+            unsavedSplitArray.find((split) => split.userId === user.id) ||
+            user.id === appUser.id ? null : (
               <div key={i} className="flex">
                 <div>{user.id.slice(0, 8)}</div>
                 <Button
                   onClick={() => {
-                    const updatedSplitArray = [...splitArray];
+                    const updatedSplitArray = [...unsavedSplitArray];
+                    if (!updatedSplitArray.length)
+                      updatedSplitArray.push({
+                        id: appUser.id,
+                        transactionId: props.transaction.transaction_id,
+                        userId: appUser.id,
+                        amount,
+                      });
+
                     updatedSplitArray.push({
-                      id: null,
+                      id: user.id,
                       transactionId: props.transaction.transaction_id,
                       userId: user.id,
                       amount: 0,
                     });
-                    props.setTransaction({
-                      ...props.transaction,
-                      splitArray: updatedSplitArray,
-                    });
+
+                    setSplitArr(updatedSplitArray);
                   }}
                 >
                   Split
@@ -191,21 +227,40 @@ const TransactionModal = (props: Props) => {
 
       <div className="flex w-full justify-between">
         <Button
-          disabled={totalSplit !== amount}
+          disabled={updatedTotalSplit !== amount}
           onClick={async () => {
             if (!appUser) return;
 
-            props.transaction.inDB
-              ? await updateSplit.mutateAsync({
-                  splitArray,
-                  transactionId: props.transaction.transaction_id,
-                })
-              : await createTransaction.mutateAsync({
-                  splitArray,
-                  userId: appUser.id,
-                  transactionId: props.transaction.transaction_id,
-                  categoryArray: props.transaction.category || [],
-                });
+            if (!props.transaction.inDB) {
+              await createTransaction.mutateAsync({
+                splitArray: unsavedSplitArray,
+                userId: appUser.id,
+                transactionId: props.transaction.transaction_id,
+                categoryArray: props.transaction.category || [],
+              });
+            } else {
+              unsavedSplitArray.forEach(async (unsavedSplit) => {
+                if (
+                  props.transaction.splitArray.find(
+                    (split) => split.id === unsavedSplit.id,
+                  )
+                ) {
+                  await updateSplit.mutateAsync({
+                    split: unsavedSplit,
+                    transactionId: props.transaction.transaction_id,
+                  });
+                } else {
+                  await createSplit.mutateAsync({
+                    split: unsavedSplit,
+                  });
+                }
+              });
+            }
+
+            props.setTransaction({
+              ...props.transaction,
+              splitArray: unsavedSplitArray,
+            });
           }}
         >
           Save changes

@@ -124,30 +124,68 @@ const transactionRouter = router({
       return updatedTransaction;
     }),
 
+  createSplit: procedure
+    .input(
+      z.object({
+        split: SplitModel.extend({ id: z.string().nullable() }),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { id, ...rest } = input.split;
+      await db.split.create({
+        data: rest,
+      });
+    }),
+
   updateSplit: procedure
     .input(
       z.object({
         transactionId: z.string(),
-        splitArray: z.array(SplitModel.extend({ id: z.string().nullable() })),
+        split: SplitModel.extend({ id: z.string().nullable() }),
       }),
     )
     .mutation(async ({ input }) => {
-      const updatedTransactionArray = await db.$transaction(
-        input.splitArray.map(({ id, ...rest }) =>
-          id === null
-            ? db.split.create({
-                data: rest,
-              })
-            : db.split.update({
-                where: {
-                  id,
-                },
-                data: rest,
-              }),
-        ),
-      );
+      const { id, ...rest } = input.split;
+      const updatedTransactionArray = id
+        ? await db.split.update({
+            where: {
+              id,
+            },
+            data: rest,
+          })
+        : await db.split.create({
+            data: rest,
+          });
 
       return updatedTransactionArray;
+    }),
+
+  removeSplit: procedure
+    .input(
+      z.object({ splitId: z.string() }).or(
+        z.object({
+          transactionId: z.string(),
+          userId: z.string(),
+        }),
+      ),
+    )
+    .mutation(async ({ input }) => {
+      //why do I have to await any of them? Don't they resolve asynchronously?
+      if ("splitId" in input) {
+        await db.split.delete({
+          where: {
+            id: input.splitId,
+          },
+        });
+      } else {
+        //delete doesn't work because the query is not unique - even though it techincally is.
+        await db.split.deleteMany({
+          where: {
+            transactionId: input.transactionId,
+            userId: input.userId,
+          },
+        });
+      }
     }),
 
   createTransaction: procedure
