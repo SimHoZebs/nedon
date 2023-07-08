@@ -256,6 +256,7 @@ const TransactionModal = (props: Props) => {
               });
             }
 
+            queryClient.transaction.getTransactionArray.refetch();
             props.setTransaction({
               ...props.transaction,
               splitArray: unsavedSplitArray,
