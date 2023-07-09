@@ -12,20 +12,10 @@ const UserSplit = (props: Props) => {
     <div className="flex w-full items-center justify-between gap-x-2">
       <div>{props.children}</div>
 
-      <input
-        className="w-20"
-        type="range"
-        min={0}
-        max={props.amount}
-        value={props.split.amount}
-        onChange={(e) => props.onAmountChange(parseFloat(e.target.value))}
-        step={0.01}
-      />
-
       <div className="flex items-center justify-between">
         $
         <input
-          className="w-12 sm:w-20 rounded-lg bg-zinc-800 p-1"
+          className="w-16 sm:w-20 rounded-lg bg-zinc-800 p-1"
           type="number"
           min={0}
           max={props.amount}
@@ -37,7 +27,7 @@ const UserSplit = (props: Props) => {
 
       <div className="flex items-center">
         <input
-          className="w-12 sm:w-16 rounded-lg bg-zinc-800 p-1"
+          className="w-16 sm:w-20 rounded-lg bg-zinc-800 p-1"
           type="number"
           min={0}
           max={100}

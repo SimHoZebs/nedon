@@ -72,21 +72,24 @@ const CategoryPicker = (props: Props) => {
       </div>
       {categoryArray.data && props.showCategoryPicker && (
         <div
-          className="absolute left-0 flex max-h-[50vh] w-full sm:min-w-max flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 p-2 text-zinc-300"
+          className="absolute left-0 flex max-h-[50vh] w-full sm:w-96 flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 p-2 text-zinc-300"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex w-full justify-between">
             <div className="flex w-fit items-center">
-              <button
-                className="flex"
-                onClick={() => {
-                  setSelectedCategoryArray(categoryArray.data);
-                  setCategoryTree([]);
-                }}
-              >
-                <Icon icon="mdi:chevron-left" height={24} />
-              </button>
+              {categoryArray.data !== selectedCategoryArray && (
+                <button
+                  className="flex"
+                  onClick={() => {
+                    setSelectedCategoryArray(categoryArray.data);
+                    setCategoryTree([]);
+                  }}
+                >
+                  <Icon icon="mdi:chevron-left" height={24} />
+                </button>
+              )}
             </div>
+
             <div className="flex gap-x-2 ">
               <button
                 className="text-indigo-300 hover:text-indigo-400"
