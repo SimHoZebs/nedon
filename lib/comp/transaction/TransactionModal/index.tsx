@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Modal from "../../Modal";
 import { FullTransaction, SplitClientSide } from "../../../util/types";
 import UserSplit from "./UserSplit";
@@ -9,6 +9,7 @@ import { Icon } from "@iconify-icon/react";
 import ActionBtn from "../../Button/ActionBtn";
 import categoryStyle from "../../../util/categoryStyle";
 import CategoryPicker from "./CategoryPicker";
+import VerticalCategoryPicker from "./VerticalCategoryPicker";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -19,7 +20,10 @@ interface Props {
 }
 
 const TransactionModal = (props: Props) => {
-  const { appUser, appGroup } = useStoreState((state) => state);
+  const { appUser, appGroup, verticalCategoryPicker } = useStoreState(
+    (state) => state,
+  );
+
   const { amount } = props.transaction;
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [unsavedSplitArray, setSplitArr] = useState<SplitClientSide[]>(
@@ -51,7 +55,7 @@ const TransactionModal = (props: Props) => {
         <div className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800">
           <div
             className={`flex rounded-full p-1 text-zinc-700 ${
-              (thisCategoryStyle && thisCategoryStyle.color) ||
+              (thisCategoryStyle && thisCategoryStyle.bgColor) ||
               "bg-zinc-900 hover:bg-zinc-800 "
             }`}
           >
@@ -70,12 +74,21 @@ const TransactionModal = (props: Props) => {
               setShowCategoryPicker((prev) => !prev);
             }}
           >
-            <CategoryPicker
-              setTransaction={props.setTransaction}
-              showCategoryPicker={showCategoryPicker}
-              transaction={props.transaction}
-              setShowCategoryPicker={setShowCategoryPicker}
-            />
+            {verticalCategoryPicker ? (
+              <VerticalCategoryPicker
+                setTransaction={props.setTransaction}
+                showCategoryPicker={showCategoryPicker}
+                transaction={props.transaction}
+                setShowCategoryPicker={setShowCategoryPicker}
+              />
+            ) : (
+              <CategoryPicker
+                setTransaction={props.setTransaction}
+                showCategoryPicker={showCategoryPicker}
+                transaction={props.transaction}
+                setShowCategoryPicker={setShowCategoryPicker}
+              />
+            )}
           </div>
         </div>
       </div>

@@ -16,6 +16,9 @@ interface StoreModel {
     StoreModel,
     (group: GroupClientSide | undefined) => GroupClientSide | undefined
   >;
+
+  verticalCategoryPicker: boolean;
+  setVerticalCategoryPicker: Action<StoreModel, boolean>;
 }
 
 const store = createStore<StoreModel>({
@@ -35,6 +38,11 @@ const store = createStore<StoreModel>({
   setAppGroup: action((state, payload) => {
     const newState = payload(state.appGroup);
     state.appGroup = newState ? { ...newState } : newState;
+  }),
+
+  verticalCategoryPicker: false,
+  setVerticalCategoryPicker: action((state, payload) => {
+    state.verticalCategoryPicker = payload;
   }),
 });
 
