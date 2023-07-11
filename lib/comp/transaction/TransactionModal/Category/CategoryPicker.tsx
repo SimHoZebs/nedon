@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { trpc } from "../../../util/trpc";
+import { trpc } from "../../../../util/trpc";
 import { Icon } from "@iconify-icon/react";
-import { useStoreState } from "../../../util/store";
+import { useStoreState } from "../../../../util/store";
 import {
   CategoryClientSide,
   HierarchicalCategory,
   FullTransaction,
-} from "../../../util/types";
-import categoryStyle from "../../../util/categoryStyle";
+} from "../../../../util/types";
+import categoryStyle from "../../../../util/categoryStyle";
 
 interface Props {
   transaction: FullTransaction;
