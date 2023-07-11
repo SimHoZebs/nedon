@@ -16,96 +16,111 @@ interface Props {
   >;
   setShowCategoryPicker: React.Dispatch<React.SetStateAction<boolean>>;
   showCategoryPicker: boolean;
+  category: CategoryClientSide;
+  categoryIndex: number;
 }
 
 const CategoryPicker = (props: Props) => {
   const { appUser } = useStoreState((state) => state);
-  const categoryArray = trpc.getCategoryArray.useQuery(undefined, {
+  const categoryOptionArray = trpc.getCategoryOptionArray.useQuery(undefined, {
     staleTime: Infinity,
   });
   const upsertTransaction = trpc.transaction.upsertManyCategory.useMutation();
   const createTransaction = trpc.transaction.createTransaction.useMutation();
   const queryClient = trpc.useContext();
 
-  const [categoryTree, setCategoryTree] = useState<string[]>([]);
-  const [selectedCategoryArray, setSelectedCategoryArray] = useState<
+  const [unsavedCategory, setUnsavedCategory] = useState<CategoryClientSide>();
+  const [selectedOptionArray, setSelectedOptionArray] = useState<
     HierarchicalCategory[]
   >([]);
 
   const syncCategory = async (hierarchicalCategory?: HierarchicalCategory) => {
-    if (!appUser || !categoryArray.data) return;
+    if (!appUser || !categoryOptionArray.data) return;
 
-    const treeCopy = [...categoryTree];
-    if (hierarchicalCategory) treeCopy.push(hierarchicalCategory.name);
+    const treeCopy: string[] = [];
 
-    const category: CategoryClientSide = {
-      amount: props.transaction.amount,
+    let updatedCategory: CategoryClientSide = {
+      ...props.category,
       categoryTree: treeCopy,
-      transactionId: props.transaction.transaction_id,
     };
 
-    let updatedCategoryArray: CategoryClientSide[] = [];
+    if (unsavedCategory) {
+      treeCopy.push(...unsavedCategory.categoryTree);
+      updatedCategory = {
+        ...unsavedCategory,
+        categoryTree: treeCopy,
+      };
+    }
+
+    if (hierarchicalCategory) treeCopy.push(hierarchicalCategory.name);
+
+    let updatedCategoryArray: CategoryClientSide[] = [
+      ...props.transaction.categoryArray,
+    ];
+    updatedCategoryArray[props.categoryIndex] = updatedCategory;
 
     //IMPROVE: picker should understand there can be mroe unsaved category than there is saved. The unsaved categoryArray should be mapped through instead.
     //Picker will update category at a time - there should be a useState that keeps track of that.
     if (props.transaction.inDB) {
-      const test = props.transaction.categoryArray.map(async (c) => {
-        const transaction = await upsertTransaction.mutateAsync({
-          transactionId: props.transaction.transaction_id,
-          categoryArray: [{ ...category, id: c.id }],
-        });
-        return transaction.categoryArray;
-      });
-      updatedCategoryArray = await test[test.length - 1];
+      const upsertResponseArray = props.transaction.categoryArray.map(
+        async (c) => {
+          const transaction = await upsertTransaction.mutateAsync({
+            transactionId: props.transaction.transaction_id,
+            categoryArray: updatedCategoryArray,
+          });
+          return transaction.categoryArray;
+        },
+      );
+      updatedCategoryArray = await upsertResponseArray[
+        upsertResponseArray.length - 1
+      ];
     } else {
       const transaction = await createTransaction.mutateAsync({
         userId: appUser.id,
         transactionId: props.transaction.transaction_id,
-        categoryArray: [category],
+        categoryArray: updatedCategoryArray,
       });
       updatedCategoryArray = transaction.categoryArray;
     }
+    queryClient.transaction.getTransactionArray.refetch();
 
-    setCategoryTree([]);
-
-    setSelectedCategoryArray(categoryArray.data);
+    setUnsavedCategory(undefined);
+    setSelectedOptionArray(categoryOptionArray.data);
     props.setTransaction({
       ...props.transaction,
       categoryArray: updatedCategoryArray,
     });
 
-    queryClient.transaction.getTransactionArray.refetch();
     props.setShowCategoryPicker(false);
   };
 
   useEffect(() => {
-    setSelectedCategoryArray(categoryArray.data || []);
-  }, [categoryArray.data]);
+    setSelectedOptionArray(categoryOptionArray.data || []);
+  }, [categoryOptionArray.data]);
 
   return appUser ? (
     <>
       <div className="flex gap-x-2 items-center">
-        <button
-          className={"" + (categoryTree.length > 0 ? "animate-pulse" : "")}
-        >
-          {categoryTree.length === 0
-            ? props.transaction.categoryArray[0]?.categoryTree.join(" > ")
-            : categoryTree.join(" > ")}
+        <button className={unsavedCategory ? "animate-pulse" : ""}>
+          {unsavedCategory
+            ? unsavedCategory.categoryTree.join(" > ")
+            : props.category.categoryTree.join(" > ")}
         </button>
       </div>
-      {categoryArray.data && props.showCategoryPicker && (
+
+      {categoryOptionArray.data && props.showCategoryPicker && (
         <div
           className="absolute left-0 flex max-h-[50vh] w-full sm:w-96 flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex w-full justify-between px-2 py-1">
             <div className="flex w-fit items-center">
-              {categoryArray.data !== selectedCategoryArray && (
+              {categoryOptionArray.data !== selectedOptionArray && (
                 <button
                   className="flex"
                   onClick={() => {
-                    setSelectedCategoryArray(categoryArray.data);
-                    setCategoryTree([]);
+                    setSelectedOptionArray(categoryOptionArray.data);
+                    setUnsavedCategory(props.category);
                   }}
                 >
                   <Icon icon="mdi:chevron-left" height={24} />
@@ -127,8 +142,8 @@ const CategoryPicker = (props: Props) => {
                 onClick={(e) => {
                   e.stopPropagation();
                   props.setShowCategoryPicker(false);
-                  setCategoryTree([]);
-                  setSelectedCategoryArray(categoryArray.data);
+                  setUnsavedCategory(undefined);
+                  setSelectedOptionArray(categoryOptionArray.data);
                 }}
               >
                 cancel
@@ -139,14 +154,24 @@ const CategoryPicker = (props: Props) => {
           <hr className="w-full border-zinc-700" />
 
           <div className="pl-2 pb-1 grid w-full auto-cols-fr grid-cols-3 overflow-x-hidden overflow-y-scroll bg-zinc-800 text-xs ">
-            {selectedCategoryArray.map((category, i) => (
+            {selectedOptionArray.map((category, i) => (
               <button
                 onClick={async () => {
                   if (category.subCategory.length === 0) {
                     await syncCategory(category);
                   } else {
-                    setSelectedCategoryArray(category.subCategory);
-                    setCategoryTree((prev) => [...prev, category.name]);
+                    setSelectedOptionArray(category.subCategory);
+                    setUnsavedCategory((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            categoryTree: [...prev.categoryTree, category.name],
+                          }
+                        : {
+                            ...props.category,
+                            categoryTree: [category.name],
+                          },
+                    );
                   }
                 }}
                 key={i}

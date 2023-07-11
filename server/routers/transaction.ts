@@ -65,44 +65,32 @@ const transactionRouter = router({
       });
 
       const fullTransactionArray: FullTransaction[] = added.map(
-        ({ category, ...transaction }) => {
+        ({ category, ...plaidTransaction }) => {
           const meta = transactionArray.find(
-            (t) => t.id === transaction.transaction_id,
+            (t) => t.id === plaidTransaction.transaction_id,
           );
+          if (!category) throw new Error("category is somehow falsy");
+
+          let transaction: FullTransaction = {
+            ...plaidTransaction,
+            inDB: false,
+            splitArray: [],
+            categoryArray: [
+              {
+                transactionId: plaidTransaction.transaction_id,
+                id: null,
+                categoryTree: category,
+                amount: -1,
+              },
+            ],
+          };
 
           if (meta) {
             const { ownerId, categoryArray, ...rest } = meta;
-            return {
-              ...transaction,
-              inDB: true,
-              ...rest,
-              categoryArray: categoryArray.length
-                ? categoryArray
-                : [
-                    {
-                      transactionId: transaction.transaction_id,
-                      id: null,
-                      categoryTree: category || [],
-                      amount: -1,
-                    },
-                  ],
-            };
-          } else {
-            const test: FullTransaction = {
-              ...transaction,
-              categoryArray: [
-                {
-                  transactionId: transaction.transaction_id,
-                  id: null,
-                  categoryTree: category || [],
-                  amount: -1,
-                },
-              ],
-              splitArray: [],
-              inDB: false,
-            };
-            return test;
+            transaction = { ...transaction, ...rest, inDB: true };
+            if (categoryArray.length) transaction.categoryArray = categoryArray;
           }
+          return transaction;
         },
       );
 

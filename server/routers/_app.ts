@@ -36,7 +36,7 @@ const setAccessToken = async ({
 
   if (PLAID_PRODUCTS.includes(Products.Transfer)) {
     userUpdateData.TRANSFER_ID = await authorizeAndCreateTransfer(
-      exchangeResponse.data.item_id
+      exchangeResponse.data.item_id,
     );
   }
 
@@ -88,7 +88,7 @@ export const appRouter = router({
       z.object({
         publicToken: z.string(),
         id: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       return setAccessToken(input);
@@ -114,7 +114,7 @@ export const appRouter = router({
       return authResponse.data;
     }),
 
-  getCategoryArray: procedure.input(z.undefined()).query(async () => {
+  getCategoryOptionArray: procedure.input(z.undefined()).query(async () => {
     const response = await client.categoriesGet({});
     return convertPlaidCategoriesToCategoryArray(response.data.categories);
   }),
@@ -130,7 +130,7 @@ const getAssetReportWithRetries = (
   plaidClient: PlaidApi,
   asset_report_token: string,
   ms = 1000,
-  retriesLeft = 20
+  retriesLeft = 20,
 ) =>
   new Promise((resolve, reject) => {
     const request = {
@@ -150,7 +150,7 @@ const getAssetReportWithRetries = (
             plaidClient,
             asset_report_token,
             ms,
-            retriesLeft - 1
+            retriesLeft - 1,
           ).then(resolve);
         }, ms);
       });

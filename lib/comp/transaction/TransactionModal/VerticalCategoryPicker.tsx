@@ -21,7 +21,7 @@ interface Props {
 //TODO: Later just make it a className change instead of this massive duplicate
 const CategoryPicker = (props: Props) => {
   const { appUser } = useStoreState((state) => state);
-  const categoryArray = trpc.getCategoryArray.useQuery(undefined, {
+  const categoryArray = trpc.getCategoryOptionArray.useQuery(undefined, {
     staleTime: Infinity,
   });
   const updateTransaction = trpc.transaction.upsertManyCategory.useMutation();
