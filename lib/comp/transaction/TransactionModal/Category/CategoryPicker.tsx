@@ -113,7 +113,7 @@ const CategoryPicker = (props: Props) => {
     <>
       {categoryOptionArray.data && (
         <div
-          className="absolute left-0 flex max-h-[50vh] w-full sm:w-96 flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300"
+          className="absolute left-64 flex max-h-[50vh] w-full sm:w-96 flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex w-full justify-between px-2 py-1">

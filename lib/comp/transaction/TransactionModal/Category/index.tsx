@@ -37,71 +37,77 @@ const Category = (props: Props) => {
 
   return (
     <>
-      <div className="relative flex items-center gap-x-2 overflow-x-auto">
-        {props.unsavedCategoryArray.map((category, index) => (
-          <div
-            key={index}
-            className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800"
-            onClick={() => {
-              setSelectedCategory(category);
-              setSelectedCategoryIndex(index);
-            }}
-          >
-            <Icon
-              className={`flex rounded-full p-1 text-zinc-700 ${
-                thisCategoryStyle(index)?.bgColor || "bg-zinc-900 "
-              }`}
-              icon={thisCategoryStyle(index)?.icon || "mdi:shape-plus-outline"}
-              height={24}
-            />
+      <div className="overflow-x-auto overflow-y-hidden">
+        <div className="relative flex items-center w-max gap-x-2 overflow-x-auto">
+          {props.unsavedCategoryArray.map((category, index) => (
+            <div
+              key={index}
+              className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800 hover:cursor-pointer"
+              onClick={() => {
+                setSelectedCategory(category);
+                setSelectedCategoryIndex(index);
+              }}
+            >
+              <Icon
+                className={`flex rounded-full p-1 text-zinc-700 ${
+                  thisCategoryStyle(index)?.bgColor || "bg-zinc-900 "
+                }`}
+                icon={
+                  thisCategoryStyle(index)?.icon || "mdi:shape-plus-outline"
+                }
+                height={24}
+              />
 
-            <div className="flex h-full flex-col items-start gap-y-1">
-              <p className={unsavedCategory ? "animate-pulse" : ""}>
-                {unsavedCategory
-                  ? unsavedCategory.categoryTree.join(" > ")
-                  : category.categoryTree.join(" > ")}
-              </p>
-              {props.unsavedCategoryArray.length > 1 && (
-                <p onClick={(e) => e.stopPropagation()}>
-                  ${" "}
-                  <input
-                    className="bg-zinc-900 w-14 group-hover:bg-zinc-800 "
-                    type="number"
-                    value={category.amount}
-                    onChange={(e) => {
-                      const updatedCategoryArray = [
-                        ...props.unsavedCategoryArray,
-                      ];
-                      updatedCategoryArray[index].amount =
-                        e.target.valueAsNumber;
-                      props.setUnsavedCategoryArray(updatedCategoryArray);
-                    }}
-                  />
+              <div className="flex h-full flex-col items-start gap-y-1">
+                <p className={unsavedCategory ? "animate-pulse" : ""}>
+                  {unsavedCategory
+                    ? unsavedCategory.categoryTree[
+                        unsavedCategory.categoryTree.length - 1
+                      ]
+                    : category.categoryTree[category.categoryTree.length - 1]}
                 </p>
-              )}
+                {props.unsavedCategoryArray.length > 1 && (
+                  <p onClick={(e) => e.stopPropagation()}>
+                    ${" "}
+                    <input
+                      className="bg-zinc-900 w-14 group-hover:bg-zinc-800 "
+                      type="number"
+                      value={category.amount}
+                      onChange={(e) => {
+                        const updatedCategoryArray = [
+                          ...props.unsavedCategoryArray,
+                        ];
+                        updatedCategoryArray[index].amount =
+                          e.target.valueAsNumber;
+                        props.setUnsavedCategoryArray(updatedCategoryArray);
+                      }}
+                    />
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {selectedCategory && selectedCategoryIndex !== undefined ? (
-        <div className="sm:relative">
-          <CategoryPicker
-            cleanup={() => {
-              setUnsavedCategory(undefined);
-              setSelectedCategoryIndex(undefined);
-              setSelectedCategory(undefined);
-            }}
-            setUnsavedCategoryArray={props.setUnsavedCategoryArray}
-            unsavedCategory={unsavedCategory}
-            setUnsavedCategory={setUnsavedCategory}
-            category={selectedCategory}
-            categoryIndex={selectedCategoryIndex}
-            setTransaction={props.setTransaction}
-            transaction={props.transaction}
-          />
+          ))}
         </div>
-      ) : null}
+
+        {selectedCategory && selectedCategoryIndex !== undefined ? (
+          <div>
+            <CategoryPicker
+              cleanup={() => {
+                setUnsavedCategory(undefined);
+                setSelectedCategoryIndex(undefined);
+                setSelectedCategory(undefined);
+              }}
+              setUnsavedCategoryArray={props.setUnsavedCategoryArray}
+              unsavedCategory={unsavedCategory}
+              setUnsavedCategory={setUnsavedCategory}
+              category={selectedCategory}
+              categoryIndex={selectedCategoryIndex}
+              setTransaction={props.setTransaction}
+              transaction={props.transaction}
+            />
+          </div>
+        ) : null}
+      </div>
 
       <div className="mt-2 flex gap-x-2 ">
         <Button

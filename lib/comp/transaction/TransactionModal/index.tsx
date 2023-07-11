@@ -87,9 +87,9 @@ const TransactionModal = (props: Props) => {
 
   return (
     <Modal setShowModal={props.setShowModal}>
-      <div className="flex flex-col ">
+      <div className="flex flex-col gap-y-2">
         <div className="flex flex-col gap-y-2 justify-between font-semibold text-xl sm:text-2xl">
-          <h3>{props.transaction.name}</h3>
+          <h2 className="text-2xl sm:text-3xl">{props.transaction.name}</h2>
           <div className="flex gap-x-2 items-center">
             <h3>${amount * -1}</h3>
             <ActionBtn className="gap-x-2">
