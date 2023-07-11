@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import Modal from "../../Modal";
-import { FullTransaction, SplitClientSide } from "../../../util/types";
+import {
+  CategoryClientSide,
+  FullTransaction,
+  SplitClientSide,
+} from "../../../util/types";
 import UserSplit from "./UserSplit";
 import Button from "../../Button/ActionBtn";
 import { useStoreState } from "../../../util/store";
@@ -9,7 +13,6 @@ import { Icon } from "@iconify-icon/react";
 import ActionBtn from "../../Button/ActionBtn";
 import categoryStyle from "../../../util/categoryStyle";
 import CategoryPicker from "./CategoryPicker";
-import VerticalCategoryPicker from "./VerticalCategoryPicker";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -80,21 +83,14 @@ const TransactionModal = (props: Props) => {
                 setShowCategoryPicker((prev) => !prev);
               }}
             >
-              {verticalCategoryPicker ? (
-                <VerticalCategoryPicker
-                  setTransaction={props.setTransaction}
-                  showCategoryPicker={showCategoryPicker}
-                  transaction={props.transaction}
-                  setShowCategoryPicker={setShowCategoryPicker}
-                />
-              ) : (
-                <CategoryPicker
-                  setTransaction={props.setTransaction}
-                  showCategoryPicker={showCategoryPicker}
-                  transaction={props.transaction}
-                  setShowCategoryPicker={setShowCategoryPicker}
-                />
-              )}
+              <CategoryPicker
+                category={category}
+                categoryIndex={index}
+                setTransaction={props.setTransaction}
+                showCategoryPicker={showCategoryPicker}
+                transaction={props.transaction}
+                setShowCategoryPicker={setShowCategoryPicker}
+              />
             </div>
           </div>
         ))}
