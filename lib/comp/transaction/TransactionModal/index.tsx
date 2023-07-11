@@ -87,12 +87,25 @@ const TransactionModal = (props: Props) => {
 
   return (
     <Modal setShowModal={props.setShowModal}>
-      <Category
-        unsavedCategoryArray={unsavedCategoryArray}
-        setUnsavedCategoryArray={setUnsavedCategoryArray}
-        setTransaction={props.setTransaction}
-        transaction={props.transaction}
-      />
+      <div className="flex flex-col ">
+        <div className="flex flex-col gap-y-2 justify-between font-semibold text-xl sm:text-2xl">
+          <h3>{props.transaction.name}</h3>
+          <div className="flex gap-x-2 items-center">
+            <h3>${amount * -1}</h3>
+            <ActionBtn className="gap-x-2">
+              <Icon icon="lucide:split" width={16} />
+              Split
+            </ActionBtn>
+          </div>
+        </div>
+
+        <Category
+          unsavedCategoryArray={unsavedCategoryArray}
+          setUnsavedCategoryArray={setUnsavedCategoryArray}
+          setTransaction={props.setTransaction}
+          transaction={props.transaction}
+        />
+      </div>
 
       <div className="flex w-full flex-col gap-y-1">
         {unsavedSplitArray.length > 1 &&

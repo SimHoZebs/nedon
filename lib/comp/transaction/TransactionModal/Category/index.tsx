@@ -36,12 +36,7 @@ const Category = (props: Props) => {
   );
 
   return (
-    <div className="flex flex-col ">
-      <div className="flex flex-col gap-y-2 justify-between font-semibold text-xl sm:text-2xl">
-        <h3>{props.transaction.name}</h3>
-        <h3>${amount * -1}</h3>
-      </div>
-
+    <>
       <div className="relative flex items-center gap-x-2 overflow-x-auto">
         {props.unsavedCategoryArray.map((category, index) => (
           <div
@@ -108,12 +103,6 @@ const Category = (props: Props) => {
         </div>
       ) : null}
 
-      <p className="text-xs h-4 text-pink-300 ">
-        {categorySplitTotal !== amount
-          ? "Category split total does not match transaction amount"
-          : null}
-      </p>
-
       <div className="mt-2 flex gap-x-2 ">
         <Button
           className="bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-200 text-xs flex gap-x-2"
@@ -132,7 +121,13 @@ const Category = (props: Props) => {
           Add category
         </Button>
       </div>
-    </div>
+
+      <p className="text-xs h-4 text-pink-300 ">
+        {categorySplitTotal !== amount
+          ? "Category split total does not match transaction amount"
+          : null}
+      </p>
+    </>
   );
 };
 
