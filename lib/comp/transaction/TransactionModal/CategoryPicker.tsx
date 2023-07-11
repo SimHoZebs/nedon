@@ -3,6 +3,7 @@ import { trpc } from "../../../util/trpc";
 import { Icon } from "@iconify-icon/react";
 import { useStoreState } from "../../../util/store";
 import { Category, FullTransaction } from "../../../util/types";
+import categoryStyle from "../../../util/categoryStyle";
 
 interface Props {
   transaction: FullTransaction;
@@ -72,10 +73,10 @@ const CategoryPicker = (props: Props) => {
       </div>
       {categoryArray.data && props.showCategoryPicker && (
         <div
-          className="absolute left-0 flex max-h-[50vh] w-full sm:w-96 flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 p-2 text-zinc-300"
+          className="absolute left-0 flex max-h-[50vh] w-full sm:w-96 flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex w-full justify-between">
+          <div className="flex w-full justify-between px-2 py-1">
             <div className="flex w-fit items-center">
               {categoryArray.data !== selectedCategoryArray && (
                 <button
@@ -115,7 +116,7 @@ const CategoryPicker = (props: Props) => {
 
           <hr className="w-full border-zinc-700" />
 
-          <div className="grid w-full auto-cols-fr grid-cols-4 gap-2 overflow-x-hidden overflow-y-scroll bg-zinc-800 py-1 text-xs">
+          <div className="pl-2 pb-1 grid w-full auto-cols-fr grid-cols-3 overflow-x-hidden overflow-y-scroll bg-zinc-800 text-xs ">
             {selectedCategoryArray.map((category, i) => (
               <button
                 onClick={async () => {
@@ -128,11 +129,24 @@ const CategoryPicker = (props: Props) => {
                 }}
                 key={i}
                 className={
-                  "flex aspect-square items-center justify-center hyphens-auto  rounded-lg border  border-zinc-400 p-1 text-center " +
-                  (category.subCategory.length > 0 ? "" : "bg-green-700")
+                  "flex flex-col gap-y-1 aspect-square items-center justify-center hyphens-auto  rounded-lg border  border-zinc-400 text-center mr-2 my-1"
                 }
               >
-                {category.name}
+                <Icon
+                  className={
+                    categoryStyle[category.name]?.textColor || "text-zinc-500"
+                  }
+                  icon={
+                    categoryStyle[category.name]?.icon ||
+                    "material-symbols:category-outline"
+                  }
+                  height={24}
+                />
+                <p>{category.name}</p>
+                <p className="text-zinc-500">
+                  {category.subCategory.length > 0 &&
+                    category.subCategory.length + " subcategories"}
+                </p>
               </button>
             ))}
           </div>

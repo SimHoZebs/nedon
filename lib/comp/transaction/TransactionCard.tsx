@@ -29,7 +29,7 @@ const TransactionCard = (props: Props) => {
       <div className={`flex w-fit items-center gap-x-2 truncate sm:gap-x-4`}>
         <Icon
           className={`rounded-full p-2 text-zinc-800 ${
-            (lastCategory && categoryStyle[lastCategory]?.color) ||
+            (lastCategory && categoryStyle[lastCategory]?.bgColor) ||
             "bg-zinc-400"
           }`}
           icon={
