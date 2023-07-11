@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import { trpc } from "../../../util/trpc";
 import { Icon } from "@iconify-icon/react";
 import { useStoreState } from "../../../util/store";
-import { Category, FullTransaction } from "../../../util/types";
+import {
+  CategoryClientSide,
+  HierarchicalCategory,
+  FullTransaction,
+} from "../../../util/types";
 import categoryStyle from "../../../util/categoryStyle";
 
 interface Props {
@@ -14,42 +18,53 @@ interface Props {
   showCategoryPicker: boolean;
 }
 
+//TODO: Later just make it a className change instead of this massive duplicate
 const CategoryPicker = (props: Props) => {
   const { appUser } = useStoreState((state) => state);
   const categoryArray = trpc.getCategoryArray.useQuery(undefined, {
     staleTime: Infinity,
   });
-  const updateCategory = trpc.transaction.updateCategory.useMutation();
+  const updateTransaction = trpc.transaction.upsertManyCategory.useMutation();
   const createTransaction = trpc.transaction.createTransaction.useMutation();
   const queryClient = trpc.useContext();
 
   const [categoryTree, setCategoryTree] = useState<string[]>([]);
   const [selectedCategoryArray, setSelectedCategoryArray] = useState<
-    Category[]
+    HierarchicalCategory[]
   >([]);
 
-  const setCategory = async (category?: Category) => {
+  const setCategory = async (categoryWithSub?: HierarchicalCategory) => {
     if (!appUser || !categoryArray.data) return;
 
-    const newCategoryArray = [...categoryTree];
-    category && newCategoryArray.push(category.name);
+    const treeCopy = [...categoryTree];
+    if (categoryWithSub) treeCopy.push(categoryWithSub.name);
 
-    props.transaction.inDB
-      ? await updateCategory.mutateAsync({
+    const category: CategoryClientSide = {
+      amount: props.transaction.amount,
+      categoryTree: treeCopy,
+      transactionId: props.transaction.transaction_id,
+    };
+
+    if (props.transaction.inDB) {
+      props.transaction.categoryArray.forEach(async (category) => {
+        await updateTransaction.mutateAsync({
           transactionId: props.transaction.transaction_id,
-          categoryArray: newCategoryArray,
-        })
-      : await createTransaction.mutateAsync({
-          userId: appUser.id,
-          transactionId: props.transaction.transaction_id,
-          categoryArray: newCategoryArray,
+          categoryArray: [{ ...category, id: category.id }],
         });
+      });
+    } else {
+      await createTransaction.mutateAsync({
+        userId: appUser.id,
+        transactionId: props.transaction.transaction_id,
+        categoryArray: [category],
+      });
+    }
 
     setCategoryTree([]);
     setSelectedCategoryArray(categoryArray.data);
     props.setTransaction({
       ...props.transaction,
-      category: newCategoryArray,
+      categoryArray: [category],
     });
 
     queryClient.transaction.getTransactionArray.refetch();
@@ -67,7 +82,7 @@ const CategoryPicker = (props: Props) => {
           className={"" + (categoryTree.length > 0 ? "animate-pulse" : "")}
         >
           {categoryTree.length === 0
-            ? props.transaction.category?.join(" > ")
+            ? props.transaction.categoryArray[0]?.categoryTree.join(" > ")
             : categoryTree.join(" > ")}
         </button>
       </div>

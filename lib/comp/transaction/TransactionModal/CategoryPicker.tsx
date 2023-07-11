@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import { trpc } from "../../../util/trpc";
 import { Icon } from "@iconify-icon/react";
 import { useStoreState } from "../../../util/store";
-import { Category, FullTransaction } from "../../../util/types";
+import {
+  CategoryClientSide,
+  HierarchicalCategory,
+  FullTransaction,
+} from "../../../util/types";
 import categoryStyle from "../../../util/categoryStyle";
 
 interface Props {
@@ -19,37 +23,55 @@ const CategoryPicker = (props: Props) => {
   const categoryArray = trpc.getCategoryArray.useQuery(undefined, {
     staleTime: Infinity,
   });
-  const updateCategory = trpc.transaction.updateCategory.useMutation();
+  const upsertTransaction = trpc.transaction.upsertManyCategory.useMutation();
   const createTransaction = trpc.transaction.createTransaction.useMutation();
   const queryClient = trpc.useContext();
 
   const [categoryTree, setCategoryTree] = useState<string[]>([]);
   const [selectedCategoryArray, setSelectedCategoryArray] = useState<
-    Category[]
+    HierarchicalCategory[]
   >([]);
 
-  const setCategory = async (category?: Category) => {
+  const syncCategory = async (hierarchicalCategory?: HierarchicalCategory) => {
     if (!appUser || !categoryArray.data) return;
 
-    const newCategoryArray = [...categoryTree];
-    category && newCategoryArray.push(category.name);
+    const treeCopy = [...categoryTree];
+    if (hierarchicalCategory) treeCopy.push(hierarchicalCategory.name);
 
-    props.transaction.inDB
-      ? await updateCategory.mutateAsync({
+    const category: CategoryClientSide = {
+      amount: props.transaction.amount,
+      categoryTree: treeCopy,
+      transactionId: props.transaction.transaction_id,
+    };
+
+    let updatedCategoryArray: CategoryClientSide[] = [];
+
+    //IMPROVE: picker should understand there can be mroe unsaved category than there is saved. The unsaved categoryArray should be mapped through instead.
+    //Picker will update category at a time - there should be a useState that keeps track of that.
+    if (props.transaction.inDB) {
+      const test = props.transaction.categoryArray.map(async (c) => {
+        const transaction = await upsertTransaction.mutateAsync({
           transactionId: props.transaction.transaction_id,
-          categoryArray: newCategoryArray,
-        })
-      : await createTransaction.mutateAsync({
-          userId: appUser.id,
-          transactionId: props.transaction.transaction_id,
-          categoryArray: newCategoryArray,
+          categoryArray: [{ ...category, id: c.id }],
         });
+        return transaction.categoryArray;
+      });
+      updatedCategoryArray = await test[test.length - 1];
+    } else {
+      const transaction = await createTransaction.mutateAsync({
+        userId: appUser.id,
+        transactionId: props.transaction.transaction_id,
+        categoryArray: [category],
+      });
+      updatedCategoryArray = transaction.categoryArray;
+    }
 
     setCategoryTree([]);
+
     setSelectedCategoryArray(categoryArray.data);
     props.setTransaction({
       ...props.transaction,
-      category: newCategoryArray,
+      categoryArray: updatedCategoryArray,
     });
 
     queryClient.transaction.getTransactionArray.refetch();
@@ -67,7 +89,7 @@ const CategoryPicker = (props: Props) => {
           className={"" + (categoryTree.length > 0 ? "animate-pulse" : "")}
         >
           {categoryTree.length === 0
-            ? props.transaction.category?.join(" > ")
+            ? props.transaction.categoryArray[0]?.categoryTree.join(" > ")
             : categoryTree.join(" > ")}
         </button>
       </div>
@@ -95,7 +117,7 @@ const CategoryPicker = (props: Props) => {
               <button
                 className="text-indigo-300 hover:text-indigo-400"
                 onClick={async () => {
-                  setCategory();
+                  syncCategory();
                 }}
               >
                 save
@@ -121,7 +143,7 @@ const CategoryPicker = (props: Props) => {
               <button
                 onClick={async () => {
                   if (category.subCategory.length === 0) {
-                    await setCategory(category);
+                    await syncCategory(category);
                   } else {
                     setSelectedCategoryArray(category.subCategory);
                     setCategoryTree((prev) => [...prev, category.name]);

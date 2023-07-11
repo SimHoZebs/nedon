@@ -8,7 +8,8 @@ import {
 } from "plaid";
 import { FullTransaction } from "../../lib/util/types";
 import { client } from "../util";
-import { SplitModel } from "../../prisma/zod";
+import { CategoryModel, SplitModel } from "../../prisma/zod";
+import { Category } from "@prisma/client";
 
 // Retrieve Transactions for an Item
 // https://plaid.com/docs/#transactions
@@ -58,26 +59,49 @@ const transactionRouter = router({
           ownerId: input.id,
         },
         include: {
+          categoryArray: true,
           splitArray: true,
         },
       });
 
       const fullTransactionArray: FullTransaction[] = added.map(
-        (transaction) => {
+        ({ category, ...transaction }) => {
           const meta = transactionArray.find(
             (t) => t.id === transaction.transaction_id,
           );
 
           if (meta) {
-            const { id, ownerId, categoryArray, ...rest } = meta;
+            const { ownerId, categoryArray, ...rest } = meta;
             return {
               ...transaction,
               inDB: true,
-              category: categoryArray,
               ...rest,
+              categoryArray: categoryArray.length
+                ? categoryArray
+                : [
+                    {
+                      transactionId: transaction.transaction_id,
+                      id: null,
+                      categoryTree: category || [],
+                      amount: -1,
+                    },
+                  ],
             };
           } else {
-            return { ...transaction, splitArray: [], inDB: false };
+            const test: FullTransaction = {
+              ...transaction,
+              categoryArray: [
+                {
+                  transactionId: transaction.transaction_id,
+                  id: null,
+                  categoryTree: category || [],
+                  amount: -1,
+                },
+              ],
+              splitArray: [],
+              inDB: false,
+            };
+            return test;
           }
         },
       );
@@ -104,24 +128,56 @@ const transactionRouter = router({
       });
     }),
 
-  updateCategory: procedure
+  upsertManyCategory: procedure
     .input(
       z.object({
         transactionId: z.string(),
-        categoryArray: z.array(z.string()),
+        categoryArray: z.array(
+          CategoryModel.extend({ id: z.string().nullish() }),
+        ),
       }),
     )
     .mutation(async ({ input }) => {
-      const updatedTransaction = await db.transaction.update({
+      const categoryToUpdateArray = input.categoryArray.filter(
+        (category) => category.id,
+      ) as Category[];
+      const categoryToCreateArray = input.categoryArray.filter(
+        (category) => !category.id,
+      ) as Omit<Category, "id">[];
+
+      const upsertedTransaction = await db.transaction.update({
         where: {
           id: input.transactionId,
         },
         data: {
-          categoryArray: input.categoryArray,
+          categoryArray: {
+            updateMany: categoryToUpdateArray.map(
+              ({ id, transactionId, ...rest }) => ({
+                where: {
+                  id,
+                },
+                data: {
+                  ...rest,
+                },
+              }),
+            ),
+            createMany: {
+              data: categoryToCreateArray.map(
+                ({ transactionId, ...category }) => ({
+                  ...category,
+                  id: undefined,
+                }),
+              ),
+            },
+          },
+        },
+        include: {
+          categoryArray: true,
+          splitArray: true,
         },
       });
 
-      return updatedTransaction;
+      return upsertedTransaction;
     }),
 
   createSplit: procedure
@@ -195,30 +251,51 @@ const transactionRouter = router({
         splitArray: z
           .array(SplitModel.extend({ id: z.string().nullable() }))
           .optional(),
-        categoryArray: z.array(z.string()),
+        categoryArray: z
+          .array(CategoryModel.extend({ id: z.string().nullish() }))
+          .optional(),
       }),
     )
     .mutation(async ({ input }) => {
       const data = {
         ownerId: input.userId,
         id: input.transactionId,
-        categoryArray: input.categoryArray,
       };
 
-      const transaction = input.splitArray
-        ? await db.transaction.create({
-            data: {
-              ...data,
-              splitArray: {
+      const categoryArrayData = input.categoryArray?.map(
+        ({ id, transactionId, ...rest }) => ({
+          ...rest,
+        }),
+      );
+      const splitArrayData = input.splitArray?.map(
+        ({ id, transactionId, ...rest }) => ({
+          ...rest,
+        }),
+      );
+
+      const transaction = await db.transaction.create({
+        data: {
+          ...data,
+          splitArray: splitArrayData
+            ? {
                 createMany: {
-                  data: input.splitArray.map(({ id, ...rest }) => ({
-                    ...rest,
-                  })),
+                  data: splitArrayData,
                 },
-              },
-            },
-          })
-        : await db.transaction.create({ data });
+              }
+            : undefined,
+          categoryArray: categoryArrayData
+            ? {
+                createMany: {
+                  data: categoryArrayData,
+                },
+              }
+            : undefined,
+        },
+        include: {
+          splitArray: true,
+          categoryArray: true,
+        },
+      });
 
       return transaction;
     }),

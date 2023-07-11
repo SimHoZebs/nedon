@@ -1,4 +1,4 @@
-import { User, Group, Split } from "@prisma/client";
+import { User, Group, Split, Category } from "@prisma/client";
 import { CounterpartyType, Transaction } from "plaid";
 
 export interface UserClientSide extends Omit<User, "ACCESS_TOKEN"> {
@@ -14,8 +14,13 @@ export interface SplitClientSide extends Omit<Split, "id"> {
   id: string | null;
 }
 
-export interface FullTransaction extends PlaidTransaction {
+export interface CategoryClientSide extends Omit<Category, "id"> {
+  id?: string | null;
+}
+
+export interface FullTransaction extends Omit<PlaidTransaction, "category"> {
   splitArray: SplitClientSide[];
+  categoryArray: CategoryClientSide[];
   inDB: boolean;
 }
 
@@ -25,9 +30,9 @@ export type CategoryWithTransactionArray = {
   subCategory: CategoryWithTransactionArray[];
 };
 
-export type Category = {
+export type HierarchicalCategory = {
   name: string;
-  subCategory: Category[];
+  subCategory: HierarchicalCategory[];
 };
 
 //temporary workaround for failing trpc queries

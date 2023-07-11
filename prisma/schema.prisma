@@ -56,11 +56,19 @@ model User {
 }
 
 model Transaction {
-  id            String   @id @default(cuid()) //transaction_id UUID for Plaid transactions, CUID for manually created transactions
+  id            String     @id @default(cuid()) //transaction_id UUID for Plaid transactions, CUID for manually created transactions
   ownerId       String
-  owner         User     @relation(fields: [ownerId], references: [id])
-  categoryArray String[]
+  owner         User       @relation(fields: [ownerId], references: [id])
+  categoryArray Category[]
   splitArray    Split[]
+}
+
+model Category {
+  id               String      @id @default(uuid())
+  categoryTree     String[]
+  amount           Float
+  transactionId    String
+  transactionArray Transaction @relation(fields: [transactionId], references: [id])
 }
 
 model Split {

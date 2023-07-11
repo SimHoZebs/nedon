@@ -1,5 +1,5 @@
 import {
-  Category,
+  HierarchicalCategory,
   CategoryWithTransactionArray,
   FullTransaction,
 } from "./types";
@@ -20,7 +20,7 @@ export const organizeTransactionByCategory = (
 export const convertPlaidCategoriesToCategoryArray = (
   categories: PlaidCategory[],
 ) => {
-  const categoryArray: Category[] = [];
+  const categoryArray: HierarchicalCategory[] = [];
   categories.forEach((category) => {
     test(categoryArray, { ...category });
   });
@@ -28,9 +28,9 @@ export const convertPlaidCategoriesToCategoryArray = (
 };
 
 const test = (
-  categoryArray: Category[],
+  categoryArray: HierarchicalCategory[],
   plaidCategory: PlaidCategory,
-): Category[] => {
+): HierarchicalCategory[] => {
   const category = plaidCategory.hierarchy;
 
   const firstCategory = category[0];
@@ -69,7 +69,7 @@ const fillCategoryArray = (
   categoryArray: CategoryWithTransactionArray[],
   transaction: FullTransaction,
 ): CategoryWithTransactionArray[] => {
-  const category = transaction.category;
+  const category = transaction.categoryArray[0].categoryTree;
 
   if (!category) return categoryArray;
 
@@ -95,7 +95,7 @@ const fillCategoryArray = (
   if (slicedCategoryArray.length === 0) {
     categoryArray[index].transactionArray.push(transaction);
   } else {
-    transaction.category = slicedCategoryArray;
+    transaction.categoryArray[0].categoryTree = slicedCategoryArray;
 
     //inefficient for cases where parent category did not exist; subcategory's existence doesn't need to be checked.
     categoryArray[index].subCategory = fillCategoryArray(
