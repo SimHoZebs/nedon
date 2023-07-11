@@ -1,18 +1,12 @@
 import React, { useState } from "react";
 import Modal from "../../Modal";
-import {
-  CategoryClientSide,
-  FullTransaction,
-  SplitClientSide,
-} from "../../../util/types";
+import { FullTransaction, SplitClientSide } from "../../../util/types";
 import UserSplit from "./UserSplit";
-import Button from "../../Button/ActionBtn";
 import { useStoreState } from "../../../util/store";
 import { trpc } from "../../../util/trpc";
 import { Icon } from "@iconify-icon/react";
 import ActionBtn from "../../Button/ActionBtn";
-import categoryStyle from "../../../util/categoryStyle";
-import CategoryPicker from "./CategoryPicker";
+import Category from "./Category";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -23,26 +17,16 @@ interface Props {
 }
 
 const TransactionModal = (props: Props) => {
-  const { appUser, appGroup, verticalCategoryPicker } = useStoreState(
-    (state) => state,
-  );
+  const { appUser, appGroup } = useStoreState((state) => state);
   const createTransaction = trpc.transaction.createTransaction.useMutation();
   const updateSplit = trpc.transaction.updateSplit.useMutation();
   const createSplit = trpc.transaction.createSplit.useMutation();
   const removeSplit = trpc.transaction.removeSplit.useMutation();
   const queryClient = trpc.useContext();
 
-  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [unsavedSplitArray, setSplitArr] = useState<SplitClientSide[]>(
     props.transaction.splitArray,
   );
-  const [unsavedCategoryArray, setUnsavedCategoryArray] = useState<
-    CategoryClientSide[]
-  >(props.transaction.categoryArray);
-  const [selectedCategory, setSelectedCategory] =
-    useState<CategoryClientSide>();
-  const [selectedCategoryIndex, setSelectedCategoryIndex] = useState<number>();
-  const [unsavedCategory, setUnsavedCategory] = useState<CategoryClientSide>();
 
   const { amount } = props.transaction;
   let updatedTotalSplit =
@@ -51,75 +35,12 @@ const TransactionModal = (props: Props) => {
         100,
     ) / 100;
 
-  const lastCategory =
-    props.transaction.categoryArray[0]?.categoryTree.slice(-1)[0];
-  const thisCategoryStyle = lastCategory && categoryStyle[lastCategory];
-
   return (
     <Modal setShowModal={props.setShowModal}>
-      <div className="flex flex-col ">
-        <div className="flex justify-between font-semibold text-xl sm:text-2xl">
-          <h3>{props.transaction.name}</h3>
-          <h3>${amount * -1}</h3>
-        </div>
-
-        <div className="relative flex items-center gap-x-2">
-          {unsavedCategoryArray.map((category, index) => (
-            <button
-              key={index}
-              className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800"
-              onClick={() => {
-                setShowCategoryPicker(true);
-                setSelectedCategory(category);
-                setSelectedCategoryIndex(index);
-              }}
-            >
-              <Icon
-                className={`flex rounded-full p-1 text-zinc-700 ${
-                  (thisCategoryStyle && thisCategoryStyle.bgColor) ||
-                  "bg-zinc-900 "
-                }`}
-                icon={
-                  (thisCategoryStyle && thisCategoryStyle.icon) ||
-                  "mdi:shape-plus-outline"
-                }
-                height={24}
-              />
-
-              <p className={unsavedCategory ? "animate-pulse" : ""}>
-                {unsavedCategory
-                  ? unsavedCategory.categoryTree.join(" > ")
-                  : category.categoryTree.join(" > ")}
-              </p>
-            </button>
-          ))}
-
-          <Button
-            onClick={() => {
-              //add empty category
-              setUnsavedCategoryArray((prev) => [...prev]);
-            }}
-          >
-            Add category
-          </Button>
-        </div>
-
-        {selectedCategory &&
-        selectedCategoryIndex !== undefined &&
-        showCategoryPicker ? (
-          <div className="sm:relative">
-            <CategoryPicker
-              unsavedCategory={unsavedCategory}
-              setUnsavedCategory={setUnsavedCategory}
-              category={selectedCategory}
-              categoryIndex={selectedCategoryIndex}
-              setTransaction={props.setTransaction}
-              transaction={props.transaction}
-              setShowCategoryPicker={setShowCategoryPicker}
-            />
-          </div>
-        ) : null}
-      </div>
+      <Category
+        setTransaction={props.setTransaction}
+        transaction={props.transaction}
+      />
 
       <div className="flex w-full flex-col gap-y-1">
         {unsavedSplitArray.length > 1 &&
@@ -238,7 +159,7 @@ const TransactionModal = (props: Props) => {
             user.id === appUser.id ? null : (
               <div key={i} className="flex">
                 <div>{user.id.slice(0, 8)}</div>
-                <Button
+                <ActionBtn
                   onClick={() => {
                     const updatedSplitArray = [...unsavedSplitArray];
                     if (!updatedSplitArray.length)
@@ -260,14 +181,14 @@ const TransactionModal = (props: Props) => {
                   }}
                 >
                   Split
-                </Button>
+                </ActionBtn>
               </div>
             ),
           )}
       </div>
 
       <div className="flex w-full justify-between">
-        <Button
+        <ActionBtn
           disabled={updatedTotalSplit !== amount}
           onClick={async () => {
             if (!appUser) return;
@@ -304,7 +225,7 @@ const TransactionModal = (props: Props) => {
           }}
         >
           Save changes
-        </Button>
+        </ActionBtn>
 
         <ActionBtn variant="negative" onClick={() => props.setShowModal(false)}>
           Cancel
