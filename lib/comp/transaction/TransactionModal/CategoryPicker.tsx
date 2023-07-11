@@ -14,13 +14,16 @@ interface Props {
   setTransaction: React.Dispatch<
     React.SetStateAction<FullTransaction | undefined>
   >;
-  setShowCategoryPicker: React.Dispatch<React.SetStateAction<boolean>>;
+  setUnsavedCategoryArray: React.Dispatch<
+    React.SetStateAction<CategoryClientSide[]>
+  >;
   unsavedCategory?: CategoryClientSide;
   setUnsavedCategory: React.Dispatch<
     React.SetStateAction<CategoryClientSide | undefined>
   >;
   category: CategoryClientSide;
   categoryIndex: number;
+  cleanup: () => void;
 }
 
 const CategoryPicker = (props: Props) => {
@@ -35,6 +38,13 @@ const CategoryPicker = (props: Props) => {
   const [selectedOptionArray, setSelectedOptionArray] = useState<
     HierarchicalCategory[]
   >([]);
+
+  const cleanup = () => {
+    if (!categoryOptionArray.data) return;
+
+    setSelectedOptionArray(categoryOptionArray.data);
+    props.cleanup();
+  };
 
   const syncCategory = async (hierarchicalCategory?: HierarchicalCategory) => {
     if (!appUser || !categoryOptionArray.data) return;
@@ -86,14 +96,13 @@ const CategoryPicker = (props: Props) => {
     }
     queryClient.transaction.getTransactionArray.refetch();
 
-    props.setUnsavedCategory(undefined);
-    setSelectedOptionArray(categoryOptionArray.data);
     props.setTransaction({
       ...props.transaction,
       categoryArray: updatedCategoryArray,
     });
 
-    props.setShowCategoryPicker(false);
+    props.setUnsavedCategoryArray(updatedCategoryArray);
+    cleanup();
   };
 
   useEffect(() => {
@@ -114,7 +123,7 @@ const CategoryPicker = (props: Props) => {
                   className="flex"
                   onClick={() => {
                     setSelectedOptionArray(categoryOptionArray.data);
-                    props.setUnsavedCategory(props.category);
+                    props.setUnsavedCategory(undefined);
                   }}
                 >
                   <Icon icon="mdi:chevron-left" height={24} />
@@ -135,9 +144,11 @@ const CategoryPicker = (props: Props) => {
                 className="text-pink-300 hover:text-pink-400"
                 onClick={(e) => {
                   e.stopPropagation();
-                  props.setShowCategoryPicker(false);
-                  props.setUnsavedCategory(undefined);
-                  setSelectedOptionArray(categoryOptionArray.data);
+                  cleanup();
+
+                  props.setUnsavedCategoryArray(
+                    props.transaction.categoryArray,
+                  );
                 }}
               >
                 cancel

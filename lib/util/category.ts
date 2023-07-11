@@ -1,6 +1,18 @@
 import { HierarchicalCategory } from "./types";
 import { Category as PlaidCategory } from "plaid";
 
+export const emptyCategory = (
+  transactionId: string,
+  categoryTree: string[],
+) => {
+  return {
+    transactionId,
+    id: null,
+    categoryTree,
+    amount: -1,
+  };
+};
+
 export const convertPlaidCategoriesToHierarchicalArray = (
   categories: PlaidCategory[],
 ) => {

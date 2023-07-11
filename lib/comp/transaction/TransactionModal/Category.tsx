@@ -4,6 +4,7 @@ import { Icon } from "@iconify-icon/react";
 import Button from "../../Button";
 import CategoryPicker from "./CategoryPicker";
 import categoryStyle from "../../../util/categoryStyle";
+import { emptyCategory } from "../../../util/category";
 
 interface Props {
   transaction: FullTransaction;
@@ -13,7 +14,6 @@ interface Props {
 }
 
 const Category = (props: Props) => {
-  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [unsavedCategoryArray, setUnsavedCategoryArray] = useState<
     CategoryClientSide[]
   >(props.transaction.categoryArray);
@@ -23,9 +23,11 @@ const Category = (props: Props) => {
   const [unsavedCategory, setUnsavedCategory] = useState<CategoryClientSide>();
 
   const { amount } = props.transaction;
-  const lastCategory =
-    props.transaction.categoryArray[0]?.categoryTree.slice(-1)[0];
-  const thisCategoryStyle = lastCategory && categoryStyle[lastCategory];
+  const thisCategoryStyle = (index: number) => {
+    const lastCategory =
+      props.transaction.categoryArray[index]?.categoryTree.slice(-1)[0];
+    return categoryStyle[lastCategory];
+  };
 
   return (
     <div className="flex flex-col">
@@ -40,20 +42,15 @@ const Category = (props: Props) => {
             key={index}
             className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800"
             onClick={() => {
-              setShowCategoryPicker(true);
               setSelectedCategory(category);
               setSelectedCategoryIndex(index);
             }}
           >
             <Icon
               className={`flex rounded-full p-1 text-zinc-700 ${
-                (thisCategoryStyle && thisCategoryStyle.bgColor) ||
-                "bg-zinc-900 "
+                thisCategoryStyle(index)?.bgColor || "bg-zinc-900 "
               }`}
-              icon={
-                (thisCategoryStyle && thisCategoryStyle.icon) ||
-                "mdi:shape-plus-outline"
-              }
+              icon={thisCategoryStyle(index)?.icon || "mdi:shape-plus-outline"}
               height={24}
             />
 
@@ -67,26 +64,35 @@ const Category = (props: Props) => {
 
         <Button
           onClick={() => {
-            //add empty category
-            setUnsavedCategoryArray((prev) => [...prev]);
+            const newCategory = emptyCategory(
+              props.transaction.transaction_id,
+              [],
+            );
+
+            setUnsavedCategoryArray((prev) => [...prev, newCategory]);
+            setSelectedCategoryIndex(unsavedCategoryArray.length);
+            setSelectedCategory(newCategory);
           }}
         >
           Add category
         </Button>
       </div>
 
-      {selectedCategory &&
-      selectedCategoryIndex !== undefined &&
-      showCategoryPicker ? (
+      {selectedCategory && selectedCategoryIndex !== undefined ? (
         <div className="sm:relative">
           <CategoryPicker
+            cleanup={() => {
+              setUnsavedCategory(undefined);
+              setSelectedCategoryIndex(undefined);
+              setSelectedCategory(undefined);
+            }}
+            setUnsavedCategoryArray={setUnsavedCategoryArray}
             unsavedCategory={unsavedCategory}
             setUnsavedCategory={setUnsavedCategory}
             category={selectedCategory}
             categoryIndex={selectedCategoryIndex}
             setTransaction={props.setTransaction}
             transaction={props.transaction}
-            setShowCategoryPicker={setShowCategoryPicker}
           />
         </div>
       ) : null}
