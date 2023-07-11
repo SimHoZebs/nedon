@@ -80,7 +80,7 @@ const transactionRouter = router({
                 transactionId: plaidTransaction.transaction_id,
                 id: null,
                 categoryTree: category,
-                amount: -1,
+                amount: plaidTransaction.amount,
               },
             ],
           };

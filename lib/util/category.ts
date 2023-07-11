@@ -9,7 +9,7 @@ export const emptyCategory = (
     transactionId,
     id: null,
     categoryTree,
-    amount: -1,
+    amount: 0,
   };
 };
 

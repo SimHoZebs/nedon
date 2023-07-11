@@ -7,6 +7,10 @@ import categoryStyle from "../../../../util/categoryStyle";
 import { emptyCategory } from "../../../../util/category";
 
 interface Props {
+  unsavedCategoryArray: CategoryClientSide[];
+  setUnsavedCategoryArray: React.Dispatch<
+    React.SetStateAction<CategoryClientSide[]>
+  >;
   transaction: FullTransaction;
   setTransaction: React.Dispatch<
     React.SetStateAction<FullTransaction | undefined>
@@ -14,9 +18,6 @@ interface Props {
 }
 
 const Category = (props: Props) => {
-  const [unsavedCategoryArray, setUnsavedCategoryArray] = useState<
-    CategoryClientSide[]
-  >(props.transaction.categoryArray);
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryClientSide>();
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState<number>();
@@ -29,16 +30,21 @@ const Category = (props: Props) => {
     return categoryStyle[lastCategory];
   };
 
+  const categorySplitTotal = props.unsavedCategoryArray.reduce(
+    (acc, curr) => acc + curr.amount,
+    0,
+  );
+
   return (
-    <div className="flex flex-col">
-      <div className="flex justify-between font-semibold text-xl sm:text-2xl">
+    <div className="flex flex-col ">
+      <div className="flex flex-col gap-y-2 justify-between font-semibold text-xl sm:text-2xl">
         <h3>{props.transaction.name}</h3>
         <h3>${amount * -1}</h3>
       </div>
 
-      <div className="relative flex items-center gap-x-2">
-        {unsavedCategoryArray.map((category, index) => (
-          <button
+      <div className="relative flex items-center gap-x-2 overflow-x-auto">
+        {props.unsavedCategoryArray.map((category, index) => (
+          <div
             key={index}
             className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800"
             onClick={() => {
@@ -54,28 +60,33 @@ const Category = (props: Props) => {
               height={24}
             />
 
-            <p className={unsavedCategory ? "animate-pulse" : ""}>
-              {unsavedCategory
-                ? unsavedCategory.categoryTree.join(" > ")
-                : category.categoryTree.join(" > ")}
-            </p>
-          </button>
+            <div className="flex h-full flex-col items-start gap-y-1">
+              <p className={unsavedCategory ? "animate-pulse" : ""}>
+                {unsavedCategory
+                  ? unsavedCategory.categoryTree.join(" > ")
+                  : category.categoryTree.join(" > ")}
+              </p>
+              {props.unsavedCategoryArray.length > 1 && (
+                <p onClick={(e) => e.stopPropagation()}>
+                  ${" "}
+                  <input
+                    className="bg-zinc-900 w-14 group-hover:bg-zinc-800 "
+                    type="number"
+                    value={category.amount}
+                    onChange={(e) => {
+                      const updatedCategoryArray = [
+                        ...props.unsavedCategoryArray,
+                      ];
+                      updatedCategoryArray[index].amount =
+                        e.target.valueAsNumber;
+                      props.setUnsavedCategoryArray(updatedCategoryArray);
+                    }}
+                  />
+                </p>
+              )}
+            </div>
+          </div>
         ))}
-
-        <Button
-          onClick={() => {
-            const newCategory = emptyCategory(
-              props.transaction.transaction_id,
-              [],
-            );
-
-            setUnsavedCategoryArray((prev) => [...prev, newCategory]);
-            setSelectedCategoryIndex(unsavedCategoryArray.length);
-            setSelectedCategory(newCategory);
-          }}
-        >
-          Add category
-        </Button>
       </div>
 
       {selectedCategory && selectedCategoryIndex !== undefined ? (
@@ -86,7 +97,7 @@ const Category = (props: Props) => {
               setSelectedCategoryIndex(undefined);
               setSelectedCategory(undefined);
             }}
-            setUnsavedCategoryArray={setUnsavedCategoryArray}
+            setUnsavedCategoryArray={props.setUnsavedCategoryArray}
             unsavedCategory={unsavedCategory}
             setUnsavedCategory={setUnsavedCategory}
             category={selectedCategory}
@@ -96,6 +107,31 @@ const Category = (props: Props) => {
           />
         </div>
       ) : null}
+
+      <p className="text-xs h-4 text-pink-300 ">
+        {categorySplitTotal !== amount
+          ? "Category split total does not match transaction amount"
+          : null}
+      </p>
+
+      <div className="mt-2 flex gap-x-2 ">
+        <Button
+          className="bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-200 text-xs flex gap-x-2"
+          onClick={() => {
+            const newCategory = emptyCategory(
+              props.transaction.transaction_id,
+              [],
+            );
+
+            props.setUnsavedCategoryArray((prev) => [...prev, newCategory]);
+            setSelectedCategoryIndex(props.unsavedCategoryArray.length);
+            setSelectedCategory(newCategory);
+          }}
+        >
+          <Icon icon={"mdi:shape-plus-outline"} width={16}></Icon>
+          Add category
+        </Button>
+      </div>
     </div>
   );
 };

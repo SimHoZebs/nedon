@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import Modal from "../../Modal";
-import { FullTransaction, SplitClientSide } from "../../../util/types";
+import {
+  CategoryClientSide,
+  FullTransaction,
+  SplitClientSide,
+} from "../../../util/types";
 import UserSplit from "./UserSplit";
 import { useStoreState } from "../../../util/store";
 import { trpc } from "../../../util/trpc";
@@ -24,20 +28,68 @@ const TransactionModal = (props: Props) => {
   const removeSplit = trpc.transaction.removeSplit.useMutation();
   const queryClient = trpc.useContext();
 
+  const [unsavedCategoryArray, setUnsavedCategoryArray] = useState<
+    CategoryClientSide[]
+  >(props.transaction.categoryArray);
   const [unsavedSplitArray, setSplitArr] = useState<SplitClientSide[]>(
     props.transaction.splitArray,
   );
 
   const { amount } = props.transaction;
   let updatedTotalSplit =
-    Math.floor(
-      unsavedSplitArray.reduce((amount, split) => amount + split.amount, 0) *
-        100,
-    ) / 100;
+    unsavedSplitArray.length > 1
+      ? Math.floor(
+          unsavedSplitArray.reduce(
+            (amount, split) => amount + split.amount,
+            0,
+          ) * 100,
+        ) / 100
+      : -1;
+  const categorySplitTotal = unsavedCategoryArray.reduce(
+    (acc, curr) => acc + curr.amount,
+    0,
+  );
+
+  const saveChanges = async () => {
+    if (!appUser) return;
+
+    if (!props.transaction.inDB) {
+      await createTransaction.mutateAsync({
+        splitArray: unsavedSplitArray,
+        userId: appUser.id,
+        transactionId: props.transaction.transaction_id,
+      });
+    } else {
+      unsavedSplitArray.forEach(async (unsavedSplit) => {
+        if (
+          props.transaction.splitArray.find(
+            (split) => split.id === unsavedSplit.id,
+          )
+        ) {
+          await updateSplit.mutateAsync({
+            split: unsavedSplit,
+          });
+        } else {
+          await createSplit.mutateAsync({
+            split: unsavedSplit,
+          });
+        }
+      });
+    }
+
+    queryClient.transaction.getTransactionArray.refetch();
+    props.setTransaction({
+      ...props.transaction,
+      splitArray: unsavedSplitArray,
+      categoryArray: unsavedCategoryArray,
+    });
+  };
 
   return (
     <Modal setShowModal={props.setShowModal}>
       <Category
+        unsavedCategoryArray={unsavedCategoryArray}
+        setUnsavedCategoryArray={setUnsavedCategoryArray}
         setTransaction={props.setTransaction}
         transaction={props.transaction}
       />
@@ -189,7 +241,10 @@ const TransactionModal = (props: Props) => {
 
       <div className="flex w-full justify-between">
         <ActionBtn
-          disabled={updatedTotalSplit !== amount}
+          disabled={
+            (updatedTotalSplit !== amount && updatedTotalSplit !== -1) ||
+            categorySplitTotal !== amount
+          }
           onClick={async () => {
             if (!appUser) return;
 
