@@ -41,7 +41,9 @@ const TransactionModal = (props: Props) => {
       unsavedSplitArray.reduce((amount, split) => amount + split.amount, 0) *
         100,
     ) / 100;
-  const lastCategory = props.transaction.category?.slice(-1)[0];
+
+  const lastCategory =
+    props.transaction.categoryArray[0]?.categoryTree.slice(-1)[0];
   const thisCategoryStyle = lastCategory && categoryStyle[lastCategory];
 
   return (
@@ -52,47 +54,51 @@ const TransactionModal = (props: Props) => {
           <h3>${amount * -1}</h3>
         </div>
 
-        <div className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800">
+        {props.transaction.categoryArray.map((category, index) => (
           <div
-            className={`flex rounded-full p-1 text-zinc-700 ${
-              (thisCategoryStyle && thisCategoryStyle.bgColor) ||
-              "bg-zinc-900 hover:bg-zinc-800 "
-            }`}
+            key={index}
+            className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800"
           >
-            <Icon
-              icon={
-                (thisCategoryStyle && thisCategoryStyle.icon) ||
-                "mdi:shape-plus-outline"
-              }
-              height={24}
-            />
-          </div>
+            <div
+              className={`flex rounded-full p-1 text-zinc-700 ${
+                (thisCategoryStyle && thisCategoryStyle.bgColor) ||
+                "bg-zinc-900 hover:bg-zinc-800 "
+              }`}
+            >
+              <Icon
+                icon={
+                  (thisCategoryStyle && thisCategoryStyle.icon) ||
+                  "mdi:shape-plus-outline"
+                }
+                height={24}
+              />
+            </div>
 
-          <div
-            className="sm:relative"
-            onClick={() => {
-              setShowCategoryPicker((prev) => !prev);
-            }}
-          >
-            {verticalCategoryPicker ? (
-              <VerticalCategoryPicker
-                setTransaction={props.setTransaction}
-                showCategoryPicker={showCategoryPicker}
-                transaction={props.transaction}
-                setShowCategoryPicker={setShowCategoryPicker}
-              />
-            ) : (
-              <CategoryPicker
-                setTransaction={props.setTransaction}
-                showCategoryPicker={showCategoryPicker}
-                transaction={props.transaction}
-                setShowCategoryPicker={setShowCategoryPicker}
-              />
-            )}
+            <div
+              className="sm:relative"
+              onClick={() => {
+                setShowCategoryPicker((prev) => !prev);
+              }}
+            >
+              {verticalCategoryPicker ? (
+                <VerticalCategoryPicker
+                  setTransaction={props.setTransaction}
+                  showCategoryPicker={showCategoryPicker}
+                  transaction={props.transaction}
+                  setShowCategoryPicker={setShowCategoryPicker}
+                />
+              ) : (
+                <CategoryPicker
+                  setTransaction={props.setTransaction}
+                  showCategoryPicker={showCategoryPicker}
+                  transaction={props.transaction}
+                  setShowCategoryPicker={setShowCategoryPicker}
+                />
+              )}
+            </div>
           </div>
-        </div>
+        ))}
       </div>
-
       <div className="flex w-full flex-col gap-y-1">
         {unsavedSplitArray.length > 1 &&
           unsavedSplitArray.map((split, i) => (
@@ -249,7 +255,6 @@ const TransactionModal = (props: Props) => {
                 splitArray: unsavedSplitArray,
                 userId: appUser.id,
                 transactionId: props.transaction.transaction_id,
-                categoryArray: props.transaction.category || [],
               });
             } else {
               unsavedSplitArray.forEach(async (unsavedSplit) => {
