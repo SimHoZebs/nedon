@@ -20,7 +20,6 @@ const Page: NextPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] =
     useState<FullTransaction>();
-  const [splitArray, setSplitArray] = useState<SplitClientSide[]>([]);
 
   //organizeTransactionByTime is computationally expensive
   const sortedTransactionArray = useMemo(() => {
@@ -61,9 +60,7 @@ const Page: NextPage = () => {
                               if (!appUser) return;
 
                               setShowModal(true);
-
                               setSelectedTransaction(transaction);
-                              setSplitArray(splitArray);
                             }}
                             transaction={transaction}
                             key={l}
