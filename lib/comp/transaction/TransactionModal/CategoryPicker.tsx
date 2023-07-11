@@ -15,7 +15,10 @@ interface Props {
     React.SetStateAction<FullTransaction | undefined>
   >;
   setShowCategoryPicker: React.Dispatch<React.SetStateAction<boolean>>;
-  showCategoryPicker: boolean;
+  unsavedCategory?: CategoryClientSide;
+  setUnsavedCategory: React.Dispatch<
+    React.SetStateAction<CategoryClientSide | undefined>
+  >;
   category: CategoryClientSide;
   categoryIndex: number;
 }
@@ -29,7 +32,6 @@ const CategoryPicker = (props: Props) => {
   const createTransaction = trpc.transaction.createTransaction.useMutation();
   const queryClient = trpc.useContext();
 
-  const [unsavedCategory, setUnsavedCategory] = useState<CategoryClientSide>();
   const [selectedOptionArray, setSelectedOptionArray] = useState<
     HierarchicalCategory[]
   >([]);
@@ -44,10 +46,10 @@ const CategoryPicker = (props: Props) => {
       categoryTree: treeCopy,
     };
 
-    if (unsavedCategory) {
-      treeCopy.push(...unsavedCategory.categoryTree);
+    if (props.unsavedCategory) {
+      treeCopy.push(...props.unsavedCategory.categoryTree);
       updatedCategory = {
-        ...unsavedCategory,
+        ...props.unsavedCategory,
         categoryTree: treeCopy,
       };
     }
@@ -84,7 +86,7 @@ const CategoryPicker = (props: Props) => {
     }
     queryClient.transaction.getTransactionArray.refetch();
 
-    setUnsavedCategory(undefined);
+    props.setUnsavedCategory(undefined);
     setSelectedOptionArray(categoryOptionArray.data);
     props.setTransaction({
       ...props.transaction,
@@ -100,15 +102,7 @@ const CategoryPicker = (props: Props) => {
 
   return appUser ? (
     <>
-      <div className="flex gap-x-2 items-center">
-        <button className={unsavedCategory ? "animate-pulse" : ""}>
-          {unsavedCategory
-            ? unsavedCategory.categoryTree.join(" > ")
-            : props.category.categoryTree.join(" > ")}
-        </button>
-      </div>
-
-      {categoryOptionArray.data && props.showCategoryPicker && (
+      {categoryOptionArray.data && (
         <div
           className="absolute left-0 flex max-h-[50vh] w-full sm:w-96 flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300"
           onClick={(e) => e.stopPropagation()}
@@ -120,7 +114,7 @@ const CategoryPicker = (props: Props) => {
                   className="flex"
                   onClick={() => {
                     setSelectedOptionArray(categoryOptionArray.data);
-                    setUnsavedCategory(props.category);
+                    props.setUnsavedCategory(props.category);
                   }}
                 >
                   <Icon icon="mdi:chevron-left" height={24} />
@@ -142,7 +136,7 @@ const CategoryPicker = (props: Props) => {
                 onClick={(e) => {
                   e.stopPropagation();
                   props.setShowCategoryPicker(false);
-                  setUnsavedCategory(undefined);
+                  props.setUnsavedCategory(undefined);
                   setSelectedOptionArray(categoryOptionArray.data);
                 }}
               >
@@ -161,7 +155,7 @@ const CategoryPicker = (props: Props) => {
                     await syncCategory(category);
                   } else {
                     setSelectedOptionArray(category.subCategory);
-                    setUnsavedCategory((prev) =>
+                    props.setUnsavedCategory((prev) =>
                       prev
                         ? {
                             ...prev,

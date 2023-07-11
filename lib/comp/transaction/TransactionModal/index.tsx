@@ -26,19 +26,25 @@ const TransactionModal = (props: Props) => {
   const { appUser, appGroup, verticalCategoryPicker } = useStoreState(
     (state) => state,
   );
-
-  const { amount } = props.transaction;
-  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
-  const [unsavedSplitArray, setSplitArr] = useState<SplitClientSide[]>(
-    props.transaction.splitArray,
-  );
-
   const createTransaction = trpc.transaction.createTransaction.useMutation();
   const updateSplit = trpc.transaction.updateSplit.useMutation();
   const createSplit = trpc.transaction.createSplit.useMutation();
   const removeSplit = trpc.transaction.removeSplit.useMutation();
   const queryClient = trpc.useContext();
 
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [unsavedSplitArray, setSplitArr] = useState<SplitClientSide[]>(
+    props.transaction.splitArray,
+  );
+  const [unsavedCategoryArray, setUnsavedCategoryArray] = useState<
+    CategoryClientSide[]
+  >(props.transaction.categoryArray);
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryClientSide>();
+  const [selectedCategoryIndex, setSelectedCategoryIndex] = useState<number>();
+  const [unsavedCategory, setUnsavedCategory] = useState<CategoryClientSide>();
+
+  const { amount } = props.transaction;
   let updatedTotalSplit =
     Math.floor(
       unsavedSplitArray.reduce((amount, split) => amount + split.amount, 0) *
@@ -57,44 +63,64 @@ const TransactionModal = (props: Props) => {
           <h3>${amount * -1}</h3>
         </div>
 
-        {props.transaction.categoryArray.map((category, index) => (
-          <div
-            key={index}
-            className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800"
-          >
-            <div
-              className={`flex rounded-full p-1 text-zinc-700 ${
-                (thisCategoryStyle && thisCategoryStyle.bgColor) ||
-                "bg-zinc-900 hover:bg-zinc-800 "
-              }`}
+        <div className="relative flex items-center gap-x-2">
+          {unsavedCategoryArray.map((category, index) => (
+            <button
+              key={index}
+              className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800"
+              onClick={() => {
+                setShowCategoryPicker(true);
+                setSelectedCategory(category);
+                setSelectedCategoryIndex(index);
+              }}
             >
               <Icon
+                className={`flex rounded-full p-1 text-zinc-700 ${
+                  (thisCategoryStyle && thisCategoryStyle.bgColor) ||
+                  "bg-zinc-900 "
+                }`}
                 icon={
                   (thisCategoryStyle && thisCategoryStyle.icon) ||
                   "mdi:shape-plus-outline"
                 }
                 height={24}
               />
-            </div>
 
-            <div
-              className="sm:relative"
-              onClick={() => {
-                setShowCategoryPicker((prev) => !prev);
-              }}
-            >
-              <CategoryPicker
-                category={category}
-                categoryIndex={index}
-                setTransaction={props.setTransaction}
-                showCategoryPicker={showCategoryPicker}
-                transaction={props.transaction}
-                setShowCategoryPicker={setShowCategoryPicker}
-              />
-            </div>
+              <p className={unsavedCategory ? "animate-pulse" : ""}>
+                {unsavedCategory
+                  ? unsavedCategory.categoryTree.join(" > ")
+                  : category.categoryTree.join(" > ")}
+              </p>
+            </button>
+          ))}
+
+          <Button
+            onClick={() => {
+              //add empty category
+              setUnsavedCategoryArray((prev) => [...prev]);
+            }}
+          >
+            Add category
+          </Button>
+        </div>
+
+        {selectedCategory &&
+        selectedCategoryIndex !== undefined &&
+        showCategoryPicker ? (
+          <div className="sm:relative">
+            <CategoryPicker
+              unsavedCategory={unsavedCategory}
+              setUnsavedCategory={setUnsavedCategory}
+              category={selectedCategory}
+              categoryIndex={selectedCategoryIndex}
+              setTransaction={props.setTransaction}
+              transaction={props.transaction}
+              setShowCategoryPicker={setShowCategoryPicker}
+            />
           </div>
-        ))}
+        ) : null}
       </div>
+
       <div className="flex w-full flex-col gap-y-1">
         {unsavedSplitArray.length > 1 &&
           unsavedSplitArray.map((split, i) => (
