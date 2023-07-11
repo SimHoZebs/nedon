@@ -14,7 +14,7 @@ import { groupRouter } from "./group";
 import transactionRouter from "./transaction";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS, client } from "../util";
 import stripUserSecrets from "../../lib/util/stripUserSecrets";
-import { convertPlaidCategoriesToCategoryArray } from "../../lib/util/transaction";
+import { convertPlaidCategoriesToHierarchicalArray } from "../../lib/util/category";
 
 const setAccessToken = async ({
   publicToken,
@@ -116,7 +116,7 @@ export const appRouter = router({
 
   getCategoryOptionArray: procedure.input(z.undefined()).query(async () => {
     const response = await client.categoriesGet({});
-    return convertPlaidCategoriesToCategoryArray(response.data.categories);
+    return convertPlaidCategoriesToHierarchicalArray(response.data.categories);
   }),
 });
 

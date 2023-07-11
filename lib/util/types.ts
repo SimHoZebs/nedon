@@ -24,10 +24,10 @@ export interface FullTransaction extends Omit<PlaidTransaction, "category"> {
   inDB: boolean;
 }
 
-export type CategoryWithTransactionArray = {
+export type HierarchicalCategoryWithTransactionArray = {
   name: string;
   transactionArray: FullTransaction[];
-  subCategory: CategoryWithTransactionArray[];
+  subCategory: HierarchicalCategoryWithTransactionArray[];
 };
 
 export type HierarchicalCategory = {

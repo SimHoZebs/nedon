@@ -5,12 +5,12 @@ import { organizeTransactionByCategory } from "../lib/util/transaction";
 import Button from "../lib/comp/Button/ActionBtn";
 import SettleModal from "../lib/comp/analysis/SettleModal";
 import {
-  CategoryWithTransactionArray,
+  HierarchicalCategoryWithTransactionArray,
   FullTransaction,
 } from "../lib/util/types";
 
 const categoryTotalSpending = (
-  category: CategoryWithTransactionArray,
+  category: HierarchicalCategoryWithTransactionArray,
 ): number => {
   let amount = category.transactionArray.reduce((total, transaction) => {
     return total + transaction.amount;
@@ -23,7 +23,7 @@ const categoryTotalSpending = (
   return amount;
 };
 
-const render = (categoryArray: CategoryWithTransactionArray[]) =>
+const render = (categoryArray: HierarchicalCategoryWithTransactionArray[]) =>
   categoryArray.map((category, i) => (
     <div key={i} className="border">
       <div>{category.name}</div>
