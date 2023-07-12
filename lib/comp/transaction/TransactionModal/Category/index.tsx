@@ -22,6 +22,10 @@ const Category = (props: Props) => {
     useState<CategoryClientSide>();
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState<number>();
   const [unsavedCategory, setUnsavedCategory] = useState<CategoryClientSide>();
+  const [pickerPosition, setPickerPosition] = useState<{
+    x: number;
+    y: number;
+  }>({ x: 0, y: 0 });
 
   const { amount } = props.transaction;
   const thisCategoryStyle = (index: number) => {
@@ -32,33 +36,57 @@ const Category = (props: Props) => {
 
   const categorySplitTotal = props.unsavedCategoryArray.reduce(
     (acc, curr) => acc + curr.amount,
-    0,
+    0
   );
 
   return (
     <>
-      <div>
-        <div className="relative flex flex-wrap items-center w-full gap-2 ">
+      <div className="flex flex-col gap-y-1">
+        <div className="flex gap-x-4">
+          <h4 className="text-lg font-medium">Categories</h4>
+          <Button
+            className="flex gap-x-2 bg-zinc-800 text-xs hover:bg-zinc-700 hover:text-zinc-200"
+            onClick={() => {
+              const newCategory = emptyCategory(
+                props.transaction.transaction_id,
+                []
+              );
+
+              props.setUnsavedCategoryArray((prev) => [...prev, newCategory]);
+              setSelectedCategoryIndex(props.unsavedCategoryArray.length);
+              setSelectedCategory(newCategory);
+            }}
+          >
+            <Icon icon={"mdi:plus"} width={16}></Icon>
+            Add category
+          </Button>
+        </div>
+        <div className="relative flex w-full flex-wrap items-center gap-2 ">
           {props.unsavedCategoryArray.map((category, index) => (
             <div
               key={index}
-              className="group border border-zinc-700 p-1 px-3 rounded-full flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800 hover:cursor-pointer"
-              onClick={() => {
+              className="group flex w-fit items-center gap-x-2 rounded-lg p-1 px-3 text-xs text-zinc-400 hover:cursor-pointer hover:bg-zinc-800 hover:text-zinc-300 sm:text-sm"
+              onClick={(e) => {
                 setSelectedCategory(category);
                 setSelectedCategoryIndex(index);
+                const offsets = e.currentTarget.getBoundingClientRect();
+                setPickerPosition({
+                  x: offsets.left,
+                  y: offsets.bottom + 8,
+                });
               }}
             >
               <Icon
-                className={`flex rounded-full bg-zinc-900 group-hover:bg-zinc-800 p-1 ${thisCategoryStyle(
-                  index,
-                )?.textColor}`}
+                className={`flex rounded-full bg-zinc-900 p-1 group-hover:bg-zinc-800 ${
+                  thisCategoryStyle(index)?.textColor
+                }`}
                 icon={
                   thisCategoryStyle(index)?.icon || "mdi:shape-plus-outline"
                 }
                 height={24}
               />
 
-              <div className="flex text-zinc-300 h-full flex-col items-start ">
+              <div className="flex h-full flex-col items-start text-zinc-300 ">
                 <p
                   className={
                     index == selectedCategoryIndex && unsavedCategory
@@ -76,7 +104,7 @@ const Category = (props: Props) => {
                   <p onClick={(e) => e.stopPropagation()}>
                     ${" "}
                     <input
-                      className="bg-zinc-900 w-14 group-hover:bg-zinc-800 "
+                      className="w-14 bg-zinc-900 group-hover:bg-zinc-800 "
                       type="number"
                       value={category.amount}
                       onChange={(e) => {
@@ -98,6 +126,7 @@ const Category = (props: Props) => {
         {selectedCategory && selectedCategoryIndex !== undefined ? (
           <div>
             <CategoryPicker
+              position={pickerPosition}
               cleanup={() => {
                 setUnsavedCategory(undefined);
                 setSelectedCategoryIndex(undefined);
@@ -115,26 +144,7 @@ const Category = (props: Props) => {
         ) : null}
       </div>
 
-      <div className="mt-2 flex gap-x-2 ">
-        <Button
-          className="bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-200 text-xs flex gap-x-2"
-          onClick={() => {
-            const newCategory = emptyCategory(
-              props.transaction.transaction_id,
-              [],
-            );
-
-            props.setUnsavedCategoryArray((prev) => [...prev, newCategory]);
-            setSelectedCategoryIndex(props.unsavedCategoryArray.length);
-            setSelectedCategory(newCategory);
-          }}
-        >
-          <Icon icon={"mdi:shape-plus-outline"} width={16}></Icon>
-          Add category
-        </Button>
-      </div>
-
-      <p className="text-xs h-4 text-pink-300 ">
+      <p className="h-4 text-xs text-pink-300 ">
         {categorySplitTotal !== amount
           ? "Category split total does not match transaction amount"
           : null}

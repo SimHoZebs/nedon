@@ -24,6 +24,7 @@ interface Props {
   category: CategoryClientSide;
   categoryIndex: number;
   cleanup: () => void;
+  position: { x: number; y: number };
 }
 
 const CategoryPicker = (props: Props) => {
@@ -106,9 +107,9 @@ const CategoryPicker = (props: Props) => {
     <>
       {categoryOptionArray.data && (
         <div
-          className="absolute left-0 flex max-h-[50vh] w-full sm:w-96 flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300"
-          
+          className="absolute left-0 flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 sm:w-96"
           onClick={(e) => e.stopPropagation()}
+          style={{ top: props.position.y, left: props.position.x }}
         >
           <div className="flex w-full justify-between px-2 py-1">
             <div className="flex w-fit items-center">
@@ -141,7 +142,7 @@ const CategoryPicker = (props: Props) => {
                   cleanup();
 
                   props.setUnsavedCategoryArray(
-                    props.transaction.categoryArray,
+                    props.transaction.categoryArray
                   );
                 }}
               >
@@ -152,7 +153,7 @@ const CategoryPicker = (props: Props) => {
 
           <hr className="w-full border-zinc-700" />
 
-          <div className="pl-2 pb-1 grid w-full auto-cols-fr grid-cols-3 overflow-x-hidden overflow-y-scroll bg-zinc-800 text-xs ">
+          <div className="grid w-full auto-cols-fr grid-cols-3 overflow-x-hidden overflow-y-scroll bg-zinc-800 pb-1 pl-2 text-xs ">
             {selectedOptionArray.map((category, i) => (
               <button
                 onClick={async () => {
@@ -170,13 +171,13 @@ const CategoryPicker = (props: Props) => {
                         : {
                             ...props.category,
                             categoryTree: [category.name],
-                          },
+                          }
                     );
                   }
                 }}
                 key={i}
                 className={
-                  "flex flex-col gap-y-1 aspect-square items-center justify-center hyphens-auto  rounded-lg border  border-zinc-400 text-center mr-2 my-1"
+                  "my-1 mr-2 flex aspect-square flex-col items-center justify-center  gap-y-1 hyphens-auto  rounded-lg border border-zinc-400 text-center"
                 }
               >
                 <Icon
