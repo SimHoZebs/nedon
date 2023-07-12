@@ -57,10 +57,11 @@ const Category = (props: Props) => {
               setSelectedCategory(newCategory);
             }}
           >
-            <Icon icon={"mdi:plus"} width={16}></Icon>
+            <Icon icon={"mdi:plus"} width={16} />
             Add category
           </Button>
         </div>
+
         <div className="relative flex w-full flex-wrap items-center gap-2 ">
           {props.unsavedCategoryArray.map((category, index) => (
             <div
@@ -106,6 +107,7 @@ const Category = (props: Props) => {
                     <input
                       className="w-14 bg-zinc-900 group-hover:bg-zinc-800 "
                       type="number"
+                      min={0}
                       value={category.amount}
                       onChange={(e) => {
                         const updatedCategoryArray = [
@@ -144,11 +146,15 @@ const Category = (props: Props) => {
         ) : null}
       </div>
 
-      <p className="h-4 text-xs text-pink-300 ">
-        {categorySplitTotal !== amount
-          ? "Category split total does not match transaction amount"
-          : null}
-      </p>
+      <div>
+        <p className="h-4 text-xs text-pink-300 ">
+          {categorySplitTotal !== amount
+            ? `Category total is $ ${categorySplitTotal}, ${
+                categorySplitTotal > amount ? "exceeding" : "short"
+              } by $ ${Math.abs(categorySplitTotal - amount)}`
+            : null}
+        </p>
+      </div>
     </>
   );
 };

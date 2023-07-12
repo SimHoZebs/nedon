@@ -26,28 +26,26 @@ const TransactionModal = (props: Props) => {
   const updateSplit = trpc.transaction.updateSplit.useMutation();
   const createSplit = trpc.transaction.createSplit.useMutation();
   const removeSplit = trpc.transaction.removeSplit.useMutation();
+  const upsertTransaction = trpc.transaction.upsertManyCategory.useMutation();
   const queryClient = trpc.useContext();
 
   const [unsavedCategoryArray, setUnsavedCategoryArray] = useState<
     CategoryClientSide[]
   >(props.transaction.categoryArray);
   const [unsavedSplitArray, setSplitArr] = useState<SplitClientSide[]>(
-    props.transaction.splitArray,
+    props.transaction.splitArray
   );
 
   const { amount } = props.transaction;
   let updatedTotalSplit =
     unsavedSplitArray.length > 1
       ? Math.floor(
-          unsavedSplitArray.reduce(
-            (amount, split) => amount + split.amount,
-            0,
-          ) * 100,
-        ) / 100
+        unsavedSplitArray.reduce((amount, split) => amount + split.amount, 0) * 100
+      ) / 100
       : -1;
   const categorySplitTotal = unsavedCategoryArray.reduce(
     (acc, curr) => acc + curr.amount,
-    0,
+    0
   );
 
   const saveChanges = async () => {
@@ -63,7 +61,7 @@ const TransactionModal = (props: Props) => {
       unsavedSplitArray.forEach(async (unsavedSplit) => {
         if (
           props.transaction.splitArray.find(
-            (split) => split.id === unsavedSplit.id,
+            (split) => split.id === unsavedSplit.id
           )
         ) {
           await updateSplit.mutateAsync({
@@ -88,9 +86,9 @@ const TransactionModal = (props: Props) => {
   return (
     <Modal setShowModal={props.setShowModal}>
       <div className="flex flex-col gap-y-2">
-        <div className="flex flex-col gap-y-2 justify-between font-semibold text-xl sm:text-2xl">
+        <div className="flex flex-col justify-between gap-y-2 text-xl font-semibold sm:text-2xl">
           <h2 className="text-2xl sm:text-3xl">{props.transaction.name}</h2>
-          <div className="flex gap-x-2 items-center">
+          <div className="flex items-center gap-x-2">
             <h3>${amount * -1}</h3>
             <ActionBtn className="gap-x-2">
               <Icon icon="lucide:split" width={16} />
@@ -116,7 +114,7 @@ const TransactionModal = (props: Props) => {
             >
               {appUser &&
                 (split.userId === appUser.id ? (
-                  <div className="w-5 aspect-square"></div>
+                  <div className="aspect-square w-5"></div>
                 ) : (
                   <button
                     title="Remove user from split"
@@ -164,12 +162,12 @@ const TransactionModal = (props: Props) => {
 
               {updatedTotalSplit !== amount ? (
                 <button
-                  className="flex min-h-[20px] aspect-square"
+                  className="flex aspect-square min-h-[20px]"
                   onClick={() => {
                     const updatedSplitArray = [...unsavedSplitArray];
                     let newSplitAmount =
                       Math.floor(
-                        (split.amount - updatedTotalSplit + amount) * 100,
+                        (split.amount - updatedTotalSplit + amount) * 100
                       ) / 100;
 
                     if (newSplitAmount < 0) newSplitAmount = 0;
@@ -185,7 +183,7 @@ const TransactionModal = (props: Props) => {
                   />
                 </button>
               ) : (
-                <div className="min-h-[20px] aspect-square"></div>
+                <div className="aspect-square min-h-[20px]"></div>
               )}
 
               <UserSplit
@@ -207,7 +205,7 @@ const TransactionModal = (props: Props) => {
           ))}
       </div>
 
-      <div className="text-red-800 h-5">
+      <div className="h-5 text-red-800">
         {updatedTotalSplit !== amount &&
           unsavedSplitArray.length > 0 &&
           `Split is ${updatedTotalSplit > amount ? "greater " : "less "}
@@ -221,7 +219,7 @@ const TransactionModal = (props: Props) => {
           appGroup.userArray.map((user, i) =>
             //Don't show users that are already splitting
             unsavedSplitArray.find((split) => split.userId === user.id) ||
-            user.id === appUser.id ? null : (
+              user.id === appUser.id ? null : (
               <div key={i} className="flex">
                 <div>{user.id.slice(0, 8)}</div>
                 <ActionBtn
@@ -264,6 +262,7 @@ const TransactionModal = (props: Props) => {
             if (!props.transaction.inDB) {
               await createTransaction.mutateAsync({
                 splitArray: unsavedSplitArray,
+                categoryArray: unsavedCategoryArray,
                 userId: appUser.id,
                 transactionId: props.transaction.transaction_id,
               });
@@ -271,7 +270,7 @@ const TransactionModal = (props: Props) => {
               unsavedSplitArray.forEach(async (unsavedSplit) => {
                 if (
                   props.transaction.splitArray.find(
-                    (split) => split.id === unsavedSplit.id,
+                    (split) => split.id === unsavedSplit.id
                   )
                 ) {
                   await updateSplit.mutateAsync({
@@ -283,15 +282,22 @@ const TransactionModal = (props: Props) => {
                   });
                 }
               });
+
+              await upsertTransaction.mutateAsync({
+                transactionId: props.transaction.transaction_id,
+                categoryArray: unsavedCategoryArray,
+              });
             }
 
             queryClient.transaction.getTransactionArray.refetch();
             props.setTransaction({
               ...props.transaction,
               splitArray: unsavedSplitArray,
+              categoryArray: unsavedCategoryArray,
             });
           }}
         >
+          <Icon icon="material-symbols:save-outline" width={16} />
           Save changes
         </ActionBtn>
 
