@@ -59,8 +59,14 @@ const Category = (props: Props) => {
               />
 
               <div className="flex h-full flex-col items-start gap-y-1">
-                <p className={unsavedCategory ? "animate-pulse" : ""}>
-                  {unsavedCategory
+                <p
+                  className={
+                    index == selectedCategoryIndex && unsavedCategory
+                      ? "animate-pulse"
+                      : ""
+                  }
+                >
+                  {index == selectedCategoryIndex && unsavedCategory
                     ? unsavedCategory.categoryTree[
                         unsavedCategory.categoryTree.length - 1
                       ]

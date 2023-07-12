@@ -74,18 +74,11 @@ const CategoryPicker = (props: Props) => {
     //IMPROVE: picker should understand there can be mroe unsaved category than there is saved. The unsaved categoryArray should be mapped through instead.
     //Picker will update category at a time - there should be a useState that keeps track of that.
     if (props.transaction.inDB) {
-      const upsertResponseArray = props.transaction.categoryArray.map(
-        async (c) => {
-          const transaction = await upsertTransaction.mutateAsync({
-            transactionId: props.transaction.transaction_id,
-            categoryArray: updatedCategoryArray,
-          });
-          return transaction.categoryArray;
-        },
-      );
-      updatedCategoryArray = await upsertResponseArray[
-        upsertResponseArray.length - 1
-      ];
+      const transaction = await upsertTransaction.mutateAsync({
+        transactionId: props.transaction.transaction_id,
+        categoryArray: updatedCategoryArray,
+      });
+      updatedCategoryArray = transaction.categoryArray;
     } else {
       const transaction = await createTransaction.mutateAsync({
         userId: appUser.id,
@@ -163,6 +156,7 @@ const CategoryPicker = (props: Props) => {
               <button
                 onClick={async () => {
                   if (category.subCategory.length === 0) {
+                    console.log("syncing");
                     await syncCategory(category);
                   } else {
                     setSelectedOptionArray(category.subCategory);
