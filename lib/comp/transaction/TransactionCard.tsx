@@ -51,12 +51,12 @@ const TransactionCard = (props: Props) => {
         </div>
       </div>
 
-      <div className="flex flex-col h-fit min-w-fit gap-x-1">
-        <div className="flex gap-x-1">
+      <div className="flex flex-col h-fit w-full gap-x-1">
+        <div className="flex gap-x-1 overflow-x-auto">
           {props.transaction.categoryArray.map((category, index) => (
             <div
               key={index}
-              className={`flex gap-x-1 rounded-full p-2 text-zinc-800 ${
+              className={`flex gap-x-1 min-w-max rounded-full p-2 text-zinc-800 ${
                 thisCategoryStyle(index)?.bgColor || "bg-zinc-400"
               }`}
             >
