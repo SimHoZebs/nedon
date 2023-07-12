@@ -10,24 +10,29 @@ import {
 } from "../lib/util/types";
 
 const categoryTotalSpending = (
-  category: HierarchicalCategoryWithTransactionArray,
+  hierarchicalCategory: HierarchicalCategoryWithTransactionArray
 ): number => {
-  let amount = category.transactionArray.reduce((total, transaction) => {
-    return total + transaction.amount;
-  }, 0);
+  let amount = hierarchicalCategory.transactionArray.reduce(
+    (total, transaction) => {
+      return total + transaction.amount;
+    },
+    0
+  );
 
-  category.subCategory.forEach((subCategory) => {
+  hierarchicalCategory.subCategory.forEach((subCategory) => {
     amount += categoryTotalSpending(subCategory);
   }, 0);
 
   return amount;
 };
 
-const render = (categoryArray: HierarchicalCategoryWithTransactionArray[]) =>
-  categoryArray.map((category, i) => (
+const render = (
+  hierarchicalCategoryArray: HierarchicalCategoryWithTransactionArray[]
+) =>
+  hierarchicalCategoryArray.map((category, i) => (
     <div key={i} className="border">
       <div>{category.name}</div>
-      <div>{categoryTotalSpending(category)}</div>
+      <div>{category.amount}</div>
       <div className="flex flex-col gap-y-3 p-3">
         {category.subCategory.length > 0 && render(category.subCategory)}
       </div>
@@ -43,12 +48,12 @@ const Page = () => {
     FullTransaction[]
   >(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken },
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
   );
   const associatedTransactionArray =
     trpc.transaction.getAssociatedTransactionArray.useQuery(
       { id: appUser ? appUser.id : "" },
-      { staleTime: 3600000, enabled: appUser?.hasAccessToken },
+      { staleTime: 3600000, enabled: appUser?.hasAccessToken }
     );
 
   //useMemo is probably unnecessary since this page doesn't re-render that much.
@@ -122,6 +127,7 @@ const Page = () => {
         ))}
       </div>
       {render(categorizedTransactionArray)}
+      <pre>{JSON.stringify(categorizedTransactionArray, null, 2)}</pre>
     </section>
   ) : null;
 };

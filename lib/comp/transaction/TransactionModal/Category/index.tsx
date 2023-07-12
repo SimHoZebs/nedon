@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { CategoryClientSide, FullTransaction } from "../../../../util/types";
+import {
+  CategoryTreeClientSide,
+  FullTransaction,
+} from "../../../../util/types";
 import { Icon } from "@iconify-icon/react";
 import Button from "../../../Button";
 import CategoryPicker from "./CategoryPicker";
@@ -7,9 +10,9 @@ import categoryStyle from "../../../../util/categoryStyle";
 import { emptyCategory } from "../../../../util/category";
 
 interface Props {
-  unsavedCategoryArray: CategoryClientSide[];
-  setUnsavedCategoryArray: React.Dispatch<
-    React.SetStateAction<CategoryClientSide[]>
+  unsavedTreeArray: CategoryTreeClientSide[];
+  setUnsavedTreeArray: React.Dispatch<
+    React.SetStateAction<CategoryTreeClientSide[]>
   >;
   transaction: FullTransaction;
   setTransaction: React.Dispatch<
@@ -18,10 +21,9 @@ interface Props {
 }
 
 const Category = (props: Props) => {
-  const [selectedCategory, setSelectedCategory] =
-    useState<CategoryClientSide>();
-  const [selectedCategoryIndex, setSelectedCategoryIndex] = useState<number>();
-  const [unsavedCategory, setUnsavedCategory] = useState<CategoryClientSide>();
+  const [selectedTree, setSelectedTree] = useState<CategoryTreeClientSide>();
+  const [selectedTreeIndex, setSelectedTreeIndex] = useState<number>();
+  const [unsavedTree, setUnsavedTree] = useState<CategoryTreeClientSide>();
   const [pickerPosition, setPickerPosition] = useState<{
     x: number;
     y: number;
@@ -29,12 +31,12 @@ const Category = (props: Props) => {
 
   const { amount } = props.transaction;
   const thisCategoryStyle = (index: number) => {
-    const lastCategory =
-      props.transaction.categoryArray[index]?.categoryTree.slice(-1)[0];
-    return categoryStyle[lastCategory];
+    const lastCategoryName =
+      props.transaction.categoryTreeArray[index]?.nameArray.slice(-1)[0];
+    return categoryStyle[lastCategoryName];
   };
 
-  const categorySplitTotal = props.unsavedCategoryArray.reduce(
+  const categorySplitTotal = props.unsavedTreeArray.reduce(
     (acc, curr) => acc + curr.amount,
     0
   );
@@ -52,9 +54,9 @@ const Category = (props: Props) => {
                 []
               );
 
-              props.setUnsavedCategoryArray((prev) => [...prev, newCategory]);
-              setSelectedCategoryIndex(props.unsavedCategoryArray.length);
-              setSelectedCategory(newCategory);
+              props.setUnsavedTreeArray((prev) => [...prev, newCategory]);
+              setSelectedTreeIndex(props.unsavedTreeArray.length);
+              setSelectedTree(newCategory);
             }}
           >
             <Icon icon={"mdi:plus"} width={16} />
@@ -63,13 +65,13 @@ const Category = (props: Props) => {
         </div>
 
         <div className="relative flex w-full flex-wrap items-center gap-2 ">
-          {props.unsavedCategoryArray.map((category, index) => (
+          {props.unsavedTreeArray.map((tree, index) => (
             <div
               key={index}
               className="group flex w-fit items-center gap-x-2 rounded-lg p-1 px-3 text-xs text-zinc-400 hover:cursor-pointer hover:bg-zinc-800 hover:text-zinc-300 sm:text-sm"
               onClick={(e) => {
-                setSelectedCategory(category);
-                setSelectedCategoryIndex(index);
+                setSelectedTree(tree);
+                setSelectedTreeIndex(index);
                 const offsets = e.currentTarget.getBoundingClientRect();
                 setPickerPosition({
                   x: offsets.left,
@@ -90,32 +92,27 @@ const Category = (props: Props) => {
               <div className="flex h-full flex-col items-start text-zinc-300 ">
                 <p
                   className={
-                    index == selectedCategoryIndex && unsavedCategory
+                    index == selectedTreeIndex && unsavedTree
                       ? "animate-pulse"
                       : ""
                   }
                 >
-                  {index == selectedCategoryIndex && unsavedCategory
-                    ? unsavedCategory.categoryTree[
-                        unsavedCategory.categoryTree.length - 1
-                      ]
-                    : category.categoryTree[category.categoryTree.length - 1]}
+                  {index == selectedTreeIndex && unsavedTree
+                    ? unsavedTree.nameArray[unsavedTree.nameArray.length - 1]
+                    : tree.nameArray[tree.nameArray.length - 1]}
                 </p>
-                {props.unsavedCategoryArray.length > 1 && (
+                {props.unsavedTreeArray.length > 1 && (
                   <p onClick={(e) => e.stopPropagation()}>
                     ${" "}
                     <input
                       className="w-14 bg-zinc-900 group-hover:bg-zinc-800 "
                       type="number"
                       min={0}
-                      value={category.amount}
+                      value={tree.amount}
                       onChange={(e) => {
-                        const updatedCategoryArray = [
-                          ...props.unsavedCategoryArray,
-                        ];
-                        updatedCategoryArray[index].amount =
-                          e.target.valueAsNumber;
-                        props.setUnsavedCategoryArray(updatedCategoryArray);
+                        const updatedTreeArray = [...props.unsavedTreeArray];
+                        updatedTreeArray[index].amount = e.target.valueAsNumber;
+                        props.setUnsavedTreeArray(updatedTreeArray);
                       }}
                     />
                   </p>
@@ -125,20 +122,20 @@ const Category = (props: Props) => {
           ))}
         </div>
 
-        {selectedCategory && selectedCategoryIndex !== undefined ? (
+        {selectedTree && selectedTreeIndex !== undefined ? (
           <div>
             <CategoryPicker
               position={pickerPosition}
               cleanup={() => {
-                setUnsavedCategory(undefined);
-                setSelectedCategoryIndex(undefined);
-                setSelectedCategory(undefined);
+                setUnsavedTree(undefined);
+                setSelectedTreeIndex(undefined);
+                setSelectedTree(undefined);
               }}
-              setUnsavedCategoryArray={props.setUnsavedCategoryArray}
-              unsavedCategory={unsavedCategory}
-              setUnsavedCategory={setUnsavedCategory}
-              category={selectedCategory}
-              categoryIndex={selectedCategoryIndex}
+              setUnsavedTreeArray={props.setUnsavedTreeArray}
+              unsavedTree={unsavedTree}
+              setUnsavedTree={setUnsavedTree}
+              category={selectedTree}
+              categoryIndex={selectedTreeIndex}
               setTransaction={props.setTransaction}
               transaction={props.transaction}
             />

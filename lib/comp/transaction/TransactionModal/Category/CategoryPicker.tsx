@@ -3,7 +3,7 @@ import { trpc } from "../../../../util/trpc";
 import { Icon } from "@iconify-icon/react";
 import { useStoreState } from "../../../../util/store";
 import {
-  CategoryClientSide,
+  CategoryTreeClientSide,
   HierarchicalCategory,
   FullTransaction,
 } from "../../../../util/types";
@@ -14,14 +14,14 @@ interface Props {
   setTransaction: React.Dispatch<
     React.SetStateAction<FullTransaction | undefined>
   >;
-  setUnsavedCategoryArray: React.Dispatch<
-    React.SetStateAction<CategoryClientSide[]>
+  setUnsavedTreeArray: React.Dispatch<
+    React.SetStateAction<CategoryTreeClientSide[]>
   >;
-  unsavedCategory?: CategoryClientSide;
-  setUnsavedCategory: React.Dispatch<
-    React.SetStateAction<CategoryClientSide | undefined>
+  unsavedTree?: CategoryTreeClientSide;
+  setUnsavedTree: React.Dispatch<
+    React.SetStateAction<CategoryTreeClientSide | undefined>
   >;
-  category: CategoryClientSide;
+  category: CategoryTreeClientSide;
   categoryIndex: number;
   cleanup: () => void;
   position: { x: number; y: number };
@@ -50,52 +50,50 @@ const CategoryPicker = (props: Props) => {
   const syncCategory = async (hierarchicalCategory?: HierarchicalCategory) => {
     if (!appUser || !categoryOptionArray.data) return;
 
-    const treeCopy: string[] = [];
+    const nameArrayCopy: string[] = [];
 
-    let updatedCategory: CategoryClientSide = {
+    let updatedCategory: CategoryTreeClientSide = {
       ...props.category,
-      categoryTree: treeCopy,
+      nameArray: nameArrayCopy,
     };
 
-    if (props.unsavedCategory) {
-      treeCopy.push(...props.unsavedCategory.categoryTree);
+    if (props.unsavedTree) {
+      nameArrayCopy.push(...props.unsavedTree.nameArray);
       updatedCategory = {
-        ...props.unsavedCategory,
-        categoryTree: treeCopy,
+        ...props.unsavedTree,
+        nameArray: nameArrayCopy,
       };
     }
 
-    if (hierarchicalCategory) treeCopy.push(hierarchicalCategory.name);
+    if (hierarchicalCategory) nameArrayCopy.push(hierarchicalCategory.name);
 
-    let updatedCategoryArray: CategoryClientSide[] = [
-      ...props.transaction.categoryArray,
+    let updatedTreeArray: CategoryTreeClientSide[] = [
+      ...props.transaction.categoryTreeArray,
     ];
-    updatedCategoryArray[props.categoryIndex] = updatedCategory;
+    updatedTreeArray[props.categoryIndex] = updatedCategory;
 
-    //IMPROVE: picker should understand there can be mroe unsaved category than there is saved. The unsaved categoryArray should be mapped through instead.
-    //Picker will update category at a time - there should be a useState that keeps track of that.
     if (props.transaction.inDB) {
       const transaction = await upsertTransaction.mutateAsync({
         transactionId: props.transaction.transaction_id,
-        categoryArray: updatedCategoryArray,
+        categoryTreeArray: updatedTreeArray,
       });
-      updatedCategoryArray = transaction.categoryArray;
+      updatedTreeArray = transaction.categoryTreeArray;
     } else {
       const transaction = await createTransaction.mutateAsync({
         userId: appUser.id,
         transactionId: props.transaction.transaction_id,
-        categoryArray: updatedCategoryArray,
+        categoryTreeArray: updatedTreeArray,
       });
-      updatedCategoryArray = transaction.categoryArray;
+      updatedTreeArray = transaction.categoryTreeArray;
     }
     queryClient.transaction.getTransactionArray.refetch();
 
     props.setTransaction({
       ...props.transaction,
-      categoryArray: updatedCategoryArray,
+      categoryTreeArray: updatedTreeArray,
     });
 
-    props.setUnsavedCategoryArray(updatedCategoryArray);
+    props.setUnsavedTreeArray(updatedTreeArray);
     cleanup();
   };
 
@@ -118,7 +116,7 @@ const CategoryPicker = (props: Props) => {
                   className="flex"
                   onClick={() => {
                     setSelectedOptionArray(categoryOptionArray.data);
-                    props.setUnsavedCategory(undefined);
+                    props.setUnsavedTree(undefined);
                   }}
                 >
                   <Icon icon="mdi:chevron-left" height={24} />
@@ -141,8 +139,8 @@ const CategoryPicker = (props: Props) => {
                   e.stopPropagation();
                   cleanup();
 
-                  props.setUnsavedCategoryArray(
-                    props.transaction.categoryArray
+                  props.setUnsavedTreeArray(
+                    props.transaction.categoryTreeArray
                   );
                 }}
               >
@@ -162,15 +160,15 @@ const CategoryPicker = (props: Props) => {
                     await syncCategory(category);
                   } else {
                     setSelectedOptionArray(category.subCategory);
-                    props.setUnsavedCategory((prev) =>
+                    props.setUnsavedTree((prev) =>
                       prev
                         ? {
                             ...prev,
-                            categoryTree: [...prev.categoryTree, category.name],
+                            nameArray: [...prev.nameArray, category.name],
                           }
                         : {
                             ...props.category,
-                            categoryTree: [category.name],
+                            nameArray: [category.name],
                           }
                     );
                   }

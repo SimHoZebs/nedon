@@ -1,4 +1,4 @@
-import { User, Group, Split, Category } from "@prisma/client";
+import { User, Group, Split, CategoryTree } from "@prisma/client";
 import { CounterpartyType, Transaction } from "plaid";
 
 export interface UserClientSide extends Omit<User, "ACCESS_TOKEN"> {
@@ -14,18 +14,19 @@ export interface SplitClientSide extends Omit<Split, "id"> {
   id: string | null;
 }
 
-export interface CategoryClientSide extends Omit<Category, "id"> {
+export interface CategoryTreeClientSide extends Omit<CategoryTree, "id"> {
   id?: string | null;
 }
 
 export interface FullTransaction extends Omit<PlaidTransaction, "category"> {
   splitArray: SplitClientSide[];
-  categoryArray: CategoryClientSide[];
+  categoryTreeArray: CategoryTreeClientSide[];
   inDB: boolean;
 }
 
 export type HierarchicalCategoryWithTransactionArray = {
   name: string;
+  amount: number;
   transactionArray: FullTransaction[];
   subCategory: HierarchicalCategoryWithTransactionArray[];
 };

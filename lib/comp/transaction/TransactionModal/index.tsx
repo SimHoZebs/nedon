@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Modal from "../../Modal";
 import {
-  CategoryClientSide,
+  CategoryTreeClientSide,
   FullTransaction,
   SplitClientSide,
 } from "../../../util/types";
@@ -29,9 +29,9 @@ const TransactionModal = (props: Props) => {
   const upsertTransaction = trpc.transaction.upsertManyCategory.useMutation();
   const queryClient = trpc.useContext();
 
-  const [unsavedCategoryArray, setUnsavedCategoryArray] = useState<
-    CategoryClientSide[]
-  >(props.transaction.categoryArray);
+  const [unsavedCategoryTreeArray, setUnsavedCategoryTreeArray] = useState<
+    CategoryTreeClientSide[]
+  >(props.transaction.categoryTreeArray);
   const [unsavedSplitArray, setSplitArr] = useState<SplitClientSide[]>(
     props.transaction.splitArray
   );
@@ -40,10 +40,13 @@ const TransactionModal = (props: Props) => {
   let updatedTotalSplit =
     unsavedSplitArray.length > 1
       ? Math.floor(
-        unsavedSplitArray.reduce((amount, split) => amount + split.amount, 0) * 100
-      ) / 100
+          unsavedSplitArray.reduce(
+            (amount, split) => amount + split.amount,
+            0
+          ) * 100
+        ) / 100
       : -1;
-  const categorySplitTotal = unsavedCategoryArray.reduce(
+  const categorySplitTotal = unsavedCategoryTreeArray.reduce(
     (acc, curr) => acc + curr.amount,
     0
   );
@@ -79,7 +82,7 @@ const TransactionModal = (props: Props) => {
     props.setTransaction({
       ...props.transaction,
       splitArray: unsavedSplitArray,
-      categoryArray: unsavedCategoryArray,
+      categoryTreeArray: unsavedCategoryTreeArray,
     });
   };
 
@@ -98,8 +101,8 @@ const TransactionModal = (props: Props) => {
         </div>
 
         <Category
-          unsavedCategoryArray={unsavedCategoryArray}
-          setUnsavedCategoryArray={setUnsavedCategoryArray}
+          unsavedTreeArray={unsavedCategoryTreeArray}
+          setUnsavedTreeArray={setUnsavedCategoryTreeArray}
           setTransaction={props.setTransaction}
           transaction={props.transaction}
         />
@@ -219,7 +222,7 @@ const TransactionModal = (props: Props) => {
           appGroup.userArray.map((user, i) =>
             //Don't show users that are already splitting
             unsavedSplitArray.find((split) => split.userId === user.id) ||
-              user.id === appUser.id ? null : (
+            user.id === appUser.id ? null : (
               <div key={i} className="flex">
                 <div>{user.id.slice(0, 8)}</div>
                 <ActionBtn
@@ -262,7 +265,7 @@ const TransactionModal = (props: Props) => {
             if (!props.transaction.inDB) {
               await createTransaction.mutateAsync({
                 splitArray: unsavedSplitArray,
-                categoryArray: unsavedCategoryArray,
+                categoryTreeArray: unsavedCategoryTreeArray,
                 userId: appUser.id,
                 transactionId: props.transaction.transaction_id,
               });
@@ -285,7 +288,7 @@ const TransactionModal = (props: Props) => {
 
               await upsertTransaction.mutateAsync({
                 transactionId: props.transaction.transaction_id,
-                categoryArray: unsavedCategoryArray,
+                categoryTreeArray: unsavedCategoryTreeArray,
               });
             }
 
@@ -293,7 +296,7 @@ const TransactionModal = (props: Props) => {
             props.setTransaction({
               ...props.transaction,
               splitArray: unsavedSplitArray,
-              categoryArray: unsavedCategoryArray,
+              categoryTreeArray: unsavedCategoryTreeArray,
             });
           }}
         >

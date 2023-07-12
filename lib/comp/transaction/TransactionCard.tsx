@@ -15,21 +15,21 @@ const TransactionCard = (props: Props) => {
   const splitAmount = props.transaction.splitArray?.find(
     (split) =>
       split.transactionId === props.transaction.transaction_id &&
-      split.userId === appUser?.id,
+      split.userId === appUser?.id
   )?.amount;
 
   const thisCategoryStyle = (index: number) => {
     const lastCategory =
-      props.transaction.categoryArray[index]?.categoryTree.slice(-1)[0];
+      props.transaction.categoryTreeArray[index]?.nameArray.slice(-1)[0];
     return categoryStyle[lastCategory];
   };
 
   return (
     <div
-      className="flex flex-col h-fit w-full justify-between gap-x-4 gap-y-1 rounded-md bg-zinc-800 p-2 text-start hover:cursor-pointer hover:bg-zinc-700"
+      className="flex h-fit w-full flex-col justify-between gap-x-4 gap-y-1 rounded-md bg-zinc-800 p-2 text-start hover:cursor-pointer hover:bg-zinc-700"
       onClick={props.button}
     >
-      <div className={`flex justify-between w-full truncate gap-x-4`}>
+      <div className={`flex w-full justify-between gap-x-4 truncate`}>
         <div className="flex-start flex h-full flex-col justify-center truncate">
           <p className="truncate text-base sm:text-lg">
             {props.transaction.name}
@@ -51,18 +51,18 @@ const TransactionCard = (props: Props) => {
         </div>
       </div>
 
-      <div className="flex flex-col h-fit w-full gap-x-1">
+      <div className="flex h-fit w-full flex-col gap-x-1">
         <div
-          className="flex gap-x-1 overflow-x-auto no-scrollbar overscroll-none"
+          className="no-scrollbar flex gap-x-1 overflow-x-auto overscroll-none"
           onWheel={(e) => {
             e.preventDefault();
             e.currentTarget.scrollLeft += e.deltaY * 0.5;
           }}
         >
-          {props.transaction.categoryArray.map((category, index) => (
+          {props.transaction.categoryTreeArray.map((tree, index) => (
             <div
               key={index}
-              className={`flex gap-x-1 min-w-max rounded-full p-2 text-zinc-800 ${
+              className={`flex min-w-max gap-x-1 rounded-full p-2 text-zinc-800 ${
                 thisCategoryStyle(index)?.bgColor || "bg-zinc-400"
               }`}
             >
@@ -71,7 +71,7 @@ const TransactionCard = (props: Props) => {
                 width={16}
               />
               <p className="text-xs">
-                {category.categoryTree[category.categoryTree.length - 1]}
+                {tree.nameArray[tree.nameArray.length - 1]}
               </p>
             </div>
           ))}

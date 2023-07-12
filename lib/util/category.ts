@@ -1,24 +1,24 @@
-import { HierarchicalCategory } from "./types";
+import { CategoryTreeClientSide, HierarchicalCategory } from "./types";
 import { Category as PlaidCategory } from "plaid";
 
 export const emptyCategory = (
   transactionId: string,
-  categoryTree: string[],
-) => {
+  name: string[]
+): CategoryTreeClientSide => {
   return {
     transactionId,
     id: null,
-    categoryTree,
+    nameArray: name,
     amount: 0,
   };
 };
 
 export const convertPlaidCategoriesToHierarchicalArray = (
-  categories: PlaidCategory[],
+  plaidCategoryArray: PlaidCategory[]
 ) => {
   const resultArray: HierarchicalCategory[] = [];
 
-  categories.forEach((category) => {
+  plaidCategoryArray.forEach((category) => {
     fillCategoryInHierarchy(resultArray, { ...category });
   });
   return resultArray;
@@ -26,14 +26,14 @@ export const convertPlaidCategoriesToHierarchicalArray = (
 
 export const fillCategoryInHierarchy = (
   resultArray: HierarchicalCategory[],
-  plaidCategory: PlaidCategory,
+  plaidCategory: PlaidCategory
 ): HierarchicalCategory[] => {
   const hierarchy = plaidCategory.hierarchy;
 
   const firstCategory = hierarchy[0];
 
   let index = resultArray.findIndex(
-    (category) => category.name === firstCategory,
+    (category) => category.name === firstCategory
   );
 
   if (index === -1) {
@@ -55,7 +55,7 @@ export const fillCategoryInHierarchy = (
 
     resultArray[index].subCategory = fillCategoryInHierarchy(
       resultArray[index].subCategory,
-      plaidCategory,
+      plaidCategory
     );
   }
 

@@ -8,8 +8,8 @@ import {
 } from "plaid";
 import { FullTransaction } from "../../lib/util/types";
 import { client } from "../util";
-import { CategoryModel, SplitModel } from "../../prisma/zod";
-import { Category } from "@prisma/client";
+import { CategoryTreeModel, SplitModel } from "../../prisma/zod";
+import { CategoryTree } from "@prisma/client";
 
 // Retrieve Transactions for an Item
 // https://plaid.com/docs/#transactions
@@ -59,39 +59,40 @@ const transactionRouter = router({
           ownerId: input.id,
         },
         include: {
-          categoryArray: true,
+          categoryTreeArray: true,
           splitArray: true,
         },
       });
 
       const fullTransactionArray: FullTransaction[] = added.map(
-        ({ category, ...plaidTransaction }) => {
+        ({ category: nameArray, ...plaidTransaction }) => {
           const meta = transactionArray.find(
-            (t) => t.id === plaidTransaction.transaction_id,
+            (t) => t.id === plaidTransaction.transaction_id
           );
-          if (!category) throw new Error("category is somehow falsy");
+          if (!nameArray) throw new Error("category is somehow falsy");
 
           let transaction: FullTransaction = {
             ...plaidTransaction,
             inDB: false,
             splitArray: [],
-            categoryArray: [
+            categoryTreeArray: [
               {
                 transactionId: plaidTransaction.transaction_id,
                 id: null,
-                categoryTree: category,
+                nameArray,
                 amount: plaidTransaction.amount,
               },
             ],
           };
 
           if (meta) {
-            const { ownerId, categoryArray, ...rest } = meta;
+            const { ownerId, categoryTreeArray, ...rest } = meta;
             transaction = { ...transaction, ...rest, inDB: true };
-            if (categoryArray.length) transaction.categoryArray = categoryArray;
+            if (categoryTreeArray.length)
+              transaction.categoryTreeArray = categoryTreeArray;
           }
           return transaction;
-        },
+        }
       );
 
       return fullTransactionArray;
@@ -120,25 +121,25 @@ const transactionRouter = router({
     .input(
       z.object({
         transactionId: z.string(),
-        categoryArray: z.array(
-          CategoryModel.extend({ id: z.string().nullish() }),
+        categoryTreeArray: z.array(
+          CategoryTreeModel.extend({ id: z.string().nullish() })
         ),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
-      const categoryToUpdateArray = input.categoryArray.filter(
-        (category) => category.id,
-      ) as Category[];
-      const categoryToCreateArray = input.categoryArray.filter(
-        (category) => !category.id,
-      ) as Omit<Category, "id">[];
+      const categoryToUpdateArray = input.categoryTreeArray.filter(
+        (category) => category.id
+      ) as CategoryTree[];
+      const categoryToCreateArray = input.categoryTreeArray.filter(
+        (category) => !category.id
+      ) as Omit<CategoryTree, "id">[];
 
       const upsertedTransaction = await db.transaction.update({
         where: {
           id: input.transactionId,
         },
         data: {
-          categoryArray: {
+          categoryTreeArray: {
             updateMany: categoryToUpdateArray.map(
               ({ id, transactionId, ...rest }) => ({
                 where: {
@@ -147,20 +148,20 @@ const transactionRouter = router({
                 data: {
                   ...rest,
                 },
-              }),
+              })
             ),
             createMany: {
               data: categoryToCreateArray.map(
                 ({ transactionId, ...category }) => ({
                   ...category,
                   id: undefined,
-                }),
+                })
               ),
             },
           },
         },
         include: {
-          categoryArray: true,
+          categoryTreeArray: true,
           splitArray: true,
         },
       });
@@ -172,7 +173,7 @@ const transactionRouter = router({
     .input(
       z.object({
         split: SplitModel.extend({ id: z.string().nullable() }),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const { id, ...rest } = input.split;
@@ -185,7 +186,7 @@ const transactionRouter = router({
     .input(
       z.object({
         split: SplitModel.extend({ id: z.string().nullable() }),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const { id, ...rest } = input.split;
@@ -209,8 +210,8 @@ const transactionRouter = router({
         z.object({
           transactionId: z.string(),
           userId: z.string(),
-        }),
-      ),
+        })
+      )
     )
     .mutation(async ({ input }) => {
       //why do I have to await any of them? Don't they resolve asynchronously?
@@ -239,10 +240,10 @@ const transactionRouter = router({
         splitArray: z
           .array(SplitModel.extend({ id: z.string().nullable() }))
           .optional(),
-        categoryArray: z
-          .array(CategoryModel.extend({ id: z.string().nullish() }))
+        categoryTreeArray: z
+          .array(CategoryTreeModel.extend({ id: z.string().nullish() }))
           .optional(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const data = {
@@ -250,15 +251,15 @@ const transactionRouter = router({
         id: input.transactionId,
       };
 
-      const categoryArrayData = input.categoryArray?.map(
+      const categoryTreeArrayData = input.categoryTreeArray?.map(
         ({ id, transactionId, ...rest }) => ({
           ...rest,
-        }),
+        })
       );
       const splitArrayData = input.splitArray?.map(
         ({ id, transactionId, ...rest }) => ({
           ...rest,
-        }),
+        })
       );
 
       const transaction = await db.transaction.create({
@@ -271,17 +272,17 @@ const transactionRouter = router({
                 },
               }
             : undefined,
-          categoryArray: categoryArrayData
+          categoryTreeArray: categoryTreeArrayData
             ? {
                 createMany: {
-                  data: categoryArrayData,
+                  data: categoryTreeArrayData,
                 },
               }
             : undefined,
         },
         include: {
           splitArray: true,
-          categoryArray: true,
+          categoryTreeArray: true,
         },
       });
 
@@ -297,9 +298,9 @@ const transactionRouter = router({
           SplitModel.extend({
             id: z.undefined(),
             transactionId: z.undefined(),
-          }),
+          })
         ),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const transaction = await db.transaction.create({
