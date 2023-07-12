@@ -52,7 +52,13 @@ const TransactionCard = (props: Props) => {
       </div>
 
       <div className="flex flex-col h-fit w-full gap-x-1">
-        <div className="flex gap-x-1 overflow-x-auto">
+        <div
+          className="flex gap-x-1 overflow-x-auto no-scrollbar overscroll-none"
+          onWheel={(e) => {
+            e.preventDefault();
+            e.currentTarget.scrollLeft += e.deltaY * 0.5;
+          }}
+        >
           {props.transaction.categoryArray.map((category, index) => (
             <div
               key={index}

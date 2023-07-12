@@ -65,7 +65,7 @@ const Page: NextPage = () => {
                             transaction={transaction}
                             key={l}
                           />
-                        ),
+                        )
                     )}
                   </div>
                 ))}

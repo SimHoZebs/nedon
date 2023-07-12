@@ -36,7 +36,7 @@ export const trpc = createTRPCNext<AppRouter>({
               // authorization: getAuthCookie(),
             };
           },
-        }),
+        })
       ],
     };
   },

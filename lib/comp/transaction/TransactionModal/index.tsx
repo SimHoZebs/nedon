@@ -248,7 +248,7 @@ const TransactionModal = (props: Props) => {
                   Split
                 </ActionBtn>
               </div>
-            ),
+            )
           )}
       </div>
 

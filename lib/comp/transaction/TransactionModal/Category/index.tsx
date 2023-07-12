@@ -37,7 +37,13 @@ const Category = (props: Props) => {
 
   return (
     <>
-      <div className="overflow-x-auto overflow-y-hidden">
+      <div
+        className="overflow-x-auto  no-scrollbar overflow-y-hidden"
+        onWheel={(e) => {
+          e.preventDefault();
+          e.currentTarget.scrollLeft += e.deltaY * 0.5;
+        }}
+      >
         <div className="relative flex items-center w-max gap-x-2 overflow-x-auto">
           {props.unsavedCategoryArray.map((category, index) => (
             <div

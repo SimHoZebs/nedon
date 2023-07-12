@@ -63,7 +63,7 @@ export const organizeTransactionByTime = (
   const dateSortedTransactionArray = transactionArray.sort(
     (a, b) =>
       new Date(b.datetime ? b.datetime : b.date).getTime() -
-      new Date(a.datetime ? a.datetime : a.date).getTime(),
+      new Date(a.datetime ? a.datetime : a.date).getTime()
   );
   const timeSortedTransactionArray: FullTransaction[][][][] = [[[[]]]];
 

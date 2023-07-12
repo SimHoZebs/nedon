@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-import { useStoreActions, useStoreState } from "../util/store";
+import { useStoreState } from "../util/store";
 
 import { Inter } from "next/font/google";
 import NavBtn from "./Button/NavBtn";
@@ -34,6 +34,9 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       className={`flex h-[100dvh] w-[100dvw] flex-col-reverse bg-zinc-950 text-sm text-zinc-300 sm:flex-row sm:text-base
       ${noto_sans.variable} font-sans font-normal`}
     >
+      <main className="h-full w-full overflow-auto px-5 py-3 no-scrollbar">
+        {props.children}
+      </main>
       {appUser && (
         <nav className="flex h-20 w-full items-center justify-between gap-y-2 bg-zinc-900 p-2 px-5 sm:h-full sm:w-56 sm:flex-col sm:justify-start sm:px-2 ">
           <div className="sm:w-full">
@@ -81,10 +84,6 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
           </div>
         </nav>
       )}
-
-      <main className="h-full w-full overflow-auto px-5 py-3">
-        {props.children}
-      </main>
     </div>
   );
 };
