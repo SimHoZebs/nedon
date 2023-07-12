@@ -37,34 +37,28 @@ const Category = (props: Props) => {
 
   return (
     <>
-      <div
-        className="overflow-x-auto  no-scrollbar overflow-y-hidden"
-        onWheel={(e) => {
-          e.preventDefault();
-          e.currentTarget.scrollLeft += e.deltaY * 0.5;
-        }}
-      >
-        <div className="relative flex items-center w-max gap-x-2 overflow-x-auto">
+      <div>
+        <div className="relative flex flex-wrap items-center w-full gap-2 ">
           {props.unsavedCategoryArray.map((category, index) => (
             <div
               key={index}
-              className="group p-2 rounded-lg flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800 hover:cursor-pointer"
+              className="group border border-zinc-700 p-1 px-3 rounded-full flex w-fit items-center gap-x-2 text-xs sm:text-sm text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800 hover:cursor-pointer"
               onClick={() => {
                 setSelectedCategory(category);
                 setSelectedCategoryIndex(index);
               }}
             >
               <Icon
-                className={`flex rounded-full p-1 text-zinc-700 ${
-                  thisCategoryStyle(index)?.bgColor || "bg-zinc-900 "
-                }`}
+                className={`flex rounded-full bg-zinc-900 group-hover:bg-zinc-800 p-1 ${thisCategoryStyle(
+                  index,
+                )?.textColor}`}
                 icon={
                   thisCategoryStyle(index)?.icon || "mdi:shape-plus-outline"
                 }
                 height={24}
               />
 
-              <div className="flex h-full flex-col items-start gap-y-1">
+              <div className="flex text-zinc-300 h-full flex-col items-start ">
                 <p
                   className={
                     index == selectedCategoryIndex && unsavedCategory
