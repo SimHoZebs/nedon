@@ -5,36 +5,63 @@ import { organizeTransactionByCategory } from "../lib/util/transaction";
 import Button from "../lib/comp/Button/ActionBtn";
 import SettleModal from "../lib/comp/analysis/SettleModal";
 import {
-  HierarchicalCategoryWithTransactionArray,
+  HierarchicalCategoryWithTransaction,
   FullTransaction,
 } from "../lib/util/types";
 
-const categoryTotalSpending = (
-  hierarchicalCategory: HierarchicalCategoryWithTransactionArray
+const subCategoryTotal = (
+  parentCategory: HierarchicalCategoryWithTransaction,
+  transactionType: "received" | "spending"
 ): number => {
-  let amount = hierarchicalCategory.transactionArray.reduce(
-    (total, transaction) => {
-      return total + transaction.amount;
+  const spending = parentCategory.subCategoryArray.reduce(
+    (total, subCategory) => {
+      let amount =
+        transactionType === "received"
+          ? subCategory.received
+          : subCategory.spending;
+      return total + amount + subCategoryTotal(subCategory, transactionType);
     },
     0
   );
 
-  hierarchicalCategory.subCategory.forEach((subCategory) => {
-    amount += categoryTotalSpending(subCategory);
+  return spending;
+};
+
+const categoryArrayTotal = (
+  categoryArray: HierarchicalCategoryWithTransaction[],
+  transactionType: "received" | "spending"
+): number => {
+  const spending = categoryArray.reduce((total, category) => {
+    let amount =
+      transactionType === "received" ? category.received : category.spending;
+    return total + amount + subCategoryTotal(category, transactionType);
   }, 0);
 
-  return amount;
+  return spending;
 };
 
 const render = (
-  hierarchicalCategoryArray: HierarchicalCategoryWithTransactionArray[]
+  hierarchicalCategoryArray: HierarchicalCategoryWithTransaction[]
 ) =>
   hierarchicalCategoryArray.map((category, i) => (
     <div key={i} className="border">
-      <div>{category.name}</div>
-      <div>{category.amount}</div>
+      <h2 className="text-3xl font-semibold">{category.name}</h2>
+
+      <h4 className="text-xl font-medium">Spending</h4>
+      <p>This category only: {category.spending}</p>
+      <p>
+        This and its subcatgories:{" "}
+        {category.spending + subCategoryTotal(category, "spending")}
+      </p>
+      <h4 className="text-xl font-medium">Receieved</h4>
+      <p>This category only: {category.received}</p>
+      <p>
+        This and its subcatgories:{" "}
+        {category.received + subCategoryTotal(category, "received")}
+      </p>
       <div className="flex flex-col gap-y-3 p-3">
-        {category.subCategory.length > 0 && render(category.subCategory)}
+        {category.subCategoryArray.length > 0 &&
+          render(category.subCategoryArray)}
       </div>
     </div>
   ));
@@ -121,6 +148,14 @@ const Page = () => {
           ))}
       </div>
 
+      <div>
+        Total spending:{" "}
+        {categoryArrayTotal(categorizedTransactionArray, "spending")}
+      </div>
+      <div>
+        Total received:{" "}
+        {categoryArrayTotal(categorizedTransactionArray, "received") * -1}
+      </div>
       <div>
         {categorizedTransactionArray.map((category, i) => (
           <div key={i} style={{ width: `%` }}></div>

@@ -155,11 +155,11 @@ const CategoryPicker = (props: Props) => {
             {selectedOptionArray.map((category, i) => (
               <button
                 onClick={async () => {
-                  if (category.subCategory.length === 0) {
+                  if (category.subCategoryArray.length === 0) {
                     console.log("syncing");
                     await syncCategory(category);
                   } else {
-                    setSelectedOptionArray(category.subCategory);
+                    setSelectedOptionArray(category.subCategoryArray);
                     props.setUnsavedTree((prev) =>
                       prev
                         ? {
@@ -190,8 +190,8 @@ const CategoryPicker = (props: Props) => {
                 />
                 <p>{category.name}</p>
                 <p className="text-zinc-500">
-                  {category.subCategory.length > 0 &&
-                    category.subCategory.length + " subcategories"}
+                  {category.subCategoryArray.length > 0 &&
+                    category.subCategoryArray.length + " subcategories"}
                 </p>
               </button>
             ))}

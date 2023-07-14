@@ -24,16 +24,17 @@ export interface FullTransaction extends Omit<PlaidTransaction, "category"> {
   inDB: boolean;
 }
 
-export type HierarchicalCategoryWithTransactionArray = {
+export type HierarchicalCategoryWithTransaction = {
   name: string;
-  amount: number;
+  spending: number;
+  received: number;
   transactionArray: FullTransaction[];
-  subCategory: HierarchicalCategoryWithTransactionArray[];
+  subCategoryArray: HierarchicalCategoryWithTransaction[];
 };
 
 export type HierarchicalCategory = {
   name: string;
-  subCategory: HierarchicalCategory[];
+  subCategoryArray: HierarchicalCategory[];
 };
 
 //temporary workaround for failing trpc queries

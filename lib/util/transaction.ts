@@ -1,5 +1,5 @@
 import {
-  HierarchicalCategoryWithTransactionArray,
+  HierarchicalCategoryWithTransaction,
   FullTransaction,
   CategoryTreeClientSide,
 } from "./types";
@@ -7,12 +7,11 @@ import {
 export const organizeTransactionByCategory = (
   transactionArray: FullTransaction[]
 ) => {
-  const categoryTreeArray: HierarchicalCategoryWithTransactionArray[] = [];
+  const categoryTreeArray: HierarchicalCategoryWithTransaction[] = [];
 
   transactionArray.forEach((transaction) => {
     transaction.categoryTreeArray.forEach((categoryTree) => {
       const transactionCopy = structuredClone(transaction);
-      transactionCopy.categoryTreeArray = [categoryTree];
       fillTransactionByCategory(
         categoryTreeArray,
         transactionCopy,
@@ -25,10 +24,10 @@ export const organizeTransactionByCategory = (
 };
 
 const fillTransactionByCategory = (
-  resultArray: HierarchicalCategoryWithTransactionArray[],
+  resultArray: HierarchicalCategoryWithTransaction[],
   transaction: FullTransaction,
   categoryTree: CategoryTreeClientSide
-): HierarchicalCategoryWithTransactionArray[] => {
+): HierarchicalCategoryWithTransaction[] => {
   const nameArray = categoryTree.nameArray;
 
   if (!nameArray.length) return resultArray;
@@ -37,14 +36,23 @@ const fillTransactionByCategory = (
 
   let index = resultArray.findIndex((cat) => cat.name === firstCategoryName);
 
+  const hierarchicalCategory = {
+    name: firstCategoryName,
+    received: 0,
+    spending: 0,
+    transactionArray: [],
+    subCategoryArray: [],
+  };
+
+  if (transaction.amount > 0) {
+    hierarchicalCategory.spending += categoryTree.amount;
+  } else {
+    hierarchicalCategory.received += categoryTree.amount;
+  }
+
   if (index === -1) {
     //if the category doesn't exist, then create it.
-    resultArray.push({
-      name: firstCategoryName,
-      amount: categoryTree.amount,
-      transactionArray: [],
-      subCategory: [],
-    });
+    resultArray.push(hierarchicalCategory);
 
     index = resultArray.length - 1;
   }
@@ -53,15 +61,16 @@ const fillTransactionByCategory = (
 
   if (slicedNameArray.length === 0) {
     resultArray[index].transactionArray.push(transaction);
-    resultArray[index].amount += categoryTree.amount;
+    resultArray[index].spending += hierarchicalCategory.spending;
+    resultArray[index].received += hierarchicalCategory.received;
   } else {
     const transactionCopy = structuredClone(transaction);
     const newCategoryTree = structuredClone(categoryTree);
     newCategoryTree.nameArray = slicedNameArray;
 
     //inefficient for cases where parent category did not exist; subcategory's existence doesn't need to be checked.
-    resultArray[index].subCategory = fillTransactionByCategory(
-      resultArray[index].subCategory,
+    resultArray[index].subCategoryArray = fillTransactionByCategory(
+      resultArray[index].subCategoryArray,
       transactionCopy,
       newCategoryTree
     );

@@ -40,7 +40,7 @@ export const fillCategoryInHierarchy = (
     //if the category doesn't exist, then create it.
     resultArray.push({
       name: firstCategory,
-      subCategory: [],
+      subCategoryArray: [],
     });
 
     index = resultArray.length - 1;
@@ -53,8 +53,8 @@ export const fillCategoryInHierarchy = (
   } else {
     plaidCategory.hierarchy = nextHierarchicalArray;
 
-    resultArray[index].subCategory = fillCategoryInHierarchy(
-      resultArray[index].subCategory,
+    resultArray[index].subCategoryArray = fillCategoryInHierarchy(
+      resultArray[index].subCategoryArray,
       plaidCategory
     );
   }
