@@ -8,6 +8,8 @@ import {
   HierarchicalCategoryWithTransaction,
   FullTransaction,
 } from "../lib/util/types";
+import H2 from "../lib/comp/H2";
+import H4 from "../lib/comp/H4";
 
 const subCategoryTotal = (
   parentCategory: HierarchicalCategoryWithTransaction,
@@ -45,15 +47,15 @@ const render = (
 ) =>
   hierarchicalCategoryArray.map((category, i) => (
     <div key={i} className="border">
-      <h2 className="text-3xl font-semibold">{category.name}</h2>
+      <H2>{category.name}</H2>
 
-      <h4 className="text-xl font-medium">Spending</h4>
+      <H4>Spending</H4>
       <p>This category only: {category.spending}</p>
       <p>
         This and its subcatgories:{" "}
         {category.spending + subCategoryTotal(category, "spending")}
       </p>
-      <h4 className="text-xl font-medium">Receieved</h4>
+      <H4>Received</H4>
       <p>This category only: {category.received}</p>
       <p>
         This and its subcatgories:{" "}
@@ -148,14 +150,14 @@ const Page = () => {
           ))}
       </div>
 
-      <div>
+      <p>
         Total spending:{" "}
         {categoryArrayTotal(categorizedTransactionArray, "spending")}
-      </div>
-      <div>
+      </p>
+      <p>
         Total received:{" "}
         {categoryArrayTotal(categorizedTransactionArray, "received") * -1}
-      </div>
+      </p>
       <div>
         {categorizedTransactionArray.map((category, i) => (
           <div key={i} style={{ width: `%` }}></div>

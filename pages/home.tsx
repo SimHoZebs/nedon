@@ -51,8 +51,8 @@ const User: NextPage = () => {
                   setShowModal(true);
                 }}
               >
-                <div>{account.name}</div>
-                <div>${account.balances.available}</div>
+                <p>{account.name}</p>
+                <p>${account.balances.available}</p>
               </AccountCard>
             )
         )}

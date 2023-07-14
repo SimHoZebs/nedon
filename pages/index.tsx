@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { Icon } from "@iconify-icon/react";
 import Button from "../lib/comp/Button";
 import { useEffect, useState } from "react";
+import H1 from "../lib/comp/H1";
 
 const Home: NextPage = () => {
   const router = useRouter();
@@ -65,9 +66,11 @@ const Home: NextPage = () => {
 
   return (
     <section className="flex h-full w-full flex-col items-center justify-center gap-y-3">
-      <h1 className="text-3xl">
-        {allUsers.isLoading ? "Loading" : "Choose an account"}
-      </h1>
+      <H1>
+        {allUsers.isLoading
+          ? "Loading available accounts...."
+          : "Choose an account"}
+      </H1>
 
       {allUsers.data && !allUsers.isRefetching && (
         <div className="flex flex-col items-center rounded-md border border-zinc-600 ">
@@ -181,7 +184,7 @@ const CreateUserBtn = (props: Props) => {
 
   return (
     <Button
-      className="flex w-full items-center justify-center gap-x-2 rounded-none rounded-b-md text-xl"
+      className="flex w-full items-center justify-center gap-x-2 rounded-none rounded-b-md text-xl font-semibold"
       onClick={async (e) => {
         setLoading(true);
         e.stopPropagation();
@@ -200,8 +203,12 @@ const CreateUserBtn = (props: Props) => {
         setLoading(false);
       }}
     >
-      create new user
-      {loading && <Icon className="animate-spin" icon="mdi:loading" />}
+      {loading ? (
+        <Icon className="animate-spin" icon="mdi:loading" />
+      ) : (
+        <Icon icon="mdi:plus-thick" />
+      )}
+      create user
     </Button>
   );
 };

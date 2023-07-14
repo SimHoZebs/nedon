@@ -11,6 +11,8 @@ import { trpc } from "../../../util/trpc";
 import { Icon } from "@iconify-icon/react";
 import ActionBtn from "../../Button/ActionBtn";
 import Category from "./Category";
+import H3 from "../../H3";
+import H2 from "../../H2";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -89,10 +91,10 @@ const TransactionModal = (props: Props) => {
   return (
     <Modal setShowModal={props.setShowModal}>
       <div className="flex flex-col gap-y-2">
-        <div className="flex flex-col justify-between gap-y-2 text-xl font-semibold sm:text-2xl">
-          <h2 className="text-2xl sm:text-3xl">{props.transaction.name}</h2>
+        <div className="flex flex-col justify-between gap-y-2 ">
+          <H2>{props.transaction.name}</H2>
           <div className="flex items-center gap-x-2">
-            <h3>${amount * -1}</h3>
+            <H3>${amount * -1}</H3>
             <ActionBtn className="gap-x-2">
               <Icon icon="lucide:split" width={16} />
               Split
@@ -216,7 +218,7 @@ const TransactionModal = (props: Props) => {
       </div>
 
       <div>
-        <h3 className="font-semibold">Friends</h3>
+        <H3>Friends</H3>
         {appUser &&
           appGroup?.userArray &&
           appGroup.userArray.map((user, i) =>

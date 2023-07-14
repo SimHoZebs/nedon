@@ -3,9 +3,12 @@ import React, { useMemo, useState } from "react";
 import { trpc } from "../lib/util/trpc";
 import { useStoreState } from "../lib/util/store";
 import TransactionCard from "../lib/comp/transaction/TransactionCard";
-import { FullTransaction, SplitClientSide } from "../lib/util/types";
+import { FullTransaction } from "../lib/util/types";
 import { organizeTransactionByTime } from "../lib/util/transaction";
 import TransactionModal from "../lib/comp/transaction/TransactionModal";
+import H1 from "../lib/comp/H1";
+import H2 from "../lib/comp/H2";
+import H3 from "../lib/comp/H3";
 
 const Page: NextPage = () => {
   const { appUser } = useStoreState((state) => state);
@@ -14,7 +17,7 @@ const Page: NextPage = () => {
     FullTransaction[]
   >(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken },
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
   );
 
   const [showModal, setShowModal] = useState(false);
@@ -40,18 +43,15 @@ const Page: NextPage = () => {
       <div className="flex w-full max-w-md flex-col items-center gap-y-2 text-4xl ">
         {sortedTransactionArray.map((year, i) => (
           <div className="flex w-full flex-col items-center " key={i}>
-            <p className="text-3xl sm:text-4xl">
+            <H1 className="text-3xl font-bold sm:text-4xl">
               {year[0][0][0].date.slice(0, 4)}
-            </p>
+            </H1>
             {year.map((month, j) => (
-              <div
-                key={j}
-                className="w-full flex-col gap-y-2 text-2xl sm:text-3xl"
-              >
-                <p>{month[0][0].date.slice(5, 7)}</p>
+              <div key={j} className="w-full flex-col gap-y-2">
+                <H2>{month[0][0].date.slice(5, 7)}</H2>
                 {month.map((day, k) => (
                   <div className="flex w-full flex-col gap-y-3" key={k}>
-                    <p className="text-lg sm:text-xl">{day[0].date.slice(8)}</p>
+                    <H3>{day[0].date.slice(8)}</H3>
                     {day.map(
                       (transaction, l) =>
                         transaction && (
