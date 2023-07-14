@@ -10,20 +10,16 @@ export const organizeTransactionByCategory = (
   const categoryTreeArray: HierarchicalCategoryWithTransaction[] = [];
 
   transactionArray.forEach((transaction) => {
+    const transactionCopy = structuredClone(transaction);
     transaction.categoryTreeArray.forEach((categoryTree) => {
-      const transactionCopy = structuredClone(transaction);
-      fillTransactionByCategory(
-        categoryTreeArray,
-        transactionCopy,
-        categoryTree
-      );
+      fillArrayByCategory(categoryTreeArray, transactionCopy, categoryTree);
     });
   });
 
   return categoryTreeArray;
 };
 
-const fillTransactionByCategory = (
+const fillArrayByCategory = (
   resultArray: HierarchicalCategoryWithTransaction[],
   transaction: FullTransaction,
   categoryTree: CategoryTreeClientSide
@@ -69,7 +65,7 @@ const fillTransactionByCategory = (
     newCategoryTree.nameArray = slicedNameArray;
 
     //inefficient for cases where parent category did not exist; subcategory's existence doesn't need to be checked.
-    resultArray[index].subCategoryArray = fillTransactionByCategory(
+    resultArray[index].subCategoryArray = fillArrayByCategory(
       resultArray[index].subCategoryArray,
       transactionCopy,
       newCategoryTree
@@ -121,4 +117,22 @@ export const organizeTransactionByTime = (
   });
 
   return timeSortedTransactionArray;
+};
+
+export const filterTransactionByDate = (
+  transactionArray: FullTransaction[],
+  date: Date,
+  rangeFormat: "year" | "month" | "date"
+) => {
+  return transactionArray.filter((transaction) => {
+    const transactionDate = new Date(transaction.date);
+    let isMatch = false;
+
+    isMatch = transactionDate.getFullYear() === date.getFullYear();
+    if (rangeFormat === "year" || !isMatch) return isMatch;
+    isMatch = transactionDate.getMonth() === date.getMonth();
+    if (rangeFormat === "month" || !isMatch) return isMatch;
+    isMatch = transactionDate.getDate() === date.getDate();
+    return isMatch;
+  });
 };

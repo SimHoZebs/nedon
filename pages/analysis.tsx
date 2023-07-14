@@ -1,8 +1,12 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { trpc } from "../lib/util/trpc";
 import { useStoreState } from "../lib/util/store";
-import { organizeTransactionByCategory } from "../lib/util/transaction";
-import Button from "../lib/comp/Button/ActionBtn";
+import {
+  filterTransactionByDate,
+  organizeTransactionByCategory,
+} from "../lib/util/transaction";
+import ActionBtn from "../lib/comp/Button/ActionBtn";
+import Button from "../lib/comp/Button";
 import SettleModal from "../lib/comp/analysis/SettleModal";
 import {
   HierarchicalCategoryWithTransaction,
@@ -10,6 +14,7 @@ import {
 } from "../lib/util/types";
 import H2 from "../lib/comp/H2";
 import H4 from "../lib/comp/H4";
+import { z } from "zod";
 
 const subCategoryTotal = (
   parentCategory: HierarchicalCategoryWithTransaction,
@@ -72,24 +77,76 @@ const Page = () => {
   const { appUser } = useStoreState((state) => state);
   const [showModal, setShowModal] = useState(false);
   const [oweUser, setOweUser] = useState<{ id: string; amount: number }>();
+  const [rangeFormat, setRangeFormat] = useState<
+    "date" | "month" | "year" | "all"
+  >("all");
+  const [date, setDate] = useState<Date>();
+  const [scopedTransactionArray, setScopedTransactionArray] = useState<
+    FullTransaction[]
+  >([]);
 
   const transactionArray = trpc.transaction.getTransactionArray.useQuery<
     FullTransaction[]
   >(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
+    { staleTime: 3600000, enabled: !!appUser }
   );
   const associatedTransactionArray =
     trpc.transaction.getAssociatedTransactionArray.useQuery(
       { id: appUser ? appUser.id : "" },
-      { staleTime: 3600000, enabled: appUser?.hasAccessToken }
+      { staleTime: 3600000, enabled: !!appUser }
     );
 
-  //useMemo is probably unnecessary since this page doesn't re-render that much.
-  const categorizedTransactionArray = useMemo(() => {
-    if (!transactionArray.data) return [];
-    return organizeTransactionByCategory(transactionArray.data);
+  useEffect(() => {
+    if (!transactionArray.data) return;
+    const initialDate = new Date(
+      transactionArray.data[transactionArray.data.length - 1].date
+    );
+
+    setDate(initialDate);
   }, [transactionArray.data]);
+
+  useEffect(() => {
+    if (!transactionArray.data || !date) return;
+
+    if (rangeFormat === "all") {
+      setScopedTransactionArray(transactionArray.data);
+      return;
+    }
+
+    const filteredArray = filterTransactionByDate(
+      transactionArray.data,
+      date,
+      rangeFormat
+    );
+
+    setScopedTransactionArray(filteredArray);
+  }, [date, rangeFormat, transactionArray.data]);
+
+  const handleRangeChange = (change: 1 | -1) => {
+    if (!date) return;
+
+    if (rangeFormat === "all") {
+      setDate(undefined);
+      return;
+    }
+
+    const newDate = new Date(date);
+
+    switch (rangeFormat) {
+      case "date":
+        newDate.setDate(date.getDate() + change);
+        break;
+      case "month":
+        newDate.setMonth(date.getMonth() + change);
+        break;
+      case "year":
+        newDate.setFullYear(date.getFullYear() + change);
+        break;
+    }
+
+    setDate(newDate);
+  };
 
   const calcOweGroup = useMemo(() => {
     if (!associatedTransactionArray.data) return;
@@ -122,49 +179,109 @@ const Page = () => {
 
   return appUser ? (
     <section className="flex flex-col gap-y-4">
-      {showModal && (
-        <SettleModal oweUser={oweUser} setShowModal={setShowModal} />
-      )}
-
       <div>
-        {calcOweGroup &&
-          Object.keys(calcOweGroup).map((userId, index) => (
-            <div key={index} className="flex flex-row gap-x-2">
-              <div>{userId.slice(0, 8)}</div>
-              <div>
-                {calcOweGroup[userId] < 0 ? "You owe: " : "They owe: "}$
-                {Math.abs(Math.floor(calcOweGroup[userId] * 100) / 100)}
+        {showModal && (
+          <SettleModal oweUser={oweUser} setShowModal={setShowModal} />
+        )}
+
+        <div>
+          {calcOweGroup &&
+            Object.keys(calcOweGroup).map((userId, index) => (
+              <div key={index} className="flex flex-row gap-x-2">
+                <div>{userId.slice(0, 8)}</div>
+                <div>
+                  {calcOweGroup[userId] < 0 ? "You owe: " : "They owe: "}$
+                  {Math.abs(Math.floor(calcOweGroup[userId] * 100) / 100)}
+                </div>
+                <ActionBtn
+                  onClick={() => {
+                    setShowModal(true);
+                    setOweUser({
+                      id: userId,
+                      amount: Math.floor(calcOweGroup[userId] * 100) / 100,
+                    });
+                  }}
+                >
+                  Manually settle
+                </ActionBtn>
               </div>
-              <Button
-                onClick={() => {
-                  setShowModal(true);
-                  setOweUser({
-                    id: userId,
-                    amount: Math.floor(calcOweGroup[userId] * 100) / 100,
-                  });
-                }}
-              >
-                Manually settle
-              </Button>
-            </div>
-          ))}
+            ))}
+        </div>
       </div>
 
-      <p>
-        Total spending:{" "}
-        {categoryArrayTotal(categorizedTransactionArray, "spending")}
-      </p>
-      <p>
-        Total received:{" "}
-        {categoryArrayTotal(categorizedTransactionArray, "received") * -1}
-      </p>
       <div>
-        {categorizedTransactionArray.map((category, i) => (
-          <div key={i} style={{ width: `%` }}></div>
-        ))}
+        <p>
+          Total spending:{" "}
+          {categoryArrayTotal(
+            organizeTransactionByCategory(scopedTransactionArray),
+            "spending"
+          )}
+        </p>
+        <p>
+          Total received:{" "}
+          {categoryArrayTotal(
+            organizeTransactionByCategory(scopedTransactionArray),
+            "received"
+          ) * -1}
+        </p>
+
+        {/*future visualization bar*/}
+        <div className="h-14 w-full rounded-none border border-zinc-500">
+          {organizeTransactionByCategory(scopedTransactionArray).map(
+            (category, i) => (
+              <div key={i} style={{ width: `%` }}></div>
+            )
+          )}
+        </div>
+
+        {date && (
+          <div className="flex">
+            <Button
+              onClick={() => {
+                handleRangeChange(-1);
+              }}
+            >
+              back
+            </Button>
+            <p>
+              {rangeFormat === "year" && date.getFullYear()}
+              {rangeFormat === "month" && date.getMonth() + 1}
+              {rangeFormat === "date" && date.getDate()}
+            </p>
+            <Button
+              onClick={() => {
+                handleRangeChange(1);
+              }}
+            >
+              next
+            </Button>
+          </div>
+        )}
+
+        <select
+          className="bg-zinc-800"
+          name="scope"
+          id=""
+          value={rangeFormat}
+          onChange={(e) => {
+            const test = z.union([
+              z.literal("date"),
+              z.literal("month"),
+              z.literal("year"),
+              z.literal("all"),
+            ]);
+            const result = test.parse(e.target.value);
+            setRangeFormat(result);
+          }}
+        >
+          <option value="date">date</option>
+          <option value="month">month</option>
+          <option value="year">year</option>
+          <option value="all">all</option>
+        </select>
+
+        {render(organizeTransactionByCategory(scopedTransactionArray))}
       </div>
-      {render(categorizedTransactionArray)}
-      <pre>{JSON.stringify(categorizedTransactionArray, null, 2)}</pre>
     </section>
   ) : null;
 };
