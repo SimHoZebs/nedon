@@ -111,6 +111,7 @@ const TransactionModal = (props: Props) => {
       </div>
 
       <div className="flex w-full flex-col gap-y-1">
+        <H3>Friends</H3>
         {unsavedSplitArray.length > 1 &&
           unsavedSplitArray.map((split, i) => (
             <div
@@ -187,9 +188,7 @@ const TransactionModal = (props: Props) => {
                     width={20}
                   />
                 </button>
-              ) : (
-                <div className="aspect-square min-h-[20px]"></div>
-              )}
+              ) : null}
 
               <UserSplit
                 onAmountChange={(amount: number) => {
@@ -204,21 +203,25 @@ const TransactionModal = (props: Props) => {
                 amount={amount}
                 split={split}
               >
-                {split.userId.slice(0, 8)}
+                <div className="flex items-center gap-x-2">
+                  <Icon
+                    icon="mdi:account"
+                    className="rounded-full bg-zinc-800 p-2 hover:text-zinc-100"
+                    width={28}
+                    height={28}
+                  />
+                  <p>{split.userId.slice(0, 8)}</p>
+                </div>
               </UserSplit>
             </div>
           ))}
-      </div>
 
-      <div className="h-5 text-red-800">
-        {updatedTotalSplit !== amount &&
-          unsavedSplitArray.length > 0 &&
-          `Split is ${updatedTotalSplit > amount ? "greater " : "less "}
+        <div className="h-5 text-red-800">
+          {updatedTotalSplit !== amount &&
+            unsavedSplitArray.length > 0 &&
+            `Split is ${updatedTotalSplit > amount ? "greater " : "less "}
           than the amount (${`props.totalSplit $${updatedTotalSplit}`})`}
-      </div>
-
-      <div>
-        <H3>Friends</H3>
+        </div>
         {appUser &&
           appGroup?.userArray &&
           appGroup.userArray.map((user, i) =>
