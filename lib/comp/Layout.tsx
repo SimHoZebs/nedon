@@ -38,10 +38,45 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
         {props.children}
       </main>
       {appUser && (
-        <nav className="flex h-20 w-full items-center justify-between gap-y-2 bg-zinc-900 p-2 px-5 sm:h-full sm:w-56 sm:flex-col sm:justify-start sm:px-2 ">
-          <div className="sm:w-full">
+        <nav className="flex h-20 w-full gap-y-2 bg-zinc-900 p-2 px-5 sm:h-full sm:w-56 sm:flex-col sm:justify-between sm:px-2 ">
+          <div className="flex w-full items-center justify-center gap-3 sm:flex-col">
+            <NavBtn
+              router={router}
+              route="/home"
+              icon="mdi:home-variant-outline"
+            >
+              Home
+            </NavBtn>
+
+            <NavBtn
+              router={router}
+              route="/transactions"
+              icon="mdi:swap-horizontal"
+            >
+              Transactions
+            </NavBtn>
+
+            <NavBtn
+              router={router}
+              route="/analysis"
+              icon="mdi:google-analytics"
+            >
+              Analysis
+            </NavBtn>
+
+            <div className="sm:w-full">
+              <ActionBtn onClick={() => router.push("/")}>
+                <div className="flex items-center gap-x-2">
+                  <Icon icon="mdi:user-add-outline" height={24} />
+                  <p>Add friend</p>
+                </div>
+              </ActionBtn>
+            </div>
+          </div>
+
+          <div className="flex sm:w-full">
             <Button
-              className="gap-x-1 pr-3 hover:bg-zinc-800 hover:text-zinc-200"
+              className="w-full gap-x-1 pr-3 hover:bg-zinc-800 hover:text-zinc-200"
               onClick={() => router.push("/profile")}
             >
               <div className="flex w-full items-center gap-x-2">
@@ -54,33 +89,11 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
                   />
                 </div>
 
-                <p className="hidden sm:block">{appUser.id.slice(0, 8)}</p>
+                <p className="hidden w-full items-center sm:block">
+                  {appUser?.id.slice(0, 8)}
+                </p>
               </div>
             </Button>
-          </div>
-          <NavBtn router={router} route="/home" icon="mdi:home-variant-outline">
-            Home
-          </NavBtn>
-
-          <NavBtn
-            router={router}
-            route="/transactions"
-            icon="mdi:swap-horizontal"
-          >
-            Transactions
-          </NavBtn>
-
-          <NavBtn router={router} route="/analysis" icon="mdi:google-analytics">
-            Analysis
-          </NavBtn>
-
-          <div className="sm:w-full">
-            <ActionBtn onClick={() => router.push("/")}>
-              <div className="flex items-center gap-x-2">
-                <Icon icon="mdi:user-add-outline" height={24} />
-                <p>Add friend</p>
-              </div>
-            </ActionBtn>
           </div>
         </nav>
       )}

@@ -65,7 +65,7 @@ const Home: NextPage = () => {
   const removeUserFromGroup = trpc.group.removeUser.useMutation();
 
   return (
-    <section className="flex h-full w-full flex-col items-center justify-center gap-y-3">
+    <section className="flex h-full w-full flex-col items-center justify-center gap-y-3 text-center">
       <H1>
         {allUsers.isLoading
           ? "Loading available accounts...."
@@ -163,6 +163,12 @@ const Home: NextPage = () => {
           <CreateUserBtn setUserIdArray={setUserIdArray} />
         </div>
       )}
+
+      <p>
+        This is a very early preview. Viewing on desktop is recommended, but a
+        responsive mobile view is in the works. Feel free to make issues of any
+        bug found.
+      </p>
     </section>
   );
 };
