@@ -78,45 +78,51 @@ const fillArrayByCategory = (
 export const organizeTransactionByTime = (
   transactionArray: FullTransaction[]
 ) => {
-  const dateSortedTransactionArray = transactionArray.sort(
+  const transactionSortedByTimeArray = transactionArray.sort(
     (a, b) =>
       new Date(b.datetime ? b.datetime : b.date).getTime() -
       new Date(a.datetime ? a.datetime : a.date).getTime()
   );
-  const timeSortedTransactionArray: FullTransaction[][][][] = [[[[]]]];
+  const transactionOrganizedByTimeArray: FullTransaction[][][][] = [[[[]]]];
 
-  let lastDate = new Date(0);
+  let lastDate: Date | undefined = undefined;
   let yearIndex = -1;
   let monthIndex = -1;
-  let dayIndex = -1;
+  let dateIndex = -1;
 
-  dateSortedTransactionArray.forEach((transaction, i) => {
+  transactionSortedByTimeArray.forEach((transaction, i) => {
     const date = new Date(transaction.date);
+    if (!lastDate) {
+      yearIndex++;
+      monthIndex++;
+      dateIndex++;
+      lastDate = date;
+    }
 
+    //other indexs are resetted because the other ifs are guaranteed to be true.
     if (lastDate.getFullYear() !== date.getFullYear()) {
       yearIndex++;
       monthIndex = -1;
-      dayIndex = -1;
-      timeSortedTransactionArray[yearIndex] = [];
+      transactionOrganizedByTimeArray[yearIndex] = [];
     }
     if (lastDate.getMonth() !== date.getMonth()) {
       monthIndex++;
-      dayIndex = -1;
-      timeSortedTransactionArray[yearIndex][monthIndex] = [];
+      dateIndex = -1;
+      transactionOrganizedByTimeArray[yearIndex][monthIndex] = [];
     }
     if (lastDate.getDate() !== date.getDate()) {
-      dayIndex++;
-      timeSortedTransactionArray[yearIndex][monthIndex][dayIndex] = [];
+      dateIndex++;
+      transactionOrganizedByTimeArray[yearIndex][monthIndex][dateIndex] = [];
     }
 
-    timeSortedTransactionArray[yearIndex][monthIndex][dayIndex].push(
+    transactionOrganizedByTimeArray[yearIndex][monthIndex][dateIndex].push(
       transaction
     );
 
     lastDate = date;
   });
 
-  return timeSortedTransactionArray;
+  return transactionOrganizedByTimeArray;
 };
 
 export const filterTransactionByDate = (
