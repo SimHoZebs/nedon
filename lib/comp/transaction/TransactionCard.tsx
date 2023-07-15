@@ -51,11 +51,14 @@ const TransactionCard = (props: Props) => {
         </div>
       </div>
 
-      <div className="flex h-fit w-full flex-col gap-x-1">
+      <div className="flex h-fit w-full justify-between gap-x-1">
+        <p className="text-sm text-zinc-400">
+          {props.transaction.datetime || "12:34"}
+        </p>
+
         <div
           className="no-scrollbar flex gap-x-1 overflow-x-auto overscroll-none"
           onWheel={(e) => {
-            e.preventDefault();
             e.currentTarget.scrollLeft += e.deltaY * 0.5;
           }}
         >

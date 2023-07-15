@@ -30,7 +30,7 @@ const Page: NextPage = () => {
     useState<FullTransaction>();
   const [rangeFormat, setRangeFormat] = useState<
     "date" | "month" | "year" | "all"
-  >("all");
+  >("month");
   const [date, setDate] = useState<Date>(new Date(Date.now()));
   const [scopedTransactionArray, setScopedTransactionArray] = useState<
     FullTransaction[]
@@ -149,7 +149,7 @@ const Page: NextPage = () => {
         <option value="all">all</option>
       </select>
 
-      <div className="flex w-full max-w-md flex-col items-center gap-y-2 text-4xl ">
+      <div className="flex w-full max-w-md flex-col items-center gap-y-2">
         {sortedTransactionArray.map((year, i) => (
           <div className="flex w-full flex-col items-center " key={i}>
             <H1 className="text-3xl font-bold sm:text-4xl">
