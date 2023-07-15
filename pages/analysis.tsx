@@ -6,7 +6,7 @@ import {
   organizeTransactionByCategory,
 } from "../lib/util/transaction";
 import ActionBtn from "../lib/comp/Button/ActionBtn";
-import Button from "../lib/comp/Button";
+import Button from "../lib/comp/Button/Button";
 import SettleModal from "../lib/comp/analysis/SettleModal";
 import {
   HierarchicalCategoryWithTransaction,

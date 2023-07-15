@@ -4,7 +4,7 @@ import {
   FullTransaction,
 } from "../../../../util/types";
 import { Icon } from "@iconify-icon/react";
-import Button from "../../../Button";
+import Button from "../../../Button/Button";
 import CategoryPicker from "./CategoryPicker";
 import categoryStyle from "../../../../util/categoryStyle";
 import { emptyCategory } from "../../../../util/category";

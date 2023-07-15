@@ -8,11 +8,11 @@ import {
   filterTransactionByDate,
   organizeTransactionByTime,
 } from "../lib/util/transaction";
-import TransactionModal from "../lib/comp/transaction/TransactionModal";
+import TransactionModal from "../lib/comp/transaction/TransactionModal/TransactionModal";
 import H1 from "../lib/comp/H1";
 import H2 from "../lib/comp/H2";
 import H3 from "../lib/comp/H3";
-import Button from "../lib/comp/Button";
+import Button from "../lib/comp/Button/Button";
 import { z } from "zod";
 
 const Page: NextPage = () => {

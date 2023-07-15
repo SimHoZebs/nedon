@@ -4,7 +4,7 @@ import { useStoreActions, useStoreState } from "../lib/util/store";
 import { emptyUser } from "../lib/util/user";
 import { useRouter } from "next/router";
 import { Icon } from "@iconify-icon/react";
-import Button from "../lib/comp/Button";
+import Button from "../lib/comp/Button/Button";
 import { useEffect, useState } from "react";
 import H1 from "../lib/comp/H1";
 

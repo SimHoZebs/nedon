@@ -10,7 +10,7 @@ import { useStoreState } from "../../../util/store";
 import { trpc } from "../../../util/trpc";
 import { Icon } from "@iconify-icon/react";
 import ActionBtn from "../../Button/ActionBtn";
-import Category from "./Category";
+import Category from "./Category/Category";
 import H3 from "../../H3";
 import H2 from "../../H2";
 

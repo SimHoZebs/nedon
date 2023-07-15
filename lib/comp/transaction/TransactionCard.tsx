@@ -31,7 +31,7 @@ const TransactionCard = (props: Props) => {
     >
       <div className={`flex w-full justify-between gap-x-4 truncate`}>
         <div className="flex-start flex h-full flex-col justify-center truncate">
-          <p className="truncate font-semibold sm:text-lg">
+          <p className="truncate text-base font-semibold sm:text-lg">
             {props.transaction.name}
           </p>
         </div>
