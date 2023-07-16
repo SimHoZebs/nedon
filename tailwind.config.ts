@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-noto-sans)"],
+        sans: ["var(--font-poppins)"],
       },
     },
   },

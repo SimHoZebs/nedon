@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useStoreState } from "../util/store";
 
 import { Inter } from "next/font/google";
+import { Poppins } from "next/font/google";
 import NavBtn from "./Button/NavBtn";
 import { Icon } from "@iconify-icon/react";
 import Button from "./Button/Button";
@@ -11,6 +12,11 @@ import ActionBtn from "./Button/ActionBtn";
 const noto_sans = Inter({
   subsets: ["latin"],
   variable: "--font-noto-sans",
+});
+const poppins = Poppins({
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  subsets: ["latin"],
+  variable: "--font-poppins",
 });
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
@@ -32,7 +38,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       className={`flex h-[100dvh] w-[100dvw] flex-col bg-zinc-950 text-sm text-zinc-300 sm:flex-row sm:text-base
-      ${noto_sans.variable} font-sans font-normal`}
+      ${poppins.variable} font-sans font-normal`}
     >
       <main className="no-scrollbar h-full w-full overflow-auto px-5 py-3">
         {props.children}

@@ -28,7 +28,6 @@ const UserSplit = (props: Props) => {
         <input
           id="amount"
           className="w-16 border-b border-zinc-900 bg-zinc-900 p-1 text-lg hover:border-zinc-500 sm:w-20"
-          border-zinc-500
           type="number"
           min={0}
           max={props.amount}
