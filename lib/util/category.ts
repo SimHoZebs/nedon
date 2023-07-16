@@ -9,6 +9,7 @@ export const emptyCategory = (
     transactionId,
     id: null,
     nameArray: name,
+    splitArray: [],
     amount: 0,
   };
 };

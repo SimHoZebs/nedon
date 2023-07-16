@@ -16,10 +16,10 @@ export interface SplitClientSide extends Omit<Split, "id"> {
 
 export interface CategoryTreeClientSide extends Omit<CategoryTree, "id"> {
   id?: string | null;
+  splitArray: SplitClientSide[];
 }
 
 export interface FullTransaction extends Omit<PlaidTransaction, "category"> {
-  splitArray: SplitClientSide[];
   categoryTreeArray: CategoryTreeClientSide[];
   inDB: boolean;
 }

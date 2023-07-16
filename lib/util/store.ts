@@ -1,5 +1,5 @@
 import { action, createStore, Action, createTypedHooks } from "easy-peasy";
-import { GroupClientSide, UserClientSide } from "./types";
+import { FullTransaction, GroupClientSide, UserClientSide } from "./types";
 
 interface StoreModel {
   linkToken: string | null;
@@ -19,6 +19,12 @@ interface StoreModel {
 
   verticalCategoryPicker: boolean;
   setVerticalCategoryPicker: Action<StoreModel, boolean>;
+
+  currentTransaction: FullTransaction | undefined;
+  setCurrentTransaction: Action<
+    StoreModel,
+    (transaction: FullTransaction | undefined) => FullTransaction | undefined
+  >;
 }
 
 const store = createStore<StoreModel>({
@@ -43,6 +49,12 @@ const store = createStore<StoreModel>({
   verticalCategoryPicker: false,
   setVerticalCategoryPicker: action((state, payload) => {
     state.verticalCategoryPicker = payload;
+  }),
+
+  currentTransaction: undefined,
+  setCurrentTransaction: action((state, payload) => {
+    const newState = payload(state.currentTransaction);
+    state.currentTransaction = newState;
   }),
 });
 

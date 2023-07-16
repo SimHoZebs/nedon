@@ -58,15 +58,31 @@ const transactionRouter = router({
         where: {
           ownerId: input.id,
         },
-        include: {
-          categoryTreeArray: true,
-          splitArray: true,
-        },
       });
+
+      const categoryTreeArrayArray = await db.$transaction(
+        transactionArray.map((transaction) =>
+          db.categoryTree.findMany({
+            where: {
+              transactionId: transaction.id,
+            },
+            include: {
+              splitArray: true,
+            },
+          })
+        )
+      );
+
+      const transactionWithCategoryTreeArray = transactionArray.map(
+        (transaction, index) => ({
+          ...transaction,
+          categoryTreeArray: categoryTreeArrayArray[index],
+        })
+      );
 
       const fullTransactionArray: FullTransaction[] = added.map(
         ({ category: nameArray, ...plaidTransaction }) => {
-          const meta = transactionArray.find(
+          const meta = transactionWithCategoryTreeArray.find(
             (t) => t.id === plaidTransaction.transaction_id
           );
           if (!nameArray) throw new Error("category is somehow falsy");
@@ -74,10 +90,10 @@ const transactionRouter = router({
           let transaction: FullTransaction = {
             ...plaidTransaction,
             inDB: false,
-            splitArray: [],
             categoryTreeArray: [
               {
                 transactionId: plaidTransaction.transaction_id,
+                splitArray: [],
                 id: null,
                 nameArray,
                 amount: plaidTransaction.amount,
@@ -104,15 +120,24 @@ const transactionRouter = router({
     .query(async ({ input }) => {
       return db.transaction.findMany({
         where: {
-          splitArray: {
+          categoryTreeArray: {
+            //TODO: is some correct? or every?
             some: {
-              userId: input.id,
+              splitArray: {
+                some: {
+                  userId: input.id,
+                },
+              },
             },
           },
         },
 
         include: {
-          splitArray: true,
+          categoryTreeArray: {
+            include: {
+              splitArray: true,
+            },
+          },
         },
       });
     }),
@@ -161,8 +186,11 @@ const transactionRouter = router({
           },
         },
         include: {
-          categoryTreeArray: true,
-          splitArray: true,
+          categoryTreeArray: {
+            include: {
+              splitArray: true,
+            },
+          },
         },
       });
 
@@ -208,7 +236,7 @@ const transactionRouter = router({
     .input(
       z.object({ splitId: z.string() }).or(
         z.object({
-          transactionId: z.string(),
+          categoryTreeId: z.string(),
           userId: z.string(),
         })
       )
@@ -225,7 +253,7 @@ const transactionRouter = router({
         //delete doesn't work because the query is not unique - even though it techincally is.
         await db.split.deleteMany({
           where: {
-            transactionId: input.transactionId,
+            categoryTreeId: input.categoryTreeId,
             userId: input.userId,
           },
         });
@@ -237,11 +265,14 @@ const transactionRouter = router({
       z.object({
         userId: z.string(),
         transactionId: z.string(),
-        splitArray: z
-          .array(SplitModel.extend({ id: z.string().nullable() }))
-          .optional(),
         categoryTreeArray: z
-          .array(CategoryTreeModel.extend({ id: z.string().nullish() }))
+          .array(
+            CategoryTreeModel.extend({ id: z.string().nullish() }).extend({
+              splitArray: z
+                .array(SplitModel.extend({ id: z.string().nullable() }))
+                .optional(),
+            })
+          )
           .optional(),
       })
     )
@@ -256,22 +287,10 @@ const transactionRouter = router({
           ...rest,
         })
       );
-      const splitArrayData = input.splitArray?.map(
-        ({ id, transactionId, ...rest }) => ({
-          ...rest,
-        })
-      );
 
       const transaction = await db.transaction.create({
         data: {
           ...data,
-          splitArray: splitArrayData
-            ? {
-                createMany: {
-                  data: splitArrayData,
-                },
-              }
-            : undefined,
           categoryTreeArray: categoryTreeArrayData
             ? {
                 createMany: {
@@ -281,8 +300,11 @@ const transactionRouter = router({
             : undefined,
         },
         include: {
-          splitArray: true,
-          categoryTreeArray: true,
+          categoryTreeArray: {
+            include: {
+              splitArray: true,
+            },
+          },
         },
       });
 

@@ -12,11 +12,17 @@ interface Props {
 const TransactionCard = (props: Props) => {
   const { appUser } = useStoreState((state) => state);
   //TODO: Need to be redesigned to fit multiple categories - probably small text or icons instead
-  const splitAmount = props.transaction.splitArray?.find(
-    (split) =>
-      split.transactionId === props.transaction.transaction_id &&
-      split.userId === appUser?.id
-  )?.amount;
+
+  //TODO: fix this later
+  const splitAmount = props.transaction.categoryTreeArray.reduce(
+    (total, tree) => {
+      let amount =
+        tree.splitArray.find((split) => split.userId === appUser?.id)?.amount ||
+        0;
+      return amount + total;
+    },
+    0
+  );
 
   const thisCategoryStyle = (index: number) => {
     const lastCategory =

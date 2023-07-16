@@ -30,7 +30,7 @@ const Page: NextPage = () => {
     useState<FullTransaction>();
   const [rangeFormat, setRangeFormat] = useState<
     "date" | "month" | "year" | "all"
-  >("month");
+  >("all");
   const [date, setDate] = useState<Date>(new Date(Date.now()));
   const [scopedTransactionArray, setScopedTransactionArray] = useState<
     FullTransaction[]

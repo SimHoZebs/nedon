@@ -155,22 +155,24 @@ const Page = () => {
     associatedTransactionArray.data.forEach((transaction) => {
       if (!appUser) return;
 
-      transaction.splitArray.forEach((split) => {
-        if (transaction.ownerId === appUser.id) {
-          if (split.userId === appUser.id) return;
+      transaction.categoryTreeArray.forEach((tree) => {
+        tree.splitArray.forEach((split) => {
+          if (transaction.ownerId === appUser.id) {
+            if (split.userId === appUser.id) return;
 
-          //amount others owe appUser
-          oweGroup[split.userId]
-            ? (oweGroup[split.userId] += split.amount)
-            : (oweGroup[split.userId] = split.amount);
-        } else {
-          if (split.userId === appUser.id) {
-            //amount appUser owe others subtracted from total owe
-            oweGroup[transaction.ownerId]
-              ? (oweGroup[transaction.ownerId] -= split.amount)
-              : (oweGroup[transaction.ownerId] = -split.amount);
+            //amount others owe appUser
+            oweGroup[split.userId]
+              ? (oweGroup[split.userId] += split.amount)
+              : (oweGroup[split.userId] = split.amount);
+          } else {
+            if (split.userId === appUser.id) {
+              //amount appUser owe others subtracted from total owe
+              oweGroup[transaction.ownerId]
+                ? (oweGroup[transaction.ownerId] -= split.amount)
+                : (oweGroup[transaction.ownerId] = -split.amount);
+            }
           }
-        }
+        });
       });
     });
 

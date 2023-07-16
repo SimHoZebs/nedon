@@ -118,6 +118,7 @@ const Category = (props: Props) => {
                   </p>
                 )}
               </div>
+              <div>{JSON.stringify(tree.splitArray, null, 2)}</div>
             </div>
           ))}
         </div>
