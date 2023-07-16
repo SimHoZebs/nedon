@@ -60,22 +60,22 @@ model Transaction {
   ownerId           String
   owner             User           @relation(fields: [ownerId], references: [id])
   categoryTreeArray CategoryTree[]
-  splitArray        Split[]
 }
 
 model CategoryTree {
-  id               String      @id @default(uuid())
-  nameArray        String[]
-  amount           Float
-  transactionId    String
-  transactionArray Transaction @relation(fields: [transactionId], references: [id])
+  id            String      @id @default(uuid())
+  nameArray     String[]
+  amount        Float
+  splitArray    Split[]
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
 }
 
 model Split {
   id String @id @default(uuid())
 
-  transactionId String
-  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+  categoryTreeId String
+  categoryTree   CategoryTree? @relation(fields: [categoryTreeId], references: [id])
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
