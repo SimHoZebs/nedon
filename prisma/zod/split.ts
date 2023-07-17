@@ -3,6 +3,7 @@ import { CompleteCategoryTree, RelatedCategoryTreeModel, CompleteUser, RelatedUs
 
 export const SplitModel = z.object({
   id: z.string(),
+  transactionId: z.string(),
   categoryTreeId: z.string(),
   userId: z.string(),
   amount: z.number(),

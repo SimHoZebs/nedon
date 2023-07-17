@@ -15,6 +15,7 @@ import transactionRouter from "./transaction";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS, client } from "../util";
 import stripUserSecrets from "../../lib/util/stripUserSecrets";
 import { convertPlaidCategoriesToHierarchicalArray } from "../../lib/util/category";
+import splitRouter from "./split";
 
 const setAccessToken = async ({
   publicToken,
@@ -36,7 +37,7 @@ const setAccessToken = async ({
 
   if (PLAID_PRODUCTS.includes(Products.Transfer)) {
     userUpdateData.TRANSFER_ID = await authorizeAndCreateTransfer(
-      exchangeResponse.data.item_id,
+      exchangeResponse.data.item_id
     );
   }
 
@@ -57,6 +58,7 @@ export const appRouter = router({
   user: userRouter,
   group: groupRouter,
   transaction: transactionRouter,
+  split: splitRouter,
 
   sandBoxAccess: procedure
     .input(z.object({ instituteID: z.string().nullish() }))
@@ -88,7 +90,7 @@ export const appRouter = router({
       z.object({
         publicToken: z.string(),
         id: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       return setAccessToken(input);
@@ -130,7 +132,7 @@ const getAssetReportWithRetries = (
   plaidClient: PlaidApi,
   asset_report_token: string,
   ms = 1000,
-  retriesLeft = 20,
+  retriesLeft = 20
 ) =>
   new Promise((resolve, reject) => {
     const request = {
@@ -150,7 +152,7 @@ const getAssetReportWithRetries = (
             plaidClient,
             asset_report_token,
             ms,
-            retriesLeft - 1,
+            retriesLeft - 1
           ).then(resolve);
         }, ms);
       });

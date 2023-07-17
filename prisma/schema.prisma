@@ -66,13 +66,15 @@ model CategoryTree {
   id            String      @id @default(uuid())
   nameArray     String[]
   amount        Float
-  splitArray    Split[]
+  splitArray    Split[] //may contain multiples of the same user
   transactionId String
   transaction   Transaction @relation(fields: [transactionId], references: [id])
 }
 
 model Split {
   id String @id @default(uuid())
+
+  transactionId String
 
   categoryTreeId String
   categoryTree   CategoryTree? @relation(fields: [categoryTreeId], references: [id])
