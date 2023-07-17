@@ -56,31 +56,29 @@ model User {
 }
 
 model Transaction {
-  id                String         @id @default(cuid()) //transaction_id UUID for Plaid transactions, CUID for manually created transactions
-  ownerId           String
-  owner             User           @relation(fields: [ownerId], references: [id])
-  categoryTreeArray CategoryTree[]
+  id         String  @id @default(cuid()) //transaction_id UUID for Plaid transactions, CUID for manually created transactions
+  ownerId    String
+  owner      User    @relation(fields: [ownerId], references: [id])
+  splitArray Split[]
 }
 
 model CategoryTree {
-  id            String      @id @default(uuid())
-  nameArray     String[]
-  amount        Float
-  splitArray    Split[] //may contain multiples of the same user
-  transactionId String
-  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  id        String   @id @default(uuid())
+  nameArray String[]
+  amount    Float
+
+  Split   Split?  @relation(fields: [splitId], references: [id])
+  splitId String?
 }
 
 model Split {
   id String @id @default(uuid())
 
   transactionId String
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
 
-  categoryTreeId String
-  categoryTree   CategoryTree? @relation(fields: [categoryTreeId], references: [id])
+  categoryTreeArray CategoryTree[]
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
-
-  amount Float
 }
