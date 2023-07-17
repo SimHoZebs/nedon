@@ -1,7 +1,9 @@
+import { mergeCategoryTreeArray } from "./category";
 import {
   HierarchicalCategoryWithTransaction,
   FullTransaction,
   CategoryTreeClientSide,
+  MergedCategoryTree,
 } from "./types";
 
 export const organizeTransactionByCategory = (
@@ -11,7 +13,10 @@ export const organizeTransactionByCategory = (
 
   transactionArray.forEach((transaction) => {
     const transactionCopy = structuredClone(transaction);
-    transaction.categoryTreeArray.forEach((categoryTree) => {
+    const mergedCategoryArray = mergeCategoryTreeArray(
+      transactionCopy.splitArray
+    );
+    mergedCategoryArray.forEach((categoryTree) => {
       fillArrayByCategory(categoryTreeArray, transactionCopy, categoryTree);
     });
   });
@@ -22,7 +27,7 @@ export const organizeTransactionByCategory = (
 const fillArrayByCategory = (
   resultArray: HierarchicalCategoryWithTransaction[],
   transaction: FullTransaction,
-  categoryTree: CategoryTreeClientSide
+  categoryTree: MergedCategoryTree
 ): HierarchicalCategoryWithTransaction[] => {
   const nameArray = categoryTree.nameArray;
 

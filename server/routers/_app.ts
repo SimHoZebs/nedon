@@ -16,6 +16,7 @@ import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS, client } from "../util";
 import stripUserSecrets from "../../lib/util/stripUserSecrets";
 import { convertPlaidCategoriesToHierarchicalArray } from "../../lib/util/category";
 import splitRouter from "./split";
+import categoryRouter from "./category";
 
 const setAccessToken = async ({
   publicToken,
@@ -58,6 +59,7 @@ export const appRouter = router({
   user: userRouter,
   group: groupRouter,
   transaction: transactionRouter,
+  category: categoryRouter,
   split: splitRouter,
 
   sandBoxAccess: procedure

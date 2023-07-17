@@ -5,20 +5,19 @@ import { useStoreActions, useStoreState } from "../../../../util/store";
 import {
   CategoryTreeClientSide,
   HierarchicalCategory,
-  FullTransaction,
+  MergedCategoryTree,
 } from "../../../../util/types";
-import categoryStyle from "../../../../util/categoryStyle";
+import categoryStyleArray from "../../../../util/categoryStyle";
 
 interface Props {
-  setUnsavedTreeArray: React.Dispatch<
-    React.SetStateAction<CategoryTreeClientSide[]>
+  setUnsavedMergedTreeArray: React.Dispatch<
+    React.SetStateAction<MergedCategoryTree[]>
   >;
-  unsavedTree?: CategoryTreeClientSide;
-  setUnsavedTree: React.Dispatch<
-    React.SetStateAction<CategoryTreeClientSide | undefined>
+  editingMergedCategory: MergedCategoryTree;
+  editingMergedCategoryIndex: number;
+  setEditingMergedCategoryIndex: React.Dispatch<
+    React.SetStateAction<number | undefined>
   >;
-  category: CategoryTreeClientSide;
-  categoryIndex: number;
   cleanup: () => void;
   position: { x: number; y: number };
 }
@@ -32,73 +31,35 @@ const CategoryPicker = (props: Props) => {
   const categoryOptionArray = trpc.getCategoryOptionArray.useQuery(undefined, {
     staleTime: Infinity,
   });
-  const upsertTransaction = trpc.transaction.upsertManyCategory.useMutation();
-  const createTransaction = trpc.transaction.createTransaction.useMutation();
-  const queryClient = trpc.useContext();
+  // const upsertTransaction = trpc.transaction.upsertManyCategory.useMutation();
+  // const createTransaction = trpc.transaction.createTransaction.useMutation();
+  // const queryClient = trpc.useContext();
 
-  const [selectedOptionArray, setSelectedOptionArray] = useState<
+  const [currentOptionArray, setCurrentOptionArray] = useState<
     HierarchicalCategory[]
   >([]);
 
   const cleanup = () => {
     if (!categoryOptionArray.data) return;
 
-    setSelectedOptionArray(categoryOptionArray.data);
+    setCurrentOptionArray(categoryOptionArray.data);
     props.cleanup();
   };
 
-  const syncCategory = async (hierarchicalCategory?: HierarchicalCategory) => {
-    if (!appUser || !categoryOptionArray.data || !currentTransaction) return;
+  const syncCategory = (hierarchicalCategory?: HierarchicalCategory) => {
+    const updatedMergedCategory = structuredClone(props.editingMergedCategory);
+    if (hierarchicalCategory)
+      updatedMergedCategory.nameArray.push(hierarchicalCategory.name);
 
-    const nameArrayCopy: string[] = [];
-
-    let updatedCategory: CategoryTreeClientSide = {
-      ...props.category,
-      nameArray: nameArrayCopy,
-    };
-
-    if (props.unsavedTree) {
-      nameArrayCopy.push(...props.unsavedTree.nameArray);
-      updatedCategory = {
-        ...props.unsavedTree,
-        nameArray: nameArrayCopy,
-      };
-    }
-
-    if (hierarchicalCategory) nameArrayCopy.push(hierarchicalCategory.name);
-
-    let updatedTreeArray: CategoryTreeClientSide[] = [
-      ...currentTransaction.categoryTreeArray,
-    ];
-    updatedTreeArray[props.categoryIndex] = updatedCategory;
-
-    if (currentTransaction.inDB) {
-      const transaction = await upsertTransaction.mutateAsync({
-        transactionId: currentTransaction.transaction_id,
-        categoryTreeArray: updatedTreeArray,
-      });
-      updatedTreeArray = transaction.categoryTreeArray;
-    } else {
-      const transaction = await createTransaction.mutateAsync({
-        userId: appUser.id,
-        transactionId: currentTransaction.transaction_id,
-        categoryTreeArray: updatedTreeArray,
-      });
-      updatedTreeArray = transaction.categoryTreeArray;
-    }
-    queryClient.transaction.getTransactionArray.refetch();
-
-    setTransaction(() => ({
-      ...currentTransaction,
-      categoryTreeArray: updatedTreeArray,
-    }));
-
-    props.setUnsavedTreeArray(updatedTreeArray);
-    cleanup();
+    props.setUnsavedMergedTreeArray((prev) => {
+      const copy = structuredClone(prev);
+      copy[props.editingMergedCategoryIndex] = updatedMergedCategory;
+      return copy;
+    });
   };
 
   useEffect(() => {
-    setSelectedOptionArray(categoryOptionArray.data || []);
+    setCurrentOptionArray(categoryOptionArray.data || []);
   }, [categoryOptionArray.data]);
 
   return appUser && currentTransaction ? (
@@ -111,12 +72,12 @@ const CategoryPicker = (props: Props) => {
         >
           <div className="flex w-full justify-between px-2 py-1">
             <div className="flex w-fit items-center">
-              {categoryOptionArray.data !== selectedOptionArray && (
+              {categoryOptionArray.data !== currentOptionArray && (
                 <button
                   className="flex"
                   onClick={() => {
-                    setSelectedOptionArray(categoryOptionArray.data);
-                    props.setUnsavedTree(undefined);
+                    setCurrentOptionArray(categoryOptionArray.data);
+                    cleanup();
                   }}
                 >
                   <Icon icon="mdi:chevron-left" height={24} />
@@ -138,10 +99,6 @@ const CategoryPicker = (props: Props) => {
                 onClick={(e) => {
                   e.stopPropagation();
                   cleanup();
-
-                  props.setUnsavedTreeArray(
-                    currentTransaction.categoryTreeArray
-                  );
                 }}
               >
                 cancel
@@ -152,25 +109,27 @@ const CategoryPicker = (props: Props) => {
           <hr className="w-full border-zinc-700" />
 
           <div className="grid w-full auto-cols-fr grid-cols-3 overflow-x-hidden overflow-y-scroll bg-zinc-800 pb-1 pl-2 text-xs ">
-            {selectedOptionArray.map((category, i) => (
+            {currentOptionArray.map((category, i) => (
               <button
                 onClick={async () => {
                   if (category.subCategoryArray.length === 0) {
                     console.log("syncing");
                     await syncCategory(category);
                   } else {
-                    setSelectedOptionArray(category.subCategoryArray);
-                    props.setUnsavedTree((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            nameArray: [...prev.nameArray, category.name],
-                          }
-                        : {
-                            ...props.category,
-                            nameArray: [category.name],
-                          }
-                    );
+                    setCurrentOptionArray(category.subCategoryArray);
+
+                    props.setUnsavedMergedTreeArray((prev) => {
+                      const clone = structuredClone(prev);
+                      clone[props.editingMergedCategoryIndex] = {
+                        ...props.editingMergedCategory,
+                        nameArray: [
+                          ...props.editingMergedCategory.nameArray,
+                          category.name,
+                        ],
+                      };
+
+                      return clone;
+                    });
                   }
                 }}
                 key={i}
@@ -180,10 +139,11 @@ const CategoryPicker = (props: Props) => {
               >
                 <Icon
                   className={
-                    categoryStyle[category.name]?.textColor || "text-zinc-500"
+                    categoryStyleArray[category.name]?.textColor ||
+                    "text-zinc-500"
                   }
                   icon={
-                    categoryStyle[category.name]?.icon ||
+                    categoryStyleArray[category.name]?.icon ||
                     "material-symbols:category-outline"
                   }
                   height={24}

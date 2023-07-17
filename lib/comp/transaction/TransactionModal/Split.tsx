@@ -1,20 +1,16 @@
 import { Icon } from "@iconify-icon/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SplitClientSide } from "../../../util/types";
 import ActionBtn from "../../Button/ActionBtn";
 import UserSplit from "./UserSplit";
 import { trpc } from "../../../util/trpc";
 import { useStoreActions, useStoreState } from "../../../util/store";
-import Button from "../../Button/Button";
-
-type mergedSplit = Omit<SplitClientSide, "categoryTreeId">;
+import SplitUserList from "./SplitUserList";
 
 const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
-  const {
-    appUser,
-    appGroup,
-    currentTransaction: transaction,
-  } = useStoreState((state) => state);
+  const { appUser, currentTransaction: transaction } = useStoreState(
+    (state) => state
+  );
   const { setCurrentTransaction: setTransaction } = useStoreActions(
     (actions) => actions
   );
@@ -22,34 +18,32 @@ const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const removeSplit = trpc.split.remove.useMutation();
   const queryClient = trpc.useContext();
 
-  const [unsavedSplitArray, setSplitArr] = useState<mergedSplit[]>(() => {
-    if (!transaction) return [];
+  const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
+    transaction?.splitArray || []
+  );
 
-    const mergedSplitArray: mergedSplit[] = [];
+  useEffect(() => {
+    console.log("lol");
+    const clone = structuredClone(transaction);
+    return;
 
-    transaction.categoryTreeArray.forEach((tree) => {
-      tree.splitArray.forEach((split) => {
-        const storedSplit = mergedSplitArray.find(
-          (storedSplit) => storedSplit.id === split.id
-        );
-        if (storedSplit) {
-          storedSplit.amount += split.amount;
-        } else {
-          mergedSplitArray.push(structuredClone(split));
-        }
-      });
-    });
-
-    return mergedSplitArray;
-  });
+    setTransaction((prev) => structuredClone(transaction));
+  }, [unsavedSplitArray]);
 
   const amount = transaction ? transaction.amount : 0;
+
+  const calcSplitTotal = (split: SplitClientSide) => {
+    return split.categoryTreeArray.reduce(
+      (total, tree) => total + tree.amount,
+      0
+    );
+  };
 
   let updatedTotalSplit =
     unsavedSplitArray.length > 1
       ? Math.floor(
           unsavedSplitArray.reduce(
-            (amount, split) => amount + split.amount,
+            (amount, split) => amount + calcSplitTotal(split),
             0
           ) * 100
         ) / 100
@@ -101,7 +95,7 @@ const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
                         queryClient.transaction.getTransactionArray.refetch();
 
-                        setSplitArr(updatedSplitArray);
+                        setUnsavedSplitArray(updatedSplitArray);
                         console.log("updatedSplitArray:", updatedSplitArray);
                         setTransaction((prev) => structuredClone(transaction));
                       }}
@@ -115,42 +109,18 @@ const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
                     </button>
                   ))}
 
-                {updatedTotalSplit !== amount ? (
-                  <button
-                    className="flex aspect-square min-h-[20px]"
-                    onClick={() => {
-                      const updatedSplitArray = [...unsavedSplitArray];
-                      let newSplitAmount =
-                        Math.floor(
-                          (split.amount - updatedTotalSplit + amount) * 100
-                        ) / 100;
-
-                      if (newSplitAmount < 0) newSplitAmount = 0;
-
-                      updatedSplitArray[i].amount = newSplitAmount;
-                      setSplitArr(updatedSplitArray);
-                    }}
-                  >
-                    <Icon
-                      className="text-blue-300"
-                      icon="cil:balance-scale"
-                      width={20}
-                    />
-                  </button>
-                ) : null}
-
                 <UserSplit
                   onAmountChange={(amount: number) => {
-                    const updatedSplit: mergedSplit = {
+                    const updatedSplit: SplitClientSide = {
                       ...split,
-                      amount,
                     };
                     const updatedSplitArray = [...unsavedSplitArray];
                     updatedSplitArray[i] = updatedSplit;
-                    setSplitArr(updatedSplitArray);
+                    setUnsavedSplitArray(updatedSplitArray);
                   }}
                   amount={amount}
-                  split={split}
+                  splitTotal={calcSplitTotal(split)}
+                  userId={split.userId}
                 >
                   <div className="flex items-center gap-x-2">
                     <Icon
@@ -172,47 +142,10 @@ const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
           than the amount (${`props.totalSplit $${updatedTotalSplit}`})`}
         </div>
 
-        {appUser &&
-          appGroup?.userArray &&
-          appGroup.userArray.map((user, i) =>
-            //Don't show users that are already splitting
-            unsavedSplitArray.find((split) => split.userId === user.id) ||
-            user.id === appUser.id ? null : (
-              <div key={i} className="flex items-center gap-x-2">
-                <Icon
-                  className="rounded-full border-2 border-zinc-400 bg-zinc-800 p-2"
-                  icon="mdi:account"
-                  width={20}
-                />
-                <div>{user.id.slice(0, 8)}</div>
-                <Button
-                  className="bg-zinc-800 text-indigo-300"
-                  onClick={() => {
-                    const updatedSplitArray = [...unsavedSplitArray];
-
-                    if (!updatedSplitArray.length)
-                      updatedSplitArray.push({
-                        id: appUser.id,
-                        transactionId: transaction.transaction_id,
-                        userId: appUser.id,
-                        amount,
-                      });
-
-                    updatedSplitArray.push({
-                      id: user.id,
-                      transactionId: transaction.transaction_id,
-                      userId: user.id,
-                      amount: 0,
-                    });
-
-                    setSplitArr(updatedSplitArray);
-                  }}
-                >
-                  Split
-                </Button>
-              </div>
-            )
-          )}
+        <SplitUserList
+          unsavedSplitArray={unsavedSplitArray}
+          setUnsavedSplitArray={setUnsavedSplitArray}
+        />
       </div>
     )
   );

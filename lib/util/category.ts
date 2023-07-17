@@ -1,17 +1,52 @@
-import { CategoryTreeClientSide, HierarchicalCategory } from "./types";
+import {
+  CategoryTreeClientSide,
+  HierarchicalCategory,
+  MergedCategoryTree,
+  SplitClientSide,
+} from "./types";
 import { Category as PlaidCategory } from "plaid";
+import categoryStyleArray from "./categoryStyle";
 
-export const emptyCategory = (
-  transactionId: string,
-  name: string[]
-): CategoryTreeClientSide => {
+export const emptyCategory = ({
+  splitId,
+  amount = 0,
+}: {
+  splitId: string | null;
+  amount: number;
+}): CategoryTreeClientSide => {
   return {
-    transactionId,
     id: null,
-    nameArray: name,
-    splitArray: [],
-    amount: 0,
+    nameArray: [],
+    splitId: splitId,
+    amount: amount,
   };
+};
+
+export const getCategoryStyle = (nameArray: string[]) => {
+  return categoryStyleArray[nameArray.slice(-1)[0]];
+};
+
+export const mergeCategoryTreeArray = (splitArray: SplitClientSide[]) => {
+  const mergedCategoryArray: MergedCategoryTree[] = [];
+
+  splitArray.forEach((split) => {
+    split.categoryTreeArray.forEach(({ nameArray, amount, ...rest }) => {
+      const storedTree = mergedCategoryArray.find(
+        ({ nameArray: storedNameArray }) =>
+          storedNameArray[storedNameArray.length - 1] ===
+          nameArray[nameArray.length - 1]
+      );
+
+      if (storedTree) {
+        storedTree.amount += amount;
+      } else {
+        mergedCategoryArray.push(
+          structuredClone({ nameArray, amount, ...rest })
+        );
+      }
+    });
+  });
+  return mergedCategoryArray;
 };
 
 export const convertPlaidCategoriesToHierarchicalArray = (

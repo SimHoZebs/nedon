@@ -2,8 +2,8 @@ import React from "react";
 
 import { useStoreState } from "../../util/store";
 import { Icon } from "@iconify-icon/react";
-import categoryStyle from "../../util/categoryStyle";
 import { FullTransaction } from "../../util/types";
+import { getCategoryStyle, mergeCategoryTreeArray } from "../../util/category";
 
 interface Props {
   transaction: FullTransaction;
@@ -14,21 +14,9 @@ const TransactionCard = (props: Props) => {
   //TODO: Need to be redesigned to fit multiple categories - probably small text or icons instead
 
   //TODO: fix this later
-  const splitAmount = props.transaction.categoryTreeArray.reduce(
-    (total, tree) => {
-      let amount =
-        tree.splitArray.find((split) => split.userId === appUser?.id)?.amount ||
-        0;
-      return amount + total;
-    },
-    0
-  );
-
-  const thisCategoryStyle = (index: number) => {
-    const lastCategory =
-      props.transaction.categoryTreeArray[index]?.nameArray.slice(-1)[0];
-    return categoryStyle[lastCategory];
-  };
+  const splitAmount = props.transaction.splitArray
+    .find((split) => split.userId === appUser?.id)
+    ?.categoryTreeArray.reduce((total, tree) => total + tree.amount, 0);
 
   return (
     <div
@@ -68,22 +56,27 @@ const TransactionCard = (props: Props) => {
             e.currentTarget.scrollLeft += e.deltaY * 0.5;
           }}
         >
-          {props.transaction.categoryTreeArray.map((tree, index) => (
-            <div
-              key={index}
-              className={`flex min-w-max gap-x-1 rounded-full p-2 text-zinc-800 ${
-                thisCategoryStyle(index)?.bgColor || "bg-zinc-400"
-              }`}
-            >
-              <Icon
-                icon={thisCategoryStyle(index)?.icon || "mdi:shape-outline"}
-                width={16}
-              />
-              <p className="text-xs">
-                {tree.nameArray[tree.nameArray.length - 1]}
-              </p>
-            </div>
-          ))}
+          {mergeCategoryTreeArray(props.transaction.splitArray).map(
+            (tree, index) => (
+              <div
+                key={index}
+                className={`flex min-w-max gap-x-1 rounded-full p-2 text-zinc-800 ${
+                  getCategoryStyle(tree.nameArray)?.bgColor || "bg-zinc-400"
+                }`}
+              >
+                <Icon
+                  icon={
+                    getCategoryStyle(tree.nameArray)?.icon ||
+                    "mdi:shape-outline"
+                  }
+                  width={16}
+                />
+                <p className="text-xs">
+                  {tree.nameArray[tree.nameArray.length - 1]}
+                </p>
+              </div>
+            )
+          )}
         </div>
       </div>
     </div>

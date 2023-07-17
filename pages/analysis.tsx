@@ -15,6 +15,7 @@ import {
 import H2 from "../lib/comp/H2";
 import H4 from "../lib/comp/H4";
 import { z } from "zod";
+import { mergeCategoryTreeArray } from "../lib/util/category";
 
 const subCategoryTotal = (
   parentCategory: HierarchicalCategoryWithTransaction,
@@ -154,25 +155,31 @@ const Page = () => {
 
     associatedTransactionArray.data.forEach((transaction) => {
       if (!appUser) return;
+      const mergedCategoryArray = mergeCategoryTreeArray(
+        transaction.splitArray
+      );
 
-      transaction.categoryTreeArray.forEach((tree) => {
-        tree.splitArray.forEach((split) => {
-          if (transaction.ownerId === appUser.id) {
-            if (split.userId === appUser.id) return;
+      transaction.splitArray.forEach((split) => {
+        const splitAmount = split.categoryTreeArray.reduce(
+          (total, category) => total + category.amount,
+          0
+        );
 
-            //amount others owe appUser
-            oweGroup[split.userId]
-              ? (oweGroup[split.userId] += split.amount)
-              : (oweGroup[split.userId] = split.amount);
-          } else {
-            if (split.userId === appUser.id) {
-              //amount appUser owe others subtracted from total owe
-              oweGroup[transaction.ownerId]
-                ? (oweGroup[transaction.ownerId] -= split.amount)
-                : (oweGroup[transaction.ownerId] = -split.amount);
-            }
+        if (transaction.ownerId === appUser.id) {
+          if (split.userId === appUser.id) return;
+
+          //amount others owe appUser
+          oweGroup[split.userId]
+            ? (oweGroup[split.userId] += splitAmount)
+            : (oweGroup[split.userId] = splitAmount);
+        } else {
+          if (split.userId === appUser.id) {
+            //amount appUser owe others subtracted from total owe
+            oweGroup[transaction.ownerId]
+              ? (oweGroup[transaction.ownerId] -= splitAmount)
+              : (oweGroup[transaction.ownerId] = -splitAmount);
           }
-        });
+        }
       });
     });
 

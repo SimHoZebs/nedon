@@ -12,16 +12,16 @@ export interface GroupClientSide extends Group {
 
 export interface SplitClientSide extends Omit<Split, "id"> {
   id: string | null;
+  categoryTreeArray: CategoryTreeClientSide[];
 }
-export type MergedSplit = Omit<SplitClientSide, "categoryTreeId">;
+export type MergedCategoryTree = Omit<CategoryTreeClientSide, "splitId">;
 
 export interface CategoryTreeClientSide extends Omit<CategoryTree, "id"> {
   id?: string | null;
-  splitArray: SplitClientSide[];
 }
 
 export interface FullTransaction extends Omit<PlaidTransaction, "category"> {
-  categoryTreeArray: CategoryTreeClientSide[];
+  splitArray: SplitClientSide[];
   inDB: boolean;
 }
 

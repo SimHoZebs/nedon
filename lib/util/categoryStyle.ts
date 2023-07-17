@@ -1,4 +1,4 @@
-const categoryStyle: {
+const categoryStyleArray: {
   [key: string]:
     | { icon: string; bgColor: string; textColor: string }
     | undefined;
@@ -100,4 +100,4 @@ const categoryStyle: {
   },
 };
 
-export default categoryStyle;
+export default categoryStyleArray;

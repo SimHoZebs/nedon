@@ -1,15 +1,23 @@
 import React from "react";
-import { MergedSplit, SplitClientSide } from "../../../util/types";
 import { Icon } from "@iconify-icon/react";
-import Button from "../../Button/Button";
+import { SplitClientSide } from "../../../util/types";
 
 const inputStyle =
   "h-7 w-16 border-b-2 border-zinc-900 bg-zinc-900 p-1 hover:border-zinc-500 focus-visible:outline-none sm:w-20";
+
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
-  split: MergedSplit;
+  splitTotal: number;
+  userId: string;
   amount: number;
   onAmountChange: (amount: number) => void;
 }
+
+const calcSplitTotal = (split: SplitClientSide) => {
+  return split.categoryTreeArray.reduce(
+    (total, tree) => total + tree.amount,
+    0
+  );
+};
 
 const UserSplit = (props: Props) => {
   return (
@@ -27,7 +35,7 @@ const UserSplit = (props: Props) => {
                 type="number"
                 min={0}
                 max={props.amount}
-                value={props.split.amount}
+                value={props.splitTotal}
                 onChange={(e) =>
                   props.onAmountChange(parseFloat(e.target.value))
                 }
@@ -42,7 +50,7 @@ const UserSplit = (props: Props) => {
                 min={0}
                 max={100}
                 value={
-                  Math.floor((props.split.amount / props.amount) * 10000) / 100
+                  Math.floor((props.splitTotal / props.amount) * 10000) / 100
                 }
                 onChange={(e) => {
                   let newAmount = Math.floor(
@@ -50,7 +58,7 @@ const UserSplit = (props: Props) => {
                   );
 
                   //0.01 percentage increments are negated in Math.floor, requiring manual increment
-                  if (newAmount === props.split.amount * 100) newAmount += 1;
+                  if (newAmount === props.splitTotal * 100) newAmount += 1;
 
                   props.onAmountChange(newAmount / 100);
                 }}
@@ -61,7 +69,7 @@ const UserSplit = (props: Props) => {
           </div>
 
           <p className="text-xs font-light text-zinc-400">
-            {props.split.id?.slice(0, 8)}
+            {props.userId?.slice(0, 8)}
           </p>
         </div>
       </div>

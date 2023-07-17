@@ -37,10 +37,7 @@ const TransactionModal = (props: Props) => {
               </Split>
             </div>
 
-            <div>
-              <h4 className="text-lg font-medium">Categories</h4>
-              <Category />
-            </div>
+            <Category />
           </div>
         </div>
 
