@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { trpc } from "../../../../util/trpc";
 import { Icon } from "@iconify-icon/react";
-import { useStoreState } from "../../../../util/store";
+import { useStoreActions, useStoreState } from "../../../../util/store";
 import {
   CategoryTreeClientSide,
   HierarchicalCategory,
@@ -10,10 +10,6 @@ import {
 import categoryStyle from "../../../../util/categoryStyle";
 
 interface Props {
-  transaction: FullTransaction;
-  setTransaction: React.Dispatch<
-    React.SetStateAction<FullTransaction | undefined>
-  >;
   setUnsavedTreeArray: React.Dispatch<
     React.SetStateAction<CategoryTreeClientSide[]>
   >;
@@ -28,7 +24,11 @@ interface Props {
 }
 
 const CategoryPicker = (props: Props) => {
-  const { appUser } = useStoreState((state) => state);
+  const { appUser, currentTransaction } = useStoreState((state) => state);
+  const { setCurrentTransaction: setTransaction } = useStoreActions(
+    (actions) => actions
+  );
+
   const categoryOptionArray = trpc.getCategoryOptionArray.useQuery(undefined, {
     staleTime: Infinity,
   });
@@ -48,7 +48,7 @@ const CategoryPicker = (props: Props) => {
   };
 
   const syncCategory = async (hierarchicalCategory?: HierarchicalCategory) => {
-    if (!appUser || !categoryOptionArray.data) return;
+    if (!appUser || !categoryOptionArray.data || !currentTransaction) return;
 
     const nameArrayCopy: string[] = [];
 
@@ -68,30 +68,30 @@ const CategoryPicker = (props: Props) => {
     if (hierarchicalCategory) nameArrayCopy.push(hierarchicalCategory.name);
 
     let updatedTreeArray: CategoryTreeClientSide[] = [
-      ...props.transaction.categoryTreeArray,
+      ...currentTransaction.categoryTreeArray,
     ];
     updatedTreeArray[props.categoryIndex] = updatedCategory;
 
-    if (props.transaction.inDB) {
+    if (currentTransaction.inDB) {
       const transaction = await upsertTransaction.mutateAsync({
-        transactionId: props.transaction.transaction_id,
+        transactionId: currentTransaction.transaction_id,
         categoryTreeArray: updatedTreeArray,
       });
       updatedTreeArray = transaction.categoryTreeArray;
     } else {
       const transaction = await createTransaction.mutateAsync({
         userId: appUser.id,
-        transactionId: props.transaction.transaction_id,
+        transactionId: currentTransaction.transaction_id,
         categoryTreeArray: updatedTreeArray,
       });
       updatedTreeArray = transaction.categoryTreeArray;
     }
     queryClient.transaction.getTransactionArray.refetch();
 
-    props.setTransaction({
-      ...props.transaction,
+    setTransaction(() => ({
+      ...currentTransaction,
       categoryTreeArray: updatedTreeArray,
-    });
+    }));
 
     props.setUnsavedTreeArray(updatedTreeArray);
     cleanup();
@@ -101,7 +101,7 @@ const CategoryPicker = (props: Props) => {
     setSelectedOptionArray(categoryOptionArray.data || []);
   }, [categoryOptionArray.data]);
 
-  return appUser ? (
+  return appUser && currentTransaction ? (
     <>
       {categoryOptionArray.data && (
         <div
@@ -140,7 +140,7 @@ const CategoryPicker = (props: Props) => {
                   cleanup();
 
                   props.setUnsavedTreeArray(
-                    props.transaction.categoryTreeArray
+                    currentTransaction.categoryTreeArray
                   );
                 }}
               >

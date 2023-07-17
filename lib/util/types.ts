@@ -13,6 +13,7 @@ export interface GroupClientSide extends Group {
 export interface SplitClientSide extends Omit<Split, "id"> {
   id: string | null;
 }
+export type MergedSplit = Omit<SplitClientSide, "categoryTreeId">;
 
 export interface CategoryTreeClientSide extends Omit<CategoryTree, "id"> {
   id?: string | null;

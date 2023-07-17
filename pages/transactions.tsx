@@ -1,7 +1,7 @@
 import { NextPage } from "next";
 import React, { useEffect, useMemo, useState } from "react";
 import { trpc } from "../lib/util/trpc";
-import { useStoreState } from "../lib/util/store";
+import { useStoreActions, useStoreState } from "../lib/util/store";
 import TransactionCard from "../lib/comp/transaction/TransactionCard";
 import { FullTransaction } from "../lib/util/types";
 import {
@@ -16,7 +16,8 @@ import Button from "../lib/comp/Button/Button";
 import { z } from "zod";
 
 const Page: NextPage = () => {
-  const { appUser } = useStoreState((state) => state);
+  const { appUser, currentTransaction } = useStoreState((state) => state);
+  const { setCurrentTransaction } = useStoreActions((actions) => actions);
 
   const transactionArray = trpc.transaction.getTransactionArray.useQuery<
     FullTransaction[]
@@ -26,8 +27,6 @@ const Page: NextPage = () => {
   );
 
   const [showModal, setShowModal] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] =
-    useState<FullTransaction>();
   const [rangeFormat, setRangeFormat] = useState<
     "date" | "month" | "year" | "all"
   >("all");
@@ -36,19 +35,26 @@ const Page: NextPage = () => {
     FullTransaction[]
   >([]);
 
-  //organizeTransactionByTime is computationally expensive
+  useEffect(() => {
+    if (!currentTransaction) return;
+
+    console.log("syncing changes to currentTransaction to db");
+
+    transactionArray.refetch();
+    //transactionArray updates when isRefetching or isFetched
+    //gotta find a way to stop this from repeatedly refetching
+  }, [currentTransaction]);
 
   useEffect(() => {
     if (!transactionArray.data) return;
-    const initialDate = new Date(
-      transactionArray.data[transactionArray.data.length - 1].date
-    );
+    if (!date) {
+      const initialDate = new Date(
+        transactionArray.data[transactionArray.data.length - 1].date
+      );
 
-    setDate(initialDate);
-  }, [transactionArray.data]);
-
-  useEffect(() => {
-    if (!transactionArray.data || !date) return;
+      setDate(initialDate);
+      return;
+    }
 
     if (rangeFormat === "all") {
       setScopedTransactionArray(transactionArray.data);
@@ -95,12 +101,8 @@ const Page: NextPage = () => {
 
   return appUser ? (
     <section className="flex w-full flex-col items-center">
-      {showModal && selectedTransaction && (
-        <TransactionModal
-          setShowModal={setShowModal}
-          transaction={selectedTransaction}
-          setTransaction={setSelectedTransaction}
-        />
+      {showModal && currentTransaction && (
+        <TransactionModal setShowModal={setShowModal} />
       )}
 
       {date && (
@@ -169,7 +171,7 @@ const Page: NextPage = () => {
                               if (!appUser) return;
 
                               setShowModal(true);
-                              setSelectedTransaction(transaction);
+                              setCurrentTransaction(() => transaction);
                             }}
                             transaction={transaction}
                             key={l}
