@@ -13,8 +13,8 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const calcSplitTotal = (split: SplitClientSide) => {
-  return split.categoryTreeArray.reduce(
-    (total, tree) => total + tree.amount,
+  return split.categoryArray.reduce(
+    (total, category) => total + category.amount,
     0
   );
 };

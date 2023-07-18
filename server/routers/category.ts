@@ -1,26 +1,27 @@
-import { CategoryTree } from "@prisma/client";
+import { Category } from "@prisma/client";
 import { z } from "zod";
 import db from "../../lib/util/db";
-import { CategoryTreeModel } from "../../prisma/zod";
+import { CategoryModel } from "../../prisma/zod";
 import { procedure, router } from "../trpc";
 
 const categoryRouter = router({
   upsertManyCategory: procedure
     .input(
       z.object({
+        userId: z.string(),
         transactionId: z.string(),
-        categoryTreeArray: z.array(
-          CategoryTreeModel.extend({ id: z.string().nullish() })
+        categoryArray: z.array(
+          CategoryModel.extend({ id: z.string().nullish() })
         ),
       })
     )
     .mutation(async ({ input }) => {
-      const categoryToUpdateArray = input.categoryTreeArray.filter(
+      const categoryToUpdateArray = input.categoryArray.filter(
         (category) => category.id
-      ) as CategoryTree[];
-      const categoryToCreateArray = input.categoryTreeArray.filter(
+      ) as Category[];
+      const categoryToCreateArray = input.categoryArray.filter(
         (category) => !category.id
-      ) as Omit<CategoryTree, "id">[];
+      ) as Omit<Category, "id">[];
 
       const upsertedTransaction = await db.transaction.update({
         where: {
@@ -28,30 +29,27 @@ const categoryRouter = router({
         },
         data: {
           splitArray: {
-            updateMany: categoryToUpdateArray.map(
-              ({ id, transactionId, ...rest }) => ({
-                where: {
-                  id,
-                },
-                data: {
-                  ...rest,
-                },
-              })
-            ),
+            updateMany: categoryToUpdateArray.map(({ id, ...rest }) => ({
+              where: {
+                id,
+              },
+              data: {
+                ...rest,
+              },
+            })),
             createMany: {
-              data: categoryToCreateArray.map(
-                ({ transactionId, ...category }) => ({
-                  ...category,
-                  id: undefined,
-                })
-              ),
+              data: categoryToCreateArray.map(({ ...category }) => ({
+                userId: input.userId,
+                ...category,
+                id: undefined,
+              })),
             },
           },
         },
         include: {
-          categoryTreeArray: {
+          splitArray: {
             include: {
-              splitArray: true,
+              categoryArray: true,
             },
           },
         },

@@ -41,7 +41,7 @@ const SplitUserList = (props: Props) => {
                 id: user.id,
                 transactionId: transaction.transaction_id,
                 userId: user.id,
-                categoryTreeArray: [],
+                categoryArray: [],
               });
 
               if (!updatedSplitArray.length) {
@@ -49,7 +49,7 @@ const SplitUserList = (props: Props) => {
                   id: appUser.id,
                   transactionId: transaction.transaction_id,
                   userId: appUser.id,
-                  categoryTreeArray: [],
+                  categoryArray: [],
                 });
               }
 

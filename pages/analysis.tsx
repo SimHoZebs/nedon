@@ -15,7 +15,7 @@ import {
 import H2 from "../lib/comp/H2";
 import H4 from "../lib/comp/H4";
 import { z } from "zod";
-import { mergeCategoryTreeArray } from "../lib/util/category";
+import { mergeCategoryArray } from "../lib/util/category";
 
 const subCategoryTotal = (
   parentCategory: HierarchicalCategoryWithTransaction,
@@ -155,12 +155,10 @@ const Page = () => {
 
     associatedTransactionArray.data.forEach((transaction) => {
       if (!appUser) return;
-      const mergedCategoryArray = mergeCategoryTreeArray(
-        transaction.splitArray
-      );
+      const mergedCategoryArray = mergeCategoryArray(transaction.splitArray);
 
       transaction.splitArray.forEach((split) => {
-        const splitAmount = split.categoryTreeArray.reduce(
+        const splitAmount = split.categoryArray.reduce(
           (total, category) => total + category.amount,
           0
         );

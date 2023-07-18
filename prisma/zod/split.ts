@@ -1,5 +1,5 @@
 import * as z from "zod"
-import { CompleteTransaction, RelatedTransactionModel, CompleteCategoryTree, RelatedCategoryTreeModel, CompleteUser, RelatedUserModel } from "./index"
+import { CompleteTransaction, RelatedTransactionModel, CompleteCategory, RelatedCategoryModel, CompleteUser, RelatedUserModel } from "./index"
 
 export const SplitModel = z.object({
   id: z.string(),
@@ -9,7 +9,7 @@ export const SplitModel = z.object({
 
 export interface CompleteSplit extends z.infer<typeof SplitModel> {
   transaction?: CompleteTransaction | null
-  categoryTreeArray: CompleteCategoryTree[]
+  categoryArray: CompleteCategory[]
   user: CompleteUser
 }
 
@@ -20,6 +20,6 @@ export interface CompleteSplit extends z.infer<typeof SplitModel> {
  */
 export const RelatedSplitModel: z.ZodSchema<CompleteSplit> = z.lazy(() => SplitModel.extend({
   transaction: RelatedTransactionModel.nullish(),
-  categoryTreeArray: RelatedCategoryTreeModel.array(),
+  categoryArray: RelatedCategoryModel.array(),
   user: RelatedUserModel,
 }))

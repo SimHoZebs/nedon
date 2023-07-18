@@ -3,7 +3,7 @@ import React from "react";
 import { useStoreState } from "../../util/store";
 import { Icon } from "@iconify-icon/react";
 import { FullTransaction } from "../../util/types";
-import { getCategoryStyle, mergeCategoryTreeArray } from "../../util/category";
+import { getCategoryStyle, mergeCategoryArray } from "../../util/category";
 
 interface Props {
   transaction: FullTransaction;
@@ -13,10 +13,11 @@ const TransactionCard = (props: Props) => {
   const { appUser } = useStoreState((state) => state);
   //TODO: Need to be redesigned to fit multiple categories - probably small text or icons instead
 
+  console.log(mergeCategoryArray(props.transaction.splitArray));
   //TODO: fix this later
   const splitAmount = props.transaction.splitArray
     .find((split) => split.userId === appUser?.id)
-    ?.categoryTreeArray.reduce((total, tree) => total + tree.amount, 0);
+    ?.categoryArray.reduce((total, category) => total + category.amount, 0);
 
   return (
     <div
@@ -56,23 +57,23 @@ const TransactionCard = (props: Props) => {
             e.currentTarget.scrollLeft += e.deltaY * 0.5;
           }}
         >
-          {mergeCategoryTreeArray(props.transaction.splitArray).map(
-            (tree, index) => (
+          {mergeCategoryArray(props.transaction.splitArray).map(
+            (category, index) => (
               <div
                 key={index}
                 className={`flex min-w-max gap-x-1 rounded-full p-2 text-zinc-800 ${
-                  getCategoryStyle(tree.nameArray)?.bgColor || "bg-zinc-400"
+                  getCategoryStyle(category.nameArray)?.bgColor || "bg-zinc-400"
                 }`}
               >
                 <Icon
                   icon={
-                    getCategoryStyle(tree.nameArray)?.icon ||
+                    getCategoryStyle(category.nameArray)?.icon ||
                     "mdi:shape-outline"
                   }
                   width={16}
                 />
                 <p className="text-xs">
-                  {tree.nameArray[tree.nameArray.length - 1]}
+                  {category.nameArray[category.nameArray.length - 1]}
                 </p>
               </div>
             )

@@ -1,22 +1,22 @@
 import * as z from "zod"
 import { CompleteSplit, RelatedSplitModel } from "./index"
 
-export const CategoryTreeModel = z.object({
+export const CategoryModel = z.object({
   id: z.string(),
   nameArray: z.string().array(),
   amount: z.number(),
   splitId: z.string().nullish(),
 })
 
-export interface CompleteCategoryTree extends z.infer<typeof CategoryTreeModel> {
+export interface CompleteCategory extends z.infer<typeof CategoryModel> {
   Split?: CompleteSplit | null
 }
 
 /**
- * RelatedCategoryTreeModel contains all relations on your model in addition to the scalars
+ * RelatedCategoryModel contains all relations on your model in addition to the scalars
  *
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
-export const RelatedCategoryTreeModel: z.ZodSchema<CompleteCategoryTree> = z.lazy(() => CategoryTreeModel.extend({
+export const RelatedCategoryModel: z.ZodSchema<CompleteCategory> = z.lazy(() => CategoryModel.extend({
   Split: RelatedSplitModel.nullish(),
 }))

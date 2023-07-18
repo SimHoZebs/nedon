@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
-  CategoryTreeClientSide,
+  CategoryClientSide,
   FullTransaction,
-  MergedCategoryTree,
+  MergedCategory,
   SplitClientSide,
 } from "../../../../util/types";
 import CategoryPicker from "./CategoryPicker";
-import {
-  emptyCategory,
-  mergeCategoryTreeArray,
-} from "../../../../util/category";
+import { emptyCategory, mergeCategoryArray } from "../../../../util/category";
 import { useStoreActions, useStoreState } from "../../../../util/store";
 import CategoryChip from "./CategoryChip";
 
@@ -18,17 +15,14 @@ const Category = () => {
   const { setCurrentTransaction: setTransaction } = useStoreActions(
     (actions) => actions
   );
-  const syncedMergedCategoryArray = mergeCategoryTreeArray(
-    transaction ? transaction.splitArray : []
-  );
 
   const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
     transaction ? structuredClone(transaction.splitArray) : []
   );
-  const [unsavedMergedCategoryArray, setUnsavedMergedTreeArray] = useState(
-    mergeCategoryTreeArray(unsavedSplitArray)
+  const [unsavedMergedCategoryArray, setUnsavedMergedCategoryArray] = useState(
+    mergeCategoryArray(unsavedSplitArray)
   );
-  const [editingMergedTreeIndex, setEditingMergedCategoryIndex] =
+  const [editingMergedCategoryIndex, setEditingMergedCategoryIndex] =
     useState<number>();
   const [pickerPosition, setPickerPosition] = useState<{
     x: number;
@@ -45,17 +39,17 @@ const Category = () => {
               const updatedSplitArray = structuredClone(unsavedSplitArray);
 
               updatedSplitArray.forEach((split) => {
-                split.categoryTreeArray.push(
+                split.categoryArray.push(
                   emptyCategory({ amount: 0, splitId: split.id })
                 );
                 return split;
               });
 
               setUnsavedSplitArray(updatedSplitArray);
-              const updatedMergedTreeArray: MergedCategoryTree[] =
-                mergeCategoryTreeArray(updatedSplitArray);
+              const updatedMergedCategoryArray: MergedCategory[] =
+                mergeCategoryArray(updatedSplitArray);
 
-              setUnsavedMergedTreeArray(updatedMergedTreeArray);
+              setUnsavedMergedCategoryArray(updatedMergedCategoryArray);
               //overcoming batch state update
               const index = unsavedMergedCategoryArray.length;
               setEditingMergedCategoryIndex(index);
@@ -67,15 +61,15 @@ const Category = () => {
 
         <div className="flex flex-col gap-y-1">
           <div className="relative flex w-full flex-wrap items-center gap-2 ">
-            {unsavedMergedCategoryArray.map((tree, index) => (
+            {unsavedMergedCategoryArray.map((category, index) => (
               <CategoryChip
                 key={index}
                 isMultiCategory={unsavedMergedCategoryArray.length > 1}
-                isEditing={editingMergedTreeIndex === index}
-                tree={
-                  editingMergedTreeIndex === index
+                isEditing={editingMergedCategoryIndex === index}
+                category={
+                  editingMergedCategoryIndex === index
                     ? unsavedMergedCategoryArray[index]
-                    : tree
+                    : category
                 }
                 categoryChipClick={(e) => {
                   setEditingMergedCategoryIndex(index);
@@ -89,14 +83,14 @@ const Category = () => {
             ))}
           </div>
 
-          {editingMergedTreeIndex !== undefined ? (
+          {editingMergedCategoryIndex !== undefined ? (
             <div>
               <CategoryPicker
-                setUnsavedMergedTreeArray={setUnsavedMergedTreeArray}
+                setUnsavedMergedCategoryArray={setUnsavedMergedCategoryArray}
                 editingMergedCategory={
-                  unsavedMergedCategoryArray[editingMergedTreeIndex]
+                  unsavedMergedCategoryArray[editingMergedCategoryIndex]
                 }
-                editingMergedCategoryIndex={editingMergedTreeIndex}
+                editingMergedCategoryIndex={editingMergedCategoryIndex}
                 setEditingMergedCategoryIndex={setEditingMergedCategoryIndex}
                 position={pickerPosition}
                 cleanup={() => {

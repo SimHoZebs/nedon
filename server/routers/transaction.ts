@@ -8,8 +8,8 @@ import {
 } from "plaid";
 import { FullTransaction } from "../../lib/util/types";
 import { client } from "../util";
-import { CategoryTreeModel, SplitModel } from "../../prisma/zod";
-import { CategoryTree, Split, Transaction } from "@prisma/client";
+import { CategoryModel, SplitModel } from "../../prisma/zod";
+import { Category, Split, Transaction } from "@prisma/client";
 import { emptyCategory } from "../../lib/util/category";
 
 // Retrieve Transactions for an Item
@@ -62,7 +62,7 @@ const transactionRouter = router({
       });
 
       const splitArrayArray: (Split & {
-        categoryTreeArray: CategoryTree[];
+        categoryArray: Category[];
       })[][] = await db.$transaction(
         transactionArray.map((transaction) =>
           db.split.findMany({
@@ -70,14 +70,14 @@ const transactionRouter = router({
               transactionId: transaction.id,
             },
             include: {
-              categoryTreeArray: true,
+              categoryArray: true,
             },
           })
         )
       );
 
       const transactionWithSplitArray: (Transaction & {
-        splitArray: (Split & { categoryTreeArray: CategoryTree[] })[];
+        splitArray: (Split & { categoryArray: Category[] })[];
       })[] = transactionArray.map((transaction, index) => ({
         ...transaction,
         splitArray: splitArrayArray[index],
@@ -97,7 +97,7 @@ const transactionRouter = router({
               {
                 id: null,
                 transactionId: plaidTransaction.transaction_id,
-                categoryTreeArray: [
+                categoryArray: [
                   emptyCategory({
                     splitId: null,
                     amount: plaidTransaction.amount,
@@ -137,7 +137,7 @@ const transactionRouter = router({
         include: {
           splitArray: {
             include: {
-              categoryTreeArray: true,
+              categoryArray: true,
             },
           },
         },
@@ -152,8 +152,8 @@ const transactionRouter = router({
         splitArray: z
           .array(
             SplitModel.extend({ id: z.string().nullish() }).extend({
-              CategoryTreeModel: z
-                .array(CategoryTreeModel.extend({ id: z.string().nullable() }))
+              CategoryModel: z
+                .array(CategoryModel.extend({ id: z.string().nullable() }))
                 .optional(),
             })
           )
@@ -167,7 +167,7 @@ const transactionRouter = router({
       };
 
       const splitArrayData = input.splitArray?.map(
-        ({ id, CategoryTreeModel, ...rest }) => ({
+        ({ id, CategoryModel, ...rest }) => ({
           ...rest,
         })
       );
@@ -186,7 +186,7 @@ const transactionRouter = router({
         include: {
           splitArray: {
             include: {
-              categoryTreeArray: true,
+              categoryArray: true,
             },
           },
         },

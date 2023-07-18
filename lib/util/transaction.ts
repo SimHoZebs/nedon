@@ -1,35 +1,33 @@
-import { mergeCategoryTreeArray } from "./category";
+import { mergeCategoryArray } from "./category";
 import {
   HierarchicalCategoryWithTransaction,
   FullTransaction,
-  CategoryTreeClientSide,
-  MergedCategoryTree,
+  CategoryClientSide,
+  MergedCategory,
 } from "./types";
 
 export const organizeTransactionByCategory = (
   transactionArray: FullTransaction[]
 ) => {
-  const categoryTreeArray: HierarchicalCategoryWithTransaction[] = [];
+  const categoryArray: HierarchicalCategoryWithTransaction[] = [];
 
   transactionArray.forEach((transaction) => {
     const transactionCopy = structuredClone(transaction);
-    const mergedCategoryArray = mergeCategoryTreeArray(
-      transactionCopy.splitArray
-    );
-    mergedCategoryArray.forEach((categoryTree) => {
-      fillArrayByCategory(categoryTreeArray, transactionCopy, categoryTree);
+    const mergedCategoryArray = mergeCategoryArray(transactionCopy.splitArray);
+    mergedCategoryArray.forEach((category) => {
+      fillArrayByCategory(categoryArray, transactionCopy, category);
     });
   });
 
-  return categoryTreeArray;
+  return categoryArray;
 };
 
 const fillArrayByCategory = (
   resultArray: HierarchicalCategoryWithTransaction[],
   transaction: FullTransaction,
-  categoryTree: MergedCategoryTree
+  category: MergedCategory
 ): HierarchicalCategoryWithTransaction[] => {
-  const nameArray = categoryTree.nameArray;
+  const nameArray = category.nameArray;
 
   if (!nameArray.length) return resultArray;
 
@@ -46,9 +44,9 @@ const fillArrayByCategory = (
   };
 
   if (transaction.amount > 0) {
-    hierarchicalCategory.spending += categoryTree.amount;
+    hierarchicalCategory.spending += category.amount;
   } else {
-    hierarchicalCategory.received += categoryTree.amount;
+    hierarchicalCategory.received += category.amount;
   }
 
   if (index === -1) {
@@ -66,14 +64,14 @@ const fillArrayByCategory = (
     resultArray[index].received += hierarchicalCategory.received;
   } else {
     const transactionCopy = structuredClone(transaction);
-    const newCategoryTree = structuredClone(categoryTree);
-    newCategoryTree.nameArray = slicedNameArray;
+    const newCategory = structuredClone(category);
+    newCategory.nameArray = slicedNameArray;
 
     //inefficient for cases where parent category did not exist; subcategory's existence doesn't need to be checked.
     resultArray[index].subCategoryArray = fillArrayByCategory(
       resultArray[index].subCategoryArray,
       transactionCopy,
-      newCategoryTree
+      newCategory
     );
   }
 

@@ -3,17 +3,17 @@ import { trpc } from "../../../../util/trpc";
 import { Icon } from "@iconify-icon/react";
 import { useStoreActions, useStoreState } from "../../../../util/store";
 import {
-  CategoryTreeClientSide,
+  CategoryClientSide,
   HierarchicalCategory,
-  MergedCategoryTree,
+  MergedCategory,
 } from "../../../../util/types";
 import categoryStyleArray from "../../../../util/categoryStyle";
 
 interface Props {
-  setUnsavedMergedTreeArray: React.Dispatch<
-    React.SetStateAction<MergedCategoryTree[]>
+  setUnsavedMergedCategoryArray: React.Dispatch<
+    React.SetStateAction<MergedCategory[]>
   >;
-  editingMergedCategory: MergedCategoryTree;
+  editingMergedCategory: MergedCategory;
   editingMergedCategoryIndex: number;
   setEditingMergedCategoryIndex: React.Dispatch<
     React.SetStateAction<number | undefined>
@@ -51,7 +51,7 @@ const CategoryPicker = (props: Props) => {
     if (hierarchicalCategory)
       updatedMergedCategory.nameArray.push(hierarchicalCategory.name);
 
-    props.setUnsavedMergedTreeArray((prev) => {
+    props.setUnsavedMergedCategoryArray((prev) => {
       const copy = structuredClone(prev);
       copy[props.editingMergedCategoryIndex] = updatedMergedCategory;
       return copy;
@@ -118,7 +118,7 @@ const CategoryPicker = (props: Props) => {
                   } else {
                     setCurrentOptionArray(category.subCategoryArray);
 
-                    props.setUnsavedMergedTreeArray((prev) => {
+                    props.setUnsavedMergedCategoryArray((prev) => {
                       const clone = structuredClone(prev);
                       clone[props.editingMergedCategoryIndex] = {
                         ...props.editingMergedCategory,

@@ -49,7 +49,7 @@ const TransactionModal = (props: Props) => {
 
               if (!transaction.inDB) {
                 await createTransaction.mutateAsync({
-                  categoryTreeArray: unsavedCategoryTreeArray,
+                  categoryArray: unsavedcategoryArray,
                   userId: appUser.id,
                   transactionId: transaction.transaction_id,
                 });
@@ -72,14 +72,14 @@ const TransactionModal = (props: Props) => {
 
                 await upsertTransaction.mutateAsync({
                   transactionId: transaction.transaction_id,
-                  categoryTreeArray: unsavedCategoryTreeArray,
+                  categoryArray: unsavedcategoryArray,
                 });
               }
 
               queryClient.transaction.getTransactionArray.refetch();
               setTransaction(() => ({
                 ...transaction,
-                categoryTreeArray: [], //unsavedCategoryTreeArray,
+                categoryArray: [], //unsavedcategoryArray,
               }));
             }}
           >

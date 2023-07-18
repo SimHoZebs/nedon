@@ -1,7 +1,7 @@
 import {
-  CategoryTreeClientSide,
+  CategoryClientSide,
   HierarchicalCategory,
-  MergedCategoryTree,
+  MergedCategory,
   SplitClientSide,
 } from "./types";
 import { Category as PlaidCategory } from "plaid";
@@ -13,7 +13,7 @@ export const emptyCategory = ({
 }: {
   splitId: string | null;
   amount: number;
-}): CategoryTreeClientSide => {
+}): CategoryClientSide => {
   return {
     id: null,
     nameArray: [],
@@ -26,19 +26,19 @@ export const getCategoryStyle = (nameArray: string[]) => {
   return categoryStyleArray[nameArray.slice(-1)[0]];
 };
 
-export const mergeCategoryTreeArray = (splitArray: SplitClientSide[]) => {
-  const mergedCategoryArray: MergedCategoryTree[] = [];
+export const mergeCategoryArray = (splitArray: SplitClientSide[]) => {
+  const mergedCategoryArray: MergedCategory[] = [];
 
   splitArray.forEach((split) => {
-    split.categoryTreeArray.forEach(({ nameArray, amount, ...rest }) => {
-      const storedTree = mergedCategoryArray.find(
+    split.categoryArray.forEach(({ nameArray, amount, ...rest }) => {
+      const storedCategory = mergedCategoryArray.find(
         ({ nameArray: storedNameArray }) =>
           storedNameArray[storedNameArray.length - 1] ===
           nameArray[nameArray.length - 1]
       );
 
-      if (storedTree) {
-        storedTree.amount += amount;
+      if (storedCategory) {
+        storedCategory.amount += amount;
       } else {
         mergedCategoryArray.push(
           structuredClone({ nameArray, amount, ...rest })

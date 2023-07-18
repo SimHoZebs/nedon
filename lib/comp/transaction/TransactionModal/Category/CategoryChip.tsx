@@ -1,10 +1,10 @@
 import React from "react";
 import { getCategoryStyle } from "../../../../util/category";
-import { MergedCategoryTree } from "../../../../util/types";
+import { MergedCategory } from "../../../../util/types";
 import { Icon } from "@iconify-icon/react";
 
 type Props = {
-  tree: MergedCategoryTree;
+  category: MergedCategory;
   categoryChipClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   isMultiCategory: boolean;
   isEditing: boolean;
@@ -19,10 +19,10 @@ const CategoryChip = (props: Props) => {
       >
         <Icon
           className={`flex rounded-full bg-zinc-900 p-1 group-hover:bg-zinc-800 ${
-            getCategoryStyle(props.tree.nameArray)?.textColor
+            getCategoryStyle(props.category.nameArray)?.textColor
           }`}
           icon={
-            getCategoryStyle(props.tree.nameArray)?.icon ||
+            getCategoryStyle(props.category.nameArray)?.icon ||
             "mdi:shape-plus-outline"
           }
           height={24}
@@ -30,7 +30,7 @@ const CategoryChip = (props: Props) => {
 
         <div className="flex h-full flex-col items-start text-zinc-300 ">
           <p className={props.isEditing ? "animate-pulse" : ""}>
-            {props.tree.nameArray[props.tree.nameArray.length - 1]}
+            {props.category.nameArray[props.category.nameArray.length - 1]}
           </p>
           {props.isMultiCategory && (
             <p onClick={(e) => e.stopPropagation()}>
@@ -39,11 +39,11 @@ const CategoryChip = (props: Props) => {
                 className="w-14 bg-zinc-900 group-hover:bg-zinc-800 "
                 type="number"
                 min={0}
-                value={props.tree.amount}
+                value={props.category.amount}
                 // onChange={(e) => {
-                //   const updatedTreeArray = [...unsavedTreeArray];
-                //   updatedTreeArray[index].amount = e.target.valueAsNumber;
-                //   setUnsavedTreeArray(updatedTreeArray);
+                //   const updatedCategoryArray = [...unsavedCategoryArray];
+                //   updatedCategoryArray[index].amount = e.target.valueAsNumber;
+                //   setUnsavedCategoryArray(updatedCategoryArray);
                 // }}
               />
             </p>

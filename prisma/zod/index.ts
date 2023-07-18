@@ -1,5 +1,5 @@
 export * from "./group"
 export * from "./user"
 export * from "./transaction"
-export * from "./categorytree"
+export * from "./category"
 export * from "./split"
