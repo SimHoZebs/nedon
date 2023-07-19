@@ -99,6 +99,7 @@ const transactionRouter = router({
                 transactionId: plaidTransaction.transaction_id,
                 categoryArray: [
                   emptyCategory({
+                    nameArray,
                     splitId: null,
                     amount: plaidTransaction.amount,
                   }),

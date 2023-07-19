@@ -8,15 +8,17 @@ import { Category as PlaidCategory } from "plaid";
 import categoryStyleArray from "./categoryStyle";
 
 export const emptyCategory = ({
+  nameArray,
   splitId,
   amount = 0,
 }: {
+  nameArray?: string[];
   splitId: string | null;
   amount: number;
 }): CategoryClientSide => {
   return {
     id: null,
-    nameArray: [],
+    nameArray: nameArray || [],
     splitId: splitId,
     amount: amount,
   };
