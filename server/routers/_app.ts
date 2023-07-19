@@ -8,13 +8,13 @@ import {
   ACHClass,
 } from "plaid";
 import userRouter from "./user";
-import db from "../../lib/util/db";
+import db from "@/util/db";
 import { User } from "@prisma/client";
 import { groupRouter } from "./group";
 import transactionRouter from "./transaction";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS, client } from "../util";
-import stripUserSecrets from "../../lib/util/stripUserSecrets";
-import { convertPlaidCategoriesToHierarchicalArray } from "../../lib/util/category";
+import stripUserSecrets from "@/util/stripUserSecrets";
+import { convertPlaidCategoriesToHierarchicalArray } from "@/util/category";
 import splitRouter from "./split";
 import categoryRouter from "./category";
 

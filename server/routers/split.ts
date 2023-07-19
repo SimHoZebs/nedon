@@ -1,5 +1,5 @@
 import { z } from "zod";
-import db from "../../lib/util/db";
+import db from "@/util/db";
 import { SplitModel } from "../../prisma/zod";
 import { procedure, router } from "../trpc";
 

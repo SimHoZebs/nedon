@@ -1,6 +1,6 @@
 import React from "react";
-import { getCategoryStyle } from "../../../../util/category";
-import { MergedCategory } from "../../../../util/types";
+import { getCategoryStyle } from "@/util/category";
+import { MergedCategory } from "@/util/types";
 import { Icon } from "@iconify-icon/react";
 
 type Props = {

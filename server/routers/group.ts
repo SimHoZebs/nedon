@@ -1,7 +1,7 @@
 import { router, procedure } from "../trpc";
 import { z } from "zod";
-import db from "../../lib/util/db";
-import stripUserSecretsFromGroup from "../../lib/util/stripUserSecretsFromGroup";
+import db from "@/util/db";
+import stripUserSecretsFromGroup from "@/util/stripUserSecretsFromGroup";
 
 export const groupRouter = router({
   get: procedure

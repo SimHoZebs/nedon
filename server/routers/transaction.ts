@@ -1,16 +1,16 @@
 import { router, procedure } from "../trpc";
 import { z } from "zod";
-import db from "../../lib/util/db";
+import db from "@/util/db";
 import {
   RemovedTransaction,
   Transaction as PlaidTransaction,
   TransactionsSyncRequest,
 } from "plaid";
-import { FullTransaction } from "../../lib/util/types";
+import { FullTransaction } from "@/util/types";
 import { client } from "../util";
 import { CategoryModel, SplitModel } from "../../prisma/zod";
 import { Category, Split, Transaction } from "@prisma/client";
-import { emptyCategory } from "../../lib/util/category";
+import { emptyCategory } from "@/util/category";
 
 // Retrieve Transactions for an Item
 // https://plaid.com/docs/#transactions

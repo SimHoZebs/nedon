@@ -1,6 +1,6 @@
 import { Category } from "@prisma/client";
 import { z } from "zod";
-import db from "../../lib/util/db";
+import db from "@/util/db";
 import { CategoryModel } from "../../prisma/zod";
 import { procedure, router } from "../trpc";
 

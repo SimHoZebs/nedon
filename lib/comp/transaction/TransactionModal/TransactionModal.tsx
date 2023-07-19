@@ -1,10 +1,10 @@
 import React from "react";
-import Modal from "../../Modal";
-import { useStoreState } from "../../../util/store";
-import ActionBtn from "../../Button/ActionBtn";
+import Modal from "@/comp/Modal";
+import { useStoreState } from "@/util/store";
+import ActionBtn from "@/comp/Button/ActionBtn";
 import Category from "./Category/Category";
-import H1 from "../../H1";
-import Split from "./Split";
+import H1 from "@/comp/H1";
+import Split from "./SplitList/SplitList";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;

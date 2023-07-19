@@ -1,13 +1,8 @@
-import React, { useEffect, useState } from "react";
-import {
-  CategoryClientSide,
-  FullTransaction,
-  MergedCategory,
-  SplitClientSide,
-} from "../../../../util/types";
+import React, { useState } from "react";
+import { MergedCategory, SplitClientSide } from "@/util/types";
 import CategoryPicker from "./CategoryPicker";
-import { emptyCategory, mergeCategoryArray } from "../../../../util/category";
-import { useStoreActions, useStoreState } from "../../../../util/store";
+import { emptyCategory, mergeCategoryArray } from "@/util/category";
+import { useStoreActions, useStoreState } from "@/util/store";
 import CategoryChip from "./CategoryChip";
 
 const Category = () => {

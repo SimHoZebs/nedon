@@ -1,11 +1,11 @@
 import { Icon } from "@iconify-icon/react";
 import React, { useEffect, useState } from "react";
-import { SplitClientSide } from "../../../util/types";
-import ActionBtn from "../../Button/ActionBtn";
-import UserSplit from "./UserSplit";
-import { trpc } from "../../../util/trpc";
-import { useStoreActions, useStoreState } from "../../../util/store";
-import SplitUserList from "./SplitUserList";
+import { SplitClientSide } from "@/util/types";
+import ActionBtn from "@/comp/Button/ActionBtn";
+import UserSplit from "./Split";
+import { trpc } from "@/util/trpc";
+import { useStoreActions, useStoreState } from "@/util/store";
+import SplitUserList from "./SplitUserOptionList";
 
 const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const { appUser, currentTransaction: transaction } = useStoreState(

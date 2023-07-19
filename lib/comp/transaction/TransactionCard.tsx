@@ -1,9 +1,9 @@
 import React from "react";
 
-import { useStoreState } from "../../util/store";
+import { useStoreState } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
-import { FullTransaction } from "../../util/types";
-import { getCategoryStyle, mergeCategoryArray } from "../../util/category";
+import { FullTransaction } from "@/util/types";
+import { getCategoryStyle, mergeCategoryArray } from "@/util/category";
 
 interface Props {
   transaction: FullTransaction;

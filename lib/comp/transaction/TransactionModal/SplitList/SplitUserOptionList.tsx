@@ -1,8 +1,8 @@
 import React from "react";
-import { useStoreState } from "../../../util/store";
+import { useStoreState } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
-import Button from "../../Button/Button";
-import { SplitClientSide } from "../../../util/types";
+import Button from "@/comp/Button/Button";
+import { SplitClientSide } from "@/util/types";
 
 type Props = {
   unsavedSplitArray: SplitClientSide[];
