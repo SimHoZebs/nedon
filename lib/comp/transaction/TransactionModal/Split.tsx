@@ -19,11 +19,11 @@ const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const queryClient = trpc.useContext();
 
   const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
-    transaction?.splitArray || []
+    transaction ? structuredClone(transaction.splitArray) : []
   );
 
+  //whenever splitArray changes, push that change to currentTransaction
   useEffect(() => {
-    console.log("lol");
     const clone = structuredClone(transaction);
     return;
 
@@ -64,52 +64,13 @@ const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
                 key={i}
                 className="flex w-full items-center gap-x-2 sm:gap-x-3"
               >
-                {appUser &&
-                  (split.userId === appUser.id ? (
-                    <div className="aspect-square w-5"></div>
-                  ) : (
-                    <button
-                      title="Remove user from split"
-                      className="group flex w-5"
-                      onClick={async () => {
-                        if (!split.id) {
-                          console.log("split id does not exist:", split.id);
-                          return;
-                        }
-
-                        const updatedSplitArray = [...unsavedSplitArray];
-                        await removeSplit.mutateAsync({
-                          transactionId: split.transactionId,
-                          userId: split.userId,
-                        });
-
-                        updatedSplitArray.splice(i, 1);
-
-                        if (updatedSplitArray.length === 1) {
-                          updatedSplitArray.pop();
-                          await removeSplit.mutateAsync({
-                            transactionId: split.transactionId,
-                            userId: appUser.id,
-                          });
-                        }
-
-                        queryClient.transaction.getTransactionArray.refetch();
-
-                        setUnsavedSplitArray(updatedSplitArray);
-                        console.log("updatedSplitArray:", updatedSplitArray);
-                        setTransaction((prev) => structuredClone(transaction));
-                      }}
-                    >
-                      <Icon
-                        icon="clarity:remove-line"
-                        className="text-zinc-500 group-hover:text-pink-400"
-                        width={20}
-                        height={20}
-                      />
-                    </button>
-                  ))}
-
                 <UserSplit
+                  onRemoveUser={() => {
+                    const updatedSplitArray =
+                      structuredClone(unsavedSplitArray);
+                    updatedSplitArray.splice(i, 1);
+                    setUnsavedSplitArray(updatedSplitArray);
+                  }}
                   onAmountChange={(amount: number) => {
                     const updatedSplit: SplitClientSide = {
                       ...split,
@@ -119,6 +80,7 @@ const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
                     setUnsavedSplitArray(updatedSplitArray);
                   }}
                   amount={amount}
+                  split={split}
                   splitTotal={calcSplitTotal(split)}
                   userId={split.userId}
                 >

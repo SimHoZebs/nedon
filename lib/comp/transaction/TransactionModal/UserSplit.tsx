@@ -1,6 +1,7 @@
 import React from "react";
 import { Icon } from "@iconify-icon/react";
 import { SplitClientSide } from "../../../util/types";
+import { useStoreState } from "../../../util/store";
 
 const inputStyle =
   "h-7 w-16 border-b-2 border-zinc-900 bg-zinc-900 p-1 hover:border-zinc-500 focus-visible:outline-none sm:w-20";
@@ -10,19 +11,33 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   userId: string;
   amount: number;
   onAmountChange: (amount: number) => void;
+  split: SplitClientSide;
+  onRemoveUser: () => void;
 }
 
-const calcSplitTotal = (split: SplitClientSide) => {
-  return split.categoryArray.reduce(
-    (total, category) => total + category.amount,
-    0
-  );
-};
-
 const UserSplit = (props: Props) => {
+  const { appUser } = useStoreState((state) => state);
+
   return (
     <div className="flex flex-col gap-y-1">
       <div className="flex w-full justify-between gap-x-2 ">
+        {appUser &&
+          (props.split.userId === appUser.id ? (
+            <div className="aspect-square w-5"></div>
+          ) : (
+            <button
+              title="Remove user from split"
+              className="group flex w-5"
+              onClick={() => props.onRemoveUser()}
+            >
+              <Icon
+                icon="clarity:remove-line"
+                className="text-zinc-500 group-hover:text-pink-400"
+                width={20}
+                height={20}
+              />
+            </button>
+          ))}
         <div>{props.children}</div>
 
         <div>

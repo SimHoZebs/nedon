@@ -104,7 +104,7 @@ const transactionRouter = router({
                     amount: plaidTransaction.amount,
                   }),
                 ],
-                userId: input.id,
+                userId: user.id,
               },
             ],
           };

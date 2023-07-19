@@ -13,7 +13,6 @@ const TransactionCard = (props: Props) => {
   const { appUser } = useStoreState((state) => state);
   //TODO: Need to be redesigned to fit multiple categories - probably small text or icons instead
 
-  console.log(mergeCategoryArray(props.transaction.splitArray));
   //TODO: fix this later
   const splitAmount = props.transaction.splitArray
     .find((split) => split.userId === appUser?.id)

@@ -16,8 +16,6 @@ const SplitUserList = (props: Props) => {
     currentTransaction: transaction,
   } = useStoreState((state) => state);
 
-  const amount = transaction ? transaction.amount : 0;
-
   return (
     transaction &&
     appUser &&
@@ -35,23 +33,25 @@ const SplitUserList = (props: Props) => {
           <Button
             className="bg-zinc-800 text-indigo-300"
             onClick={() => {
-              const updatedSplitArray = [...props.unsavedSplitArray];
+              const updatedSplitArray = structuredClone(
+                props.unsavedSplitArray
+              );
+
+              const appUserCategoryArray = transaction.splitArray.find(
+                (split) => split.userId === appUser.id
+              )?.categoryArray;
+
+              if (!appUserCategoryArray) {
+                console.error("appUser has no category array");
+                return;
+              }
 
               updatedSplitArray.push({
                 id: user.id,
                 transactionId: transaction.transaction_id,
                 userId: user.id,
-                categoryArray: [],
+                categoryArray: appUserCategoryArray,
               });
-
-              if (!updatedSplitArray.length) {
-                updatedSplitArray.push({
-                  id: appUser.id,
-                  transactionId: transaction.transaction_id,
-                  userId: appUser.id,
-                  categoryArray: [],
-                });
-              }
 
               props.setUnsavedSplitArray(updatedSplitArray);
             }}
