@@ -36,16 +36,6 @@ const Page: NextPage = () => {
   >([]);
 
   useEffect(() => {
-    if (!currentTransaction) return;
-
-    console.log("syncing changes to currentTransaction to db");
-
-    transactionArray.refetch();
-    //transactionArray updates when isRefetching or isFetched
-    //gotta find a way to stop this from repeatedly refetching
-  }, [currentTransaction]);
-
-  useEffect(() => {
     if (!transactionArray.data) return;
     if (!date) {
       const initialDate = new Date(

@@ -1,11 +1,13 @@
 import { Icon } from "@iconify-icon/react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { SplitClientSide } from "@/util/types";
 import ActionBtn from "@/comp/Button/ActionBtn";
 import UserSplit from "./UserSplit";
 import { trpc } from "@/util/trpc";
 import { useStoreActions, useStoreState } from "@/util/store";
 import SplitUserOptionList from "./SplitUserOptionList";
+import H3 from "@/comp/H3";
+import Button from "@/comp/Button/Button";
 
 const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const { appUser, currentTransaction: transaction } = useStoreState(
@@ -17,19 +19,15 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   const removeSplit = trpc.split.remove.useMutation();
   const queryClient = trpc.useContext();
+  const createTransaction = trpc.transaction.create.useMutation();
+  const updateSplit = trpc.split.update.useMutation();
 
   const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
     transaction ? structuredClone(transaction.splitArray) : []
   );
+  const [isManaging, setIsManaging] = useState(false);
 
   //whenever splitArray changes, push that change to currentTransaction
-  useEffect(() => {
-    const clone = structuredClone(transaction);
-    return;
-
-    setTransaction((prev) => structuredClone(transaction));
-  }, [unsavedSplitArray]);
-
   const amount = transaction ? transaction.amount : 0;
 
   const calcSplitTotal = (split: SplitClientSide) => {
@@ -48,16 +46,66 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
     ) / 100;
 
   return (
+    appUser &&
     transaction && (
-      <div className="flex w-full flex-col gap-y-2">
+      <div className="flex w-full flex-col gap-y-3">
         <div className="flex gap-x-2">
           {props.children}
-          <ActionBtn>Split</ActionBtn>
+          {unsavedSplitArray.length === 1 && (
+            <ActionBtn onClick={() => setIsManaging(true)}>Split</ActionBtn>
+          )}
         </div>
 
-        <div className="flex flex-col gap-y-2">
-          {unsavedSplitArray.length > 1 &&
-            unsavedSplitArray.map((split, i) => (
+        {unsavedSplitArray.length > 1 && (
+          <div className="flex flex-col gap-y-2">
+            <div className="flex w-full justify-between">
+              <H3>Split</H3>
+              {isManaging ? (
+                <div className="flex gap-x-2">
+                  <ActionBtn
+                    onClick={() => {
+                      setIsManaging(false);
+                      if (transaction.inDB) {
+                        unsavedSplitArray.forEach((split) => {
+                          if (split.inDB && split.id) {
+                            updateSplit.mutateAsync({
+                              split,
+                            });
+                          } else {
+                          }
+                        });
+                      } else {
+                        createTransaction.mutateAsync({
+                          userId: appUser.id,
+                          transactionId: transaction.id,
+                          splitArray: unsavedSplitArray,
+                        });
+                      }
+
+                      queryClient.transaction.getTransactionArray.refetch();
+                    }}
+                  >
+                    Save changes
+                  </ActionBtn>
+                  <ActionBtn
+                    variant="negative"
+                    onClick={() => setIsManaging(false)}
+                  >
+                    Cancel
+                  </ActionBtn>
+                </div>
+              ) : (
+                <Button
+                  className="flex gap-x-2 bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
+                  onClick={() => setIsManaging(true)}
+                >
+                  <Icon icon={"mdi:edit"} />
+                  Manage
+                </Button>
+              )}
+            </div>
+
+            {unsavedSplitArray.map((split, i) => (
               <div
                 key={i}
                 className="flex w-full items-center gap-x-2 sm:gap-x-3"
@@ -104,7 +152,8 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                 </UserSplit>
               </div>
             ))}
-        </div>
+          </div>
+        )}
 
         <div className="h-5 text-red-800">
           {updatedTotalSplit !== amount &&
@@ -113,10 +162,12 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
           than the amount (${`updatedTotalSplit $${updatedTotalSplit}`})`}
         </div>
 
-        <SplitUserOptionList
-          unsavedSplitArray={unsavedSplitArray}
-          setUnsavedSplitArray={setUnsavedSplitArray}
-        />
+        {isManaging && (
+          <SplitUserOptionList
+            unsavedSplitArray={unsavedSplitArray}
+            setUnsavedSplitArray={setUnsavedSplitArray}
+          />
+        )}
       </div>
     )
   );

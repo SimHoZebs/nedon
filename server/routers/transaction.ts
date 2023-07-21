@@ -6,10 +6,10 @@ import {
   Transaction as PlaidTransaction,
   TransactionsSyncRequest,
 } from "plaid";
-import { FullTransaction } from "@/util/types";
+import { FullTransaction, splitClientSideModel } from "@/util/types";
 import { client } from "../util";
-import { CategoryModel, SplitModel } from "../../prisma/zod";
-import { Category, Split, Transaction } from "@prisma/client";
+import { SplitModel } from "../../prisma/zod";
+import { Transaction } from "@prisma/client";
 import { emptyCategory } from "@/util/category";
 
 // Retrieve Transactions for an Item
@@ -57,68 +57,83 @@ const transactionRouter = router({
 
       const transactionArray: Transaction[] = await db.transaction.findMany({
         where: {
-          ownerId: input.id,
+          ownerId: user.id,
+        },
+        include: {
+          splitArray: true,
         },
       });
 
-      const splitArrayArray: (Split & {
-        categoryArray: Category[];
-      })[][] = await db.$transaction(
-        transactionArray.map((transaction) =>
-          db.split.findMany({
-            where: {
-              transactionId: transaction.id,
+      const splitArray = await db.split.findMany({
+        where: {
+          transactionId: {
+            in: transactionArray.map((transaction) => transaction.id),
+          },
+        },
+        include: {
+          categoryArray: true,
+        },
+      });
+
+      const full: FullTransaction[] = added.map((plaidTransaction) => {
+        const result: FullTransaction = {
+          ...plaidTransaction,
+          id: plaidTransaction.transaction_id,
+          ownerId: user.id,
+          inDB: false,
+          splitArray: [
+            {
+              id: null,
+              inDB: false,
+              transactionId: plaidTransaction.transaction_id,
+              categoryArray: [
+                emptyCategory({
+                  nameArray: plaidTransaction.category || [],
+                  splitId: null,
+                  amount: plaidTransaction.amount,
+                }),
+              ],
+              userId: user.id,
             },
-            include: {
-              categoryArray: true,
-            },
-          })
-        )
-      );
+          ],
+        };
 
-      const transactionWithSplitArray: (Transaction & {
-        splitArray: (Split & { categoryArray: Category[] })[];
-      })[] = transactionArray.map((transaction, index) => ({
-        ...transaction,
-        splitArray: splitArrayArray[index],
-      }));
-
-      const fullTransactionArray: FullTransaction[] = added.map(
-        ({ category: nameArray, ...plaidTransaction }) => {
-          const meta = transactionWithSplitArray.find(
-            (t) => t.id === plaidTransaction.transaction_id
-          );
-          if (!nameArray) throw new Error("category is somehow falsy");
-
-          let transaction: FullTransaction = {
-            ...plaidTransaction,
-            inDB: false,
-            splitArray: [
-              {
-                id: null,
-                transactionId: plaidTransaction.transaction_id,
-                categoryArray: [
-                  emptyCategory({
-                    nameArray,
-                    splitId: null,
-                    amount: plaidTransaction.amount,
-                  }),
-                ],
-                userId: user.id,
-              },
-            ],
-          };
-
-          if (meta) {
-            const { ownerId, splitArray, ...rest } = meta;
-            transaction = { ...transaction, ...rest, inDB: true };
-            if (splitArray.length) transaction.splitArray = splitArray;
-          }
-          return transaction;
+        if (splitArray.length === 0) {
+          return result;
         }
-      );
 
-      return fullTransactionArray;
+        const matchingSplitArray = splitArray.filter(
+          (split) => split.transactionId === plaidTransaction.transaction_id
+        );
+
+        console.log("matchingSplitArray", matchingSplitArray.length);
+
+        const matchingTransaction = transactionArray.find(
+          (transaction) => transaction.id === plaidTransaction.transaction_id
+        );
+
+        if (matchingSplitArray.length) {
+          matchingSplitArray.forEach((matchingSplit) => {
+            const matchingIndex = splitArray.findIndex(
+              (split) => split.id === matchingSplit.id
+            );
+            splitArray.splice(matchingIndex, 1);
+          });
+
+          result.splitArray = matchingSplitArray.map((split) => ({
+            ...split,
+            inDB: true,
+          }));
+        }
+
+        if (matchingTransaction) {
+          result.inDB = true;
+        }
+
+        return result;
+      });
+
+      return full;
     }),
 
   //all transaction meta including the user
@@ -145,20 +160,12 @@ const transactionRouter = router({
       });
     }),
 
-  createTransaction: procedure
+  create: procedure
     .input(
       z.object({
         userId: z.string(),
         transactionId: z.string(),
-        splitArray: z
-          .array(
-            SplitModel.extend({ id: z.string().nullish() }).extend({
-              CategoryModel: z
-                .array(CategoryModel.extend({ id: z.string().nullable() }))
-                .optional(),
-            })
-          )
-          .optional(),
+        splitArray: z.array(splitClientSideModel),
       })
     )
     .mutation(async ({ input }) => {
@@ -167,11 +174,9 @@ const transactionRouter = router({
         id: input.transactionId,
       };
 
-      const splitArrayData = input.splitArray?.map(
-        ({ id, CategoryModel, ...rest }) => ({
-          ...rest,
-        })
-      );
+      const splitArrayData = input.splitArray?.map(({ userId, ...rest }) => ({
+        userId,
+      }));
 
       const transaction = await db.transaction.create({
         data: {
@@ -179,19 +184,29 @@ const transactionRouter = router({
           splitArray: splitArrayData
             ? {
                 createMany: {
-                  data: splitArrayData,
+                  data: input.splitArray.map((split) => ({
+                    userId: split.userId,
+                  })),
                 },
               }
             : undefined,
         },
         include: {
-          splitArray: {
-            include: {
-              categoryArray: true,
-            },
-          },
+          splitArray: {},
         },
       });
+
+      db.$transaction(
+        transaction.splitArray.map((split, index) =>
+          db.category.createMany({
+            data: input.splitArray[index].categoryArray.map((category) => ({
+              splitId: split.id,
+              nameArray: category.nameArray,
+              amount: category.amount,
+            })),
+          })
+        )
+      );
 
       return transaction;
     }),
