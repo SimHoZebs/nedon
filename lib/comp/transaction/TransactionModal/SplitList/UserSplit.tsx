@@ -4,7 +4,7 @@ import { SplitClientSide } from "@/util/types";
 import { useStoreState } from "@/util/store";
 
 const inputStyle =
-  "h-7 w-16 border-b-2 border-zinc-900 bg-zinc-900 p-1 hover:border-zinc-500 focus-visible:outline-none sm:w-20";
+  "h-7 w-16 border-b-2 border-zinc-900 bg-zinc-900 p-1 hover:border-zinc-500 focus-visible:outline-none sm:w-24";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   splitTotal: number;

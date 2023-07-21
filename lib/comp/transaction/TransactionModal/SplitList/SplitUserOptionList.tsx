@@ -9,7 +9,7 @@ type Props = {
   setUnsavedSplitArray: React.Dispatch<React.SetStateAction<SplitClientSide[]>>;
 };
 
-const SplitUserList = (props: Props) => {
+const SplitUserOptionList = (props: Props) => {
   const {
     appUser,
     appGroup,
@@ -35,9 +35,16 @@ const SplitUserList = (props: Props) => {
             onClick={() => {
               const updatedSplitArray = structuredClone(
                 props.unsavedSplitArray
-              );
+              ).map((split) => ({
+                ...split,
+                categoryArray: split.categoryArray.map((category) => ({
+                  ...category,
+                  amount:
+                    transaction.amount / (props.unsavedSplitArray.length + 1),
+                })),
+              }));
 
-              const appUserCategoryArray = transaction.splitArray.find(
+              const appUserCategoryArray = updatedSplitArray.find(
                 (split) => split.userId === appUser.id
               )?.categoryArray;
 
@@ -64,4 +71,4 @@ const SplitUserList = (props: Props) => {
   );
 };
 
-export default SplitUserList;
+export default SplitUserOptionList;

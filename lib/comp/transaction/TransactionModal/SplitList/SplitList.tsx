@@ -2,12 +2,12 @@ import { Icon } from "@iconify-icon/react";
 import React, { useEffect, useState } from "react";
 import { SplitClientSide } from "@/util/types";
 import ActionBtn from "@/comp/Button/ActionBtn";
-import UserSplit from "./Split";
+import UserSplit from "./UserSplit";
 import { trpc } from "@/util/trpc";
 import { useStoreActions, useStoreState } from "@/util/store";
-import SplitUserList from "./SplitUserOptionList";
+import SplitUserOptionList from "./SplitUserOptionList";
 
-const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
+const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const { appUser, currentTransaction: transaction } = useStoreState(
     (state) => state
   );
@@ -40,14 +40,12 @@ const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
   };
 
   let updatedTotalSplit =
-    unsavedSplitArray.length > 1
-      ? Math.floor(
-          unsavedSplitArray.reduce(
-            (amount, split) => amount + calcSplitTotal(split),
-            0
-          ) * 100
-        ) / 100
-      : -1;
+    Math.floor(
+      unsavedSplitArray.reduce(
+        (amount, split) => amount + calcSplitTotal(split),
+        0
+      ) * 100
+    ) / 100;
 
   return (
     transaction && (
@@ -68,7 +66,18 @@ const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
                   onRemoveUser={() => {
                     const updatedSplitArray =
                       structuredClone(unsavedSplitArray);
-                    updatedSplitArray.splice(i, 1);
+                    const splicedSplit = updatedSplitArray.splice(i, 1);
+                    const amount = splicedSplit[0].categoryArray.reduce(
+                      (total, category) => total + category.amount,
+                      0
+                    );
+
+                    updatedSplitArray.forEach((split) => {
+                      split.categoryArray.forEach((category) => {
+                        category.amount += amount / updatedSplitArray.length;
+                      });
+                    });
+
                     setUnsavedSplitArray(updatedSplitArray);
                   }}
                   onAmountChange={(amount: number) => {
@@ -101,10 +110,10 @@ const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
           {updatedTotalSplit !== amount &&
             unsavedSplitArray.length > 0 &&
             `Split is ${updatedTotalSplit > amount ? "greater " : "less "}
-          than the amount (${`props.totalSplit $${updatedTotalSplit}`})`}
+          than the amount (${`updatedTotalSplit $${updatedTotalSplit}`})`}
         </div>
 
-        <SplitUserList
+        <SplitUserOptionList
           unsavedSplitArray={unsavedSplitArray}
           setUnsavedSplitArray={setUnsavedSplitArray}
         />
@@ -113,4 +122,4 @@ const Split = (props: React.HTMLAttributes<HTMLDivElement>) => {
   );
 };
 
-export default Split;
+export default SplitList;

@@ -4,7 +4,7 @@ import { useStoreState } from "@/util/store";
 import ActionBtn from "@/comp/Button/ActionBtn";
 import Category from "./Category/Category";
 import H1 from "@/comp/H1";
-import Split from "./SplitList/SplitList";
+import SplitList from "./SplitList/SplitList";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -32,9 +32,9 @@ const TransactionModal = (props: Props) => {
 
           <div className="flex justify-between">
             <div className="flex flex-col ">
-              <Split>
+              <SplitList>
                 <H1>${amount * -1}</H1>
-              </Split>
+              </SplitList>
             </div>
 
             <Category />
