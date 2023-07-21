@@ -5,11 +5,11 @@ export const CategoryModel = z.object({
   id: z.string(),
   nameArray: z.string().array(),
   amount: z.number(),
-  splitId: z.string().nullish(),
+  splitId: z.string(),
 })
 
 export interface CompleteCategory extends z.infer<typeof CategoryModel> {
-  Split?: CompleteSplit | null
+  Split: CompleteSplit
 }
 
 /**
@@ -18,5 +18,5 @@ export interface CompleteCategory extends z.infer<typeof CategoryModel> {
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
 export const RelatedCategoryModel: z.ZodSchema<CompleteCategory> = z.lazy(() => CategoryModel.extend({
-  Split: RelatedSplitModel.nullish(),
+  Split: RelatedSplitModel,
 }))

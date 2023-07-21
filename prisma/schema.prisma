@@ -67,8 +67,8 @@ model Category {
   nameArray String[]
   amount    Float
 
-  Split   Split?  @relation(fields: [splitId], references: [id])
-  splitId String?
+  Split   Split  @relation(fields: [splitId], references: [id])
+  splitId String
 }
 
 model Split {
