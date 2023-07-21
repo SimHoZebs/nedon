@@ -1,5 +1,8 @@
-import { User, Group, Split, Category } from "@prisma/client";
-import { CounterpartyType, Transaction } from "plaid";
+import { User, Group } from "@prisma/client";
+import { CounterpartyType, Transaction as PTransaction } from "plaid";
+import { Transaction } from "@prisma/client";
+import { CategoryModel, SplitModel } from "prisma/zod";
+import { z } from "zod";
 
 export type UserClientSide = Omit<User, "ACCESS_TOKEN"> & {
   hasAccessToken: boolean;
@@ -10,21 +13,28 @@ export type GroupClientSide = Group & {
   userArray?: UserClientSide[];
 };
 
-export type SplitClientSide = Omit<Split, "id"> & {
-  id: string | null;
-  categoryArray: CategoryClientSide[];
-};
+export const categoryClientSideModel = CategoryModel.extend({
+  id: z.string().nullable(),
+  splitId: z.string().nullable(),
+});
+
+export type CategoryClientSide = z.infer<typeof categoryClientSideModel>;
+
+export const splitClientSideModel = SplitModel.extend({
+  id: z.string().nullable(),
+  inDB: z.boolean(),
+  categoryArray: z.array(categoryClientSideModel),
+});
+
+export type SplitClientSide = z.infer<typeof splitClientSideModel>;
 
 export type MergedCategory = Omit<CategoryClientSide, "splitId">;
 
-export type CategoryClientSide = Omit<Category, "id"> & {
-  id?: string | null;
-};
-
-export type FullTransaction = Omit<PlaidTransaction, "category"> & {
-  splitArray: SplitClientSide[];
-  inDB: boolean;
-};
+export type FullTransaction = Transaction &
+  Omit<PlaidTransaction, "category"> & {
+    splitArray: SplitClientSide[];
+    inDB: boolean;
+  };
 
 export type HierarchicalCategoryWithTransaction = {
   name: string;
@@ -40,7 +50,7 @@ export type HierarchicalCategory = {
 };
 
 //temporary workaround for failing trpc queries
-interface PlaidTransaction extends Transaction {
+interface PlaidTransaction extends PTransaction {
   location: {
     /**
      * The street address where the transaction occurred.
