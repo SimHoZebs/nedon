@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Modal from "../Modal";
-import { useStoreState } from "../../util/store";
+import { useStoreState } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import Button from "../Button/ActionBtn";
-import { trpc } from "../../util/trpc";
+import { trpc } from "@/util/trpc";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -59,18 +59,16 @@ const SettleModal = (props: Props) => {
           //Why do I even need this check?
           if (!props.oweUser) return;
 
-          //TODO: probs should not be 1
-          await createManualTransaction.mutateAsync({
-            userId: appUser.id,
-            splitArray: [
-              { amount: 0, userId: appUser.id, categoryTreeId: "1" },
-              {
-                amount: appUserGiving ? settleAmount * 1 : settleAmount * -1,
-                userId: props.oweUser.id,
-                categoryTreeId: "1",
-              },
-            ],
-          });
+          // //TODO: probs should not be 1
+          // await createManualTransaction.mutateAsync({
+          //   userId: appUser.id,
+          //   splitArray: [
+          //     { userId: appUser.id },
+          //     {
+          //       userId: props.oweUser.id,
+          //     },
+          //   ],
+          // });
 
           associatedTransactionArray.refetch();
           props.setShowModal(false);
