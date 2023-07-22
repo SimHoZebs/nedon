@@ -2,6 +2,7 @@ import { z } from "zod";
 import db from "@/util/db";
 import { SplitModel } from "../../prisma/zod";
 import { procedure, router } from "../trpc";
+import { splitClientSideModel } from "@/util/types";
 
 const splitRouter = router({
   create: procedure
@@ -20,20 +21,40 @@ const splitRouter = router({
   update: procedure
     .input(
       z.object({
-        split: SplitModel.extend({ id: z.string().nullable() }),
+        split: splitClientSideModel,
       })
     )
     .mutation(async ({ input }) => {
-      const { id, ...rest } = input.split;
+      const { id, categoryArray, ...rest } = input.split;
+      const { id: categoryID, ...categoryRest } = categoryArray[0];
+
       const updatedTransactionArray = id
         ? await db.split.update({
             where: {
               id,
             },
-            data: rest,
+            data: {
+              categoryArray: {
+                updateMany: categoryArray.map((category) => ({
+                  where: {
+                    splitId: id,
+                  },
+                  data: {
+                    nameArray: category.nameArray,
+                    amount: category.amount,
+                  },
+                })),
+              },
+            },
+            include: {
+              categoryArray: true,
+            },
           })
         : await db.split.create({
             data: rest,
+            include: {
+              categoryArray: true,
+            },
           });
 
       return updatedTransactionArray;

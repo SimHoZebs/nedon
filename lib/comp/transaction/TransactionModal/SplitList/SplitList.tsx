@@ -21,6 +21,8 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const queryClient = trpc.useContext();
   const createTransaction = trpc.transaction.create.useMutation();
   const updateSplit = trpc.split.update.useMutation();
+  const createSplit = trpc.split.create.useMutation();
+  const createCategory = trpc.category.create.useMutation();
 
   const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
     transaction ? structuredClone(transaction.splitArray) : []
@@ -63,19 +65,20 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
               {isManaging ? (
                 <div className="flex gap-x-2">
                   <ActionBtn
-                    onClick={() => {
+                    onClick={async () => {
                       setIsManaging(false);
                       if (transaction.inDB) {
-                        unsavedSplitArray.forEach((split) => {
+                        unsavedSplitArray.forEach(async (split) => {
                           if (split.inDB && split.id) {
-                            updateSplit.mutateAsync({
+                            await updateSplit.mutateAsync({
                               split,
                             });
                           } else {
+                            createSplit.mutateAsync({ split });
                           }
                         });
                       } else {
-                        createTransaction.mutateAsync({
+                        await createTransaction.mutateAsync({
                           userId: appUser.id,
                           transactionId: transaction.id,
                           splitArray: unsavedSplitArray,
@@ -87,6 +90,7 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                   >
                     Save changes
                   </ActionBtn>
+
                   <ActionBtn
                     variant="negative"
                     onClick={() => setIsManaging(false)}
@@ -129,11 +133,13 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                     setUnsavedSplitArray(updatedSplitArray);
                   }}
                   onAmountChange={(amount: number) => {
-                    const updatedSplit: SplitClientSide = {
-                      ...split,
-                    };
-                    const updatedSplitArray = [...unsavedSplitArray];
-                    updatedSplitArray[i] = updatedSplit;
+                    const updatedSplitArray =
+                      structuredClone(unsavedSplitArray);
+                    updatedSplitArray[i].categoryArray.forEach((category) => {
+                      category.amount =
+                        amount / updatedSplitArray[i].categoryArray.length;
+                    });
+
                     setUnsavedSplitArray(updatedSplitArray);
                   }}
                   amount={amount}

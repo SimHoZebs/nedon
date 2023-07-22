@@ -106,8 +106,6 @@ const transactionRouter = router({
           (split) => split.transactionId === plaidTransaction.transaction_id
         );
 
-        console.log("matchingSplitArray", matchingSplitArray.length);
-
         const matchingTransaction = transactionArray.find(
           (transaction) => transaction.id === plaidTransaction.transaction_id
         );
