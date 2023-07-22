@@ -155,7 +155,6 @@ const Page = () => {
 
     associatedTransactionArray.data.forEach((transaction) => {
       if (!appUser) return;
-      const mergedCategoryArray = mergeCategoryArray(transaction.splitArray);
 
       transaction.splitArray.forEach((split) => {
         const splitAmount = split.categoryArray.reduce(
