@@ -57,8 +57,8 @@ export const splitInDB = SplitModel.extend({
   categoryArray: z.array(categoryInSplitInDB),
 });
 
-export type SplitClientSide = z.infer<typeof SplitClientSide>;
-export const SplitClientSide = z.union([splitInDB, unsavedSplit]);
+export type SplitClientSide = z.infer<typeof splitClientSide>;
+export const splitClientSide = z.union([splitInDB, unsavedSplit]);
 
 export type MergedCategory = Omit<CategoryClientside, "splitId">;
 

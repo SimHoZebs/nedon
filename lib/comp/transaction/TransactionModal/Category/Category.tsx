@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { MergedCategory, SplitClientSide } from "@/util/types";
+import {
+  MergedCategory,
+  SplitClientSide,
+  UnsavedCategoryInSplitInDB,
+  UnsavedCategoryInUnsavedSplit,
+} from "@/util/types";
 import CategoryPicker from "./CategoryPicker";
 import { emptyCategory, mergeCategoryArray } from "@/util/category";
 import { useStoreActions, useStoreState } from "@/util/store";
@@ -34,11 +39,24 @@ const Category = () => {
               const updatedSplitArray = structuredClone(unsavedSplitArray);
 
               updatedSplitArray.forEach((split) => {
-                //FIX: TEMPORARY MEASURE
-                split.categoryArray.push(
-                  emptyCategory({ amount: 0, splitId: split.id }) as never
-                );
-                return split;
+                //prevent reducing to never
+                if (split.id) {
+                  split.categoryArray.push(
+                    emptyCategory({
+                      amount: 0,
+                      splitId: split.id,
+                    }) as UnsavedCategoryInSplitInDB
+                  );
+                  return split;
+                } else if (split.id === null) {
+                  split.categoryArray.push(
+                    emptyCategory({
+                      amount: 0,
+                      splitId: null,
+                    }) as UnsavedCategoryInUnsavedSplit
+                  );
+                  return split;
+                }
               });
 
               setUnsavedSplitArray(updatedSplitArray);
