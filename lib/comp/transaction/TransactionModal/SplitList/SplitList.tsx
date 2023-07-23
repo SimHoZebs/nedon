@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/react";
 import React, { useState } from "react";
-import { SplitClientSide } from "@/util/types";
+import { SplitClientSide, isSplitInDB } from "@/util/types";
 import ActionBtn from "@/comp/Button/ActionBtn";
 import UserSplit from "./UserSplit";
 import { trpc } from "@/util/trpc";
@@ -23,7 +23,7 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const updateSplit = trpc.split.update.useMutation();
   const createSplit = trpc.split.create.useMutation();
   const createCategory = trpc.category.create.useMutation();
-
+  const upsertManyCategory = trpc.category.upsertMany.useMutation();
   const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
     transaction ? structuredClone(transaction.splitArray) : []
   );
@@ -67,14 +67,38 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                   <ActionBtn
                     onClick={async () => {
                       setIsManaging(false);
+
+                      if (!transaction.inDB) {
+                        await createTransaction.mutateAsync({
+                          userId: appUser.id,
+                          transactionId: transaction.id,
+                          splitArray: unsavedSplitArray,
+                        });
+                      } else {
+                        unsavedSplitArray.forEach(async (split) => {
+                          if (!isSplitInDB(split)) {
+                            await createSplit.mutateAsync({ split });
+                          } else {
+                            upsertManyCategory.mutateAsync({
+                              categoryArray: split.categoryArray,
+                            });
+                          }
+                        });
+                      }
                       if (transaction.inDB) {
                         unsavedSplitArray.forEach(async (split) => {
-                          if (split.inDB && split.id) {
-                            await updateSplit.mutateAsync({
-                              split,
-                            });
-                          } else {
+                          if (!split.id) {
                             createSplit.mutateAsync({ split });
+                          } else {
+                            split.categoryArray.forEach((category) => {
+                              if (category.id) {
+                              } else {
+                                createCategory.mutateAsync({
+                                  ...category,
+                                  splitId: category.splitId!,
+                                });
+                              }
+                            });
                           }
                         });
                       } else {

@@ -6,7 +6,7 @@ import {
   Transaction as PlaidTransaction,
   TransactionsSyncRequest,
 } from "plaid";
-import { FullTransaction, splitClientSideModel } from "@/util/types";
+import { FullTransaction, SplitClientSideModel } from "@/util/types";
 import { client } from "../util";
 import { SplitModel } from "../../prisma/zod";
 import { Transaction } from "@prisma/client";
@@ -84,7 +84,6 @@ const transactionRouter = router({
           splitArray: [
             {
               id: null,
-              inDB: false,
               transactionId: plaidTransaction.transaction_id,
               categoryArray: [
                 emptyCategory({
@@ -163,7 +162,7 @@ const transactionRouter = router({
       z.object({
         userId: z.string(),
         transactionId: z.string(),
-        splitArray: z.array(splitClientSideModel),
+        splitArray: z.array(SplitClientSideModel),
       })
     )
     .mutation(async ({ input }) => {

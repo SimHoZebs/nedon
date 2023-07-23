@@ -13,20 +13,31 @@ export type GroupClientSide = Group & {
   userArray?: UserClientSide[];
 };
 
-export const categoryClientSideModel = CategoryModel.extend({
+export type CategoryClientSide = z.infer<typeof CategoryClientSideModel>;
+export const CategoryClientSideModel = CategoryModel.extend({
   id: z.string().nullable(),
   splitId: z.string().nullable(),
 });
 
-export type CategoryClientSide = z.infer<typeof categoryClientSideModel>;
-
-export const splitClientSideModel = SplitModel.extend({
+export type categoryInSplitInDB = z.infer<typeof CategoryInSplitInDBModel>;
+const CategoryInSplitInDBModel = CategoryModel.extend({
   id: z.string().nullable(),
-  inDB: z.boolean(),
-  categoryArray: z.array(categoryClientSideModel),
 });
 
-export type SplitClientSide = z.infer<typeof splitClientSideModel>;
+export type SplitInDB = z.infer<typeof SplitInDBModel>;
+const SplitInDBModel = SplitModel.extend({
+  categoryArray: z.array(CategoryInSplitInDBModel),
+});
+
+export function isSplitInDB(split: SplitClientSide): split is SplitInDB {
+  return !!split.id;
+}
+
+export type SplitClientSide = z.infer<typeof SplitClientSideModel>;
+export const SplitClientSideModel = SplitModel.extend({
+  id: z.string().nullable(),
+  categoryArray: z.array(CategoryClientSideModel),
+});
 
 export type MergedCategory = Omit<CategoryClientSide, "splitId">;
 
