@@ -49,13 +49,11 @@ export const categoryClientside = z.union([
 export type UnsavedSplit = z.infer<typeof unsavedSplit>;
 export const unsavedSplit = SplitModel.extend({
   id: z.null(),
-  inDB: z.literal(false),
   categoryArray: z.array(unsavedCategoryInUnsavedSplit),
 });
 
 export type SplitInDB = z.infer<typeof splitInDB>;
 export const splitInDB = SplitModel.extend({
-  inDB: z.literal(true),
   categoryArray: z.array(categoryInSplitInDB),
 });
 

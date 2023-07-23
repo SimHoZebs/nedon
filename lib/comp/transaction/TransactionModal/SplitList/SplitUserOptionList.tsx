@@ -2,12 +2,7 @@ import React from "react";
 import { useStoreState } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import Button from "@/comp/Button/Button";
-import {
-  SplitClientSide,
-  UnsavedCategory,
-  UnsavedCategoryInUnsavedSplit,
-  UnsavedSplit,
-} from "@/util/types";
+import { SplitClientSide } from "@/util/types";
 
 type Props = {
   unsavedSplitArray: SplitClientSide[];
@@ -74,7 +69,6 @@ const SplitUserOptionList = (props: Props) => {
 
               updatedSplitArray.push({
                 id: null,
-                inDB: false,
                 transactionId: transaction.transaction_id,
                 userId: user.id,
                 categoryArray: categoryArrayCopy,

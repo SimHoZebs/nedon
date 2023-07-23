@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/react";
 import React, { useState } from "react";
-import { SplitClientSide, SplitInDB, UnsavedSplit } from "@/util/types";
+import { SplitClientSide } from "@/util/types";
 import ActionBtn from "@/comp/Button/ActionBtn";
 import UserSplit from "./UserSplit";
 import { trpc } from "@/util/trpc";
@@ -77,7 +77,7 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                         });
                       } else {
                         unsavedSplitArray.forEach(async (split) => {
-                          if (!split.inDB) {
+                          if (!split.id) {
                             await createSplit.mutateAsync({ split });
                           } else {
                             upsertManyCategory.mutateAsync({
@@ -88,7 +88,7 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                       }
                       if (transaction.inDB) {
                         unsavedSplitArray.forEach(async (split) => {
-                          if (!split.inDB) {
+                          if (!split.id) {
                             createSplit.mutateAsync({ split });
                           } else {
                             split.categoryArray.forEach((category) => {

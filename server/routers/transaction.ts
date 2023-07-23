@@ -91,7 +91,6 @@ const transactionRouter = router({
           splitArray: [
             {
               id: null,
-              inDB: false,
               transactionId: plaidTransaction.transaction_id,
               categoryArray: [
                 emptyCategory({
@@ -139,7 +138,6 @@ const transactionRouter = router({
 
           result.splitArray = matchingSplitArray.map((split) => ({
             ...split,
-            inDB: true,
           }));
           result.inDB = true;
           return result;
