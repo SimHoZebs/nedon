@@ -2,7 +2,7 @@ import { z } from "zod";
 import db from "@/util/db";
 import { SplitModel } from "../../prisma/zod";
 import { procedure, router } from "../trpc";
-import { splitInDB, unsavedSplit } from "@/util/types";
+import { splitClientSideModel } from "@/util/types";
 
 const splitRouter = router({
   create: procedure
@@ -21,7 +21,7 @@ const splitRouter = router({
   update: procedure
     .input(
       z.object({
-        split: splitInDB,
+        split: splitClientSideModel,
       })
     )
     .mutation(async ({ input }) => {

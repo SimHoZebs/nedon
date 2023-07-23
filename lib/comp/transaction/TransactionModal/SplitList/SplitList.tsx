@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/react";
 import React, { useState } from "react";
-import { SplitClientSide, SplitInDB, UnsavedSplit } from "@/util/types";
+import { SplitClientSide } from "@/util/types";
 import ActionBtn from "@/comp/Button/ActionBtn";
 import UserSplit from "./UserSplit";
 import { trpc } from "@/util/trpc";
@@ -23,7 +23,7 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const updateSplit = trpc.split.update.useMutation();
   const createSplit = trpc.split.create.useMutation();
   const createCategory = trpc.category.create.useMutation();
-  const upsertManyCategory = trpc.category.upsertMany.useMutation();
+
   const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
     transaction ? structuredClone(transaction.splitArray) : []
   );
@@ -33,9 +33,7 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const amount = transaction ? transaction.amount : 0;
 
   const calcSplitTotal = (split: SplitClientSide) => {
-    //c1[]|c2[] into (c1|c2)[]
-    const typeMergedCategory = split.categoryArray.map((category) => category);
-    return typeMergedCategory.reduce(
+    return split.categoryArray.reduce(
       (total, category) => total + category.amount,
       0
     );
@@ -69,37 +67,14 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                   <ActionBtn
                     onClick={async () => {
                       setIsManaging(false);
-                      if (!transaction.inDB) {
-                        await createTransaction.mutateAsync({
-                          userId: appUser.id,
-                          transactionId: transaction.id,
-                          splitArray: unsavedSplitArray,
-                        });
-                      } else {
-                        unsavedSplitArray.forEach(async (split) => {
-                          if (!split.inDB) {
-                            await createSplit.mutateAsync({ split });
-                          } else {
-                            upsertManyCategory.mutateAsync({
-                              categoryArray: split.categoryArray,
-                            });
-                          }
-                        });
-                      }
                       if (transaction.inDB) {
                         unsavedSplitArray.forEach(async (split) => {
-                          if (!split.inDB) {
-                            createSplit.mutateAsync({ split });
-                          } else {
-                            split.categoryArray.forEach((category) => {
-                              if (category.id) {
-                              } else {
-                                createCategory.mutateAsync({
-                                  ...category,
-                                  splitId: category.splitId!,
-                                });
-                              }
+                          if (split.inDB && split.id) {
+                            await updateSplit.mutateAsync({
+                              split,
                             });
+                          } else {
+                            createSplit.mutateAsync({ split });
                           }
                         });
                       } else {
@@ -144,10 +119,7 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                     const updatedSplitArray =
                       structuredClone(unsavedSplitArray);
                     const splicedSplit = updatedSplitArray.splice(i, 1);
-                    //c1[]|c2[] into (c1|c2)[]
-                    const typeMergedCategory =
-                      splicedSplit[0].categoryArray.map((c) => c);
-                    const amount = typeMergedCategory.reduce(
+                    const amount = splicedSplit[0].categoryArray.reduce(
                       (total, category) => total + category.amount,
                       0
                     );

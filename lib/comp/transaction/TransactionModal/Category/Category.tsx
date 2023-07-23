@@ -34,9 +34,8 @@ const Category = () => {
               const updatedSplitArray = structuredClone(unsavedSplitArray);
 
               updatedSplitArray.forEach((split) => {
-                //FIX: TEMPORARY MEASURE
                 split.categoryArray.push(
-                  emptyCategory({ amount: 0, splitId: split.id }) as never
+                  emptyCategory({ amount: 0, splitId: split.id })
                 );
                 return split;
               });

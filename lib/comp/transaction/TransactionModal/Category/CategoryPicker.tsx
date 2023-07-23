@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import { trpc } from "@/util/trpc";
 import { Icon } from "@iconify-icon/react";
 import { useStoreActions, useStoreState } from "@/util/store";
-import { HierarchicalCategory, MergedCategory } from "@/util/types";
+import {
+  CategoryClientSide,
+  HierarchicalCategory,
+  MergedCategory,
+} from "@/util/types";
 import categoryStyleArray from "@/util/categoryStyle";
 
 interface Props {

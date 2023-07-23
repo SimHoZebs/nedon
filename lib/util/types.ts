@@ -1,6 +1,7 @@
 import { User, Group } from "@prisma/client";
-import { CounterpartyType, Transaction } from "plaid";
-import { CategoryModel, SplitModel, TransactionModel } from "prisma/zod";
+import { CounterpartyType, Transaction as PTransaction } from "plaid";
+import { Transaction } from "@prisma/client";
+import { CategoryModel, SplitModel } from "prisma/zod";
 import { z } from "zod";
 
 export type UserClientSide = Omit<User, "ACCESS_TOKEN"> & {
@@ -12,77 +13,28 @@ export type GroupClientSide = Group & {
   userArray?: UserClientSide[];
 };
 
-export type UnsavedCategoryInUnsavedSplit = z.infer<
-  typeof unsavedCategoryInUnsavedSplit
->;
-export const unsavedCategoryInUnsavedSplit = CategoryModel.extend({
-  id: z.null(),
-  splitId: z.null(),
-});
-
-export type UnsavedCategoryInSplitInDB = z.infer<
-  typeof unsavedCategoryInSplitInDB
->;
-export const unsavedCategoryInSplitInDB = CategoryModel.extend({
-  id: z.null(),
-  splitId: z.string(),
-});
-
-export type UnsavedCategory = z.infer<typeof unsavedCategory>;
-const unsavedCategory = z.union([
-  unsavedCategoryInUnsavedSplit,
-  unsavedCategoryInSplitInDB,
-]);
-
-export type CategoryInSplitInDB = z.infer<typeof categoryInSplitInDB>;
-export const categoryInSplitInDB = CategoryModel.extend({
+export const categoryClientSideModel = CategoryModel.extend({
   id: z.string().nullable(),
-  splitId: z.string(),
+  splitId: z.string().nullable(),
 });
 
-export type CategoryClientside = z.infer<typeof categoryClientside>;
-export const categoryClientside = z.union([
-  unsavedCategoryInUnsavedSplit,
-  categoryInSplitInDB,
-]);
+export type CategoryClientSide = z.infer<typeof categoryClientSideModel>;
 
-export type UnsavedSplit = z.infer<typeof unsavedSplit>;
-export const unsavedSplit = SplitModel.extend({
-  id: z.null(),
-  inDB: z.literal(false),
-  categoryArray: z.array(unsavedCategoryInUnsavedSplit),
+export const splitClientSideModel = SplitModel.extend({
+  id: z.string().nullable(),
+  inDB: z.boolean(),
+  categoryArray: z.array(categoryClientSideModel),
 });
 
-export type SplitInDB = z.infer<typeof splitInDB>;
-export const splitInDB = SplitModel.extend({
-  inDB: z.literal(true),
-  categoryArray: z.array(categoryInSplitInDB),
-});
+export type SplitClientSide = z.infer<typeof splitClientSideModel>;
 
-export type SplitClientSide = z.infer<typeof SplitClientSide>;
-export const SplitClientSide = z.union([splitInDB, unsavedSplit]);
+export type MergedCategory = Omit<CategoryClientSide, "splitId">;
 
-export type MergedCategory = Omit<CategoryClientside, "splitId">;
-
-export type TransactionInDB = z.infer<typeof transactionInDB>;
-const transactionInDB = TransactionModel.extend({
-  splitArray: z.array(z.union([splitInDB, unsavedSplit])),
-  inDB: z.literal(true),
-});
-
-export type UnsavedTransaction = z.infer<typeof unsavedTransaction>;
-const unsavedTransaction = TransactionModel.extend({
-  splitArray: z.array(unsavedSplit),
-  inDB: z.literal(false),
-});
-
-const transactionClientside = z.union([transactionInDB, unsavedTransaction]);
-
-export type FullTransaction<T = z.infer<typeof transactionClientside>> = Omit<
-  PlaidTransaction,
-  "category"
-> &
-  T;
+export type FullTransaction = Transaction &
+  Omit<PlaidTransaction, "category"> & {
+    splitArray: SplitClientSide[];
+    inDB: boolean;
+  };
 
 export type HierarchicalCategoryWithTransaction = {
   name: string;
@@ -98,7 +50,7 @@ export type HierarchicalCategory = {
 };
 
 //temporary workaround for failing trpc queries
-interface PlaidTransaction extends Transaction {
+interface PlaidTransaction extends PTransaction {
   location: {
     /**
      * The street address where the transaction occurred.
