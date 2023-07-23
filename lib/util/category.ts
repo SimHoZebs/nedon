@@ -1,8 +1,9 @@
 import {
-  CategoryClientSide,
   HierarchicalCategory,
   MergedCategory,
-  SplitClientSide,
+  SplitInDB,
+  UnsavedSplit,
+  UnsavedCategory,
 } from "./types";
 import { Category as PlaidCategory } from "plaid";
 import categoryStyleArray from "./categoryStyle";
@@ -15,7 +16,7 @@ export const emptyCategory = ({
   nameArray?: string[];
   splitId: string | null;
   amount: number;
-}): CategoryClientSide => {
+}): UnsavedCategory => {
   return {
     id: null,
     nameArray: nameArray || [],
@@ -28,7 +29,9 @@ export const getCategoryStyle = (nameArray: string[]) => {
   return categoryStyleArray[nameArray.slice(-1)[0]];
 };
 
-export const mergeCategoryArray = (splitArray: SplitClientSide[]) => {
+export const mergeCategoryArray = (
+  splitArray: (SplitInDB | UnsavedSplit)[]
+) => {
   const mergedCategoryArray: MergedCategory[] = [];
 
   splitArray.forEach((split) => {

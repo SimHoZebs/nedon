@@ -1,28 +1,22 @@
 import { Category } from "@prisma/client";
 import { z } from "zod";
 import db from "@/util/db";
-import { CategoryModel } from "../../prisma/zod";
 import { procedure, router } from "../trpc";
-import { categoryClientSideModel } from "@/util/types";
+import { CategoryInSplitInDB, categoryInSplitInDB } from "@/util/types";
+import { CategoryModel } from "prisma/zod";
 
 const categoryRouter = router({
-  create: procedure
-    .input(categoryClientSideModel.extend({ splitId: z.string() }))
-    .mutation(async ({ input }) => {
-      const { id, ...rest } = input;
-      await db.category.create({
-        data: rest,
-      });
-    }),
+  create: procedure.input(categoryInSplitInDB).mutation(async ({ input }) => {
+    const { id, ...rest } = input;
+    await db.category.create({
+      data: rest,
+    });
+  }),
 
-  upsertManyCategory: procedure
+  upsertMany: procedure
     .input(
       z.object({
-        userId: z.string(),
-        transactionId: z.string(),
-        categoryArray: z.array(
-          CategoryModel.extend({ id: z.string().nullish() })
-        ),
+        categoryArray: z.array(categoryInSplitInDB),
       })
     )
     .mutation(async ({ input }) => {
@@ -31,41 +25,33 @@ const categoryRouter = router({
       ) as Category[];
       const categoryToCreateArray = input.categoryArray.filter(
         (category) => !category.id
-      ) as Omit<Category, "id">[];
+      ) as CategoryInSplitInDB[];
 
-      const upsertedTransaction = await db.transaction.update({
+      const upsertedSplitArray = await db.split.update({
         where: {
-          id: input.transactionId,
+          id: input.categoryArray[0].splitId,
         },
         data: {
-          splitArray: {
-            updateMany: categoryToUpdateArray.map(({ id, ...rest }) => ({
-              where: {
-                id,
-              },
-              data: {
-                ...rest,
-              },
-            })),
+          categoryArray: {
+            updateMany: categoryToUpdateArray.map(
+              ({ id, splitId, ...rest }) => ({
+                where: { id },
+                data: { rest },
+              })
+            ),
             createMany: {
-              data: categoryToCreateArray.map(({ ...category }) => ({
-                userId: input.userId,
+              data: categoryToCreateArray.map(({ id, ...category }) => ({
                 ...category,
-                id: undefined,
               })),
             },
           },
         },
         include: {
-          splitArray: {
-            include: {
-              categoryArray: true,
-            },
-          },
+          categoryArray: true,
         },
       });
 
-      return upsertedTransaction;
+      return upsertedSplitArray;
     }),
 });
 

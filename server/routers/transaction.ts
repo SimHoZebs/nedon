@@ -6,7 +6,14 @@ import {
   Transaction as PlaidTransaction,
   TransactionsSyncRequest,
 } from "plaid";
-import { FullTransaction, splitClientSideModel } from "@/util/types";
+import {
+  FullTransaction,
+  TransactionInDB,
+  UnsavedCategoryInUnsavedSplit,
+  UnsavedTransaction,
+  splitInDB,
+  unsavedSplit,
+} from "@/util/types";
 import { client } from "../util";
 import { SplitModel } from "../../prisma/zod";
 import { Transaction } from "@prisma/client";
@@ -76,7 +83,7 @@ const transactionRouter = router({
       });
 
       const full: FullTransaction[] = added.map((plaidTransaction) => {
-        const result: FullTransaction = {
+        const result: unknown = {
           ...plaidTransaction,
           id: plaidTransaction.transaction_id,
           ownerId: user.id,
@@ -91,7 +98,7 @@ const transactionRouter = router({
                   nameArray: plaidTransaction.category || [],
                   splitId: null,
                   amount: plaidTransaction.amount,
-                }),
+                }) as UnsavedCategoryInUnsavedSplit,
               ],
               userId: user.id,
             },
@@ -99,7 +106,7 @@ const transactionRouter = router({
         };
 
         if (splitArray.length === 0) {
-          return result;
+          return result as FullTransaction<UnsavedTransaction>;
         }
 
         const matchingSplitArray = splitArray.filter(
@@ -110,7 +117,19 @@ const transactionRouter = router({
           (transaction) => transaction.id === plaidTransaction.transaction_id
         );
 
-        if (matchingSplitArray.length) {
+        function matchingSplitArrayExists(
+          transaction: unknown
+        ): transaction is FullTransaction<TransactionInDB> {
+          return !!matchingSplitArray.length;
+        }
+
+        function matchingTransactionExists(
+          transaction: unknown
+        ): transaction is FullTransaction<TransactionInDB> {
+          return !!matchingTransaction;
+        }
+
+        if (matchingSplitArrayExists(result)) {
           matchingSplitArray.forEach((matchingSplit) => {
             const matchingIndex = splitArray.findIndex(
               (split) => split.id === matchingSplit.id
@@ -122,13 +141,14 @@ const transactionRouter = router({
             ...split,
             inDB: true,
           }));
-        }
-
-        if (matchingTransaction) {
           result.inDB = true;
+          return result;
+        } else if (matchingTransactionExists(result)) {
+          result.inDB = true;
+          return result;
+        } else {
+          return result as FullTransaction<UnsavedTransaction>;
         }
-
-        return result;
       });
 
       return full;
@@ -163,7 +183,7 @@ const transactionRouter = router({
       z.object({
         userId: z.string(),
         transactionId: z.string(),
-        splitArray: z.array(splitClientSideModel),
+        splitArray: z.array(z.union([splitInDB, unsavedSplit])),
       })
     )
     .mutation(async ({ input }) => {
@@ -194,7 +214,7 @@ const transactionRouter = router({
         },
       });
 
-      db.$transaction(
+      await db.$transaction(
         transaction.splitArray.map((split, index) =>
           db.category.createMany({
             data: input.splitArray[index].categoryArray.map((category) => ({

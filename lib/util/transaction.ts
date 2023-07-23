@@ -2,7 +2,6 @@ import { mergeCategoryArray } from "./category";
 import {
   HierarchicalCategoryWithTransaction,
   FullTransaction,
-  CategoryClientSide,
   MergedCategory,
 } from "./types";
 

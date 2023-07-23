@@ -2,7 +2,12 @@ import React from "react";
 import { useStoreState } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import Button from "@/comp/Button/Button";
-import { SplitClientSide } from "@/util/types";
+import {
+  SplitClientSide,
+  UnsavedCategory,
+  UnsavedCategoryInUnsavedSplit,
+  UnsavedSplit,
+} from "@/util/types";
 
 type Props = {
   unsavedSplitArray: SplitClientSide[];
@@ -33,16 +38,22 @@ const SplitUserOptionList = (props: Props) => {
           <Button
             className="bg-zinc-800 text-indigo-300"
             onClick={() => {
-              const updatedSplitArray = structuredClone(
+              const clone: SplitClientSide[] = structuredClone(
                 props.unsavedSplitArray
-              ).map((split) => ({
-                ...split,
-                categoryArray: split.categoryArray.map((category) => ({
-                  ...category,
-                  amount:
-                    transaction.amount / (props.unsavedSplitArray.length + 1),
-                })),
-              }));
+              );
+
+              const updatedSplitArray: SplitClientSide[] = clone.map(
+                (split) =>
+                  ({
+                    ...split,
+                    categoryArray: split.categoryArray.map((category) => ({
+                      ...category,
+                      amount:
+                        transaction.amount /
+                        (props.unsavedSplitArray.length + 1),
+                    })),
+                  } as SplitClientSide) //prevent types from merging
+              );
 
               const appUserCategoryArray = updatedSplitArray.find(
                 (split) => split.userId === appUser.id
@@ -53,12 +64,20 @@ const SplitUserOptionList = (props: Props) => {
                 return;
               }
 
+              const categoryArrayCopy = appUserCategoryArray.map(
+                (category) => ({
+                  ...category,
+                  id: null,
+                  splitId: null,
+                })
+              );
+
               updatedSplitArray.push({
-                id: user.id,
+                id: null,
                 inDB: false,
                 transactionId: transaction.transaction_id,
                 userId: user.id,
-                categoryArray: appUserCategoryArray,
+                categoryArray: categoryArrayCopy,
               });
 
               props.setUnsavedSplitArray(updatedSplitArray);
