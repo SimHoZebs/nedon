@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  MergedCategory,
-  SplitClientSide,
-  UnsavedCategoryInSplitInDB,
-  UnsavedCategoryInUnsavedSplit,
-} from "@/util/types";
+import { MergedCategory, SplitClientSide } from "@/util/types";
 import CategoryPicker from "./CategoryPicker";
 import { emptyCategory, mergeCategoryArray } from "@/util/category";
 import { useStoreActions, useStoreState } from "@/util/store";
