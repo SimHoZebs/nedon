@@ -119,7 +119,6 @@ const transactionRouter = router({
 
           result.splitArray = matchingSplitArray.map((split) => ({
             ...split,
-            inDB: true,
           }));
         }
 

@@ -54,7 +54,7 @@ const SplitUserOptionList = (props: Props) => {
               }
 
               updatedSplitArray.push({
-                id: user.id,
+                id: null,
                 transactionId: transaction.transaction_id,
                 userId: user.id,
                 categoryArray: appUserCategoryArray,
