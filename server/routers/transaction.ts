@@ -15,7 +15,7 @@ import { emptyCategory } from "@/util/category";
 // Retrieve Transactions for an Item
 // https://plaid.com/docs/#transactions
 const transactionRouter = router({
-  getTransactionArray: procedure
+  getAll: procedure
     .input(z.object({ id: z.string(), cursor: z.string().optional() }))
     .query(async ({ input }) => {
       const user = await db.user.findFirst({
@@ -133,7 +133,7 @@ const transactionRouter = router({
     }),
 
   //all transaction meta including the user
-  getAssociatedTransactionArray: procedure
+  getAllAssociated: procedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       return db.transaction.findMany({
@@ -208,7 +208,7 @@ const transactionRouter = router({
     }),
 
   //createMeta could've been modified instead but this avoids accidentally missing transactionId for Plaid transactions.
-  createManualTransaction: procedure
+  createManually: procedure
     .input(
       z.object({
         userId: z.string(),

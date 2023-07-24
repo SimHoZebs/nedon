@@ -14,10 +14,10 @@ const SettleModal = (props: Props) => {
   const [settleAmount, setSettleAmount] = useState(0);
   const [appUserGiving, setAppuserGiving] = useState(true);
 
-  const createManualTransaction =
-    trpc.transaction.createManualTransaction.useMutation();
+  const createTransactionManually =
+    trpc.transaction.createManually.useMutation();
   const associatedTransactionArray =
-    trpc.transaction.getAssociatedTransactionArray.useQuery(
+    trpc.transaction.getAllAssociated.useQuery(
       { id: appUser ? appUser.id : "" },
       { staleTime: 3600000, enabled: !!appUser }
     );

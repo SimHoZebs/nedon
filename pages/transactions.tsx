@@ -19,7 +19,7 @@ const Page: NextPage = () => {
   const { appUser, currentTransaction } = useStoreState((state) => state);
   const { setCurrentTransaction } = useStoreActions((actions) => actions);
 
-  const transactionArray = trpc.transaction.getTransactionArray.useQuery<
+  const transactionArray = trpc.transaction.getAll.useQuery<
     FullTransaction[]
   >(
     { id: appUser ? appUser.id : "" },

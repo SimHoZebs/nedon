@@ -109,7 +109,7 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                         });
                       }
 
-                      queryClient.transaction.getTransactionArray.refetch();
+                      queryClient.transaction.getAll.refetch();
                     }}
                   >
                     Save changes

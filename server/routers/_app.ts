@@ -67,7 +67,7 @@ export const appRouter = router({
     .query(async ({ input }) => {
       const response = await client.sandboxPublicTokenCreate({
         // institution_id: input.instituteID,
-        institution_id: "ins_56",
+        institution_id: "ins_1",
         initial_products: PLAID_PRODUCTS,
       });
 

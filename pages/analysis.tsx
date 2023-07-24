@@ -86,17 +86,14 @@ const Page = () => {
     FullTransaction[]
   >([]);
 
-  const transactionArray = trpc.transaction.getTransactionArray.useQuery<
-    FullTransaction[]
-  >(
+  const transactionArray = trpc.transaction.getAll.useQuery<FullTransaction[]>(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser }
   );
-  const associatedTransactionArray =
-    trpc.transaction.getAssociatedTransactionArray.useQuery(
-      { id: appUser ? appUser.id : "" },
-      { staleTime: 3600000, enabled: !!appUser }
-    );
+  const associatedTransactionArray = trpc.transaction.getAllAssociated.useQuery(
+    { id: appUser ? appUser.id : "" },
+    { staleTime: 3600000, enabled: !!appUser }
+  );
 
   useEffect(() => {
     if (!transactionArray.data) return;
