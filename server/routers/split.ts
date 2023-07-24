@@ -13,7 +13,7 @@ const splitRouter = router({
     )
     .mutation(async ({ input }) => {
       const { id, ...rest } = input.split;
-      await db.split.create({
+      const split = await db.split.create({
         data: rest,
       });
     }),
