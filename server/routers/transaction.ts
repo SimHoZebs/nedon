@@ -97,16 +97,18 @@ const transactionRouter = router({
           ],
         };
 
+        const matchingTransaction = transactionArray.find(
+          (transaction) => transaction.id === plaidTransaction.transaction_id
+        );
+
+        if (matchingTransaction) result.inDB = true;
+
         if (splitArray.length === 0) {
           return result;
         }
 
         const matchingSplitArray = splitArray.filter(
           (split) => split.transactionId === plaidTransaction.transaction_id
-        );
-
-        const matchingTransaction = transactionArray.find(
-          (transaction) => transaction.id === plaidTransaction.transaction_id
         );
 
         if (matchingSplitArray.length) {
@@ -120,10 +122,6 @@ const transactionRouter = router({
           result.splitArray = matchingSplitArray.map((split) => ({
             ...split,
           }));
-        }
-
-        if (matchingTransaction) {
-          result.inDB = true;
         }
 
         return result;
