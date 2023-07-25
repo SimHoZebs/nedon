@@ -1,6 +1,5 @@
 import { z } from "zod";
 import db from "@/util/db";
-import { SplitModel } from "../../prisma/zod";
 import { procedure, router } from "../trpc";
 import { SplitClientSideModel } from "@/util/types";
 
@@ -8,13 +7,25 @@ const splitRouter = router({
   create: procedure
     .input(
       z.object({
-        split: SplitModel.extend({ id: z.string().nullable() }),
+        split: SplitClientSideModel,
       })
     )
     .mutation(async ({ input }) => {
-      const { id, ...rest } = input.split;
-      await db.split.create({
-        data: rest,
+      const { id, categoryArray, ...rest } = input.split;
+      return await db.split.create({
+        data: {
+          ...rest,
+          categoryArray: {
+            createMany: {
+              data: categoryArray.map((category) => ({
+                amount: category.amount,
+              })),
+            },
+          },
+        },
+        include: {
+          categoryArray: true,
+        },
       });
     }),
 
