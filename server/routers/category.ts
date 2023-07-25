@@ -40,7 +40,7 @@ const categoryRouter = router({
             updateMany: categoryToUpdateArray.map(
               ({ id, splitId, ...rest }) => ({
                 where: { id },
-                data: { rest },
+                data: rest,
               })
             ),
 
