@@ -66,8 +66,6 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                 <div className="flex gap-x-2">
                   <ActionBtn
                     onClick={async () => {
-                      setIsManaging(false);
-
                       if (!transaction.inDB) {
                         await createTransaction.mutateAsync({
                           userId: appUser.id,
@@ -85,30 +83,8 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                           }
                         });
                       }
-                      if (transaction.inDB) {
-                        unsavedSplitArray.forEach(async (split) => {
-                          if (!split.id) {
-                            createSplit.mutateAsync({ split });
-                          } else {
-                            split.categoryArray.forEach((category) => {
-                              if (category.id) {
-                              } else {
-                                createCategory.mutateAsync({
-                                  ...category,
-                                  splitId: category.splitId!,
-                                });
-                              }
-                            });
-                          }
-                        });
-                      } else {
-                        await createTransaction.mutateAsync({
-                          userId: appUser.id,
-                          transactionId: transaction.id,
-                          splitArray: unsavedSplitArray,
-                        });
-                      }
 
+                      setIsManaging(false);
                       queryClient.transaction.getAll.refetch();
                     }}
                   >
