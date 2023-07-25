@@ -13,6 +13,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   onAmountChange: (amount: number) => void;
   split: SplitClientSide;
   onRemoveUser: () => void;
+  isManaging: boolean;
 }
 
 const UserSplit = (props: Props) => {
@@ -22,7 +23,7 @@ const UserSplit = (props: Props) => {
     <div className="flex flex-col gap-y-1">
       <div className="flex w-full justify-between gap-x-2 ">
         {appUser &&
-          (props.split.userId === appUser.id ? (
+          (props.split.userId === appUser.id || !props.isManaging ? (
             <div className="aspect-square w-5"></div>
           ) : (
             <button

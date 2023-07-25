@@ -13,23 +13,19 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const { appUser, currentTransaction: transaction } = useStoreState(
     (state) => state
   );
-  const { setCurrentTransaction: setTransaction } = useStoreActions(
-    (actions) => actions
-  );
 
-  const removeSplit = trpc.split.remove.useMutation();
+  const deleteSplit = trpc.split.delete.useMutation();
   const queryClient = trpc.useContext();
   const createTransaction = trpc.transaction.create.useMutation();
-  const updateSplit = trpc.split.update.useMutation();
   const createSplit = trpc.split.create.useMutation();
-  const createCategory = trpc.category.create.useMutation();
   const upsertManyCategory = trpc.category.upsertMany.useMutation();
+
   const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
     transaction ? structuredClone(transaction.splitArray) : []
   );
   const [isManaging, setIsManaging] = useState(false);
+  useState<SplitClientSide[]>();
 
-  //whenever splitArray changes, push that change to currentTransaction
   const amount = transaction ? transaction.amount : 0;
 
   const calcSplitTotal = (split: SplitClientSide) => {
@@ -53,12 +49,12 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
       <div className="flex w-full flex-col gap-y-3">
         <div className="flex gap-x-2">
           {props.children}
-          {unsavedSplitArray.length === 1 && (
+          {unsavedSplitArray.length === 1 && !isManaging && (
             <ActionBtn onClick={() => setIsManaging(true)}>Split</ActionBtn>
           )}
         </div>
 
-        {unsavedSplitArray.length > 1 && (
+        {(unsavedSplitArray.length > 1 || isManaging) && (
           <div className="flex flex-col gap-y-2">
             <div className="flex w-full justify-between">
               <H3>Split</H3>
@@ -66,6 +62,19 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                 <div className="flex gap-x-2">
                   <ActionBtn
                     onClick={async () => {
+                      const splitToDeleteArray = transaction.splitArray.filter(
+                        (split) =>
+                          unsavedSplitArray.find(
+                            (unsavedSplit) => unsavedSplit.id !== split.id
+                          )
+                      );
+                      console.log("split to delete", splitToDeleteArray);
+
+                      splitToDeleteArray.forEach(async (split) => {
+                        if (split.id)
+                          await deleteSplit.mutateAsync({ splitId: split.id });
+                      });
+
                       if (!transaction.inDB) {
                         await createTransaction.mutateAsync({
                           userId: appUser.id,
@@ -115,6 +124,7 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                 className="flex w-full items-center gap-x-2 sm:gap-x-3"
               >
                 <UserSplit
+                  isManaging={isManaging}
                   onRemoveUser={() => {
                     const updatedSplitArray =
                       structuredClone(unsavedSplitArray);
