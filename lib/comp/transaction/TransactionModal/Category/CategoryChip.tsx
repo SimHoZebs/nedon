@@ -40,6 +40,8 @@ const CategoryChip = (props: Props) => {
                 type="number"
                 min={0}
                 value={props.category.amount}
+                //on change, the other categories will have to reduce its contribution.
+                //Changing value in categories mean changing the amount of category in every contributor
                 // onChange={(e) => {
                 //   const updatedCategoryArray = [...unsavedCategoryArray];
                 //   updatedCategoryArray[index].amount = e.target.valueAsNumber;

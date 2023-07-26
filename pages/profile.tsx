@@ -11,7 +11,7 @@ const Page = () => {
     useStoreActions((actions) => actions);
 
   return (
-    <section className="flex h-full w-full items-start flex-col gap-y-3">
+    <section className="flex h-full w-full flex-col items-start gap-y-3">
       <Button
         variant="negative"
         className="gap-x-2"

@@ -30,6 +30,7 @@ const Category = () => {
         <div>
           <h4 className="text-lg font-medium">Categories</h4>
           <button
+            className="rounded-lg bg-zinc-800 p-2"
             onClick={() => {
               const updatedSplitArray = structuredClone(unsavedSplitArray);
 

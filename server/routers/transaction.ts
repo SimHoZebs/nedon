@@ -1,12 +1,12 @@
 import { router, procedure } from "../trpc";
 import { z } from "zod";
 import db from "@/util/db";
+import { RemovedTransaction, TransactionsSyncRequest } from "plaid";
 import {
-  RemovedTransaction,
-  Transaction as PlaidTransaction,
-  TransactionsSyncRequest,
-} from "plaid";
-import { FullTransaction, SplitClientSideModel } from "@/util/types";
+  FullTransaction,
+  SplitClientSideModel,
+  PlaidTransaction,
+} from "@/util/types";
 import { client } from "../util";
 import { SplitModel } from "../../prisma/zod";
 import convertToFullTransaction from "@/util/convertToFullTransaction";
