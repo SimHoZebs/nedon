@@ -10,8 +10,13 @@ import H3 from "@/comp/H3";
 import Button from "@/comp/Button/Button";
 
 const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
-  const { appUser, currentTransaction: transaction } = useStoreState(
-    (state) => state
+  const { appUser, currentTransaction } = useStoreState((state) => state);
+  const { data: transaction } = trpc.transaction.get.useQuery(
+    { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
+    { enabled: !!currentTransaction && !!appUser?.id }
+  );
+  const { setCurrentTransaction: setTransaction } = useStoreActions(
+    (actions) => actions
   );
 
   const deleteSplit = trpc.split.delete.useMutation();
@@ -84,9 +89,14 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                       } else {
                         unsavedSplitArray.forEach(async (split) => {
                           if (!isSplitInDB(split)) {
+                            console.log(
+                              "split is not in DB, it's ID is",
+                              split
+                            );
+
                             await createSplit.mutateAsync({ split });
                           } else {
-                            upsertManyCategory.mutateAsync({
+                            await upsertManyCategory.mutateAsync({
                               categoryArray: split.categoryArray,
                             });
                           }
@@ -94,7 +104,7 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                       }
 
                       setIsManaging(false);
-                      queryClient.transaction.getAll.refetch();
+                      await queryClient.transaction.get.refetch();
                     }}
                   >
                     Save changes

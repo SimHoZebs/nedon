@@ -3,6 +3,7 @@ import { useStoreState } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import Button from "@/comp/Button/Button";
 import { SplitClientSide } from "@/util/types";
+import { trpc } from "@/util/trpc";
 
 type Props = {
   unsavedSplitArray: SplitClientSide[];
@@ -10,11 +11,13 @@ type Props = {
 };
 
 const SplitUserOptionList = (props: Props) => {
-  const {
-    appUser,
-    appGroup,
-    currentTransaction: transaction,
-  } = useStoreState((state) => state);
+  const { appUser, appGroup, currentTransaction } = useStoreState(
+    (state) => state
+  );
+  const { data: transaction } = trpc.transaction.get.useQuery(
+    { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
+    { enabled: !!currentTransaction && !!appUser?.id }
+  );
 
   return (
     transaction &&
@@ -55,7 +58,7 @@ const SplitUserOptionList = (props: Props) => {
 
               updatedSplitArray.push({
                 id: null,
-                transactionId: transaction.transaction_id,
+                transactionId: transaction.id,
                 userId: user.id,
                 categoryArray: appUserCategoryArray,
               });

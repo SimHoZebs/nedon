@@ -5,15 +5,20 @@ import ActionBtn from "@/comp/Button/ActionBtn";
 import Category from "./Category/Category";
 import H1 from "@/comp/H1";
 import SplitList from "./SplitList/SplitList";
+import { trpc } from "@/util/trpc";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const TransactionModal = (props: Props) => {
-  const { currentTransaction: transaction } = useStoreState((state) => state);
+  const { currentTransaction, appUser } = useStoreState((state) => state);
+  const { data: transaction } = trpc.transaction.get.useQuery(
+    { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
+    { enabled: !!currentTransaction && !!appUser?.id }
+  );
 
-  const amount = transaction ? transaction.amount : 0;
+  const amount = currentTransaction ? currentTransaction.amount : 0;
 
   return (
     transaction && (

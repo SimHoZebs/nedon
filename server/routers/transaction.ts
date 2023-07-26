@@ -1,5 +1,5 @@
 import { router, procedure } from "../trpc";
-import { unknown, z } from "zod";
+import { z } from "zod";
 import db from "@/util/db";
 import {
   RemovedTransaction,
@@ -9,19 +9,25 @@ import {
 import { FullTransaction, SplitClientSideModel } from "@/util/types";
 import { client } from "../util";
 import { SplitModel } from "../../prisma/zod";
-import { Transaction } from "@prisma/client";
-import { emptyCategory } from "@/util/category";
 import convertToFullTransaction from "@/util/convertToFullTransaction";
 
 // Retrieve Transactions for an Item
 // https://plaid.com/docs/#transactions
 const transactionRouter = router({
   get: procedure
-    .input(z.object({ plaidTransaction: z.unknown(), id: z.string() }))
+    .input(z.object({ userId: z.string(), plaidTransaction: z.unknown() }))
     .query(async ({ input }) => {
-      return await db.transaction.findUnique({
+      function isPlaidTransaction(
+        plaidTransaction: unknown
+      ): plaidTransaction is FullTransaction {
+        return (plaidTransaction as FullTransaction).id !== undefined;
+      }
+
+      if (!isPlaidTransaction(input.plaidTransaction)) return null;
+
+      const transactionInDB = await db.transaction.findUnique({
         where: {
-          id: input.id,
+          id: input.plaidTransaction.id,
         },
         include: {
           splitArray: {
@@ -31,6 +37,11 @@ const transactionRouter = router({
           },
         },
       });
+
+      return {
+        ...input.plaidTransaction,
+        ...transactionInDB,
+      };
     }),
 
   getAll: procedure
