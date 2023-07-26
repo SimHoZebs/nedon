@@ -1,5 +1,5 @@
 import { router, procedure } from "../trpc";
-import { z } from "zod";
+import { unknown, z } from "zod";
 import db from "@/util/db";
 import {
   RemovedTransaction,
@@ -11,10 +11,28 @@ import { client } from "../util";
 import { SplitModel } from "../../prisma/zod";
 import { Transaction } from "@prisma/client";
 import { emptyCategory } from "@/util/category";
+import convertToFullTransaction from "@/util/convertToFullTransaction";
 
 // Retrieve Transactions for an Item
 // https://plaid.com/docs/#transactions
 const transactionRouter = router({
+  get: procedure
+    .input(z.object({ plaidTransaction: z.unknown(), id: z.string() }))
+    .query(async ({ input }) => {
+      return await db.transaction.findUnique({
+        where: {
+          id: input.id,
+        },
+        include: {
+          splitArray: {
+            include: {
+              categoryArray: true,
+            },
+          },
+        },
+      });
+    }),
+
   getAll: procedure
     .input(z.object({ id: z.string(), cursor: z.string().optional() }))
     .query(async ({ input }) => {
@@ -55,76 +73,29 @@ const transactionRouter = router({
         cursor = data.next_cursor;
       }
 
-      const transactionArray: Transaction[] = await db.transaction.findMany({
+      const transactionArray = await db.transaction.findMany({
         where: {
           ownerId: user.id,
         },
         include: {
-          splitArray: true,
-        },
-      });
-
-      const splitArray = await db.split.findMany({
-        where: {
-          transactionId: {
-            in: transactionArray.map((transaction) => transaction.id),
+          splitArray: {
+            include: {
+              categoryArray: true,
+            },
           },
-        },
-        include: {
-          categoryArray: true,
         },
       });
 
       const full: FullTransaction[] = added.map((plaidTransaction) => {
-        const result: FullTransaction = {
-          ...plaidTransaction,
-          id: plaidTransaction.transaction_id,
-          ownerId: user.id,
-          inDB: false,
-          splitArray: [
-            {
-              id: null,
-              transactionId: plaidTransaction.transaction_id,
-              categoryArray: [
-                emptyCategory({
-                  nameArray: plaidTransaction.category || [],
-                  splitId: null,
-                  amount: plaidTransaction.amount,
-                }),
-              ],
-              userId: user.id,
-            },
-          ],
-        };
-
         const matchingTransaction = transactionArray.find(
           (transaction) => transaction.id === plaidTransaction.transaction_id
         );
 
-        if (matchingTransaction) result.inDB = true;
-
-        if (splitArray.length === 0) {
-          return result;
-        }
-
-        const matchingSplitArray = splitArray.filter(
-          (split) => split.transactionId === plaidTransaction.transaction_id
+        return convertToFullTransaction(
+          user.id,
+          plaidTransaction,
+          matchingTransaction
         );
-
-        if (matchingSplitArray.length) {
-          matchingSplitArray.forEach((matchingSplit) => {
-            const matchingIndex = splitArray.findIndex(
-              (split) => split.id === matchingSplit.id
-            );
-            splitArray.splice(matchingIndex, 1);
-          });
-
-          result.splitArray = matchingSplitArray.map((split) => ({
-            ...split,
-          }));
-        }
-
-        return result;
       });
 
       return full;

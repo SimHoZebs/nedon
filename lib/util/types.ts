@@ -42,7 +42,7 @@ export const SplitClientSideModel = SplitModel.extend({
 export type MergedCategory = Omit<CategoryClientSide, "splitId">;
 
 export type FullTransaction = Transaction &
-  Omit<PlaidTransaction, "category"> & {
+  Omit<PlaidTransaction, "category" | "transaction_id"> & {
     splitArray: SplitClientSide[];
     inDB: boolean;
   };
@@ -61,7 +61,7 @@ export type HierarchicalCategory = {
 };
 
 //temporary workaround for failing trpc queries
-interface PlaidTransaction extends PTransaction {
+export interface PlaidTransaction extends PTransaction {
   location: {
     /**
      * The street address where the transaction occurred.
