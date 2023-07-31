@@ -25,7 +25,8 @@ export const emptyCategory = ({
 };
 
 export const getCategoryStyle = (nameArray: string[]) => {
-  return categoryStyleArray[nameArray.slice(-1)[0]];
+  const style = categoryStyleArray[nameArray.slice(-1)[0]];
+  return style ? style : categoryStyleArray["Unknown"]!;
 };
 
 export const mergeCategoryArray = (splitArray: SplitClientSide[]) => {

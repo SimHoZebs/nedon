@@ -3,7 +3,7 @@ import React from "react";
 import { useStoreState } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import { FullTransaction } from "@/util/types";
-import { getCategoryStyle, mergeCategoryArray } from "@/util/category";
+import { getCategoryStyle } from "@/util/category";
 
 interface Props {
   transaction: FullTransaction;
@@ -54,19 +54,16 @@ const TransactionCard = (props: Props) => {
             e.currentTarget.scrollLeft += e.deltaY * 0.5;
           }}
         >
-          {mergeCategoryArray(props.transaction.splitArray).map(
+          {props.transaction.splitArray[0].categoryArray.map(
             (category, index) => (
               <div
                 key={index}
                 className={`flex min-w-max gap-x-1 rounded-full p-2 text-zinc-800 ${
-                  getCategoryStyle(category.nameArray)?.bgColor || "bg-zinc-400"
+                  getCategoryStyle(category.nameArray).bgColor
                 }`}
               >
                 <Icon
-                  icon={
-                    getCategoryStyle(category.nameArray)?.icon ||
-                    "mdi:shape-outline"
-                  }
+                  icon={getCategoryStyle(category.nameArray).icon}
                   width={16}
                 />
                 <p className="text-xs">

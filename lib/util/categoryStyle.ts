@@ -98,6 +98,11 @@ const categoryStyleArray: {
     bgColor: "bg-green-300",
     textColor: "text-green-300",
   },
+  Unknown: {
+    icon: "mdi:shape-outline",
+    bgColor: "bg-zinc-400",
+    textColor: "text-zinc-400",
+  },
 };
 
 export default categoryStyleArray;
