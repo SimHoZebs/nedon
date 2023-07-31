@@ -17,6 +17,8 @@ const TransactionModal = (props: Props) => {
     { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
     { enabled: !!currentTransaction && !!appUser?.id }
   );
+  const deleteTransaction = trpc.transaction.delete.useMutation();
+  const queryClient = trpc.useContext();
 
   const amount = currentTransaction ? currentTransaction.amount : 0;
 
@@ -47,56 +49,25 @@ const TransactionModal = (props: Props) => {
         </div>
 
         <div className="flex w-full justify-between">
-          {/* <ActionBtn
-            disabled={categorySplitTotal !== amount}
-            onClick={async () => {
-              if (!appUser) return;
-
-              if (!transaction.inDB) {
-                await createTransaction.mutateAsync({
-                  categoryArray: unsavedcategoryArray,
-                  userId: appUser.id,
-                  transactionId: transaction.transaction_id,
-                });
-              } else {
-                // unsavedSplitArray.forEach(async (unsavedSplit) => {
-                //   if (
-                //     props.transaction.splitArray.find(
-                //       (split) => split.id === unsavedSplit.id
-                //     )
-                //   ) {
-                //     await updateSplit.mutateAsync({
-                //       split: unsavedSplit,
-                //     });
-                //   } else {
-                //     await createSplit.mutateAsync({
-                //       split: unsavedSplit,
-                //     });
-                //   }
-                // });
-
-                await upsertTransaction.mutateAsync({
-                  transactionId: transaction.transaction_id,
-                  categoryArray: unsavedcategoryArray,
-                });
-              }
-
-              queryClient.transaction.getTransactionArray.refetch();
-              setTransaction(() => ({
-                ...transaction,
-                categoryArray: [], //unsavedcategoryArray,
-              }));
-            }}
-          >
-            <Icon icon="material-symbols:save-outline" width={16} />
-            Save changes
-          </ActionBtn> */}
-
           <ActionBtn
             variant="negative"
             onClick={() => props.setShowModal(false)}
           >
             Cancel
+          </ActionBtn>
+
+          <ActionBtn
+            onClick={async () => {
+              if (!transaction.inDB) return;
+
+              await deleteTransaction.mutateAsync({
+                id: transaction.id,
+              });
+
+              await queryClient.transaction.get.refetch();
+            }}
+          >
+            Reset transaction data
           </ActionBtn>
         </div>
 

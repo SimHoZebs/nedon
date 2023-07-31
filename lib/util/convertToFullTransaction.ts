@@ -17,6 +17,7 @@ const convertToFullTransaction = (
     splitArray: transactionInDB?.splitArray || [
       {
         id: null,
+        userId,
         transactionId: plaidTransaction.transaction_id,
         categoryArray: [
           emptyCategory({
@@ -25,7 +26,6 @@ const convertToFullTransaction = (
             amount: plaidTransaction.amount,
           }),
         ],
-        userId,
       },
     ],
   };
