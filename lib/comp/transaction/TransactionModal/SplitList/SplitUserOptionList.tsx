@@ -60,7 +60,7 @@ const SplitUserOptionList = (props: Props) => {
                 id: null,
                 transactionId: transaction.id,
                 userId: user.id,
-                categoryArray: appUserCategoryArray,
+                categoryArray: structuredClone(appUserCategoryArray),
               });
 
               props.setUnsavedSplitArray(updatedSplitArray);
