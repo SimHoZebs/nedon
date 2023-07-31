@@ -14,6 +14,7 @@ const Home: NextPage = () => {
   const [userIdArray, setUserIdArray] = useState<string[]>([]);
   const allUsers = trpc.user.getAll.useQuery(userIdArray, {
     staleTime: Infinity,
+    enabled: userIdArray.length > 0,
   });
 
   useEffect(() => {
@@ -135,15 +136,18 @@ const Home: NextPage = () => {
                     <div className="flex h-full w-px bg-zinc-500"></div>
                   </>
                 )}
+
                 <Button
                   title="Delete user"
                   className="text-pink-300"
                   onClick={async (e) => {
                     e.stopPropagation();
-                    if (!user.groupArray) return;
-                    await deleteGroup.mutateAsync({
-                      id: user.groupArray[0].id,
-                    });
+                    if (user.groupArray && user.groupArray.length > 0) {
+                      await deleteGroup.mutateAsync({
+                        id: user.groupArray[0].id,
+                      });
+                    }
+
                     await deleteUser.mutateAsync(user.id);
                     setUserIdArray((prev) =>
                       prev.filter((userId) => userId !== user.id)
@@ -196,6 +200,7 @@ const CreateUserBtn = (props: Props) => {
         e.stopPropagation();
         const user = await createUser.mutateAsync();
         await createGroup.mutateAsync({ id: user.id });
+        if (createGroup.error) console.error(createGroup.error);
 
         const publicToken = await sandboxPublicToken.refetch();
         if (!publicToken.data) throw new Error("no public token");

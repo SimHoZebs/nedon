@@ -58,7 +58,7 @@ model User {
 model Transaction {
   id         String  @id @default(cuid()) //transaction_id UUID for Plaid transactions, CUID for manually created transactions
   ownerId    String
-  owner      User    @relation(fields: [ownerId], references: [id])
+  owner      User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   splitArray Split[]
 }
 
@@ -67,7 +67,7 @@ model Category {
   nameArray String[]
   amount    Float
 
-  Split   Split  @relation(fields: [splitId], references: [id])
+  Split   Split  @relation(fields: [splitId], references: [id], onDelete: Cascade)
   splitId String
 }
 
@@ -75,10 +75,10 @@ model Split {
   id String @id @default(uuid())
 
   transactionId String
-  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+  transaction   Transaction? @relation(fields: [transactionId], references: [id], onDelete: Cascade)
 
   categoryArray Category[]
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
