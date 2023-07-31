@@ -12,7 +12,6 @@ interface Props {
 const TransactionCard = (props: Props) => {
   const { appUser } = useStoreState((state) => state);
 
-  //TODO: fix this later
   const splitAmount = props.transaction.splitArray
     .find((split) => split.userId === appUser?.id)
     ?.categoryArray.reduce((total, category) => total + category.amount, 0);
@@ -34,7 +33,7 @@ const TransactionCard = (props: Props) => {
             props.transaction.amount > 0 ? "" : "text-green-300"
           }`}
         >
-          {splitAmount && (
+          {props.transaction.splitArray.length > 1 && (
             <Icon icon="lucide:split" width={16} className="text-zinc-400" />
           )}
           <div>
