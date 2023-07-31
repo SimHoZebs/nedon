@@ -41,6 +41,7 @@ const transactionRouter = router({
       return {
         ...input.plaidTransaction,
         ...transactionInDB,
+        inDB: !!transactionInDB,
       };
     }),
 
@@ -219,6 +220,26 @@ const transactionRouter = router({
       });
 
       return transaction;
+    }),
+
+  delete: procedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      await db.transaction.delete({
+        where: {
+          id: input.id,
+        },
+      });
+    }),
+
+  deleteAll: procedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      await db.transaction.deleteMany({
+        where: {
+          ownerId: input.id,
+        },
+      });
     }),
 });
 
