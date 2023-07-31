@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SplitClientSide, isSplitInDB } from "@/util/types";
 import ActionBtn from "@/comp/Button/ActionBtn";
 import UserSplit from "./UserSplit";
@@ -31,6 +31,13 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const [isManaging, setIsManaging] = useState(false);
   useState<SplitClientSide[]>();
 
+  useEffect(() => {
+    console.log("syncing unsavedSplitArray with transaction.splitArray");
+
+    if (transaction) {
+      setUnsavedSplitArray(structuredClone(transaction.splitArray));
+    }
+  }, [transaction]);
   const amount = transaction ? transaction.amount : 0;
 
   const calcSplitTotal = (split: SplitClientSide) => {
@@ -47,6 +54,43 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
         0
       ) * 100
     ) / 100;
+
+  const saveChanges = async () => {
+    if (!appUser || !transaction) return;
+
+    const splitToDeleteArray = transaction.splitArray.filter(
+      (split) =>
+        !unsavedSplitArray.find((unsavedSplit) => unsavedSplit.id === split.id)
+    );
+
+    console.log("Deleting following splits", splitToDeleteArray);
+
+    splitToDeleteArray.forEach(async (split) => {
+      if (split.id) await deleteSplit.mutateAsync({ splitId: split.id });
+    });
+
+    if (!transaction.inDB) {
+      await createTransaction.mutateAsync({
+        userId: appUser.id,
+        transactionId: transaction.id,
+        splitArray: unsavedSplitArray,
+      });
+    } else {
+      unsavedSplitArray.forEach(async (split) => {
+        if (!isSplitInDB(split)) {
+          console.log("split", split, " is not in DB, creating new split");
+          await createSplit.mutateAsync({ split });
+        } else {
+          await upsertManyCategory.mutateAsync({
+            categoryArray: split.categoryArray,
+          });
+        }
+      });
+    }
+
+    setIsManaging(false);
+    await queryClient.transaction.get.refetch();
+  };
 
   return (
     appUser &&
@@ -65,50 +109,7 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
               <H3>Split</H3>
               {isManaging ? (
                 <div className="flex gap-x-2">
-                  <ActionBtn
-                    onClick={async () => {
-                      const splitToDeleteArray = transaction.splitArray.filter(
-                        (split) =>
-                          unsavedSplitArray.find(
-                            (unsavedSplit) => unsavedSplit.id !== split.id
-                          )
-                      );
-                      console.log("split to delete", splitToDeleteArray);
-
-                      splitToDeleteArray.forEach(async (split) => {
-                        if (split.id)
-                          await deleteSplit.mutateAsync({ splitId: split.id });
-                      });
-
-                      if (!transaction.inDB) {
-                        await createTransaction.mutateAsync({
-                          userId: appUser.id,
-                          transactionId: transaction.id,
-                          splitArray: unsavedSplitArray,
-                        });
-                      } else {
-                        unsavedSplitArray.forEach(async (split) => {
-                          if (!isSplitInDB(split)) {
-                            console.log(
-                              "split is not in DB, it's ID is",
-                              split
-                            );
-
-                            await createSplit.mutateAsync({ split });
-                          } else {
-                            await upsertManyCategory.mutateAsync({
-                              categoryArray: split.categoryArray,
-                            });
-                          }
-                        });
-                      }
-
-                      setIsManaging(false);
-                      await queryClient.transaction.get.refetch();
-                    }}
-                  >
-                    Save changes
-                  </ActionBtn>
+                  <ActionBtn onClick={saveChanges}>Save changes</ActionBtn>
 
                   <ActionBtn
                     variant="negative"
