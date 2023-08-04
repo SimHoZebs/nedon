@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Icon } from "@iconify-icon/react";
 import { SplitClientSide } from "@/util/types";
 import { useStoreState } from "@/util/store";
+import { getCategoryStyle } from "@/util/category";
 
 const inputStyle =
   "h-7 w-16 border-b-2 border-zinc-900 bg-zinc-900 p-1 hover:border-zinc-500 focus-visible:outline-none sm:w-24";
@@ -18,6 +19,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 
 const UserSplit = (props: Props) => {
   const { appUser } = useStoreState((state) => state);
+  const [showDetail, setShowDetail] = useState(false);
 
   return (
     <div className="flex flex-col gap-y-1">
@@ -90,8 +92,38 @@ const UserSplit = (props: Props) => {
         </div>
       </div>
 
-      <button className="group mb-4 flex h-0 w-full justify-center overflow-hidden rounded-b-lg bg-zinc-800 p-1 hover:m-0 hover:h-fit">
-        <Icon icon="mdi:chevron-down" width={16} />
+      <button
+        className={`group mb-5 flex w-full flex-col justify-center overflow-hidden rounded-b-lg bg-zinc-800 ${
+          showDetail || "h-1 hover:m-0 hover:h-fit"
+        }`}
+        onClick={() => setShowDetail(!showDetail)}
+      >
+        {showDetail ? (
+          <div className="flex w-full flex-col items-center border-x-2 border-t-2 border-zinc-800 bg-zinc-900">
+            {props.split.categoryArray.map((category, i) => (
+              <div className="my-1 flex items-center gap-x-1" key={i}>
+                <Icon
+                  className={
+                    getCategoryStyle(category.nameArray).bgColor +
+                    " rounded-full p-1 text-zinc-900"
+                  }
+                  icon={getCategoryStyle(category.nameArray).icon}
+                />
+                <div>
+                  <p className="text-xs font-light text-zinc-300">
+                    {category.nameArray[category.nameArray.length - 1]}
+                  </p>
+                  <p className="text-xs font-light text-zinc-300">
+                    ${category.amount}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : null}
+        <div className="m-1 flex h-fit w-full justify-center bg-zinc-800">
+          <Icon icon="formkit:open" width={16} height={16} />
+        </div>
       </button>
     </div>
   );
