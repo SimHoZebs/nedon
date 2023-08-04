@@ -7,7 +7,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 const Modal = (props: Props) => {
   return (
     <div
-      className="absolute left-0 top-0 z-10 flex h-[100dvh] w-[100dvw] items-center bg-zinc-900 bg-opacity-70 backdrop-blur-sm sm:justify-center"
+      className="absolute left-0 top-0 z-10 flex h-[100dvh] w-[100dvw] items-center overflow-hidden bg-zinc-900 bg-opacity-70 backdrop-blur-sm sm:justify-center"
       onMouseDown={(e) => {
         props.setShowModal(false);
         e.stopPropagation();

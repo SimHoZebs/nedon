@@ -1,15 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MergedCategory, SplitClientSide } from "@/util/types";
 import CategoryPicker from "./CategoryPicker";
 import { emptyCategory, mergeCategoryArray } from "@/util/category";
-import { useStoreActions, useStoreState } from "@/util/store";
+import { useStoreState } from "@/util/store";
 import CategoryChip from "./CategoryChip";
+import { trpc } from "@/util/trpc";
 
 const Category = () => {
-  const { currentTransaction: transaction } = useStoreState((state) => state);
-  const { setCurrentTransaction: setTransaction } = useStoreActions(
-    (actions) => actions
+  const { appUser, currentTransaction } = useStoreState((state) => state);
+
+  const { data: transaction } = trpc.transaction.get.useQuery(
+    { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
+    { enabled: !!currentTransaction && !!appUser?.id }
   );
+  const categoryPickerRef = useRef<HTMLDivElement>(null);
 
   const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
     transaction ? structuredClone(transaction.splitArray) : []
@@ -17,12 +21,25 @@ const Category = () => {
   const [unsavedMergedCategoryArray, setUnsavedMergedCategoryArray] = useState(
     mergeCategoryArray(unsavedSplitArray)
   );
+
+  //Indicator for if (undefined) and which (number) category is being edited. 'if' is needed for CategoryChip.tsx to highlight the editing category.
   const [editingMergedCategoryIndex, setEditingMergedCategoryIndex] =
     useState<number>();
+
+  //Picker always exists; Modal.tsx hides it with overflow-hidden
   const [pickerPosition, setPickerPosition] = useState<{
     x: number;
     y: number;
-  }>({ x: 0, y: 0 });
+  }>({ x: -400, y: 0 });
+  const queryClient = trpc.useContext();
+
+  useEffect(() => {
+    console.log("syncing unsavedSplitArray with transaction.splitArray");
+
+    if (transaction) {
+      setUnsavedSplitArray(structuredClone(transaction.splitArray));
+    }
+  }, [transaction]);
 
   return (
     transaction && (
@@ -31,7 +48,7 @@ const Category = () => {
           <h4 className="text-lg font-medium">Categories</h4>
           <button
             className="rounded-lg bg-zinc-800 p-2"
-            onClick={() => {
+            onClick={async (e) => {
               const updatedSplitArray = structuredClone(unsavedSplitArray);
 
               updatedSplitArray.forEach((split) => {
@@ -46,9 +63,27 @@ const Category = () => {
                 mergeCategoryArray(updatedSplitArray);
 
               setUnsavedMergedCategoryArray(updatedMergedCategoryArray);
-              //overcoming batch state update
+
+              //The index is not referenced from the react state as that wouldn't have updated yet (See: batch state update).
               const index = unsavedMergedCategoryArray.length;
               setEditingMergedCategoryIndex(index);
+
+              const pickerOffsets =
+                categoryPickerRef.current?.getBoundingClientRect();
+
+              if (!pickerOffsets)
+                throw new Error(
+                  `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`
+                );
+
+              const clickPositionOffsets =
+                e.currentTarget.getBoundingClientRect();
+              setPickerPosition({
+                x: clickPositionOffsets.right - pickerOffsets?.width,
+                y: clickPositionOffsets.bottom + 8,
+              });
+
+              await queryClient.transaction.get.refetch();
             }}
           >
             Create category
@@ -69,9 +104,18 @@ const Category = () => {
                 }
                 categoryChipClick={(e) => {
                   setEditingMergedCategoryIndex(index);
+
+                  const pickerOffsets =
+                    categoryPickerRef.current?.getBoundingClientRect();
+
+                  if (!pickerOffsets)
+                    throw new Error(
+                      `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`
+                    );
+
                   const offsets = e.currentTarget.getBoundingClientRect();
                   setPickerPosition({
-                    x: offsets.left,
+                    x: offsets.right - pickerOffsets?.width,
                     y: offsets.bottom + 8,
                   });
                 }}
@@ -79,23 +123,32 @@ const Category = () => {
             ))}
           </div>
 
-          {editingMergedCategoryIndex !== undefined ? (
-            <div>
-              <CategoryPicker
-                setUnsavedMergedCategoryArray={setUnsavedMergedCategoryArray}
-                editingMergedCategory={
-                  unsavedMergedCategoryArray[editingMergedCategoryIndex]
-                }
-                editingMergedCategoryIndex={editingMergedCategoryIndex}
-                setEditingMergedCategoryIndex={setEditingMergedCategoryIndex}
-                position={pickerPosition}
-                cleanup={() => {
-                  setEditingMergedCategoryIndex(undefined);
-                }}
-              />
-            </div>
-          ) : null}
+          <CategoryPicker
+            ref={categoryPickerRef}
+            setUnsavedMergedCategoryArray={setUnsavedMergedCategoryArray}
+            //Fallback to 0 for initial boundingClient size.
+            editingMergedCategory={
+              unsavedMergedCategoryArray[editingMergedCategoryIndex || 0]
+            }
+            editingMergedCategoryIndex={editingMergedCategoryIndex || 0}
+            setEditingMergedCategoryIndex={setEditingMergedCategoryIndex}
+            position={pickerPosition}
+            cleanup={() => {
+              setEditingMergedCategoryIndex(undefined);
+              setPickerPosition({
+                x: -400,
+                y: 0,
+              });
+            }}
+          />
         </div>
+        <button
+          onClick={() =>
+            console.log(categoryPickerRef.current?.getBoundingClientRect())
+          }
+        >
+          test
+        </button>
 
         <div>
           {/* <p className="h-4 text-xs text-pink-300 ">
