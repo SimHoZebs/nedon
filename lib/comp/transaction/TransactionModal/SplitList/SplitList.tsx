@@ -4,19 +4,21 @@ import { SplitClientSide, isSplitInDB } from "@/util/types";
 import ActionBtn from "@/comp/Button/ActionBtn";
 import UserSplit from "./UserSplit";
 import { trpc } from "@/util/trpc";
-import { useStoreActions, useStoreState } from "@/util/store";
+import { useStoreState } from "@/util/store";
 import SplitUserOptionList from "./SplitUserOptionList";
 import H3 from "@/comp/H3";
 import Button from "@/comp/Button/Button";
 
-const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
+  unsavedSplitArray: SplitClientSide[];
+  setUnsavedSplitArray: React.Dispatch<React.SetStateAction<SplitClientSide[]>>;
+}
+
+const SplitList = (props: Props) => {
   const { appUser, currentTransaction } = useStoreState((state) => state);
   const { data: transaction } = trpc.transaction.get.useQuery(
     { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
     { enabled: !!currentTransaction && !!appUser?.id }
-  );
-  const { setCurrentTransaction: setTransaction } = useStoreActions(
-    (actions) => actions
   );
 
   const deleteSplit = trpc.split.delete.useMutation();
@@ -25,9 +27,6 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const createSplit = trpc.split.create.useMutation();
   const upsertManyCategory = trpc.category.upsertMany.useMutation();
 
-  const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
-    transaction ? structuredClone(transaction.splitArray) : []
-  );
   const [isManaging, setIsManaging] = useState(false);
   useState<SplitClientSide[]>();
 
@@ -35,9 +34,10 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
     console.log("syncing unsavedSplitArray with transaction.splitArray");
 
     if (transaction) {
-      setUnsavedSplitArray(structuredClone(transaction.splitArray));
+      props.setUnsavedSplitArray(structuredClone(transaction.splitArray));
     }
-  }, [transaction]);
+  }, [props, transaction]);
+
   const amount = transaction ? transaction.amount : 0;
 
   const calcSplitTotal = (split: SplitClientSide) => {
@@ -49,18 +49,28 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   let updatedTotalSplit =
     Math.floor(
-      unsavedSplitArray.reduce(
+      props.unsavedSplitArray.reduce(
         (amount, split) => amount + calcSplitTotal(split),
         0
       ) * 100
     ) / 100;
 
   const saveChanges = async () => {
-    if (!appUser || !transaction) return;
+    if (!appUser || !transaction) {
+      console.error(
+        "appUser or transaction is undefined. Appuser:",
+        appUser,
+        "transaction:",
+        transaction
+      );
+      return;
+    }
 
     const splitToDeleteArray = transaction.splitArray.filter(
       (split) =>
-        !unsavedSplitArray.find((unsavedSplit) => unsavedSplit.id === split.id)
+        !props.unsavedSplitArray.find(
+          (unsavedSplit) => unsavedSplit.id === split.id
+        )
     );
 
     console.log("Deleting following splits", splitToDeleteArray);
@@ -73,10 +83,10 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
       await createTransaction.mutateAsync({
         userId: appUser.id,
         transactionId: transaction.id,
-        splitArray: unsavedSplitArray,
+        splitArray: props.unsavedSplitArray,
       });
     } else {
-      unsavedSplitArray.forEach(async (split) => {
+      props.unsavedSplitArray.forEach(async (split) => {
         if (!isSplitInDB(split)) {
           console.log("split", split, " is not in DB, creating new split");
           await createSplit.mutateAsync({ split });
@@ -98,12 +108,12 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
       <div className="flex w-full flex-col gap-y-3">
         <div className="flex gap-x-2">
           {props.children}
-          {unsavedSplitArray.length === 1 && !isManaging && (
+          {props.unsavedSplitArray.length === 1 && !isManaging && (
             <ActionBtn onClick={() => setIsManaging(true)}>Split</ActionBtn>
           )}
         </div>
 
-        {(unsavedSplitArray.length > 1 || isManaging) && (
+        {(props.unsavedSplitArray.length > 1 || isManaging) && (
           <div className="flex flex-col gap-y-2">
             <div className="flex w-full justify-between">
               <H3>Split</H3>
@@ -129,7 +139,7 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
               )}
             </div>
 
-            {unsavedSplitArray.map((split, i) => (
+            {props.unsavedSplitArray.map((split, i) => (
               <div
                 key={i}
                 className="flex w-full items-center gap-x-2 sm:gap-x-3"
@@ -137,8 +147,9 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                 <UserSplit
                   isManaging={isManaging}
                   onRemoveUser={() => {
-                    const updatedSplitArray =
-                      structuredClone(unsavedSplitArray);
+                    const updatedSplitArray = structuredClone(
+                      props.unsavedSplitArray
+                    );
                     const splicedSplit = updatedSplitArray.splice(i, 1);
                     const amount = splicedSplit[0].categoryArray.reduce(
                       (total, category) => total + category.amount,
@@ -151,17 +162,18 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
                       });
                     });
 
-                    setUnsavedSplitArray(updatedSplitArray);
+                    props.setUnsavedSplitArray(updatedSplitArray);
                   }}
                   onAmountChange={(amount: number) => {
-                    const updatedSplitArray =
-                      structuredClone(unsavedSplitArray);
+                    const updatedSplitArray = structuredClone(
+                      props.unsavedSplitArray
+                    );
                     updatedSplitArray[i].categoryArray.forEach((category) => {
                       category.amount =
                         amount / updatedSplitArray[i].categoryArray.length;
                     });
 
-                    setUnsavedSplitArray(updatedSplitArray);
+                    props.setUnsavedSplitArray(updatedSplitArray);
                   }}
                   amount={amount}
                   split={split}
@@ -184,15 +196,15 @@ const SplitList = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
         <div className="h-5 text-red-800">
           {updatedTotalSplit !== amount &&
-            unsavedSplitArray.length > 0 &&
+            props.unsavedSplitArray.length > 0 &&
             `Split is ${updatedTotalSplit > amount ? "greater " : "less "}
           than the amount (${`updatedTotalSplit $${updatedTotalSplit}`})`}
         </div>
 
         {isManaging && (
           <SplitUserOptionList
-            unsavedSplitArray={unsavedSplitArray}
-            setUnsavedSplitArray={setUnsavedSplitArray}
+            unsavedSplitArray={props.unsavedSplitArray}
+            setUnsavedSplitArray={props.setUnsavedSplitArray}
           />
         )}
       </div>

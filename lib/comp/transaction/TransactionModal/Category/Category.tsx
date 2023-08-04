@@ -6,7 +6,12 @@ import { useStoreState } from "@/util/store";
 import CategoryChip from "./CategoryChip";
 import { trpc } from "@/util/trpc";
 
-const Category = () => {
+interface Props {
+  unsavedSplitArray: SplitClientSide[];
+  setUnsavedSplitArray: React.Dispatch<React.SetStateAction<SplitClientSide[]>>;
+}
+
+const Category = (props: Props) => {
   const { appUser, currentTransaction } = useStoreState((state) => state);
 
   const { data: transaction } = trpc.transaction.get.useQuery(
@@ -15,11 +20,8 @@ const Category = () => {
   );
   const categoryPickerRef = useRef<HTMLDivElement>(null);
 
-  const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
-    transaction ? structuredClone(transaction.splitArray) : []
-  );
   const [unsavedMergedCategoryArray, setUnsavedMergedCategoryArray] = useState(
-    mergeCategoryArray(unsavedSplitArray)
+    mergeCategoryArray(props.unsavedSplitArray)
   );
 
   //Indicator for if (undefined) and which (number) category is being edited. 'if' is needed for CategoryChip.tsx to highlight the editing category.
@@ -37,9 +39,9 @@ const Category = () => {
     console.log("syncing unsavedSplitArray with transaction.splitArray");
 
     if (transaction) {
-      setUnsavedSplitArray(structuredClone(transaction.splitArray));
+      props.setUnsavedSplitArray(structuredClone(transaction.splitArray));
     }
-  }, [transaction]);
+  }, [props, transaction]);
 
   return (
     transaction && (
@@ -49,7 +51,9 @@ const Category = () => {
           <button
             className="rounded-lg bg-zinc-800 p-2"
             onClick={async (e) => {
-              const updatedSplitArray = structuredClone(unsavedSplitArray);
+              const updatedSplitArray = structuredClone(
+                props.unsavedSplitArray
+              );
 
               updatedSplitArray.forEach((split) => {
                 split.categoryArray.push(
@@ -58,7 +62,7 @@ const Category = () => {
                 return split;
               });
 
-              setUnsavedSplitArray(updatedSplitArray);
+              props.setUnsavedSplitArray(updatedSplitArray);
               const updatedMergedCategoryArray: MergedCategory[] =
                 mergeCategoryArray(updatedSplitArray);
 

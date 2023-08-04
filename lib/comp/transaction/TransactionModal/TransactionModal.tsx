@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Modal from "@/comp/Modal";
 import { useStoreState } from "@/util/store";
 import ActionBtn from "@/comp/Button/ActionBtn";
@@ -6,6 +6,7 @@ import Category from "./Category/Category";
 import H1 from "@/comp/H1";
 import SplitList from "./SplitList/SplitList";
 import { trpc } from "@/util/trpc";
+import { SplitClientSide } from "@/util/types";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -19,6 +20,10 @@ const TransactionModal = (props: Props) => {
   );
   const deleteTransaction = trpc.transaction.delete.useMutation();
   const queryClient = trpc.useContext();
+
+  const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
+    transaction ? structuredClone(transaction.splitArray) : []
+  );
 
   const amount = currentTransaction ? currentTransaction.amount : 0;
 
@@ -39,12 +44,18 @@ const TransactionModal = (props: Props) => {
 
           <div className="flex justify-between">
             <div className="flex flex-col ">
-              <SplitList>
+              <SplitList
+                unsavedSplitArray={unsavedSplitArray}
+                setUnsavedSplitArray={setUnsavedSplitArray}
+              >
                 <H1>${amount * -1}</H1>
               </SplitList>
             </div>
 
-            <Category />
+            <Category
+              unsavedSplitArray={unsavedSplitArray}
+              setUnsavedSplitArray={setUnsavedSplitArray}
+            />
           </div>
         </div>
 
