@@ -35,14 +35,6 @@ const Category = (props: Props) => {
   }>({ x: -400, y: 0 });
   const queryClient = trpc.useContext();
 
-  useEffect(() => {
-    console.log("syncing unsavedSplitArray with transaction.splitArray");
-
-    if (transaction) {
-      props.setUnsavedSplitArray(structuredClone(transaction.splitArray));
-    }
-  }, [props, transaction]);
-
   return (
     transaction && (
       <div>

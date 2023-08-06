@@ -30,14 +30,6 @@ const SplitList = (props: Props) => {
   const [isManaging, setIsManaging] = useState(false);
   useState<SplitClientSide[]>();
 
-  useEffect(() => {
-    console.log("syncing unsavedSplitArray with transaction.splitArray");
-
-    if (transaction) {
-      props.setUnsavedSplitArray(structuredClone(transaction.splitArray));
-    }
-  }, [props, transaction]);
-
   const amount = transaction ? transaction.amount : 0;
 
   const calcSplitTotal = (split: SplitClientSide) => {

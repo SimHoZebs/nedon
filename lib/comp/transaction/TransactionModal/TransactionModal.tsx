@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "@/comp/Modal";
 import { useStoreState } from "@/util/store";
 import ActionBtn from "@/comp/Button/ActionBtn";
@@ -24,6 +24,14 @@ const TransactionModal = (props: Props) => {
   const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
     transaction ? structuredClone(transaction.splitArray) : []
   );
+
+  useEffect(() => {
+    console.log("syncing unsavedSplitArray with transaction.splitArray");
+
+    if (transaction) {
+      setUnsavedSplitArray(structuredClone(transaction.splitArray));
+    }
+  }, [transaction]);
 
   const amount = currentTransaction ? currentTransaction.amount : 0;
 
