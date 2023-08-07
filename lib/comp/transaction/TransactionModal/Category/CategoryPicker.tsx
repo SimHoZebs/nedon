@@ -60,8 +60,15 @@ const CategoryPicker = forwardRef(
         props.createCategoryForManySplit(updatedMergedCategory.nameArray);
       }
 
-      await queryClient.transaction.invalidate();
+      props.setUnsavedMergedCategoryArray((prev) => {
+        const clone = structuredClone(prev);
+        clone[props.editingMergedCategoryIndex] = updatedMergedCategory;
+        return clone;
+      });
+
       props.closePicker();
+
+      queryClient.transaction.invalidate();
     };
 
     useEffect(() => {

@@ -36,7 +36,8 @@ const TransactionModal = (props: Props) => {
   const amount = currentTransaction ? currentTransaction.amount : 0;
 
   return (
-    transaction && (
+    transaction &&
+    !!unsavedSplitArray.length && (
       <Modal setShowModal={props.setShowModal}>
         <div className="flex flex-col justify-between gap-y-2">
           <div className="flex items-start justify-between gap-y-2">
@@ -83,7 +84,7 @@ const TransactionModal = (props: Props) => {
                 id: transaction.id,
               });
 
-              await queryClient.transaction.get.refetch();
+              await queryClient.transaction.invalidate();
             }}
           >
             Reset transaction data
