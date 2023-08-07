@@ -7,16 +7,13 @@ import categoryStyleArray from "@/util/categoryStyle";
 
 interface Props {
   createCategoryForManySplit: (nameArray: string[]) => void;
-  translateAmountChange: () => void;
+  updateCategoryNameArrayForAllSplit: (newNameArray: string[]) => void;
   unsavedMergedCategoryArray: MergedCategory[];
   setUnsavedMergedCategoryArray: React.Dispatch<
     React.SetStateAction<MergedCategory[]>
   >;
   editingMergedCategoryIndex: number;
-  setEditingMergedCategoryIndex: React.Dispatch<
-    React.SetStateAction<number | undefined>
-  >;
-  resetPicker: () => void;
+  closePicker: () => void;
   position: { x: number; y: number };
 }
 
@@ -42,7 +39,7 @@ const CategoryPicker = forwardRef(
       if (!categoryOptionArray.data) return;
 
       setCurrentOptionArray(categoryOptionArray.data);
-      props.resetPicker();
+      props.closePicker();
     };
 
     /**
@@ -56,12 +53,15 @@ const CategoryPicker = forwardRef(
         updatedMergedCategory.nameArray.push(clickedTreedCategory.name);
 
       if (editingMergedCategory.id) {
-        props.translateAmountChange();
+        props.updateCategoryNameArrayForAllSplit(
+          updatedMergedCategory.nameArray
+        );
       } else {
         props.createCategoryForManySplit(updatedMergedCategory.nameArray);
       }
-      await queryClient.transaction.get.refetch();
-      props.resetPicker();
+
+      await queryClient.transaction.invalidate();
+      props.closePicker();
     };
 
     useEffect(() => {

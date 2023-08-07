@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { SplitClientSide, isSplitInDB } from "@/util/types";
+import { MergedCategory, SplitClientSide, isSplitInDB } from "@/util/types";
 import CategoryPicker from "./CategoryPicker";
 import { emptyCategory, mergeCategoryArray } from "@/util/category";
 import { useStoreState } from "@/util/store";
@@ -46,27 +46,31 @@ const Category = (props: Props) => {
     });
   };
 
-  const translateAmountChange = () => {
-    const mergedCategoryInDBArray = mergeCategoryArray(props.unsavedSplitArray);
-    const updatedMergedCategoryArray = mergedCategoryInDBArray.filter(
-      (mergedCategoryInDB, index) =>
-        mergedCategoryInDB.amount !== unsavedMergedCategoryArray[index].amount
-    );
-
+  const updateManyCategoryNameArray = (updatedNameArray: string[]) => {
     props.unsavedSplitArray.forEach((unsavedSplit) => {
-      if (!isSplitInDB(unsavedSplit)) return;
+      if (!isSplitInDB(unsavedSplit)) {
+        console.error("Split not in DB, can not update category.");
+        return;
+      }
 
-      const categoryArrayClone = structuredClone(unsavedSplit.categoryArray);
-      const updatedCategoryArray = categoryArrayClone.map(
-        (updatedCategory, index) => {
-          return {
-            ...updatedCategory,
-            amount: updatedMergedCategoryArray[index].amount,
-          };
-        }
+      const { categoryArray: updatedCategoryArray } =
+        structuredClone(unsavedSplit);
+
+      const updatedCategoryIndex = updatedCategoryArray.findIndex(
+        (categoryInDB) =>
+          categoryInDB.nameArray.join() !== updatedNameArray.join()
       );
 
-      upsertManyCategory.mutateAsync({ categoryArray: updatedCategoryArray });
+      if (updatedCategoryIndex === -1) {
+        console.error("target category not found in DB.");
+        return;
+      }
+
+      updatedCategoryArray[updatedCategoryIndex].nameArray = updatedNameArray;
+
+      upsertManyCategory.mutateAsync({
+        categoryArray: updatedCategoryArray,
+      });
     });
   };
 
@@ -88,18 +92,6 @@ const Category = (props: Props) => {
           <button
             className="rounded-lg bg-zinc-800 p-2"
             onClick={async (e) => {
-              // const updatedSplitArray = structuredClone(
-              //   props.unsavedSplitArray
-              // );
-
-              // updatedSplitArray.forEach((split) => {
-              //   split.categoryArray.push(
-              //     emptyCategory({ amount: 0, splitId: split.id })
-              //   );
-              //   return split;
-              // });
-
-              // props.setUnsavedSplitArray(updatedSplitArray);
               const mergedCategoryArrayClone = structuredClone(
                 unsavedMergedCategoryArray
               );
@@ -170,14 +162,13 @@ const Category = (props: Props) => {
           <CategoryPicker
             ref={categoryPickerRef}
             setUnsavedMergedCategoryArray={setUnsavedMergedCategoryArray}
-            translateAmountChange={translateAmountChange}
+            updateCategoryNameArrayForAllSplit={updateManyCategoryNameArray}
             createCategoryForManySplit={createCategoryForManySplit}
             //Fallback to 0 for initial boundingClient size.
             unsavedMergedCategoryArray={unsavedMergedCategoryArray}
             editingMergedCategoryIndex={editingMergedCategoryIndex || 0}
-            setEditingMergedCategoryIndex={setEditingMergedCategoryIndex}
             position={pickerPosition}
-            resetPicker={() => {
+            closePicker={() => {
               setEditingMergedCategoryIndex(undefined);
               setPickerPosition({
                 x: -400,
