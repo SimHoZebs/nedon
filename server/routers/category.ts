@@ -7,11 +7,12 @@ import { CategoryClientSideModel } from "@/util/types";
 
 const categoryRouter = router({
   create: procedure
-    .input(CategoryClientSideModel.extend({ splitId: z.string() }))
+    .input(
+      CategoryClientSideModel.extend({ splitId: z.string(), id: z.undefined() })
+    )
     .mutation(async ({ input }) => {
-      const { id, ...rest } = input;
       await db.category.create({
-        data: rest,
+        data: input,
       });
     }),
 

@@ -19,7 +19,12 @@ export const CategoryClientSideModel = CategoryModel.extend({
   splitId: z.string().nullable(),
 });
 
-export type categoryInSplitInDB = z.infer<typeof CategoryInSplitInDBModel>;
+export function isCategoryInSplitInDB(
+  category: CategoryClientSide
+): category is CategoryInSplitInDB {
+  return !!category.splitId;
+}
+export type CategoryInSplitInDB = z.infer<typeof CategoryInSplitInDBModel>;
 const CategoryInSplitInDBModel = CategoryModel.extend({
   id: z.string().nullable(),
 });
@@ -47,17 +52,17 @@ export type FullTransaction = Transaction &
     inDB: boolean;
   };
 
-export type HierarchicalCategoryWithTransaction = {
+export type TreedCategoryWithTransaction = {
   name: string;
   spending: number;
   received: number;
   transactionArray: FullTransaction[];
-  subCategoryArray: HierarchicalCategoryWithTransaction[];
+  subCategoryArray: TreedCategoryWithTransaction[];
 };
 
-export type HierarchicalCategory = {
+export type TreedCategory = {
   name: string;
-  subCategoryArray: HierarchicalCategory[];
+  subCategoryArray: TreedCategory[];
 };
 
 //temporary workaround for failing trpc queries

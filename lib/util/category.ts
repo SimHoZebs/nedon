@@ -1,6 +1,6 @@
 import {
   CategoryClientSide,
-  HierarchicalCategory,
+  TreedCategory,
   MergedCategory,
   SplitClientSide,
 } from "./types";
@@ -55,7 +55,7 @@ export const mergeCategoryArray = (splitArray: SplitClientSide[]) => {
 export const convertPlaidCategoriesToHierarchicalArray = (
   plaidCategoryArray: PlaidCategory[]
 ) => {
-  const resultArray: HierarchicalCategory[] = [];
+  const resultArray: TreedCategory[] = [];
 
   plaidCategoryArray.forEach((category) => {
     fillCategoryInHierarchy(resultArray, { ...category });
@@ -64,9 +64,9 @@ export const convertPlaidCategoriesToHierarchicalArray = (
 };
 
 export const fillCategoryInHierarchy = (
-  resultArray: HierarchicalCategory[],
+  resultArray: TreedCategory[],
   plaidCategory: PlaidCategory
-): HierarchicalCategory[] => {
+): TreedCategory[] => {
   const hierarchy = plaidCategory.hierarchy;
 
   const firstCategory = hierarchy[0];

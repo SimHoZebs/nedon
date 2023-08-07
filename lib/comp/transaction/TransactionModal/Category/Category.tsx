@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { MergedCategory, SplitClientSide } from "@/util/types";
+import React, { useState, useRef } from "react";
+import { SplitClientSide, isSplitInDB } from "@/util/types";
 import CategoryPicker from "./CategoryPicker";
 import { emptyCategory, mergeCategoryArray } from "@/util/category";
 import { useStoreState } from "@/util/store";
@@ -14,15 +14,61 @@ interface Props {
 const Category = (props: Props) => {
   const { appUser, currentTransaction } = useStoreState((state) => state);
 
+  const createCategory = trpc.category.create.useMutation();
+  const upsertManyCategory = trpc.category.upsertMany.useMutation();
   const { data: transaction } = trpc.transaction.get.useQuery(
     { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
     { enabled: !!currentTransaction && !!appUser?.id }
   );
+
   const categoryPickerRef = useRef<HTMLDivElement>(null);
 
   const [unsavedMergedCategoryArray, setUnsavedMergedCategoryArray] = useState(
     mergeCategoryArray(props.unsavedSplitArray)
   );
+
+  const createCategoryForManySplit = (nameArray: string[]) => {
+    //Only one category may be created at a time, so find is more suitable than filter.
+    props.unsavedSplitArray.forEach(async (unsavedSplit, index) => {
+      if (unsavedSplit.id === null) {
+        console.error(
+          "A split not in DB tried to add a category to itself.Its index in unsavedSplitArray is:",
+          index
+        );
+        return;
+      }
+
+      await createCategory.mutateAsync({
+        splitId: unsavedSplit.id!, // never null because of the if check
+        amount: 0,
+        nameArray: nameArray,
+      });
+    });
+  };
+
+  const translateAmountChange = () => {
+    const mergedCategoryInDBArray = mergeCategoryArray(props.unsavedSplitArray);
+    const updatedMergedCategoryArray = mergedCategoryInDBArray.filter(
+      (mergedCategoryInDB, index) =>
+        mergedCategoryInDB.amount !== unsavedMergedCategoryArray[index].amount
+    );
+
+    props.unsavedSplitArray.forEach((unsavedSplit) => {
+      if (!isSplitInDB(unsavedSplit)) return;
+
+      const categoryArrayClone = structuredClone(unsavedSplit.categoryArray);
+      const updatedCategoryArray = categoryArrayClone.map(
+        (updatedCategory, index) => {
+          return {
+            ...updatedCategory,
+            amount: updatedMergedCategoryArray[index].amount,
+          };
+        }
+      );
+
+      upsertManyCategory.mutateAsync({ categoryArray: updatedCategoryArray });
+    });
+  };
 
   //Indicator for if (undefined) and which (number) category is being edited. 'if' is needed for CategoryChip.tsx to highlight the editing category.
   const [editingMergedCategoryIndex, setEditingMergedCategoryIndex] =
@@ -33,7 +79,6 @@ const Category = (props: Props) => {
     x: number;
     y: number;
   }>({ x: -400, y: 0 });
-  const queryClient = trpc.useContext();
 
   return (
     transaction && (
@@ -43,25 +88,30 @@ const Category = (props: Props) => {
           <button
             className="rounded-lg bg-zinc-800 p-2"
             onClick={async (e) => {
-              const updatedSplitArray = structuredClone(
-                props.unsavedSplitArray
+              // const updatedSplitArray = structuredClone(
+              //   props.unsavedSplitArray
+              // );
+
+              // updatedSplitArray.forEach((split) => {
+              //   split.categoryArray.push(
+              //     emptyCategory({ amount: 0, splitId: split.id })
+              //   );
+              //   return split;
+              // });
+
+              // props.setUnsavedSplitArray(updatedSplitArray);
+              const mergedCategoryArrayClone = structuredClone(
+                unsavedMergedCategoryArray
               );
 
-              updatedSplitArray.forEach((split) => {
-                split.categoryArray.push(
-                  emptyCategory({ amount: 0, splitId: split.id })
-                );
-                return split;
-              });
+              mergedCategoryArrayClone.push(
+                emptyCategory({ amount: 0, splitId: null })
+              );
 
-              props.setUnsavedSplitArray(updatedSplitArray);
-              const updatedMergedCategoryArray: MergedCategory[] =
-                mergeCategoryArray(updatedSplitArray);
+              setUnsavedMergedCategoryArray(mergedCategoryArrayClone);
 
-              setUnsavedMergedCategoryArray(updatedMergedCategoryArray);
-
-              //The index is not referenced from the react state as that wouldn't have updated yet (See: batch state update).
-              const index = unsavedMergedCategoryArray.length;
+              //The index is referenced from the clone instead of the react state as they are identical and the react state wouldn't have updated yet (See: batch state update)
+              const index = mergedCategoryArrayClone.length - 1;
               setEditingMergedCategoryIndex(index);
 
               const pickerOffsets =
@@ -78,8 +128,6 @@ const Category = (props: Props) => {
                 x: clickPositionOffsets.right - pickerOffsets?.width,
                 y: clickPositionOffsets.bottom + 8,
               });
-
-              await queryClient.transaction.get.refetch();
             }}
           >
             Create category
@@ -122,14 +170,14 @@ const Category = (props: Props) => {
           <CategoryPicker
             ref={categoryPickerRef}
             setUnsavedMergedCategoryArray={setUnsavedMergedCategoryArray}
+            translateAmountChange={translateAmountChange}
+            createCategoryForManySplit={createCategoryForManySplit}
             //Fallback to 0 for initial boundingClient size.
-            editingMergedCategory={
-              unsavedMergedCategoryArray[editingMergedCategoryIndex || 0]
-            }
+            unsavedMergedCategoryArray={unsavedMergedCategoryArray}
             editingMergedCategoryIndex={editingMergedCategoryIndex || 0}
             setEditingMergedCategoryIndex={setEditingMergedCategoryIndex}
             position={pickerPosition}
-            cleanup={() => {
+            resetPicker={() => {
               setEditingMergedCategoryIndex(undefined);
               setPickerPosition({
                 x: -400,

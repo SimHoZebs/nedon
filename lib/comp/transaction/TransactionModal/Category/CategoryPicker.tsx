@@ -2,24 +2,28 @@ import React, { ForwardedRef, forwardRef, useEffect, useState } from "react";
 import { trpc } from "@/util/trpc";
 import { Icon } from "@iconify-icon/react";
 import { useStoreState } from "@/util/store";
-import { HierarchicalCategory, MergedCategory } from "@/util/types";
+import { TreedCategory, MergedCategory } from "@/util/types";
 import categoryStyleArray from "@/util/categoryStyle";
 
 interface Props {
+  createCategoryForManySplit: (nameArray: string[]) => void;
+  translateAmountChange: () => void;
+  unsavedMergedCategoryArray: MergedCategory[];
   setUnsavedMergedCategoryArray: React.Dispatch<
     React.SetStateAction<MergedCategory[]>
   >;
-  editingMergedCategory: MergedCategory;
   editingMergedCategoryIndex: number;
   setEditingMergedCategoryIndex: React.Dispatch<
     React.SetStateAction<number | undefined>
   >;
-  cleanup: () => void;
+  resetPicker: () => void;
   position: { x: number; y: number };
 }
 
 const CategoryPicker = forwardRef(
   (props: Props, ref: ForwardedRef<HTMLDivElement>) => {
+    const editingMergedCategory =
+      props.unsavedMergedCategoryArray[props.editingMergedCategoryIndex];
     const { appUser, currentTransaction } = useStoreState((state) => state);
 
     const categoryOptionArray = trpc.getCategoryOptionArray.useQuery(
@@ -28,30 +32,36 @@ const CategoryPicker = forwardRef(
         staleTime: Infinity,
       }
     );
+    const queryClient = trpc.useContext();
 
     const [currentOptionArray, setCurrentOptionArray] = useState<
-      HierarchicalCategory[]
+      TreedCategory[]
     >([]);
 
     const cleanup = () => {
       if (!categoryOptionArray.data) return;
 
       setCurrentOptionArray(categoryOptionArray.data);
-      props.cleanup();
+      props.resetPicker();
     };
 
-    const syncCategory = (hierarchicalCategory?: HierarchicalCategory) => {
-      const updatedMergedCategory = structuredClone(
-        props.editingMergedCategory
-      );
-      if (hierarchicalCategory)
-        updatedMergedCategory.nameArray.push(hierarchicalCategory.name);
+    /**
+     *
+     * @param clickedTreedCategory  if the category is assigned by click instead of the "save" button.
+     */
+    const syncCategory = async (clickedTreedCategory?: TreedCategory) => {
+      const updatedMergedCategory = structuredClone(editingMergedCategory);
 
-      props.setUnsavedMergedCategoryArray((prev) => {
-        const copy = structuredClone(prev);
-        copy[props.editingMergedCategoryIndex] = updatedMergedCategory;
-        return copy;
-      });
+      if (clickedTreedCategory)
+        updatedMergedCategory.nameArray.push(clickedTreedCategory.name);
+
+      if (editingMergedCategory.id) {
+        props.translateAmountChange();
+      } else {
+        props.createCategoryForManySplit(updatedMergedCategory.nameArray);
+      }
+      await queryClient.transaction.get.refetch();
+      props.resetPicker();
     };
 
     useEffect(() => {
@@ -86,7 +96,9 @@ const CategoryPicker = forwardRef(
                 <button
                   className="text-indigo-300 hover:text-indigo-400"
                   onClick={async () => {
-                    syncCategory();
+                    if (editingMergedCategory.id === null) {
+                      syncCategory();
+                    }
                   }}
                 >
                   save
@@ -111,16 +123,16 @@ const CategoryPicker = forwardRef(
                   onClick={async () => {
                     if (category.subCategoryArray.length === 0) {
                       console.log("syncing");
-                      await syncCategory(category);
+                      syncCategory(category);
                     } else {
                       setCurrentOptionArray(category.subCategoryArray);
 
                       props.setUnsavedMergedCategoryArray((prev) => {
                         const clone = structuredClone(prev);
                         clone[props.editingMergedCategoryIndex] = {
-                          ...props.editingMergedCategory,
+                          ...editingMergedCategory,
                           nameArray: [
-                            ...props.editingMergedCategory.nameArray,
+                            ...editingMergedCategory.nameArray,
                             category.name,
                           ],
                         };

@@ -9,16 +9,15 @@ import ActionBtn from "../lib/comp/Button/ActionBtn";
 import Button from "../lib/comp/Button/Button";
 import SettleModal from "../lib/comp/analysis/SettleModal";
 import {
-  HierarchicalCategoryWithTransaction,
+  TreedCategoryWithTransaction,
   FullTransaction,
 } from "../lib/util/types";
 import H2 from "../lib/comp/H2";
 import H4 from "../lib/comp/H4";
 import { z } from "zod";
-import { mergeCategoryArray } from "../lib/util/category";
 
 const subCategoryTotal = (
-  parentCategory: HierarchicalCategoryWithTransaction,
+  parentCategory: TreedCategoryWithTransaction,
   transactionType: "received" | "spending"
 ): number => {
   const spending = parentCategory.subCategoryArray.reduce(
@@ -36,7 +35,7 @@ const subCategoryTotal = (
 };
 
 const categoryArrayTotal = (
-  categoryArray: HierarchicalCategoryWithTransaction[],
+  categoryArray: TreedCategoryWithTransaction[],
   transactionType: "received" | "spending"
 ): number => {
   const spending = categoryArray.reduce((total, category) => {
@@ -48,9 +47,7 @@ const categoryArrayTotal = (
   return spending;
 };
 
-const render = (
-  hierarchicalCategoryArray: HierarchicalCategoryWithTransaction[]
-) =>
+const render = (hierarchicalCategoryArray: TreedCategoryWithTransaction[]) =>
   hierarchicalCategoryArray.map((category, i) => (
     <div key={i} className="border">
       <H2>{category.name}</H2>
