@@ -35,7 +35,7 @@ model Group {
   id String @id @default(uuid())
 
   ownerId    String
-  groupOwner User   @relation("mygroup", fields: [ownerId], references: [id])
+  groupOwner User   @relation("mygroup", fields: [ownerId], references: [id], onDelete: Cascade)
   userArray  User[]
 }
 
