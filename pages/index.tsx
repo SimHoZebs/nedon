@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import { trpc } from "../lib/util/trpc";
-import { useStore } from "../lib/util/store";
+import useLocalStoreDelay, { useLocalStore, useStore } from "../lib/util/store";
 import { emptyUser } from "../lib/util/user";
 import { useRouter } from "next/router";
 import { Icon } from "@iconify-icon/react";
@@ -11,48 +11,19 @@ import H1 from "../lib/comp/H1";
 const Home: NextPage = () => {
   const router = useRouter();
   const server = trpc.useContext();
-  const [userIdArray, setUserIdArray] = useState<string[]>([]);
-  const allUsers = trpc.user.getAll.useQuery(userIdArray, {
+  const userIdArray = useLocalStoreDelay(
+    useLocalStore,
+    (state) => state.userIdArray
+  );
+  const addUserId = useLocalStore((state) => state.addUserId);
+  const deleteUserId = useLocalStore((state) => state.deleteUserId);
+  const setUserIdArray = useLocalStore((state) => state.setUserIdArray);
+
+  //userIdArray will never be undefined due to enable condition.
+  const allUsers = trpc.user.getAll.useQuery(userIdArray!, {
     staleTime: Infinity,
-    enabled: userIdArray.length > 0,
+    enabled: !!userIdArray && userIdArray.length > 0,
   });
-
-  useEffect(() => {
-    const localStorageUserIdArray = localStorage.getItem("userIdArray");
-    if (!localStorageUserIdArray) return;
-
-    //initial load of browser with users
-    console.log("syncing local state using local storage");
-
-    setUserIdArray(() => localStorageUserIdArray.split(","));
-  }, []);
-
-  useEffect(() => {
-    const refetchAllUsersAndSyncLocalStorage = async () => {
-      console.log("refetching to sync local storage and local state");
-
-      const userArray = await allUsers.refetch();
-      if (!userArray.data) throw new Error("no data");
-
-      const newUserIdArray = userArray.data.map((user) => user.id);
-      setUserIdArray(() => newUserIdArray);
-      localStorage.setItem("userIdArray", newUserIdArray.join(","));
-    };
-
-    if (
-      userIdArray.length === 0 ||
-      localStorage.getItem("userIdArray") === userIdArray.join(",")
-    ) {
-      console.log("local storage and local state are already synced");
-
-      return;
-    }
-
-    console.log("syncing local storage using local state");
-
-    localStorage.setItem("userIdArray", userIdArray.join(","));
-    refetchAllUsersAndSyncLocalStorage();
-  }, [allUsers, userIdArray]);
 
   const deleteUser = trpc.user.delete.useMutation();
   const deleteGroup = trpc.group.delete.useMutation();
@@ -65,106 +36,109 @@ const Home: NextPage = () => {
   const addUserToGroup = trpc.group.addUser.useMutation();
   const removeUserFromGroup = trpc.group.removeUser.useMutation();
 
+  useEffect(() => {
+    if (!allUsers.data || !setUserIdArray) return;
+
+    setUserIdArray(allUsers.data.map((user) => user.id));
+  }, [allUsers.data, setUserIdArray]);
+
   return (
     <section className="flex h-full w-full flex-col items-center justify-center gap-y-3 text-center">
       <H1>
-        {allUsers.isLoading
-          ? "Loading available accounts...."
-          : "Choose an account"}
+        {!userIdArray ? "Loading available accounts...." : "Choose an account"}
       </H1>
 
-      {allUsers.data && !allUsers.isRefetching && (
+      {addUserId && (
         <div className="flex flex-col items-center rounded-md border border-zinc-600 ">
-          {allUsers.data.map((user) => (
-            <div
-              key={user.id}
-              className="flex w-full items-center justify-between border-b border-zinc-600 p-3 hover:cursor-pointer sm:gap-x-16"
-              onClick={async (e) => {
-                setAppUser(user);
+          {allUsers.data &&
+            allUsers.data.map((user) => (
+              <div
+                key={user.id}
+                className="flex w-full items-center justify-between border-b border-zinc-600 p-3 hover:cursor-pointer sm:gap-x-16"
+                onClick={async (e) => {
+                  setAppUser(user);
 
-                if (!user.groupArray) return;
-                const group = await server.group.get.fetch({
-                  id: user.groupArray[0].id,
-                });
+                  if (!user.groupArray) return;
+                  const group = await server.group.get.fetch({
+                    id: user.groupArray[0].id,
+                  });
 
-                if (!group) return;
-                setAppGroup(group);
-                router.push("/transactions");
-              }}
-            >
-              <div className="flex gap-x-2">
-                <p>userId: {user.id.slice(0, 8)}</p>
-              </div>
-              <div className="flex h-full min-w-fit items-center gap-x-1">
-                {appUser && appUser.id !== user.id && appGroup && (
-                  <>
-                    <Button
-                      className={`after:h-full after:w-px after:bg-zinc-500 ${
-                        appGroup.userArray?.find(
+                  if (!group) return;
+                  setAppGroup(group);
+                  router.push("/transactions");
+                }}
+              >
+                <div className="flex gap-x-2">
+                  <p>userId: {user.id.slice(0, 8)}</p>
+                </div>
+                <div className="flex h-full min-w-fit items-center gap-x-1">
+                  {appUser && appUser.id !== user.id && appGroup && (
+                    <>
+                      <Button
+                        className={`after:h-full after:w-px after:bg-zinc-500 ${
+                          appGroup.userArray?.find(
+                            (groupUser) => groupUser.id === user.id
+                          )
+                            ? "text-pink-300"
+                            : "text-blue-300"
+                        }`}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+
+                          const updatedAppGroup = appGroup.userArray?.find(
+                            (groupUser) => groupUser.id === user.id
+                          )
+                            ? await removeUserFromGroup.mutateAsync({
+                                groupId: appGroup.id,
+                                userId: user.id,
+                              })
+                            : await addUserToGroup.mutateAsync({
+                                userId: user.id,
+                                groupId: appGroup.id,
+                              });
+
+                          setAppGroup(updatedAppGroup);
+                        }}
+                      >
+                        {appGroup.userArray?.find(
                           (groupUser) => groupUser.id === user.id
-                        )
-                          ? "text-pink-300"
-                          : "text-blue-300"
-                      }`}
-                      onClick={async (e) => {
-                        e.stopPropagation();
+                        ) ? (
+                          <Icon icon="mdi:user-remove-outline" width={20} />
+                        ) : (
+                          <Icon icon="mdi:user-add-outline" width={20} />
+                        )}
+                      </Button>
 
-                        const updatedAppGroup = appGroup.userArray?.find(
-                          (groupUser) => groupUser.id === user.id
-                        )
-                          ? await removeUserFromGroup.mutateAsync({
-                              groupId: appGroup.id,
-                              userId: user.id,
-                            })
-                          : await addUserToGroup.mutateAsync({
-                              userId: user.id,
-                              groupId: appGroup.id,
-                            });
+                      <div className="flex h-full w-px bg-zinc-500"></div>
+                    </>
+                  )}
 
-                        setAppGroup(updatedAppGroup);
-                      }}
-                    >
-                      {appGroup.userArray?.find(
-                        (groupUser) => groupUser.id === user.id
-                      ) ? (
-                        <Icon icon="mdi:user-remove-outline" width={20} />
-                      ) : (
-                        <Icon icon="mdi:user-add-outline" width={20} />
-                      )}
-                    </Button>
+                  <Button
+                    title="Delete user"
+                    className="text-pink-300"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      if (user.groupArray && user.groupArray.length > 0) {
+                        await deleteGroup.mutateAsync({
+                          id: user.groupArray[0].id,
+                        });
+                      }
 
-                    <div className="flex h-full w-px bg-zinc-500"></div>
-                  </>
-                )}
+                      await deleteUser.mutateAsync(user.id);
+                      deleteUserId(user.id);
 
-                <Button
-                  title="Delete user"
-                  className="text-pink-300"
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    if (user.groupArray && user.groupArray.length > 0) {
-                      await deleteGroup.mutateAsync({
-                        id: user.groupArray[0].id,
-                      });
-                    }
-
-                    await deleteUser.mutateAsync(user.id);
-                    setUserIdArray((prev) =>
-                      prev.filter((userId) => userId !== user.id)
-                    );
-
-                    if (appUser && appUser.id === user.id) {
-                      setAppUser(emptyUser);
-                    }
-                  }}
-                >
-                  <Icon icon="mdi:delete-outline" width={20} />
-                </Button>
+                      if (appUser && appUser.id === user.id) {
+                        setAppUser(emptyUser);
+                      }
+                    }}
+                  >
+                    <Icon icon="mdi:delete-outline" width={20} />
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          <CreateUserBtn setUserIdArray={setUserIdArray} />
+          <CreateUserBtn addUserId={addUserId} />
         </div>
       )}
 
@@ -178,7 +152,7 @@ const Home: NextPage = () => {
 };
 
 interface Props {
-  setUserIdArray: React.Dispatch<React.SetStateAction<string[]>>;
+  addUserId: (userId: string) => void;
 }
 
 const CreateUserBtn = (props: Props) => {
@@ -210,7 +184,7 @@ const CreateUserBtn = (props: Props) => {
           id: user.id,
         });
 
-        props.setUserIdArray((prev) => [...prev, userWithAccessToken.id]);
+        props.addUserId(userWithAccessToken.id);
         setLoading(false);
       }}
     >
