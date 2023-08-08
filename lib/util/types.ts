@@ -13,6 +13,21 @@ export type GroupClientSide = Group & {
   userArray?: UserClientSide[];
 };
 
+export type TreedCategory = {
+  name: string;
+  subCategoryArray: TreedCategory[];
+};
+
+export type TreedCategoryWithTransaction = {
+  name: string;
+  spending: number;
+  received: number;
+  transactionArray: FullTransaction[];
+  subCategoryArray: TreedCategoryWithTransaction[];
+};
+
+export type MergedCategory = Omit<CategoryClientSide, "splitId">;
+
 export type CategoryClientSide = z.infer<typeof CategoryClientSideModel>;
 export const CategoryClientSideModel = CategoryModel.extend({
   id: z.string().nullable(),
@@ -29,14 +44,13 @@ const CategoryInSplitInDBModel = CategoryModel.extend({
   id: z.string().nullable(),
 });
 
+export function isSplitInDB(split: SplitClientSide): split is SplitInDB {
+  return !!split.id;
+}
 export type SplitInDB = z.infer<typeof SplitInDBModel>;
 const SplitInDBModel = SplitModel.extend({
   categoryArray: z.array(CategoryInSplitInDBModel),
 });
-
-export function isSplitInDB(split: SplitClientSide): split is SplitInDB {
-  return !!split.id;
-}
 
 export type SplitClientSide = z.infer<typeof SplitClientSideModel>;
 export const SplitClientSideModel = SplitModel.extend({
@@ -44,27 +58,17 @@ export const SplitClientSideModel = SplitModel.extend({
   categoryArray: z.array(CategoryClientSideModel),
 });
 
-export type MergedCategory = Omit<CategoryClientSide, "splitId">;
-
 export type FullTransaction = Transaction &
   Omit<PlaidTransaction, "category" | "transaction_id"> & {
     splitArray: SplitClientSide[];
     inDB: boolean;
   };
 
-export type TreedCategoryWithTransaction = {
-  name: string;
-  spending: number;
-  received: number;
-  transactionArray: FullTransaction[];
-  subCategoryArray: TreedCategoryWithTransaction[];
-};
-
-export type TreedCategory = {
-  name: string;
-  subCategoryArray: TreedCategory[];
-};
-
+export function isPlaidTransaction(
+  plaidTransaction: unknown
+): plaidTransaction is FullTransaction {
+  return (plaidTransaction as FullTransaction).id !== undefined;
+}
 //temporary workaround for failing trpc queries
 export interface PlaidTransaction extends PTransaction {
   location: {

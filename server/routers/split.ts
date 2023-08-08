@@ -74,12 +74,6 @@ const splitRouter = router({
   delete: procedure
     .input(z.object({ splitId: z.string() }))
     .mutation(async ({ input }) => {
-      await db.category.deleteMany({
-        where: {
-          splitId: input.splitId,
-        },
-      });
-
       //await so transaction refetch occurs properly.
       await db.split.delete({
         where: {

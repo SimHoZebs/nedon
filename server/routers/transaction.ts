@@ -6,6 +6,7 @@ import {
   FullTransaction,
   SplitClientSideModel,
   PlaidTransaction,
+  isPlaidTransaction,
 } from "@/util/types";
 import { client } from "../util";
 import { SplitModel } from "../../prisma/zod";
@@ -17,12 +18,6 @@ const transactionRouter = router({
   get: procedure
     .input(z.object({ userId: z.string(), plaidTransaction: z.unknown() }))
     .query(async ({ input }) => {
-      function isPlaidTransaction(
-        plaidTransaction: unknown
-      ): plaidTransaction is FullTransaction {
-        return (plaidTransaction as FullTransaction).id !== undefined;
-      }
-
       if (!isPlaidTransaction(input.plaidTransaction)) return null;
 
       const transactionInDB = await db.transaction.findUnique({
@@ -151,39 +146,25 @@ const transactionRouter = router({
         id: input.transactionId,
       };
 
-      const splitArrayData = input.splitArray?.map(({ userId, ...rest }) => ({
-        userId,
-      }));
-
       const transaction = await db.transaction.create({
         data: {
           ...data,
-          splitArray: splitArrayData
-            ? {
-                createMany: {
-                  data: input.splitArray.map((split) => ({
-                    userId: split.userId,
-                  })),
-                },
-              }
-            : undefined,
+          splitArray: {
+            create: input.splitArray.map((split) => ({
+              userId: split.userId,
+              categoryArray: {
+                create: split.categoryArray.map((category) => ({
+                  nameArray: category.nameArray,
+                  amount: category.amount,
+                })),
+              },
+            })),
+          },
         },
         include: {
           splitArray: {},
         },
       });
-
-      db.$transaction(
-        transaction.splitArray.map((split, index) =>
-          db.category.createMany({
-            data: input.splitArray[index].categoryArray.map((category) => ({
-              splitId: split.id,
-              nameArray: category.nameArray,
-              amount: category.amount,
-            })),
-          })
-        )
-      );
 
       return transaction;
     }),
@@ -209,14 +190,12 @@ const transactionRouter = router({
               id: input.userId,
             },
           },
+          splitArray: {
+            create: input.splitArray.map((split) => ({
+              ...split,
+            })),
+          },
         },
-      });
-
-      await db.split.createMany({
-        data: input.splitArray.map(({ id, ...rest }) => ({
-          ...rest,
-          transactionId: transaction.id,
-        })),
       });
 
       return transaction;
