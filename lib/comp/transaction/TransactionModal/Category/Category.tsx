@@ -19,6 +19,7 @@ const Category = (props: Props) => {
       test: "",
     });
 
+  const createTransaction = trpc.transaction.create.useMutation();
   const createCategory = trpc.category.create.useMutation();
   const upsertManyCategory = trpc.category.upsertMany.useMutation();
   const { data: transaction } = trpc.transaction.get.useQuery(
@@ -33,11 +34,36 @@ const Category = (props: Props) => {
   );
 
   const createCategoryForManySplit = (nameArray: string[]) => {
+    if (!appUser || !currentTransaction || !transaction) {
+      console.error(
+        "appUser or currentTransaction or transaction is undefined."
+      );
+      return;
+    }
+
+    if (!transaction.inDB) {
+      const split = structuredClone(props.unsavedSplitArray[0]);
+      split.categoryArray.push(
+        emptyCategory({
+          nameArray,
+          splitId: split.id,
+          amount: 0,
+        })
+      );
+
+      createTransaction.mutateAsync({
+        userId: appUser.id,
+        transactionId: currentTransaction.id,
+        splitArray: [split],
+      });
+      return;
+    }
+
     //Only one category may be created at a time, so find is more suitable than filter.
     props.unsavedSplitArray.forEach(async (unsavedSplit, index) => {
       if (unsavedSplit.id === null) {
         console.error(
-          "A split not in DB tried to add a category to itself.Its index in unsavedSplitArray is:",
+          "A split not in DB tried to add a category to itself. Its index in unsavedSplitArray is:",
           index
         );
         return;
