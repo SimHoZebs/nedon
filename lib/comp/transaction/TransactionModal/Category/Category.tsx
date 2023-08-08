@@ -20,6 +20,7 @@ const Category = (props: Props) => {
     });
 
   const createTransaction = trpc.transaction.create.useMutation();
+  const createSplit = trpc.split.create.useMutation();
   const createCategory = trpc.category.create.useMutation();
   const upsertManyCategory = trpc.category.upsertMany.useMutation();
   const { data: transaction } = trpc.transaction.get.useQuery(
@@ -60,12 +61,15 @@ const Category = (props: Props) => {
     }
 
     //Only one category may be created at a time, so find is more suitable than filter.
-    props.unsavedSplitArray.forEach(async (unsavedSplit, index) => {
+    props.unsavedSplitArray.forEach(async (unsavedSplit) => {
       if (unsavedSplit.id === null) {
-        console.error(
-          "A split not in DB tried to add a category to itself. Its index in unsavedSplitArray is:",
-          index
+        const split = structuredClone(unsavedSplit);
+        split.categoryArray.push(
+          emptyCategory({ nameArray, splitId: split.id, amount: 0 })
         );
+
+        createSplit.mutateAsync({ split });
+
         return;
       }
 
