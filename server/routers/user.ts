@@ -1,10 +1,10 @@
 import { router, procedure } from "../trpc";
 import { z } from "zod";
 import db from "@/util/db";
-import stripUserSecrets from "@/util/stripUserSecrets";
 import { PLAID_PRODUCTS } from "../util";
 import { Group, User } from "@prisma/client";
 import { UserClientSide } from "@/util/types";
+import { stripUserSecrets } from "@/util/user";
 
 const userRouter = router({
   get: procedure.input(z.string()).query(async ({ input }) => {

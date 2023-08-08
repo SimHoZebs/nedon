@@ -9,7 +9,7 @@ import {
 } from "@/util/types";
 import { client } from "../util";
 import { SplitModel } from "../../prisma/zod";
-import convertToFullTransaction from "@/util/convertToFullTransaction";
+import { convertToFullTransaction } from "@/util/transaction";
 
 // Retrieve Transactions for an Item
 // https://plaid.com/docs/#transactions

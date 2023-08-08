@@ -1,9 +1,42 @@
-import { mergeCategoryArray } from "./category";
+import { fillArrayByCategory, mergeCategoryArray } from "./category";
+import { Transaction } from "@prisma/client";
 import {
-  TreedCategoryWithTransaction,
+  SplitClientSide,
   FullTransaction,
-  MergedCategory,
+  PlaidTransaction,
+  TreedCategoryWithTransaction,
 } from "./types";
+
+import { emptyCategory } from "./category";
+
+export const convertToFullTransaction = (
+  userId: string,
+  plaidTransaction: PlaidTransaction,
+  transactionInDB?: Transaction & { splitArray: SplitClientSide[] }
+): FullTransaction => {
+  const { category, transaction_id, ...rest } = plaidTransaction;
+
+  return {
+    ...rest,
+    id: transaction_id,
+    ownerId: userId,
+    inDB: !!transactionInDB,
+    splitArray: transactionInDB?.splitArray || [
+      {
+        id: null,
+        userId,
+        transactionId: plaidTransaction.transaction_id,
+        categoryArray: [
+          emptyCategory({
+            nameArray: plaidTransaction.category || [],
+            splitId: null,
+            amount: plaidTransaction.amount,
+          }),
+        ],
+      },
+    ],
+  };
+};
 
 export const organizeTransactionByCategory = (
   transactionArray: FullTransaction[]
@@ -19,62 +52,6 @@ export const organizeTransactionByCategory = (
   });
 
   return categoryArray;
-};
-
-const fillArrayByCategory = (
-  resultArray: TreedCategoryWithTransaction[],
-  transaction: FullTransaction,
-  category: MergedCategory
-): TreedCategoryWithTransaction[] => {
-  const nameArray = category.nameArray;
-
-  if (!nameArray.length) return resultArray;
-
-  const firstCategoryName = nameArray[0];
-
-  let index = resultArray.findIndex((cat) => cat.name === firstCategoryName);
-
-  const hierarchicalCategory = {
-    name: firstCategoryName,
-    received: 0,
-    spending: 0,
-    transactionArray: [],
-    subCategoryArray: [],
-  };
-
-  if (transaction.amount > 0) {
-    hierarchicalCategory.spending += category.amount;
-  } else {
-    hierarchicalCategory.received += category.amount;
-  }
-
-  if (index === -1) {
-    //if the category doesn't exist, then create it.
-    resultArray.push(hierarchicalCategory);
-
-    index = resultArray.length - 1;
-  }
-
-  const slicedNameArray = nameArray.slice(1);
-
-  if (slicedNameArray.length === 0) {
-    resultArray[index].transactionArray.push(transaction);
-    resultArray[index].spending += hierarchicalCategory.spending;
-    resultArray[index].received += hierarchicalCategory.received;
-  } else {
-    const transactionCopy = structuredClone(transaction);
-    const newCategory = structuredClone(category);
-    newCategory.nameArray = slicedNameArray;
-
-    //inefficient for cases where parent category did not exist; subcategory's existence doesn't need to be checked.
-    resultArray[index].subCategoryArray = fillArrayByCategory(
-      resultArray[index].subCategoryArray,
-      transactionCopy,
-      newCategory
-    );
-  }
-
-  return resultArray;
 };
 
 export const organizeTransactionByTime = (

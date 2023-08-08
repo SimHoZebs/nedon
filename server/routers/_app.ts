@@ -13,10 +13,10 @@ import { User } from "@prisma/client";
 import { groupRouter } from "./group";
 import transactionRouter from "./transaction";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS, client } from "../util";
-import stripUserSecrets from "@/util/stripUserSecrets";
 import { convertPlaidCategoriesToHierarchicalArray } from "@/util/category";
 import splitRouter from "./split";
 import categoryRouter from "./category";
+import { stripUserSecrets } from "@/util/user";
 
 const setAccessToken = async ({
   publicToken,
