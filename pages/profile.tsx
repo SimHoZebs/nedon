@@ -1,14 +1,19 @@
 import React from "react";
-import { useStoreActions, useStoreState } from "../lib/util/store";
+import { useStore } from "../lib/util/store";
 import Button from "../lib/comp/Button/ActionBtn";
 import { useRouter } from "next/router";
 import { Icon } from "@iconify-icon/react";
 
 const Page = () => {
   const router = useRouter();
-  const { verticalCategoryPicker } = useStoreState((state) => state);
-  const { setAppUser, setAppGroup, setVerticalCategoryPicker } =
-    useStoreActions((actions) => actions);
+  const verticalCategoryPicker = useStore(
+    (state) => state.verticalCategoryPicker
+  );
+  const setAppUser = useStore((state) => state.setAppUser);
+  const setAppGroup = useStore((state) => state.setAppGroup);
+  const setVerticalCategoryPicker = useStore(
+    (state) => state.setVerticalCategoryPicker
+  );
 
   return (
     <section className="flex h-full w-full flex-col items-start gap-y-3">
@@ -17,8 +22,8 @@ const Page = () => {
         className="gap-x-2"
         onClick={() => {
           router.push("/");
-          setAppUser(() => undefined);
-          setAppGroup(() => undefined);
+          setAppUser(undefined);
+          setAppGroup(undefined);
         }}
       >
         <Icon

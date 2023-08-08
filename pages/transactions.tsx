@@ -1,7 +1,7 @@
 import { NextPage } from "next";
 import React, { useEffect, useMemo, useState } from "react";
 import { trpc } from "../lib/util/trpc";
-import { useStoreActions, useStoreState } from "../lib/util/store";
+import { useStore } from "../lib/util/store";
 import TransactionCard from "../lib/comp/transaction/TransactionCard";
 import { FullTransaction } from "../lib/util/types";
 import {
@@ -16,8 +16,11 @@ import Button from "../lib/comp/Button/Button";
 import { z } from "zod";
 
 const Page: NextPage = () => {
-  const { appUser, currentTransaction } = useStoreState((state) => state);
-  const { setCurrentTransaction } = useStoreActions((actions) => actions);
+  const appUser = useStore((state) => state.appUser);
+  const currentTransaction = useStore((state) => state.currentTransaction);
+  const setCurrentTransaction = useStore(
+    (state) => state.setCurrentTransaction
+  );
 
   const transactionArray = trpc.transaction.getAll.useQuery(
     { id: appUser ? appUser.id : "" },
@@ -159,7 +162,7 @@ const Page: NextPage = () => {
                               if (!appUser) return;
 
                               setShowModal(true);
-                              setCurrentTransaction(() => transaction);
+                              setCurrentTransaction(transaction);
                             }}
                             transaction={transaction}
                             key={l}

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useStoreState } from "../lib/util/store";
+import { useStore } from "../lib/util/store";
 import { NextPage } from "next";
 
 import { trpc } from "../lib/util/trpc";
@@ -8,7 +8,7 @@ import Modal from "../lib/comp/Modal";
 import AccountCard from "../lib/comp/home/AccountCard";
 
 const User: NextPage = () => {
-  const { appUser } = useStoreState((state) => state);
+  const appUser = useStore((state) => state.appUser);
   const [showModal, setShowModal] = useState(false);
   const [clickedAccount, setClickedAccount] = useState<AccountBase>();
 

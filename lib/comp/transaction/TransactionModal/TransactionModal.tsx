@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Modal from "@/comp/Modal";
-import { useStoreState } from "@/util/store";
+import { useStore } from "@/util/store";
 import ActionBtn from "@/comp/Button/ActionBtn";
 import Category from "./Category/Category";
 import H1 from "@/comp/H1";
@@ -13,7 +13,11 @@ interface Props {
 }
 
 const TransactionModal = (props: Props) => {
-  const { currentTransaction, appUser } = useStoreState((state) => state);
+  const [appUser, currentTransaction] = useStore((state) => [
+    state.appUser,
+    state.currentTransaction,
+  ]);
+
   const { data: transaction } = trpc.transaction.get.useQuery(
     { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
     { enabled: !!currentTransaction && !!appUser?.id }

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useStoreState } from "@/util/store";
+import { useStore } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import { FullTransaction } from "@/util/types";
 import { getCategoryStyle } from "@/util/category";
@@ -10,7 +10,7 @@ interface Props {
   button: () => void;
 }
 const TransactionCard = (props: Props) => {
-  const { appUser } = useStoreState((state) => state);
+  const appUser = useStore((state) => state.appUser);
 
   const splitAmount = props.transaction.splitArray
     .find((split) => split.userId === appUser?.id)

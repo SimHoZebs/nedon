@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import { trpc } from "../lib/util/trpc";
-import { useStoreActions, useStoreState } from "../lib/util/store";
+import { useStore } from "../lib/util/store";
 import { emptyUser } from "../lib/util/user";
 import { useRouter } from "next/router";
 import { Icon } from "@iconify-icon/react";
@@ -57,10 +57,10 @@ const Home: NextPage = () => {
   const deleteUser = trpc.user.delete.useMutation();
   const deleteGroup = trpc.group.delete.useMutation();
 
-  const { appUser, appGroup } = useStoreState((state) => state);
-  const { setAppUser: setAppUser, setAppGroup } = useStoreActions(
-    (actions) => actions
-  );
+  const appUser = useStore((state) => state.appUser);
+  const appGroup = useStore((state) => state.appGroup);
+  const setAppUser = useStore((state) => state.setAppUser);
+  const setAppGroup = useStore((state) => state.setAppGroup);
 
   const addUserToGroup = trpc.group.addUser.useMutation();
   const removeUserFromGroup = trpc.group.removeUser.useMutation();
@@ -80,7 +80,7 @@ const Home: NextPage = () => {
               key={user.id}
               className="flex w-full items-center justify-between border-b border-zinc-600 p-3 hover:cursor-pointer sm:gap-x-16"
               onClick={async (e) => {
-                setAppUser((prev) => user);
+                setAppUser(user);
 
                 if (!user.groupArray) return;
                 const group = await server.group.get.fetch({
@@ -88,7 +88,7 @@ const Home: NextPage = () => {
                 });
 
                 if (!group) return;
-                setAppGroup((prev) => group);
+                setAppGroup(group);
                 router.push("/transactions");
               }}
             >
@@ -121,7 +121,7 @@ const Home: NextPage = () => {
                               groupId: appGroup.id,
                             });
 
-                        setAppGroup((prev) => updatedAppGroup);
+                        setAppGroup(updatedAppGroup);
                       }}
                     >
                       {appGroup.userArray?.find(
@@ -154,7 +154,7 @@ const Home: NextPage = () => {
                     );
 
                     if (appUser && appUser.id === user.id) {
-                      setAppUser(() => emptyUser);
+                      setAppUser(emptyUser);
                     }
                   }}
                 >

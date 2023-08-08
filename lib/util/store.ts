@@ -1,66 +1,44 @@
-import { action, createStore, Action, createTypedHooks } from "easy-peasy";
 import { FullTransaction, GroupClientSide, UserClientSide } from "./types";
+import { create } from "zustand";
 
-interface StoreModel {
+interface Store {
   linkToken: string | null;
-  setLinkToken: Action<StoreModel, string | null>;
+  setLinkToken: (linkToken: string | null) => void;
 
   appUser?: UserClientSide;
-  setAppUser: Action<
-    StoreModel,
-    (user: UserClientSide | undefined) => UserClientSide | undefined
-  >;
+  setAppUser: (user: UserClientSide | undefined) => void;
 
   appGroup?: GroupClientSide;
-  setAppGroup: Action<
-    StoreModel,
-    (group: GroupClientSide | undefined) => GroupClientSide | undefined
-  >;
-
-  verticalCategoryPicker: boolean;
-  setVerticalCategoryPicker: Action<StoreModel, boolean>;
+  setAppGroup: (group: GroupClientSide | undefined) => void;
 
   currentTransaction: FullTransaction | undefined;
-  setCurrentTransaction: Action<
-    StoreModel,
-    (transaction: FullTransaction | undefined) => FullTransaction | undefined
-  >;
+  setCurrentTransaction: (transaction: FullTransaction | undefined) => void;
+
+  verticalCategoryPicker: boolean;
+  setVerticalCategoryPicker: (verticalCategoryPicker: boolean) => void;
+
+  test: string;
+  setTest: (test: string) => void;
 }
 
-const store = createStore<StoreModel>({
+export const useStore = create<Store>()((set) => ({
   linkToken: "", // Don't set to null or error message will show up briefly when site loads
-  setLinkToken: action((state, payload) => {
-    state.linkToken = payload;
-  }),
+  setLinkToken: (linkToken: string | null) => set({ linkToken }),
 
   appUser: undefined,
-  setAppUser: action((state, payload) => {
-    const newState = payload(state.appUser);
-
-    state.appUser = newState ? { ...newState } : newState;
-  }),
+  setAppUser: (appUser: UserClientSide | undefined) => set({ appUser }),
 
   appGroup: undefined,
-  setAppGroup: action((state, payload) => {
-    const newState = payload(state.appGroup);
-    state.appGroup = newState ? { ...newState } : newState;
-  }),
-
-  verticalCategoryPicker: false,
-  setVerticalCategoryPicker: action((state, payload) => {
-    state.verticalCategoryPicker = payload;
-  }),
+  setAppGroup: (appGroup: GroupClientSide | undefined) => set({ appGroup }),
 
   currentTransaction: undefined,
-  setCurrentTransaction: action((state, payload) => {
-    const newState = payload(state.currentTransaction);
-    state.currentTransaction = newState;
-  }),
-});
+  setCurrentTransaction: (currentTransaction: FullTransaction | undefined) =>
+    set({ currentTransaction }),
 
-export default store;
+  verticalCategoryPicker: false,
+  setVerticalCategoryPicker: (verticalCategoryPicker: boolean) =>
+    set({ verticalCategoryPicker }),
 
-const typedHooks = createTypedHooks<StoreModel>();
-
-export const useStoreActions = typedHooks.useStoreActions;
-export const useStoreState = typedHooks.useStoreState;
+  test: "",
+  setTest: (test: string) => set({ test }),
+}));

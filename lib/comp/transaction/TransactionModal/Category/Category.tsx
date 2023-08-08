@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
-import { MergedCategory, SplitClientSide, isSplitInDB } from "@/util/types";
+import { SplitClientSide, isSplitInDB } from "@/util/types";
 import CategoryPicker from "./CategoryPicker";
 import { emptyCategory, mergeCategoryArray } from "@/util/category";
-import { useStoreState } from "@/util/store";
+import { useStore } from "@/util/store";
 import CategoryChip from "./CategoryChip";
 import { trpc } from "@/util/trpc";
 
@@ -12,7 +12,12 @@ interface Props {
 }
 
 const Category = (props: Props) => {
-  const { appUser, currentTransaction } = useStoreState((state) => state);
+  const appUser = useStore((state) => state.appUser);
+  const currentTransaction = useStore((state) => state.currentTransaction);
+  const setTest = () =>
+    useStore.setState({
+      test: "",
+    });
 
   const createCategory = trpc.category.create.useMutation();
   const upsertManyCategory = trpc.category.upsertMany.useMutation();
@@ -124,6 +129,7 @@ const Category = (props: Props) => {
           >
             Create category
           </button>
+          <button onClick={() => setTest()}>test</button>
         </div>
 
         <div className="flex flex-col gap-y-1">
@@ -177,13 +183,6 @@ const Category = (props: Props) => {
             }}
           />
         </div>
-        <button
-          onClick={() =>
-            console.log(categoryPickerRef.current?.getBoundingClientRect())
-          }
-        >
-          test
-        </button>
 
         <div>
           {/* <p className="h-4 text-xs text-pink-300 ">

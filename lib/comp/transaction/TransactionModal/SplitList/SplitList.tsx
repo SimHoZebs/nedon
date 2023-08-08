@@ -1,10 +1,10 @@
 import { Icon } from "@iconify-icon/react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { SplitClientSide, isSplitInDB } from "@/util/types";
 import ActionBtn from "@/comp/Button/ActionBtn";
 import UserSplit from "./UserSplit";
 import { trpc } from "@/util/trpc";
-import { useStoreState } from "@/util/store";
+import { useStore } from "@/util/store";
 import SplitUserOptionList from "./SplitUserOptionList";
 import H3 from "@/comp/H3";
 import Button from "@/comp/Button/Button";
@@ -15,7 +15,9 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const SplitList = (props: Props) => {
-  const { appUser, currentTransaction } = useStoreState((state) => state);
+  const appUser = useStore((state) => state.appUser);
+  const currentTransaction = useStore((state) => state.currentTransaction);
+
   const { data: transaction } = trpc.transaction.get.useQuery(
     { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
     { enabled: !!currentTransaction && !!appUser?.id }

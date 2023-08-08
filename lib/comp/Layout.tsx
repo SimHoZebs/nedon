@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-import { useStoreState } from "../util/store";
+import { useStore } from "../util/store";
 
 import { Inter } from "next/font/google";
 import { Poppins } from "next/font/google";
@@ -21,7 +21,7 @@ const poppins = Poppins({
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
-  const { appUser } = useStoreState((state) => state);
+  const appUser = useStore((state) => state.appUser);
 
   useEffect(() => {
     if (!appUser && router.pathname !== "/") {

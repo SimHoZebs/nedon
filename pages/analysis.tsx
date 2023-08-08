@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { trpc } from "../lib/util/trpc";
-import { useStoreState } from "../lib/util/store";
+import { useStore } from "../lib/util/store";
 import {
   filterTransactionByDate,
   organizeTransactionByCategory,
@@ -72,7 +72,7 @@ const render = (hierarchicalCategoryArray: TreedCategoryWithTransaction[]) =>
   ));
 
 const Page = () => {
-  const { appUser } = useStoreState((state) => state);
+  const appUser = useStore((state) => state.appUser);
   const [showModal, setShowModal] = useState(false);
   const [oweUser, setOweUser] = useState<{ id: string; amount: number }>();
   const [rangeFormat, setRangeFormat] = useState<

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Icon } from "@iconify-icon/react";
 import { SplitClientSide } from "@/util/types";
-import { useStoreState } from "@/util/store";
+import { useStore } from "@/util/store";
 import { getCategoryStyle } from "@/util/category";
 
 const inputStyle =
@@ -18,7 +18,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const UserSplit = (props: Props) => {
-  const { appUser } = useStoreState((state) => state);
+  const appUser = useStore((state) => state.appUser);
   const [showDetail, setShowDetail] = useState(false);
 
   return (

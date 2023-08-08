@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Modal from "../Modal";
-import { useStoreState } from "@/util/store";
+import { useStore } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import Button from "../Button/ActionBtn";
 import { trpc } from "@/util/trpc";
@@ -10,17 +10,16 @@ interface Props {
   oweUser: { id: string; amount: number } | undefined;
 }
 const SettleModal = (props: Props) => {
-  const { appUser } = useStoreState((state) => state);
+  const appUser = useStore((state) => state.appUser);
   const [settleAmount, setSettleAmount] = useState(0);
   const [appUserGiving, setAppuserGiving] = useState(true);
 
   const createTransactionManually =
     trpc.transaction.createManually.useMutation();
-  const associatedTransactionArray =
-    trpc.transaction.getAllAssociated.useQuery(
-      { id: appUser ? appUser.id : "" },
-      { staleTime: 3600000, enabled: !!appUser }
-    );
+  const associatedTransactionArray = trpc.transaction.getAllAssociated.useQuery(
+    { id: appUser ? appUser.id : "" },
+    { staleTime: 3600000, enabled: !!appUser }
+  );
 
   return appUser && props.oweUser ? (
     <Modal setShowModal={props.setShowModal}>

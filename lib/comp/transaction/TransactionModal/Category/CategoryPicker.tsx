@@ -1,7 +1,7 @@
 import React, { ForwardedRef, forwardRef, useEffect, useState } from "react";
 import { trpc } from "@/util/trpc";
 import { Icon } from "@iconify-icon/react";
-import { useStoreState } from "@/util/store";
+import { useStore } from "@/util/store";
 import { TreedCategory, MergedCategory } from "@/util/types";
 import categoryStyleArray from "@/util/categoryStyle";
 
@@ -21,7 +21,8 @@ const CategoryPicker = forwardRef(
   (props: Props, ref: ForwardedRef<HTMLDivElement>) => {
     const editingMergedCategory =
       props.unsavedMergedCategoryArray[props.editingMergedCategoryIndex];
-    const { appUser, currentTransaction } = useStoreState((state) => state);
+    const appUser = useStore((state) => state.appUser);
+    const currentTransaction = useStore((state) => state.currentTransaction);
 
     const categoryOptionArray = trpc.getCategoryOptionArray.useQuery(
       undefined,

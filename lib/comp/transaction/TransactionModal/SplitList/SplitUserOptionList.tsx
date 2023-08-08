@@ -1,5 +1,5 @@
 import React from "react";
-import { useStoreState } from "@/util/store";
+import { useStore } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import Button from "@/comp/Button/Button";
 import { SplitClientSide } from "@/util/types";
@@ -11,9 +11,9 @@ type Props = {
 };
 
 const SplitUserOptionList = (props: Props) => {
-  const { appUser, appGroup, currentTransaction } = useStoreState(
-    (state) => state
-  );
+  const appUser = useStore((state) => state.appUser);
+  const appGroup = useStore((state) => state.appGroup);
+  const currentTransaction = useStore((state) => state.currentTransaction);
   const { data: transaction } = trpc.transaction.get.useQuery(
     { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
     { enabled: !!currentTransaction && !!appUser?.id }
