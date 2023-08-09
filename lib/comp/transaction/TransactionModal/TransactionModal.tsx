@@ -13,10 +13,8 @@ interface Props {
 }
 
 const TransactionModal = (props: Props) => {
-  const [appUser, currentTransaction] = useStore((state) => [
-    state.appUser,
-    state.currentTransaction,
-  ]);
+  const appUser = useStore((state) => state.appUser);
+  const currentTransaction = useStore((state) => state.currentTransaction);
 
   const { data: transaction } = trpc.transaction.get.useQuery(
     { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
@@ -40,8 +38,7 @@ const TransactionModal = (props: Props) => {
   const amount = currentTransaction ? currentTransaction.amount : 0;
 
   return (
-    transaction &&
-    !!unsavedSplitArray.length && (
+    transaction && (
       <Modal setShowModal={props.setShowModal}>
         <div className="flex flex-col justify-between gap-y-2">
           <div className="flex items-start justify-between gap-y-2">
@@ -55,21 +52,23 @@ const TransactionModal = (props: Props) => {
             </div>
           </div>
 
-          <div className="flex justify-between">
-            <div className="flex flex-col ">
-              <SplitList
+          {!!unsavedSplitArray.length && (
+            <div className="flex justify-between">
+              <div className="flex flex-col ">
+                <SplitList
+                  unsavedSplitArray={unsavedSplitArray}
+                  setUnsavedSplitArray={setUnsavedSplitArray}
+                >
+                  <H1>${amount * -1}</H1>
+                </SplitList>
+              </div>
+
+              <Category
                 unsavedSplitArray={unsavedSplitArray}
                 setUnsavedSplitArray={setUnsavedSplitArray}
-              >
-                <H1>${amount * -1}</H1>
-              </SplitList>
+              />
             </div>
-
-            <Category
-              unsavedSplitArray={unsavedSplitArray}
-              setUnsavedSplitArray={setUnsavedSplitArray}
-            />
-          </div>
+          )}
         </div>
 
         <div className="flex w-full justify-between">

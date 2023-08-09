@@ -8,7 +8,7 @@ import Button from "./ActionBtn";
 
 const LinkBtn = () => {
   const appUser = useStore((state) => state.appUser);
-  const { setAppUser } = useStore((actions) => actions);
+  const setAppUser = useStore((state) => state.setAppUser);
   const setAccessToken = trpc.setAccessToken.useMutation();
   const linkToken = trpc.createLinkToken.useQuery(undefined, {
     staleTime: 360000,
