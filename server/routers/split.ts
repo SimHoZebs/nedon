@@ -1,7 +1,7 @@
 import { z } from "zod";
 import db from "@/util/db";
 import { procedure, router } from "../trpc";
-import { SplitClientSideModel } from "@/util/types";
+import { SplitClientSideModel, SplitInDB } from "@/util/types";
 
 const splitRouter = router({
   create: procedure
@@ -69,6 +69,59 @@ const splitRouter = router({
           });
 
       return updatedTransactionArray;
+    }),
+
+  upsertMany: procedure
+    .input(
+      z.object({
+        splitArray: z.array(SplitClientSideModel),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const splitToUpdateArray = input.splitArray.filter(
+        (split) => split.id
+      ) as SplitInDB[];
+      const splitToCreateArray = input.splitArray.filter((split) => !split.id);
+
+      const updatedTransaction = await db.transaction.update({
+        where: {
+          id: input.splitArray[0].transactionId,
+        },
+        data: {
+          splitArray: {
+            create: splitToCreateArray.map(
+              ({ id, transactionId, ...split }) => ({
+                ...split,
+                categoryArray: {
+                  create: split.categoryArray.map(({ id, ...category }) => ({
+                    ...category,
+                  })),
+                },
+              })
+            ),
+
+            update: splitToUpdateArray.map(
+              ({ id: splitId, categoryArray }) => ({
+                where: { id: splitId },
+                data: {
+                  categoryArray: {
+                    update: categoryArray.map(
+                      ({ id, splitId, ...category }) => ({
+                        where: { id },
+                        data: {
+                          ...category,
+                        },
+                      })
+                    ),
+                  },
+                },
+              })
+            ),
+          },
+        },
+      });
+
+      return updatedTransaction;
     }),
 
   delete: procedure

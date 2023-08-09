@@ -16,8 +16,8 @@ const Category = (props: Props) => {
   const currentTransaction = useStore((state) => state.currentTransaction);
   const createTransaction = trpc.transaction.create.useMutation();
   const createSplit = trpc.split.create.useMutation();
+  const upsertManySplit = trpc.split.upsertMany.useMutation();
   const createCategory = trpc.category.create.useMutation();
-  const upsertManyCategory = trpc.category.upsertMany.useMutation();
   const { data: transaction } = trpc.transaction.get.useQuery(
     { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
     { enabled: !!currentTransaction && !!appUser?.id }
@@ -79,7 +79,7 @@ const Category = (props: Props) => {
     });
   };
 
-  const updateManyCategoryNameArray = (updatedNameArray: string[]) => {
+  const updateManyCategoryNameArray = async (updatedNameArray: string[]) => {
     if (!transaction) return console.error("transaction is undefined.");
 
     if (!transaction.inDB) {
@@ -97,45 +97,22 @@ const Category = (props: Props) => {
       return;
     }
 
-    //TODO: change to upsertMany
-    props.unsavedSplitArray.forEach((unsavedSplit) => {
-      if (!isSplitInDB(unsavedSplit)) {
-        if (editingMergedCategoryIndex === undefined) {
-          console.error("editingMergedCategoryIndex is undefined.");
-          return;
-        }
+    if (editingMergedCategoryIndex === undefined) {
+      console.error("editingMergedCategoryIndex is undefined.");
+      return;
+    }
 
-        const updatedSplit = structuredClone(unsavedSplit);
+    const updatedSplitArray = props.unsavedSplitArray.map((unsavedSplit) => {
+      const updatedSplit = structuredClone(unsavedSplit);
 
-        updatedSplit.categoryArray[editingMergedCategoryIndex].nameArray =
-          updatedNameArray;
+      updatedSplit.categoryArray[editingMergedCategoryIndex].nameArray =
+        updatedNameArray;
 
-        createSplit.mutateAsync({
-          split: {
-            ...updatedSplit,
-          },
-        });
-        return;
-      }
+      return updatedSplit;
+    });
 
-      const { categoryArray: updatedCategoryArray } =
-        structuredClone(unsavedSplit);
-
-      const updatedCategoryIndex = updatedCategoryArray.findIndex(
-        (categoryInDB) =>
-          categoryInDB.nameArray.join() !== updatedNameArray.join()
-      );
-
-      if (updatedCategoryIndex === -1) {
-        console.error("target category not found in DB.");
-        return;
-      }
-
-      updatedCategoryArray[updatedCategoryIndex].nameArray = updatedNameArray;
-
-      upsertManyCategory.mutateAsync({
-        categoryArray: updatedCategoryArray,
-      });
+    await upsertManySplit.mutateAsync({
+      splitArray: updatedSplitArray,
     });
   };
 
@@ -182,10 +159,12 @@ const Category = (props: Props) => {
             const pickerOffsets =
               categoryPickerRef.current?.getBoundingClientRect();
 
-            if (!pickerOffsets)
-              throw new Error(
+            if (!pickerOffsets) {
+              console.error(
                 `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`
               );
+              return;
+            }
 
             const clickPositionOffsets =
               e.currentTarget.getBoundingClientRect();
@@ -217,11 +196,12 @@ const Category = (props: Props) => {
                 const pickerOffsets =
                   categoryPickerRef.current?.getBoundingClientRect();
 
-                if (!pickerOffsets)
-                  throw new Error(
-                    `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`
-                  );
+                if (!pickerOffsets) {
+                  console.error;
+                  `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`;
 
+                  return;
+                }
                 const offsets = e.currentTarget.getBoundingClientRect();
                 setPickerPosition({
                   x: offsets.right - pickerOffsets?.width,

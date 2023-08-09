@@ -36,20 +36,16 @@ export const CategoryClientSideModel = CategoryModel.extend({
 
 export function isCategoryInSplitInDB(
   category: CategoryClientSide
-): category is CategoryInSplitInDB {
+): category is z.infer<typeof CategoryModel> {
   return !!category.splitId;
 }
-export type CategoryInSplitInDB = z.infer<typeof CategoryInSplitInDBModel>;
-const CategoryInSplitInDBModel = CategoryModel.extend({
-  id: z.string().nullable(),
-});
 
 export function isSplitInDB(split: SplitClientSide): split is SplitInDB {
   return !!split.id;
 }
 export type SplitInDB = z.infer<typeof SplitInDBModel>;
 const SplitInDBModel = SplitModel.extend({
-  categoryArray: z.array(CategoryInSplitInDBModel),
+  categoryArray: z.array(CategoryModel),
 });
 
 export type SplitClientSide = z.infer<typeof SplitClientSideModel>;

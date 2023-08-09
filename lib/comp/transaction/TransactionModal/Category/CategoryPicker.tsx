@@ -6,7 +6,7 @@ import categoryStyleArray from "@/util/categoryStyle";
 
 interface Props {
   createCategoryForManySplit: (nameArray: string[]) => void;
-  updateManyCategoryNameArray: (newNameArray: string[]) => void;
+  updateManyCategoryNameArray: (newNameArray: string[]) => Promise<void>;
   unsavedMergedCategoryArray: MergedCategory[];
   editingMergedCategoryIndex: number;
   closePicker: () => void;
@@ -57,7 +57,9 @@ const CategoryPicker = forwardRef(
       if (editingMergedCategory.nameArray.length === 0) {
         props.createCategoryForManySplit(updatedMergedCategory.nameArray);
       } else {
-        props.updateManyCategoryNameArray(updatedMergedCategory.nameArray);
+        await props.updateManyCategoryNameArray(
+          updatedMergedCategory.nameArray
+        );
       }
 
       props.closePicker();
