@@ -32,22 +32,20 @@ const SplitList = (props: Props) => {
   const [isManaging, setIsManaging] = useState(false);
   useState<SplitClientSide[]>();
 
-  const amount = transaction ? transaction.amount : 0;
+  const transactionAmount = transaction ? transaction.amount : 0;
 
-  const calcSplitTotal = (split: SplitClientSide) => {
+  const calcSplitAmount = (split: SplitClientSide) => {
     return split.categoryArray.reduce(
       (total, category) => total + category.amount,
       0
     );
   };
 
-  let updatedTotalSplit =
-    Math.floor(
-      props.unsavedSplitArray.reduce(
-        (amount, split) => amount + calcSplitTotal(split),
-        0
-      ) * 100
-    ) / 100;
+  let updatedSplitAmount = parseFloat(
+    props.unsavedSplitArray
+      .reduce((amount, split) => amount + calcSplitAmount(split), 0)
+      .toFixed(2)
+  );
 
   const saveChanges = async () => {
     if (!appUser || !transaction) {
@@ -167,9 +165,9 @@ const SplitList = (props: Props) => {
 
                   props.setUnsavedSplitArray(updatedSplitArray);
                 }}
-                amount={amount}
+                transactionAmount={transactionAmount}
                 split={split}
-                splitTotal={calcSplitTotal(split)}
+                splitAmount={calcSplitAmount(split)}
                 userId={split.userId}
               >
                 <div className="flex items-center gap-x-2">
@@ -187,10 +185,12 @@ const SplitList = (props: Props) => {
       )}
 
       <div className="h-5 text-red-800">
-        {updatedTotalSplit !== amount &&
+        {updatedSplitAmount !== transactionAmount &&
           props.unsavedSplitArray.length > 0 &&
-          `Split is ${updatedTotalSplit > amount ? "greater " : "less "}
-          than the amount (${`updatedTotalSplit $${updatedTotalSplit}`})`}
+          `Split is ${
+            updatedSplitAmount > transactionAmount ? "greater " : "less "
+          }
+          than the amount (${`updatedTotalSplit $${updatedSplitAmount}`})`}
       </div>
 
       {isManaging && (

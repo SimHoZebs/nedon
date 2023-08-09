@@ -8,9 +8,9 @@ const inputStyle =
   "h-7 w-16 border-b-2 border-zinc-900 bg-zinc-900 p-1 hover:border-zinc-500 focus-visible:outline-none sm:w-24";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
-  splitTotal: number;
+  splitAmount: number;
   userId: string;
-  amount: number;
+  transactionAmount: number;
   onAmountChange: (amount: number) => void;
   split: SplitClientSide;
   onRemoveUser: () => void;
@@ -52,8 +52,8 @@ const UserSplit = (props: Props) => {
                 className={inputStyle}
                 type="number"
                 min={0}
-                max={props.amount}
-                value={props.splitTotal}
+                max={props.transactionAmount}
+                value={props.splitAmount}
                 onChange={(e) =>
                   props.onAmountChange(parseFloat(e.target.value))
                 }
@@ -68,18 +68,20 @@ const UserSplit = (props: Props) => {
                 type="number"
                 min={0}
                 max={100}
-                value={
-                  Math.floor((props.splitTotal / props.amount) * 10000) / 100
-                }
+                value={parseFloat(
+                  ((props.splitAmount / props.transactionAmount) * 100).toFixed(
+                    2
+                  )
+                )}
                 onChange={(e) => {
-                  let newAmount = Math.floor(
-                    parseFloat(e.target.value) * props.amount
+                  const updatedSplitAmount = parseFloat(
+                    (
+                      (parseFloat(e.target.value) / 100) *
+                      props.transactionAmount
+                    ).toFixed(2)
                   );
 
-                  //0.01 percentage increments are negated in Math.floor, requiring manual increment
-                  if (newAmount === props.splitTotal * 100) newAmount += 1;
-
-                  props.onAmountChange(newAmount / 100);
+                  props.onAmountChange(updatedSplitAmount);
                 }}
                 step={0.01}
               />

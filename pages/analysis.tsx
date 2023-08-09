@@ -148,7 +148,10 @@ const Page = () => {
     const oweGroup: { [userId: string]: number } = {};
 
     associatedTransactionArray.data.forEach((transaction) => {
-      if (!appUser) return;
+      if (!appUser) {
+        console.error("appUser not found");
+        return;
+      }
 
       transaction.splitArray.forEach((split) => {
         const splitAmount = split.categoryArray.reduce(
@@ -191,14 +194,16 @@ const Page = () => {
                 <div>{userId.slice(0, 8)}</div>
                 <div>
                   {calcOweGroup[userId] < 0 ? "You owe: " : "They owe: "}$
-                  {Math.abs(Math.floor(calcOweGroup[userId] * 100) / 100)}
+                  {Math.abs(parseFloat(calcOweGroup[userId].toFixed(2)))}
                 </div>
                 <ActionBtn
                   onClick={() => {
                     setShowModal(true);
                     setOweUser({
                       id: userId,
-                      amount: Math.floor(calcOweGroup[userId] * 100) / 100,
+                      amount: parseFloat(
+                        (calcOweGroup[userId] * 100).toFixed(2)
+                      ),
                     });
                   }}
                 >
