@@ -82,9 +82,41 @@ const Category = (props: Props) => {
   const updateManyCategoryNameArray = (updatedNameArray: string[]) => {
     if (!transaction) return console.error("transaction is undefined.");
 
+    if (!transaction.inDB) {
+      createTransaction.mutateAsync({
+        userId: appUser!.id,
+        transactionId: currentTransaction!.id,
+        splitArray: props.unsavedSplitArray.map((split) => ({
+          ...split,
+          categoryArray: split.categoryArray.map((category) => ({
+            ...category,
+            nameArray: updatedNameArray,
+          })),
+        })),
+      });
+      return;
+    }
+
+    //TODO: change to upsertMany
     props.unsavedSplitArray.forEach((unsavedSplit) => {
       if (!isSplitInDB(unsavedSplit)) {
-        console.error("Split not in DB, can not update category.");
+        if (editingMergedCategoryIndex === undefined) {
+          console.error("editingMergedCategoryIndex is undefined.");
+          return;
+        }
+
+        const updatedSplit = structuredClone(unsavedSplit);
+
+        updatedSplit.categoryArray[editingMergedCategoryIndex].nameArray =
+          updatedNameArray;
+
+        console.log("unsavedSplit", updatedSplit);
+
+        createSplit.mutateAsync({
+          split: {
+            ...updatedSplit,
+          },
+        });
         return;
       }
 
@@ -203,22 +235,24 @@ const Category = (props: Props) => {
           ))}
         </div>
 
-        <CategoryPicker
-          ref={categoryPickerRef}
-          updateManyCategoryNameArray={updateManyCategoryNameArray}
-          createCategoryForManySplit={createCategoryForManySplit}
-          //Fallback to 0 for initial boundingClient size.
-          unsavedMergedCategoryArray={unsavedMergedCategoryArray}
-          editingMergedCategoryIndex={editingMergedCategoryIndex || 0}
-          position={pickerPosition}
-          closePicker={() => {
-            setEditingMergedCategoryIndex(undefined);
-            setPickerPosition({
-              x: -400,
-              y: 0,
-            });
-          }}
-        />
+        {transaction && (
+          <CategoryPicker
+            ref={categoryPickerRef}
+            updateManyCategoryNameArray={updateManyCategoryNameArray}
+            createCategoryForManySplit={createCategoryForManySplit}
+            //Fallback to 0 for initial boundingClient size.
+            unsavedMergedCategoryArray={unsavedMergedCategoryArray}
+            editingMergedCategoryIndex={editingMergedCategoryIndex || 0}
+            position={pickerPosition}
+            closePicker={() => {
+              setEditingMergedCategoryIndex(undefined);
+              setPickerPosition({
+                x: -400,
+                y: 0,
+              });
+            }}
+          />
+        )}
       </div>
     </div>
   );

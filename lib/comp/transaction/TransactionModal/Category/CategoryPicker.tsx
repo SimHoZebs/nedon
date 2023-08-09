@@ -1,8 +1,7 @@
 import React, { ForwardedRef, forwardRef, useEffect, useState } from "react";
 import { trpc } from "@/util/trpc";
 import { Icon } from "@iconify-icon/react";
-import { useStore } from "@/util/store";
-import { TreedCategory, MergedCategory } from "@/util/types";
+import { TreedCategory, MergedCategory, FullTransaction } from "@/util/types";
 import categoryStyleArray from "@/util/categoryStyle";
 
 interface Props {
@@ -45,13 +44,16 @@ const CategoryPicker = forwardRef(
     const syncCategory = async (clickedTreedCategory?: TreedCategory) => {
       const updatedMergedCategory = structuredClone(editingMergedCategory);
 
-      if (clickedTreedCategory)
+      if (clickedTreedCategory) {
+        //FIX: this only pushes the last name
         updatedMergedCategory.nameArray.push(clickedTreedCategory.name);
+      }
 
-      if (editingMergedCategory.id) {
-        props.updateManyCategoryNameArray(updatedMergedCategory.nameArray);
-      } else {
+      //The only diff between categories inDB and not inDB
+      if (editingMergedCategory.nameArray.length === 0) {
         props.createCategoryForManySplit(updatedMergedCategory.nameArray);
+      } else {
+        props.updateManyCategoryNameArray(updatedMergedCategory.nameArray);
       }
 
       props.closePicker();
