@@ -63,6 +63,7 @@ const UserSplit = (props: Props) => {
 
             <div className="flex items-center text-xl">
               <input
+                title="ratio"
                 className={inputStyle}
                 type="number"
                 min={0}

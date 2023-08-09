@@ -52,7 +52,7 @@ const TransactionModal = (props: Props) => {
             </div>
           </div>
 
-          {!!unsavedSplitArray.length && (
+          {unsavedSplitArray.length && (
             <div className="flex justify-between">
               <div className="flex flex-col ">
                 <SplitList

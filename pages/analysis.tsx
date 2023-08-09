@@ -259,6 +259,7 @@ const Page = () => {
         )}
 
         <select
+          title="scope"
           className="bg-zinc-800"
           name="scope"
           id=""
