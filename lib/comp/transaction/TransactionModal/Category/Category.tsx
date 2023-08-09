@@ -179,8 +179,7 @@ const Category = (props: Props) => {
             );
 
             //The index is referenced from the clone instead of the react state as they are identical and the react state wouldn't have updated yet (See: batch state update)
-            const index = mergedCategoryArrayClone.length - 1;
-            setEditingMergedCategoryIndex(index);
+            setEditingMergedCategoryIndex(mergedCategoryArrayClone.length - 1);
 
             const pickerOffsets =
               categoryPickerRef.current?.getBoundingClientRect();

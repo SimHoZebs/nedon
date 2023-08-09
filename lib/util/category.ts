@@ -38,8 +38,7 @@ export const mergeCategoryArray = (splitArray: SplitClientSide[]) => {
     split.categoryArray.forEach(({ nameArray, amount, ...rest }) => {
       const storedCategory = mergedCategoryArray.find(
         ({ nameArray: storedNameArray }) =>
-          storedNameArray[storedNameArray.length - 1] ===
-          nameArray[nameArray.length - 1]
+          storedNameArray.at(-1) === nameArray.at(-1)
       );
 
       if (storedCategory) {

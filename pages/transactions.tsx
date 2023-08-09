@@ -39,9 +39,7 @@ const Page: NextPage = () => {
   useEffect(() => {
     if (!transactionArray.data) return;
     if (!date) {
-      const initialDate = new Date(
-        transactionArray.data[transactionArray.data.length - 1].date
-      );
+      const initialDate = new Date(transactionArray.data.at(-1)!.date);
 
       setDate(initialDate);
       return;

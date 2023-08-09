@@ -66,9 +66,7 @@ const TransactionCard = (props: Props) => {
                   icon={getCategoryStyle(category.nameArray).icon}
                   width={16}
                 />
-                <p className="text-xs">
-                  {category.nameArray[category.nameArray.length - 1]}
-                </p>
+                <p className="text-xs">{category.nameArray.at(-1)}</p>
               </div>
             )
           )}

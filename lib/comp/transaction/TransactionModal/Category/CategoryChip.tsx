@@ -30,7 +30,7 @@ const CategoryChip = (props: Props) => {
 
         <div className="flex h-full flex-col items-start text-zinc-300 ">
           <p className={props.isEditing ? "animate-pulse" : ""}>
-            {props.category.nameArray[props.category.nameArray.length - 1]}
+            {props.category.nameArray.at(-1)}
           </p>
           {props.isMultiCategory && (
             <p onClick={(e) => e.stopPropagation()}>

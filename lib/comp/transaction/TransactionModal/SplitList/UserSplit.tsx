@@ -114,7 +114,7 @@ const UserSplit = (props: Props) => {
                 />
                 <div>
                   <p className="text-xs font-light text-zinc-300">
-                    {category.nameArray[category.nameArray.length - 1]}
+                    {category.nameArray.at(-1)}
                   </p>
                   <p className="text-xs font-light text-zinc-300">
                     ${category.amount}
