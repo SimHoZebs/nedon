@@ -56,8 +56,10 @@ const SettleModal = (props: Props) => {
         disabled={!settleAmount}
         onClick={async () => {
           //Why do I even need this check?
-          if (!props.oweUser) return;
-
+          if (!props.oweUser) {
+            console.error("oweUser is undefined");
+            return;
+          }
           // //TODO: probs should not be 1
           // await createManualTransaction.mutateAsync({
           //   userId: appUser.id,

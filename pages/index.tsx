@@ -37,7 +37,12 @@ const Home: NextPage = () => {
   const removeUserFromGroup = trpc.group.removeUser.useMutation();
 
   useEffect(() => {
-    if (!allUsers.data || !setUserIdArray) return;
+    if (!allUsers.data || !setUserIdArray) {
+      console.debug(
+        "allUsers.data or setUserIdArray is undefined. all Users is probably fetching, but setUserIdArray could be missing from the store."
+      );
+      return;
+    }
 
     setUserIdArray(allUsers.data.map((user) => user.id));
   }, [allUsers.data, setUserIdArray]);
@@ -58,12 +63,21 @@ const Home: NextPage = () => {
                 onClick={async (e) => {
                   setAppUser(user);
 
-                  if (!user.groupArray) return;
+                  if (!user.groupArray) {
+                    console.error("Cannot login. User has no groupArray.");
+                    return;
+                  }
+
                   const group = await server.group.get.fetch({
                     id: user.groupArray[0].id,
                   });
 
-                  if (!group) return;
+                  if (!group) {
+                    console.error(
+                      "Cannot login. server returned undefined group."
+                    );
+                    return;
+                  }
                   setAppGroup(group);
                   router.push("/transactions");
                 }}

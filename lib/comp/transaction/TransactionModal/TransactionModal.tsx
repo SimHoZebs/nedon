@@ -28,7 +28,7 @@ const TransactionModal = (props: Props) => {
   );
 
   useEffect(() => {
-    console.log("syncing unsavedSplitArray with transaction.splitArray");
+    console.debug("syncing unsavedSplitArray with transaction.splitArray");
 
     if (transaction) {
       setUnsavedSplitArray(structuredClone(transaction.splitArray));
@@ -81,7 +81,12 @@ const TransactionModal = (props: Props) => {
 
           <ActionBtn
             onClick={async () => {
-              if (!transaction.inDB) return;
+              if (!transaction.inDB) {
+                console.error(
+                  "deleteTransaction denied. transaction not in db."
+                );
+                return;
+              }
 
               await deleteTransaction.mutateAsync({
                 id: transaction.id,

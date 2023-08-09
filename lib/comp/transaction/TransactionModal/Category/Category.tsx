@@ -110,8 +110,6 @@ const Category = (props: Props) => {
         updatedSplit.categoryArray[editingMergedCategoryIndex].nameArray =
           updatedNameArray;
 
-        console.log("unsavedSplit", updatedSplit);
-
         createSplit.mutateAsync({
           split: {
             ...updatedSplit,

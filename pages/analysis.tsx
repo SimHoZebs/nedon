@@ -93,14 +93,24 @@ const Page = () => {
   );
 
   useEffect(() => {
-    if (!transactionArray.data) return;
+    if (!transactionArray.data) {
+      console.debug("transactionArray undefined. It is probably fetching.");
+      return;
+    }
+
     const initialDate = new Date(transactionArray.data.at(-1)!.date);
 
     setDate(initialDate);
   }, [transactionArray.data]);
 
   useEffect(() => {
-    if (!transactionArray.data || !date) return;
+    if (!transactionArray.data || !date) {
+      console.debug(
+        "transactionArray or date undefined. transactionArray is probably fetching, but date might be missing."
+      );
+
+      return;
+    }
 
     if (rangeFormat === "all") {
       setScopedTransactionArray(transactionArray.data);
@@ -117,7 +127,10 @@ const Page = () => {
   }, [date, rangeFormat, transactionArray.data]);
 
   const handleRangeChange = (change: 1 | -1) => {
-    if (!date) return;
+    if (!date) {
+      console.error("handleRangeChange denied. date undefined.");
+      return;
+    }
 
     if (rangeFormat === "all") {
       setDate(undefined);
@@ -142,7 +155,12 @@ const Page = () => {
   };
 
   const calcOweGroup = useMemo(() => {
-    if (!associatedTransactionArray.data) return;
+    if (!associatedTransactionArray.data) {
+      console.debug(
+        "associatedTransactionArray undefined. It's probably fetching. "
+      );
+      return;
+    }
     const oweGroup: { [userId: string]: number } = {};
 
     associatedTransactionArray.data.forEach((transaction) => {

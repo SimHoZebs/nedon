@@ -25,7 +25,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   useEffect(() => {
     if (!appUser && router.pathname !== "/") {
-      console.log(
+      console.debug(
         "User is on path:" +
           router.pathname +
           " but did not log in. Sending to basePath."

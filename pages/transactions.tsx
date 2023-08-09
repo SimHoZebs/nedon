@@ -37,7 +37,11 @@ const Page: NextPage = () => {
   >([]);
 
   useEffect(() => {
-    if (!transactionArray.data) return;
+    if (!transactionArray.data) {
+      console.debug("transactionArray undefined. Probably fetching.");
+
+      return;
+    }
     if (!date) {
       const initialDate = new Date(transactionArray.data.at(-1)!.date);
 
@@ -60,7 +64,10 @@ const Page: NextPage = () => {
   }, [date, rangeFormat, transactionArray.data]);
 
   const handleRangeChange = (change: 1 | -1) => {
-    if (!date) return;
+    if (!date) {
+      console.error("handleRangeChange denied. date undefined.");
+      return;
+    }
 
     if (rangeFormat === "all") {
       setDate(new Date(Date.now()));
@@ -157,8 +164,6 @@ const Page: NextPage = () => {
                         transaction && (
                           <TransactionCard
                             button={() => {
-                              if (!appUser) return;
-
                               setShowModal(true);
                               setCurrentTransaction(transaction);
                             }}

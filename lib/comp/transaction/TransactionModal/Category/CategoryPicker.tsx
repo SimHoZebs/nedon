@@ -31,7 +31,11 @@ const CategoryPicker = forwardRef(
     >([]);
 
     const cleanup = () => {
-      if (!categoryOptionArray.data) return;
+      if (!categoryOptionArray.data) {
+        console.error("cleanup denied. categoryOptionArray.data is undefined.");
+
+        return;
+      }
 
       setCurrentOptionArray(categoryOptionArray.data);
       props.closePicker();
@@ -119,7 +123,7 @@ const CategoryPicker = forwardRef(
                 <button
                   onClick={async () => {
                     if (category.subCategoryArray.length === 0) {
-                      console.log("syncing");
+                      console.debug("syncing");
                       syncCategory(category);
                     } else {
                       setCurrentOptionArray(category.subCategoryArray);

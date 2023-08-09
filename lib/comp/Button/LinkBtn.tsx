@@ -19,7 +19,10 @@ const LinkBtn = () => {
   const onSuccess = React.useCallback(
     (public_token: string) => {
       const getUserAccessToken = async () => {
-        if (!appUser) return;
+        if (!appUser) {
+          console.error("appUser is undefined.");
+          return;
+        }
 
         const user = await setAccessToken.mutateAsync({
           publicToken: public_token,
@@ -27,7 +30,7 @@ const LinkBtn = () => {
         });
 
         if (!user.hasAccessToken) {
-          console.log("error setting access token from server");
+          console.error("unable to set access token from server");
         }
 
         setAppUser({ ...user });

@@ -65,8 +65,6 @@ const SplitList = (props: Props) => {
         )
     );
 
-    console.log("Deleting following splits", splitToDeleteArray);
-
     splitToDeleteArray.forEach(async (split) => {
       if (split.id) await deleteSplit.mutateAsync({ splitId: split.id });
     });
@@ -80,7 +78,6 @@ const SplitList = (props: Props) => {
     } else {
       props.unsavedSplitArray.forEach(async (split) => {
         if (!isSplitInDB(split)) {
-          console.log("split", split, " is not in DB, creating new split");
           await createSplit.mutateAsync({ split });
         } else {
           await upsertManyCategory.mutateAsync({
