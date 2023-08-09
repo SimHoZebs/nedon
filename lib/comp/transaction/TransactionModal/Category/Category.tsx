@@ -25,8 +25,8 @@ const Category = (props: Props) => {
 
   const categoryPickerRef = useRef<HTMLDivElement>(null);
 
-  const [unsavedMergedCategoryArray, setUnsavedMergedCategoryArray] = useState(
-    mergeCategoryArray(props.unsavedSplitArray)
+  const unsavedMergedCategoryArray = mergeCategoryArray(
+    props.unsavedSplitArray
   );
 
   const createCategoryForManySplit = (nameArray: string[]) => {
@@ -38,14 +38,17 @@ const Category = (props: Props) => {
     }
 
     if (!transaction.inDB) {
+      if (editingMergedCategoryIndex === undefined) {
+        console.error("editingMergedCategoryIndex is undefined.");
+        return;
+      }
+
       const split = structuredClone(props.unsavedSplitArray[0]);
-      split.categoryArray.push(
-        emptyCategory({
-          nameArray,
-          splitId: split.id,
-          amount: 0,
-        })
-      );
+      split.categoryArray[editingMergedCategoryIndex] = emptyCategory({
+        nameArray,
+        splitId: split.id,
+        amount: 0,
+      });
 
       createTransaction.mutateAsync({
         userId: appUser.id,
@@ -131,7 +134,17 @@ const Category = (props: Props) => {
               emptyCategory({ amount: 0, splitId: null })
             );
 
-            setUnsavedMergedCategoryArray(mergedCategoryArrayClone);
+            const newCategory = emptyCategory({
+              amount: 0,
+              splitId: null,
+            });
+
+            props.setUnsavedSplitArray((prev) =>
+              prev.map((split) => {
+                split.categoryArray.push(newCategory);
+                return split;
+              })
+            );
 
             //The index is referenced from the clone instead of the react state as they are identical and the react state wouldn't have updated yet (See: batch state update)
             const index = mergedCategoryArrayClone.length - 1;
@@ -192,8 +205,7 @@ const Category = (props: Props) => {
 
         <CategoryPicker
           ref={categoryPickerRef}
-          setUnsavedMergedCategoryArray={setUnsavedMergedCategoryArray}
-          updateCategoryNameArrayForAllSplit={updateManyCategoryNameArray}
+          updateManyCategoryNameArray={updateManyCategoryNameArray}
           createCategoryForManySplit={createCategoryForManySplit}
           //Fallback to 0 for initial boundingClient size.
           unsavedMergedCategoryArray={unsavedMergedCategoryArray}

@@ -7,11 +7,8 @@ import categoryStyleArray from "@/util/categoryStyle";
 
 interface Props {
   createCategoryForManySplit: (nameArray: string[]) => void;
-  updateCategoryNameArrayForAllSplit: (newNameArray: string[]) => void;
+  updateManyCategoryNameArray: (newNameArray: string[]) => void;
   unsavedMergedCategoryArray: MergedCategory[];
-  setUnsavedMergedCategoryArray: React.Dispatch<
-    React.SetStateAction<MergedCategory[]>
-  >;
   editingMergedCategoryIndex: number;
   closePicker: () => void;
   position: { x: number; y: number };
@@ -52,18 +49,10 @@ const CategoryPicker = forwardRef(
         updatedMergedCategory.nameArray.push(clickedTreedCategory.name);
 
       if (editingMergedCategory.id) {
-        props.updateCategoryNameArrayForAllSplit(
-          updatedMergedCategory.nameArray
-        );
+        props.updateManyCategoryNameArray(updatedMergedCategory.nameArray);
       } else {
         props.createCategoryForManySplit(updatedMergedCategory.nameArray);
       }
-
-      props.setUnsavedMergedCategoryArray((prev) => {
-        const clone = structuredClone(prev);
-        clone[props.editingMergedCategoryIndex] = updatedMergedCategory;
-        return clone;
-      });
 
       props.closePicker();
 
@@ -132,19 +121,6 @@ const CategoryPicker = forwardRef(
                       syncCategory(category);
                     } else {
                       setCurrentOptionArray(category.subCategoryArray);
-
-                      props.setUnsavedMergedCategoryArray((prev) => {
-                        const clone = structuredClone(prev);
-                        clone[props.editingMergedCategoryIndex] = {
-                          ...editingMergedCategory,
-                          nameArray: [
-                            ...editingMergedCategory.nameArray,
-                            category.name,
-                          ],
-                        };
-
-                        return clone;
-                      });
                     }
                   }}
                   key={i}
