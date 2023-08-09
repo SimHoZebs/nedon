@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import { trpc } from "../lib/util/trpc";
-import useLocalStoreDelay, { useLocalStore, useStore } from "../lib/util/store";
+import { useLocalStoreDelay, useLocalStore, useStore } from "../lib/util/store";
 import { emptyUser } from "../lib/util/user";
 import { useRouter } from "next/router";
 import { Icon } from "@iconify-icon/react";

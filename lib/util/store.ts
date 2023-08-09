@@ -56,7 +56,7 @@ export const useLocalStore = create<LocalStore>()(
 
 import { useState, useEffect } from "react";
 
-const useLocalStoreDelay = <T, F>(
+export const useLocalStoreDelay = <T, F>(
   store: (callback: (state: T) => unknown) => unknown,
   callback: (state: T) => F
 ) => {
@@ -69,8 +69,6 @@ const useLocalStoreDelay = <T, F>(
 
   return data;
 };
-
-export default useLocalStoreDelay;
 
 export const useStore = create<Store>()((set) => ({
   linkToken: "", // Don't set to null or error message will show up briefly when site loads
