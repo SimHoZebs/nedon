@@ -90,7 +90,7 @@ const Page: NextPage = () => {
     return organizeTransactionByTime(scopedTransactionArray);
   }, [scopedTransactionArray]);
 
-  return appUser ? (
+  return (
     <section className="flex w-full flex-col items-center">
       {showModal && currentTransaction && (
         <TransactionModal setShowModal={setShowModal} />
@@ -177,7 +177,7 @@ const Page: NextPage = () => {
         ))}
       </div>
     </section>
-  ) : null;
+  );
 };
 
 export default Page;

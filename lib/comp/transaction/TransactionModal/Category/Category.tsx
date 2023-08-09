@@ -14,11 +14,6 @@ interface Props {
 const Category = (props: Props) => {
   const appUser = useStore((state) => state.appUser);
   const currentTransaction = useStore((state) => state.currentTransaction);
-  const setTest = () =>
-    useStore.setState({
-      test: "",
-    });
-
   const createTransaction = trpc.transaction.create.useMutation();
   const createSplit = trpc.split.create.useMutation();
   const createCategory = trpc.category.create.useMutation();
@@ -82,6 +77,8 @@ const Category = (props: Props) => {
   };
 
   const updateManyCategoryNameArray = (updatedNameArray: string[]) => {
+    if (!transaction) return console.error("transaction is undefined.");
+
     props.unsavedSplitArray.forEach((unsavedSplit) => {
       if (!isSplitInDB(unsavedSplit)) {
         console.error("Split not in DB, can not update category.");
@@ -120,111 +117,98 @@ const Category = (props: Props) => {
   }>({ x: -400, y: 0 });
 
   return (
-    transaction && (
+    <div>
       <div>
-        <div>
-          <h4 className="text-lg font-medium">Categories</h4>
-          <button
-            className="rounded-lg bg-zinc-800 p-2"
-            onClick={async (e) => {
-              const mergedCategoryArrayClone = structuredClone(
-                unsavedMergedCategoryArray
+        <h4 className="text-lg font-medium">Categories</h4>
+        <button
+          className="rounded-lg bg-zinc-800 p-2"
+          onClick={async (e) => {
+            const mergedCategoryArrayClone = structuredClone(
+              unsavedMergedCategoryArray
+            );
+
+            mergedCategoryArrayClone.push(
+              emptyCategory({ amount: 0, splitId: null })
+            );
+
+            setUnsavedMergedCategoryArray(mergedCategoryArrayClone);
+
+            //The index is referenced from the clone instead of the react state as they are identical and the react state wouldn't have updated yet (See: batch state update)
+            const index = mergedCategoryArrayClone.length - 1;
+            setEditingMergedCategoryIndex(index);
+
+            const pickerOffsets =
+              categoryPickerRef.current?.getBoundingClientRect();
+
+            if (!pickerOffsets)
+              throw new Error(
+                `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`
               );
 
-              mergedCategoryArrayClone.push(
-                emptyCategory({ amount: 0, splitId: null })
-              );
-
-              setUnsavedMergedCategoryArray(mergedCategoryArrayClone);
-
-              //The index is referenced from the clone instead of the react state as they are identical and the react state wouldn't have updated yet (See: batch state update)
-              const index = mergedCategoryArrayClone.length - 1;
-              setEditingMergedCategoryIndex(index);
-
-              const pickerOffsets =
-                categoryPickerRef.current?.getBoundingClientRect();
-
-              if (!pickerOffsets)
-                throw new Error(
-                  `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`
-                );
-
-              const clickPositionOffsets =
-                e.currentTarget.getBoundingClientRect();
-              setPickerPosition({
-                x: clickPositionOffsets.right - pickerOffsets?.width,
-                y: clickPositionOffsets.bottom + 8,
-              });
-            }}
-          >
-            Create category
-          </button>
-          <button onClick={() => setTest()}>test</button>
-        </div>
-
-        <div className="flex flex-col gap-y-1">
-          <div className="relative flex w-full flex-wrap items-center gap-2 ">
-            {unsavedMergedCategoryArray.map((category, index) => (
-              <CategoryChip
-                key={index}
-                isMultiCategory={unsavedMergedCategoryArray.length > 1}
-                isEditing={editingMergedCategoryIndex === index}
-                category={
-                  editingMergedCategoryIndex === index
-                    ? unsavedMergedCategoryArray[index]
-                    : category
-                }
-                categoryChipClick={(e) => {
-                  setEditingMergedCategoryIndex(index);
-
-                  const pickerOffsets =
-                    categoryPickerRef.current?.getBoundingClientRect();
-
-                  if (!pickerOffsets)
-                    throw new Error(
-                      `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`
-                    );
-
-                  const offsets = e.currentTarget.getBoundingClientRect();
-                  setPickerPosition({
-                    x: offsets.right - pickerOffsets?.width,
-                    y: offsets.bottom + 8,
-                  });
-                }}
-              />
-            ))}
-          </div>
-
-          <CategoryPicker
-            ref={categoryPickerRef}
-            setUnsavedMergedCategoryArray={setUnsavedMergedCategoryArray}
-            updateCategoryNameArrayForAllSplit={updateManyCategoryNameArray}
-            createCategoryForManySplit={createCategoryForManySplit}
-            //Fallback to 0 for initial boundingClient size.
-            unsavedMergedCategoryArray={unsavedMergedCategoryArray}
-            editingMergedCategoryIndex={editingMergedCategoryIndex || 0}
-            position={pickerPosition}
-            closePicker={() => {
-              setEditingMergedCategoryIndex(undefined);
-              setPickerPosition({
-                x: -400,
-                y: 0,
-              });
-            }}
-          />
-        </div>
-
-        <div>
-          {/* <p className="h-4 text-xs text-pink-300 ">
-            {categorySplitTotal !== amount
-              ? `Category total is $ ${categorySplitTotal}, ${
-                  categorySplitTotal > amount ? "exceeding" : "short"
-                } by $ ${Math.abs(categorySplitTotal - amount)}`
-              : null}
-          </p> */}
-        </div>
+            const clickPositionOffsets =
+              e.currentTarget.getBoundingClientRect();
+            setPickerPosition({
+              x: clickPositionOffsets.right - pickerOffsets?.width,
+              y: clickPositionOffsets.bottom + 8,
+            });
+          }}
+        >
+          Create category
+        </button>
       </div>
-    )
+
+      <div className="flex flex-col gap-y-1">
+        <div className="relative flex w-full flex-wrap items-center gap-2 ">
+          {unsavedMergedCategoryArray.map((category, index) => (
+            <CategoryChip
+              key={index}
+              isMultiCategory={unsavedMergedCategoryArray.length > 1}
+              isEditing={editingMergedCategoryIndex === index}
+              category={
+                editingMergedCategoryIndex === index
+                  ? unsavedMergedCategoryArray[index]
+                  : category
+              }
+              categoryChipClick={(e) => {
+                setEditingMergedCategoryIndex(index);
+
+                const pickerOffsets =
+                  categoryPickerRef.current?.getBoundingClientRect();
+
+                if (!pickerOffsets)
+                  throw new Error(
+                    `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`
+                  );
+
+                const offsets = e.currentTarget.getBoundingClientRect();
+                setPickerPosition({
+                  x: offsets.right - pickerOffsets?.width,
+                  y: offsets.bottom + 8,
+                });
+              }}
+            />
+          ))}
+        </div>
+
+        <CategoryPicker
+          ref={categoryPickerRef}
+          setUnsavedMergedCategoryArray={setUnsavedMergedCategoryArray}
+          updateCategoryNameArrayForAllSplit={updateManyCategoryNameArray}
+          createCategoryForManySplit={createCategoryForManySplit}
+          //Fallback to 0 for initial boundingClient size.
+          unsavedMergedCategoryArray={unsavedMergedCategoryArray}
+          editingMergedCategoryIndex={editingMergedCategoryIndex || 0}
+          position={pickerPosition}
+          closePicker={() => {
+            setEditingMergedCategoryIndex(undefined);
+            setPickerPosition({
+              x: -400,
+              y: 0,
+            });
+          }}
+        />
+      </div>
+    </div>
   );
 };
 

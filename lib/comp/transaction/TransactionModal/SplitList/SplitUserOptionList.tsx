@@ -20,7 +20,6 @@ const SplitUserOptionList = (props: Props) => {
   );
 
   return (
-    transaction &&
     appUser &&
     appGroup?.userArray &&
     appGroup.userArray.map((user, i) =>
@@ -36,6 +35,11 @@ const SplitUserOptionList = (props: Props) => {
           <Button
             className="bg-zinc-800 text-indigo-300"
             onClick={() => {
+              if (!transaction) {
+                console.error("transaction is null");
+                return;
+              }
+
               const updatedSplitArray = structuredClone(
                 props.unsavedSplitArray
               ).map((split) => ({

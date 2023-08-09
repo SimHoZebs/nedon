@@ -97,112 +97,109 @@ const SplitList = (props: Props) => {
   };
 
   return (
-    appUser &&
-    transaction && (
-      <div className="flex w-full flex-col gap-y-3">
-        <div className="flex gap-x-2">
-          {props.children}
-          {props.unsavedSplitArray.length === 1 && !isManaging && (
-            <ActionBtn onClick={() => setIsManaging(true)}>Split</ActionBtn>
-          )}
-        </div>
-
-        {(props.unsavedSplitArray.length > 1 || isManaging) && (
-          <div className="flex flex-col gap-y-2">
-            <div className="flex w-full justify-between">
-              <H3>Split</H3>
-              {isManaging ? (
-                <div className="flex gap-x-2">
-                  <ActionBtn onClick={saveChanges}>Save changes</ActionBtn>
-
-                  <ActionBtn
-                    variant="negative"
-                    onClick={() => setIsManaging(false)}
-                  >
-                    Cancel
-                  </ActionBtn>
-                </div>
-              ) : (
-                <Button
-                  className="flex gap-x-2 bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
-                  onClick={() => setIsManaging(true)}
-                >
-                  <Icon icon={"mdi:edit"} />
-                  Manage
-                </Button>
-              )}
-            </div>
-
-            {props.unsavedSplitArray.map((split, i) => (
-              <div
-                key={i}
-                className="flex w-full items-center gap-x-2 sm:gap-x-3"
-              >
-                <UserSplit
-                  isManaging={isManaging}
-                  onRemoveUser={() => {
-                    const updatedSplitArray = structuredClone(
-                      props.unsavedSplitArray
-                    );
-                    const splicedSplit = updatedSplitArray.splice(i, 1);
-                    const amount = splicedSplit[0].categoryArray.reduce(
-                      (total, category) => total + category.amount,
-                      0
-                    );
-
-                    updatedSplitArray.forEach((split) => {
-                      split.categoryArray.forEach((category) => {
-                        category.amount += amount / updatedSplitArray.length;
-                      });
-                    });
-
-                    props.setUnsavedSplitArray(updatedSplitArray);
-                  }}
-                  onAmountChange={(amount: number) => {
-                    const updatedSplitArray = structuredClone(
-                      props.unsavedSplitArray
-                    );
-                    updatedSplitArray[i].categoryArray.forEach((category) => {
-                      category.amount =
-                        amount / updatedSplitArray[i].categoryArray.length;
-                    });
-
-                    props.setUnsavedSplitArray(updatedSplitArray);
-                  }}
-                  amount={amount}
-                  split={split}
-                  splitTotal={calcSplitTotal(split)}
-                  userId={split.userId}
-                >
-                  <div className="flex items-center gap-x-2">
-                    <Icon
-                      icon="mdi:account"
-                      className="rounded-full border-2 border-zinc-400 bg-zinc-800 p-2 hover:text-zinc-100"
-                      width={20}
-                      height={20}
-                    />
-                  </div>
-                </UserSplit>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="h-5 text-red-800">
-          {updatedTotalSplit !== amount &&
-            props.unsavedSplitArray.length > 0 &&
-            `Split is ${updatedTotalSplit > amount ? "greater " : "less "}
-          than the amount (${`updatedTotalSplit $${updatedTotalSplit}`})`}
-        </div>
-
-        {isManaging && (
-          <SplitUserOptionList
-            unsavedSplitArray={props.unsavedSplitArray}
-            setUnsavedSplitArray={props.setUnsavedSplitArray}
-          />
+    <div className="flex w-full flex-col gap-y-3">
+      <div className="flex gap-x-2">
+        {props.children}
+        {props.unsavedSplitArray.length === 1 && !isManaging && (
+          <ActionBtn onClick={() => setIsManaging(true)}>Split</ActionBtn>
         )}
       </div>
-    )
+
+      {(props.unsavedSplitArray.length > 1 || isManaging) && (
+        <div className="flex flex-col gap-y-2">
+          <div className="flex w-full justify-between">
+            <H3>Split</H3>
+            {isManaging ? (
+              <div className="flex gap-x-2">
+                <ActionBtn onClick={saveChanges}>Save changes</ActionBtn>
+
+                <ActionBtn
+                  variant="negative"
+                  onClick={() => setIsManaging(false)}
+                >
+                  Cancel
+                </ActionBtn>
+              </div>
+            ) : (
+              <Button
+                className="flex gap-x-2 bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
+                onClick={() => setIsManaging(true)}
+              >
+                <Icon icon={"mdi:edit"} />
+                Manage
+              </Button>
+            )}
+          </div>
+
+          {props.unsavedSplitArray.map((split, i) => (
+            <div
+              key={i}
+              className="flex w-full items-center gap-x-2 sm:gap-x-3"
+            >
+              <UserSplit
+                isManaging={isManaging}
+                onRemoveUser={() => {
+                  const updatedSplitArray = structuredClone(
+                    props.unsavedSplitArray
+                  );
+                  const splicedSplit = updatedSplitArray.splice(i, 1);
+                  const amount = splicedSplit[0].categoryArray.reduce(
+                    (total, category) => total + category.amount,
+                    0
+                  );
+
+                  updatedSplitArray.forEach((split) => {
+                    split.categoryArray.forEach((category) => {
+                      category.amount += amount / updatedSplitArray.length;
+                    });
+                  });
+
+                  props.setUnsavedSplitArray(updatedSplitArray);
+                }}
+                onAmountChange={(amount: number) => {
+                  const updatedSplitArray = structuredClone(
+                    props.unsavedSplitArray
+                  );
+                  updatedSplitArray[i].categoryArray.forEach((category) => {
+                    category.amount =
+                      amount / updatedSplitArray[i].categoryArray.length;
+                  });
+
+                  props.setUnsavedSplitArray(updatedSplitArray);
+                }}
+                amount={amount}
+                split={split}
+                splitTotal={calcSplitTotal(split)}
+                userId={split.userId}
+              >
+                <div className="flex items-center gap-x-2">
+                  <Icon
+                    icon="mdi:account"
+                    className="rounded-full border-2 border-zinc-400 bg-zinc-800 p-2 hover:text-zinc-100"
+                    width={20}
+                    height={20}
+                  />
+                </div>
+              </UserSplit>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="h-5 text-red-800">
+        {updatedTotalSplit !== amount &&
+          props.unsavedSplitArray.length > 0 &&
+          `Split is ${updatedTotalSplit > amount ? "greater " : "less "}
+          than the amount (${`updatedTotalSplit $${updatedTotalSplit}`})`}
+      </div>
+
+      {isManaging && (
+        <SplitUserOptionList
+          unsavedSplitArray={props.unsavedSplitArray}
+          setUnsavedSplitArray={props.setUnsavedSplitArray}
+        />
+      )}
+    </div>
   );
 };
 

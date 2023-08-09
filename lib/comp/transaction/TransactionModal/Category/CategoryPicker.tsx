@@ -21,8 +21,6 @@ const CategoryPicker = forwardRef(
   (props: Props, ref: ForwardedRef<HTMLDivElement>) => {
     const editingMergedCategory =
       props.unsavedMergedCategoryArray[props.editingMergedCategoryIndex];
-    const appUser = useStore((state) => state.appUser);
-    const currentTransaction = useStore((state) => state.currentTransaction);
 
     const categoryOptionArray = trpc.getCategoryOptionArray.useQuery(
       undefined,
@@ -76,7 +74,7 @@ const CategoryPicker = forwardRef(
       setCurrentOptionArray(categoryOptionArray.data || []);
     }, [categoryOptionArray.data]);
 
-    return appUser && currentTransaction ? (
+    return (
       <div>
         {categoryOptionArray.data && (
           <div
@@ -176,7 +174,7 @@ const CategoryPicker = forwardRef(
           </div>
         )}
       </div>
-    ) : null;
+    );
   }
 );
 

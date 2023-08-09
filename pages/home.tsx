@@ -21,7 +21,7 @@ const User: NextPage = () => {
     <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700"></div>
   );
 
-  return appUser ? (
+  return (
     <section className="flex h-full w-full flex-col gap-y-3">
       {showModal && (
         <Modal setShowModal={setShowModal}>
@@ -57,7 +57,7 @@ const User: NextPage = () => {
             )
         )}
     </section>
-  ) : null;
+  );
 };
 
 export default User;
