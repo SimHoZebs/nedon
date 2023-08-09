@@ -17,7 +17,6 @@ import { z } from "zod";
 
 const Page: NextPage = () => {
   const appUser = useStore((state) => state.appUser);
-  const transactionOnModal = useStore((state) => state.transactionOnModal);
 
   const transactionArray = trpc.transaction.getAll.useQuery(
     { id: appUser ? appUser.id : "" },

@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SplitClientSide, isSplitInDB } from "@/util/types";
 import ActionBtn from "@/comp/Button/ActionBtn";
 import UserSplit from "./UserSplit";

@@ -11,6 +11,20 @@ import { useState, useEffect } from "react";
 import { Transaction } from "@prisma/client";
 import { resetFullTransaction } from "./transaction";
 
+export const useLocalStoreDelay = <T, F>(
+  store: (callback: (state: T) => unknown) => unknown,
+  callback: (state: T) => F
+) => {
+  const result = store(callback) as F;
+  const [data, setData] = useState<F>();
+
+  useEffect(() => {
+    setData(result);
+  }, [result]);
+
+  return data;
+};
+
 interface LocalStore {
   userIdArray: string[] | never[];
   setUserIdArray: (userIdArray: string[]) => void;
@@ -42,20 +56,6 @@ export const useLocalStore = create<LocalStore>()(
     )
   )
 );
-
-export const useLocalStoreDelay = <T, F>(
-  store: (callback: (state: T) => unknown) => unknown,
-  callback: (state: T) => F
-) => {
-  const result = store(callback) as F;
-  const [data, setData] = useState<F>();
-
-  useEffect(() => {
-    setData(result);
-  }, [result]);
-
-  return data;
-};
 
 interface Store {
   linkToken: string | null;
@@ -142,11 +142,3 @@ export const useStore = create<Store>()(
       set({ verticalCategoryPicker }),
   }))
 );
-
-interface TransactionStore {}
-
-export const useTransactionStore = create<TransactionStore>()((set) => ({
-  transactionOnModal: undefined,
-  setTransactionOnModal: (transactionOnModal: FullTransaction | undefined) =>
-    set({ transactionOnModal }),
-}));
