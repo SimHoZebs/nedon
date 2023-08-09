@@ -6,7 +6,6 @@ import {
   FullTransaction,
   SplitClientSideModel,
   PlaidTransaction,
-  isPlaidTransaction,
 } from "@/util/types";
 import { client } from "../util";
 import { SplitModel } from "../../prisma/zod";
@@ -15,14 +14,12 @@ import { convertToFullTransaction } from "@/util/transaction";
 // Retrieve Transactions for an Item
 // https://plaid.com/docs/#transactions
 const transactionRouter = router({
-  get: procedure
-    .input(z.object({ userId: z.string(), plaidTransaction: z.unknown() }))
+  getWithoutPlaid: procedure
+    .input(z.object({ userId: z.string(), transactionId: z.string() }))
     .query(async ({ input }) => {
-      if (!isPlaidTransaction(input.plaidTransaction)) return null;
-
       const transactionInDB = await db.transaction.findUnique({
         where: {
-          id: input.plaidTransaction.id,
+          id: input.transactionId,
         },
         include: {
           splitArray: {
@@ -33,8 +30,9 @@ const transactionRouter = router({
         },
       });
 
+      if (!transactionInDB) return null;
+
       return {
-        ...input.plaidTransaction,
         ...transactionInDB,
         inDB: !!transactionInDB,
       };

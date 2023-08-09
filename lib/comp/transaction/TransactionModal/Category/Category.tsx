@@ -1,38 +1,30 @@
 import React, { useState, useRef } from "react";
-import { SplitClientSide, isSplitInDB } from "@/util/types";
+import { SplitClientSide } from "@/util/types";
 import CategoryPicker from "./CategoryPicker";
 import { emptyCategory, mergeCategoryArray } from "@/util/category";
 import { useStore } from "@/util/store";
 import CategoryChip from "./CategoryChip";
 import { trpc } from "@/util/trpc";
 
-interface Props {
-  unsavedSplitArray: SplitClientSide[];
-  setUnsavedSplitArray: React.Dispatch<React.SetStateAction<SplitClientSide[]>>;
-}
-
-const Category = (props: Props) => {
-  const appUser = useStore((state) => state.appUser);
-  const currentTransaction = useStore((state) => state.currentTransaction);
+const Category = () => {
   const createTransaction = trpc.transaction.create.useMutation();
   const createSplit = trpc.split.create.useMutation();
   const upsertManySplit = trpc.split.upsertMany.useMutation();
   const createCategory = trpc.category.create.useMutation();
-  const { data: transaction } = trpc.transaction.get.useQuery(
-    { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
-    { enabled: !!currentTransaction && !!appUser?.id }
-  );
 
+  const unsavedSplitArray = useStore((state) => state.unsavedSplitArray);
+  const setUnsavedSplitArray = useStore((state) => state.setUnsavedSplitArray);
   const categoryPickerRef = useRef<HTMLDivElement>(null);
 
-  const unsavedMergedCategoryArray = mergeCategoryArray(
-    props.unsavedSplitArray
-  );
+  const appUser = useStore((state) => state.appUser);
+  const transaction = useStore((state) => state.transactionOnModal);
+
+  const unsavedMergedCategoryArray = mergeCategoryArray(unsavedSplitArray);
 
   const createCategoryForManySplit = (nameArray: string[]) => {
-    if (!appUser || !currentTransaction || !transaction) {
+    if (!appUser || !transaction) {
       console.error(
-        "appUser or currentTransaction or transaction is undefined."
+        "appUser or transactionOnModal or transaction is undefined."
       );
       return;
     }
@@ -43,7 +35,7 @@ const Category = (props: Props) => {
         return;
       }
 
-      const split = structuredClone(props.unsavedSplitArray[0]);
+      const split = structuredClone(unsavedSplitArray[0]);
       split.categoryArray[editingMergedCategoryIndex] = emptyCategory({
         nameArray,
         splitId: split.id,
@@ -52,14 +44,14 @@ const Category = (props: Props) => {
 
       createTransaction.mutateAsync({
         userId: appUser.id,
-        transactionId: currentTransaction.id,
+        transactionId: transaction.id,
         splitArray: [split],
       });
       return;
     }
 
     //Only one category may be created at a time, so find is more suitable than filter.
-    props.unsavedSplitArray.forEach(async (unsavedSplit) => {
+    unsavedSplitArray.forEach(async (unsavedSplit) => {
       if (unsavedSplit.id === null) {
         const split = structuredClone(unsavedSplit);
         split.categoryArray.push(
@@ -85,8 +77,8 @@ const Category = (props: Props) => {
     if (!transaction.inDB) {
       createTransaction.mutateAsync({
         userId: appUser!.id,
-        transactionId: currentTransaction!.id,
-        splitArray: props.unsavedSplitArray.map((split) => ({
+        transactionId: transaction!.id,
+        splitArray: unsavedSplitArray.map((split) => ({
           ...split,
           categoryArray: split.categoryArray.map((category) => ({
             ...category,
@@ -102,7 +94,7 @@ const Category = (props: Props) => {
       return;
     }
 
-    const updatedSplitArray = props.unsavedSplitArray.map((unsavedSplit) => {
+    const updatedSplitArray = unsavedSplitArray.map((unsavedSplit) => {
       const updatedSplit = structuredClone(unsavedSplit);
 
       updatedSplit.categoryArray[editingMergedCategoryIndex].nameArray =
@@ -146,12 +138,14 @@ const Category = (props: Props) => {
               splitId: null,
             });
 
-            props.setUnsavedSplitArray((prev) =>
-              prev.map((split) => {
+            const updatedSplitArray = structuredClone(unsavedSplitArray).map(
+              (split) => {
                 split.categoryArray.push(newCategory);
                 return split;
-              })
+              }
             );
+
+            setUnsavedSplitArray(updatedSplitArray);
 
             //The index is referenced from the clone instead of the react state as they are identical and the react state wouldn't have updated yet (See: batch state update)
             setEditingMergedCategoryIndex(mergedCategoryArrayClone.length - 1);

@@ -3,27 +3,18 @@ import { useStore } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import Button from "@/comp/Button/Button";
 import { SplitClientSide } from "@/util/types";
-import { trpc } from "@/util/trpc";
 
-type Props = {
-  unsavedSplitArray: SplitClientSide[];
-  setUnsavedSplitArray: React.Dispatch<React.SetStateAction<SplitClientSide[]>>;
-};
-
-const SplitUserOptionList = (props: Props) => {
+const SplitUserOptionList = () => {
   const appUser = useStore((state) => state.appUser);
   const appGroup = useStore((state) => state.appGroup);
-  const currentTransaction = useStore((state) => state.currentTransaction);
-  const { data: transaction } = trpc.transaction.get.useQuery(
-    { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
-    { enabled: !!currentTransaction && !!appUser?.id }
-  );
+  const transactionInDB = useStore((state) => state.transactionOnModal);
+  const unsavedSplitArray = useStore((state) => state.unsavedSplitArray);
+  const setUnsavedSplitArray = useStore((state) => state.setUnsavedSplitArray);
 
   return (
     appUser &&
-    appGroup?.userArray &&
-    appGroup.userArray.map((user, i) =>
-      props.unsavedSplitArray.find((split) => split.userId === user.id) ||
+    appGroup?.userArray?.map((user, i) =>
+      unsavedSplitArray.find((split) => split.userId === user.id) ||
       user.id === appUser.id ? null : (
         <div key={i} className="flex items-center gap-x-2">
           <Icon
@@ -35,21 +26,21 @@ const SplitUserOptionList = (props: Props) => {
           <Button
             className="bg-zinc-800 text-indigo-300"
             onClick={() => {
-              if (!transaction) {
+              if (!transactionInDB) {
                 console.error("transaction is null");
                 return;
               }
 
-              const updatedSplitArray = structuredClone(
-                props.unsavedSplitArray
-              ).map((split) => ({
-                ...split,
-                categoryArray: split.categoryArray.map((category) => ({
-                  ...category,
-                  amount:
-                    transaction.amount / (props.unsavedSplitArray.length + 1),
-                })),
-              }));
+              const updatedSplitArray = structuredClone(unsavedSplitArray).map(
+                (split) => ({
+                  ...split,
+                  categoryArray: split.categoryArray.map((category) => ({
+                    ...category,
+                    amount:
+                      transactionInDB.amount / (unsavedSplitArray.length + 1),
+                  })),
+                })
+              );
 
               const appUserCategoryArray = updatedSplitArray.find(
                 (split) => split.userId === appUser.id
@@ -62,12 +53,12 @@ const SplitUserOptionList = (props: Props) => {
 
               updatedSplitArray.push({
                 id: null,
-                transactionId: transaction.id,
+                transactionId: transactionInDB.id,
                 userId: user.id,
                 categoryArray: structuredClone(appUserCategoryArray),
               });
 
-              props.setUnsavedSplitArray(updatedSplitArray);
+              setUnsavedSplitArray(updatedSplitArray);
             }}
           >
             Split

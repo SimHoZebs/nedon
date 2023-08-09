@@ -9,6 +9,28 @@ import {
 
 import { emptyCategory } from "./category";
 
+export const resetFullTransaction = (
+  fullTransaction: FullTransaction
+): FullTransaction => ({
+  ...fullTransaction,
+  inDB: false,
+  splitArray: [
+    {
+      id: null,
+      userId: fullTransaction.ownerId,
+      transactionId: fullTransaction.id,
+      categoryArray: [
+        {
+          id: null,
+          splitId: null,
+          nameArray: fullTransaction.splitArray[0].categoryArray[0].nameArray,
+          amount: fullTransaction.amount,
+        },
+      ],
+    },
+  ],
+});
+
 export const convertToFullTransaction = (
   userId: string,
   plaidTransaction: PlaidTransaction,

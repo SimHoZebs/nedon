@@ -17,10 +17,7 @@ import { z } from "zod";
 
 const Page: NextPage = () => {
   const appUser = useStore((state) => state.appUser);
-  const currentTransaction = useStore((state) => state.currentTransaction);
-  const setCurrentTransaction = useStore(
-    (state) => state.setCurrentTransaction
-  );
+  const transactionOnModal = useStore((state) => state.transactionOnModal);
 
   const transactionArray = trpc.transaction.getAll.useQuery(
     { id: appUser ? appUser.id : "" },
@@ -97,9 +94,7 @@ const Page: NextPage = () => {
 
   return (
     <section className="flex w-full flex-col items-center">
-      {showModal && currentTransaction && (
-        <TransactionModal setShowModal={setShowModal} />
-      )}
+      {showModal && <TransactionModal setShowModal={setShowModal} />}
 
       {date && (
         <div className="flex">
@@ -163,10 +158,7 @@ const Page: NextPage = () => {
                       (transaction, l) =>
                         transaction && (
                           <TransactionCard
-                            button={() => {
-                              setShowModal(true);
-                              setCurrentTransaction(transaction);
-                            }}
+                            setShowModal={setShowModal}
                             transaction={transaction}
                             key={l}
                           />

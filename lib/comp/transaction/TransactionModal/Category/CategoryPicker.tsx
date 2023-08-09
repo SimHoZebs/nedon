@@ -1,7 +1,7 @@
 import React, { ForwardedRef, forwardRef, useEffect, useState } from "react";
 import { trpc } from "@/util/trpc";
 import { Icon } from "@iconify-icon/react";
-import { TreedCategory, MergedCategory, FullTransaction } from "@/util/types";
+import { TreedCategory, MergedCategory } from "@/util/types";
 import categoryStyleArray from "@/util/categoryStyle";
 
 interface Props {

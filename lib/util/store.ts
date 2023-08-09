@@ -1,29 +1,18 @@
-import { FullTransaction, GroupClientSide, UserClientSide } from "./types";
+import {
+  FullTransaction,
+  GroupClientSide,
+  SplitClientSide,
+  SplitInDB,
+  UserClientSide,
+} from "./types";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-
-interface Store {
-  linkToken: string | null;
-  setLinkToken: (linkToken: string | null) => void;
-
-  appUser?: UserClientSide;
-  setAppUser: (user: UserClientSide | undefined) => void;
-
-  appGroup?: GroupClientSide;
-  setAppGroup: (group: GroupClientSide | undefined) => void;
-
-  currentTransaction: FullTransaction | undefined;
-  setCurrentTransaction: (transaction: FullTransaction | undefined) => void;
-
-  verticalCategoryPicker: boolean;
-  setVerticalCategoryPicker: (verticalCategoryPicker: boolean) => void;
-
-  test: string;
-  setTest: (test: string) => void;
-}
+import { useState, useEffect } from "react";
+import { Transaction } from "@prisma/client";
+import { resetFullTransaction } from "./transaction";
 
 interface LocalStore {
-  userIdArray: string[];
+  userIdArray: string[] | never[];
   setUserIdArray: (userIdArray: string[]) => void;
   addUserId: (userId: string) => void;
   deleteUserId: (userId: string) => void;
@@ -54,8 +43,6 @@ export const useLocalStore = create<LocalStore>()(
   )
 );
 
-import { useState, useEffect } from "react";
-
 export const useLocalStoreDelay = <T, F>(
   store: (callback: (state: T) => unknown) => unknown,
   callback: (state: T) => F
@@ -70,32 +57,96 @@ export const useLocalStoreDelay = <T, F>(
   return data;
 };
 
-export const useStore = create<Store>()((set) => ({
-  linkToken: "", // Don't set to null or error message will show up briefly when site loads
-  setLinkToken: (linkToken: string | null) => set({ linkToken }),
+interface Store {
+  linkToken: string | null;
+  setLinkToken: (linkToken: string | null) => void;
 
-  appUser: undefined,
-  setAppUser: (appUser: UserClientSide | undefined) => set({ appUser }),
+  appUser?: UserClientSide;
+  setAppUser: (user: UserClientSide | undefined) => void;
 
-  appGroup: undefined,
-  setAppGroup: (appGroup: GroupClientSide | undefined) => set({ appGroup }),
+  appGroup?: GroupClientSide;
+  setAppGroup: (group: GroupClientSide | undefined) => void;
 
-  currentTransaction: undefined,
-  setCurrentTransaction: (currentTransaction: FullTransaction | undefined) =>
-    set({ currentTransaction }),
+  transactionOnModal: FullTransaction | undefined;
+  setTransactionOnModal: (transaction: FullTransaction | undefined) => void;
+  refreshDBData: (
+    transaction: (Transaction & { splitArray: SplitInDB[] }) | null
+  ) => void;
+  resetTransactionOnModal: () => void;
 
-  verticalCategoryPicker: false,
-  setVerticalCategoryPicker: (verticalCategoryPicker: boolean) =>
-    set({ verticalCategoryPicker }),
+  unsavedSplitArray: SplitClientSide[];
+  setUnsavedSplitArray: (splitArray: SplitClientSide[]) => void;
 
-  test: "",
-  setTest: (test: string) => set({ test }),
-}));
+  verticalCategoryPicker: boolean;
+  setVerticalCategoryPicker: (verticalCategoryPicker: boolean) => void;
+}
+
+export const useStore = create<Store>()(
+  devtools((set) => ({
+    linkToken: "", // Don't set to null or error message will show up briefly when site loads
+    setLinkToken: (linkToken: string | null) => set({ linkToken }),
+
+    appUser: undefined,
+    setAppUser: (appUser: UserClientSide | undefined) => set({ appUser }),
+
+    appGroup: undefined,
+    setAppGroup: (appGroup: GroupClientSide | undefined) => set({ appGroup }),
+
+    transactionOnModal: undefined,
+    setTransactionOnModal: (transasction: FullTransaction | undefined) =>
+      set({ transactionOnModal: transasction }),
+
+    refreshDBData: (
+      transaction: (Transaction & { splitArray: SplitInDB[] }) | null
+    ) => {
+      set((store) => {
+        if (!store.transactionOnModal) return store;
+
+        const clone = structuredClone(store.transactionOnModal);
+        const test = {
+          transactionOnModal: {
+            ...clone,
+            ...transaction,
+          },
+        };
+        console.log("test", test);
+
+        return {
+          transactionOnModal: {
+            ...clone,
+            ...transaction,
+          },
+        };
+      });
+    },
+
+    resetTransactionOnModal: () =>
+      set((store) => {
+        console.log("resetting");
+
+        if (!store.transactionOnModal) return store;
+        const transaction = resetFullTransaction(store.transactionOnModal);
+
+        return {
+          transactionOnModal: transaction,
+          unsavedSplitArray: transaction.splitArray,
+        };
+      }),
+
+    unsavedSplitArray: [],
+    setUnsavedSplitArray: (splitArray: SplitClientSide[]) =>
+      set({ unsavedSplitArray: splitArray }),
+
+    verticalCategoryPicker: false,
+    setVerticalCategoryPicker: (verticalCategoryPicker: boolean) =>
+      set({ verticalCategoryPicker }),
+  }))
+);
 
 interface TransactionStore {}
 
 export const useTransactionStore = create<TransactionStore>()((set) => ({
-  currentTransaction: undefined,
-  setCurrentTransaction: (currentTransaction: FullTransaction | undefined) =>
-    set({ currentTransaction }),
+  transactionOnModal: undefined,
+  setTransactionOnModal: (transactionOnModal: FullTransaction | undefined) =>
+    set({ transactionOnModal }),
 }));

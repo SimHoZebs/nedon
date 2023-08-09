@@ -1,5 +1,4 @@
 import React from "react";
-
 import { useStore } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import { FullTransaction } from "@/util/types";
@@ -7,10 +6,13 @@ import { getCategoryStyle } from "@/util/category";
 
 interface Props {
   transaction: FullTransaction;
-  button: () => void;
+  setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const TransactionCard = (props: Props) => {
   const appUser = useStore((state) => state.appUser);
+  const setTransactionOnModal = useStore(
+    (state) => state.setTransactionOnModal
+  );
 
   const splitAmount = props.transaction.splitArray
     .find((split) => split.userId === appUser?.id)
@@ -19,7 +21,10 @@ const TransactionCard = (props: Props) => {
   return (
     <div
       className="flex h-fit w-full flex-col justify-between gap-x-4 gap-y-1 rounded-md bg-zinc-800 p-2 text-start hover:cursor-pointer hover:bg-zinc-700"
-      onClick={props.button}
+      onClick={() => {
+        props.setShowModal(true);
+        setTransactionOnModal(props.transaction);
+      }}
     >
       <div className={`flex w-full justify-between gap-x-4 truncate`}>
         <div className="flex-start flex h-full flex-col justify-center truncate">

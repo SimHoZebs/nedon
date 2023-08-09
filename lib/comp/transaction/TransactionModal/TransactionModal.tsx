@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import Modal from "@/comp/Modal";
 import { useStore } from "@/util/store";
 import ActionBtn from "@/comp/Button/ActionBtn";
@@ -6,7 +6,6 @@ import Category from "./Category/Category";
 import H1 from "@/comp/H1";
 import SplitList from "./SplitList/SplitList";
 import { trpc } from "@/util/trpc";
-import { SplitClientSide } from "@/util/types";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -14,28 +13,36 @@ interface Props {
 
 const TransactionModal = (props: Props) => {
   const appUser = useStore((state) => state.appUser);
-  const currentTransaction = useStore((state) => state.currentTransaction);
+  const transaction = useStore((state) => state.transactionOnModal);
+  const refreshDBData = useStore((state) => state.refreshDBData);
+  const resetTransaction = useStore((state) => state.resetTransactionOnModal);
+  const unsavedSplitArray = useStore((state) => state.unsavedSplitArray);
+  const setUnsavedSplitArray = useStore((state) => state.setUnsavedSplitArray);
 
-  const { data: transaction } = trpc.transaction.get.useQuery(
-    { plaidTransaction: currentTransaction, userId: appUser?.id || "" },
-    { enabled: !!currentTransaction && !!appUser?.id }
+  const transactionWithoutPlaid = trpc.transaction.getWithoutPlaid.useQuery(
+    { transactionId: transaction?.id || "", userId: appUser?.id || "" },
+    { enabled: !!transaction && !!appUser?.id }
   );
   const deleteTransaction = trpc.transaction.delete.useMutation();
   const queryClient = trpc.useContext();
 
-  const [unsavedSplitArray, setUnsavedSplitArray] = useState<SplitClientSide[]>(
-    transaction ? structuredClone(transaction.splitArray) : []
-  );
-
   useEffect(() => {
-    console.debug("syncing unsavedSplitArray with transaction.splitArray");
-
-    if (transaction) {
-      setUnsavedSplitArray(structuredClone(transaction.splitArray));
+    console.debug("dependency updated");
+    //data is null when transaction not inDB.
+    if (transactionWithoutPlaid.data === null) {
+      resetTransaction();
+    } else if (transactionWithoutPlaid.data) {
+      refreshDBData(transactionWithoutPlaid.data);
+      setUnsavedSplitArray(transactionWithoutPlaid.data.splitArray);
     }
-  }, [transaction]);
+  }, [
+    refreshDBData,
+    resetTransaction,
+    setUnsavedSplitArray,
+    transactionWithoutPlaid.data,
+  ]);
 
-  const amount = currentTransaction ? currentTransaction.amount : 0;
+  const amount = transaction ? transaction.amount : 0;
 
   return (
     transaction && (
@@ -55,18 +62,12 @@ const TransactionModal = (props: Props) => {
           {unsavedSplitArray.length && (
             <div className="flex justify-between">
               <div className="flex flex-col ">
-                <SplitList
-                  unsavedSplitArray={unsavedSplitArray}
-                  setUnsavedSplitArray={setUnsavedSplitArray}
-                >
+                <SplitList>
                   <H1>${amount * -1}</H1>
                 </SplitList>
               </div>
 
-              <Category
-                unsavedSplitArray={unsavedSplitArray}
-                setUnsavedSplitArray={setUnsavedSplitArray}
-              />
+              <Category />
             </div>
           )}
         </div>
