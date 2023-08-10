@@ -37,15 +37,15 @@ const Home: NextPage = () => {
   const removeUserFromGroup = trpc.group.removeUser.useMutation();
 
   useEffect(() => {
-    if (!allUsers.data || !setUserIdArray) {
-      console.debug(
-        "allUsers.data or setUserIdArray is undefined. all Users is probably fetching, but setUserIdArray could be missing from the store."
-      );
+    if (!allUsers.data) {
+      allUsers.status === "loading"
+        ? console.debug("Can't sync userIdArray. allUsers is loading.")
+        : console.error("Can't sync serIdArray. Fetching allUsers failed.");
       return;
     }
 
     setUserIdArray(allUsers.data.map((user) => user.id));
-  }, [allUsers.data, setUserIdArray]);
+  }, [allUsers.data, allUsers.status, setUserIdArray]);
 
   return (
     <section className="flex h-full w-full flex-col items-center justify-center gap-y-3 text-center">

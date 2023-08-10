@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import Modal from "@/comp/Modal";
-import { useStore } from "@/util/store";
 import ActionBtn from "@/comp/Button/ActionBtn";
 import Category from "./Category/Category";
 import H1 from "@/comp/H1";
@@ -25,7 +24,7 @@ const TransactionModal = (props: Props) => {
   const queryClient = trpc.useContext();
 
   useEffect(() => {
-    console.debug("dependency updated");
+    console.debug("transactionModal dependencies updated");
     if (!transaction) {
       console.error(
         "Unable to set unsavedSplitArray. transaction is undefined"
@@ -76,7 +75,7 @@ const TransactionModal = (props: Props) => {
             onClick={async () => {
               if (!transaction.id) {
                 console.error(
-                  "deleteTransaction denied. transaction not in db."
+                  "Can't delete transaction. transaction not in db."
                 );
                 return;
               }

@@ -43,7 +43,9 @@ const CategoryPicker = forwardRef(
 
     const resetPicker = () => {
       if (!categoryOptionArray.data) {
-        console.error("cleanup denied. categoryOptionArray.data is undefined.");
+        console.error(
+          "Can't reset picker. categoryOptionArray is undefined. How did you get here?"
+        );
 
         return;
       }
@@ -169,15 +171,13 @@ const CategoryPicker = forwardRef(
 
     useEffect(() => {
       if (!categoryOptionArray.data) {
-        if (categoryOptionArray.status === "loading") {
-          console.debug(
-            "Unable to set currentOptionArray. categoryOption is loading."
-          );
-        } else {
-          console.error(
-            "Unable to set currentOptionArray. categoryOption failed to load."
-          );
-        }
+        categoryOptionArray.status === "loading"
+          ? console.debug(
+              "Can't sync currentOptionArray. categoryOptionArray is loading."
+            )
+          : console.error(
+              "Can't sync currentOptionArray. fetching categoryOptionArray failed."
+            );
 
         return;
       }

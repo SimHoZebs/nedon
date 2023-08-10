@@ -34,10 +34,13 @@ const Page: NextPage = () => {
 
   useEffect(() => {
     if (!transactionArray.data) {
-      console.debug("transactionArray undefined. Probably fetching.");
+      transactionArray.status === "loading"
+        ? console.debug("Can't set date. transactionArray is loading.")
+        : console.error("Can't set date. Fetching transactionArray failed.");
 
       return;
     }
+
     if (!date) {
       const initialDate = new Date(transactionArray.data.at(-1)!.date);
 
@@ -57,11 +60,11 @@ const Page: NextPage = () => {
     );
 
     setScopedTransactionArray(filteredArray);
-  }, [date, rangeFormat, transactionArray.data]);
+  }, [date, rangeFormat, transactionArray.data, transactionArray.status]);
 
   const handleRangeChange = (change: 1 | -1) => {
     if (!date) {
-      console.error("handleRangeChange denied. date undefined.");
+      console.error("can't run handleRangeChange. date undefined.");
       return;
     }
 

@@ -2,17 +2,12 @@ import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useStore } from "../util/store";
 
-import { Inter } from "next/font/google";
 import { Poppins } from "next/font/google";
 import NavBtn from "./Button/NavBtn";
 import { Icon } from "@iconify-icon/react";
 import Button from "./Button/Button";
 import ActionBtn from "./Button/ActionBtn";
 
-const noto_sans = Inter({
-  subsets: ["latin"],
-  variable: "--font-noto-sans",
-});
 const poppins = Poppins({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   subsets: ["latin"],
@@ -26,9 +21,9 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   useEffect(() => {
     if (!appUser && router.pathname !== "/") {
       console.debug(
-        "User is on path:" +
+        "Pushing to basePath. User is on path:" +
           router.pathname +
-          " but did not log in. Sending to basePath."
+          " but did not log in."
       );
 
       router.push("/");

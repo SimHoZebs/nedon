@@ -94,21 +94,21 @@ const Page = () => {
 
   useEffect(() => {
     if (!transactionArray.data) {
-      console.debug("transactionArray undefined. It is probably fetching.");
+      transactionArray.status === "loading"
+        ? console.debug(
+            "can't set date nor scopedTransactionArray. transactionArray is loading."
+          )
+        : console.error(
+            "can't set date nor scopedTransactionArray. Fetching transactionArray failed."
+          );
+
       return;
     }
 
-    const initialDate = new Date(transactionArray.data.at(-1)!.date);
+    if (!date) {
+      const initialDate = new Date(transactionArray.data.at(-1)!.date);
 
-    setDate(initialDate);
-  }, [transactionArray.data]);
-
-  useEffect(() => {
-    if (!transactionArray.data || !date) {
-      console.debug(
-        "transactionArray or date undefined. transactionArray is probably fetching, but date might be missing."
-      );
-
+      setDate(initialDate);
       return;
     }
 
@@ -124,11 +124,11 @@ const Page = () => {
     );
 
     setScopedTransactionArray(filteredArray);
-  }, [date, rangeFormat, transactionArray.data]);
+  }, [date, rangeFormat, transactionArray.data, transactionArray.status]);
 
   const handleRangeChange = (change: 1 | -1) => {
     if (!date) {
-      console.error("handleRangeChange denied. date undefined.");
+      console.error("Can't run handleRangeChange. date undefined.");
       return;
     }
 
@@ -156,9 +156,13 @@ const Page = () => {
 
   const calcOweGroup = useMemo(() => {
     if (!associatedTransactionArray.data) {
-      console.debug(
-        "associatedTransactionArray undefined. It's probably fetching. "
-      );
+      associatedTransactionArray.status === "loading"
+        ? console.debug(
+            "Can't run calcOweGroup. associatedTransactionArray is loading."
+          )
+        : console.error(
+            "Can't run calcOweGroup. Fetching associatedTransactionArray failed."
+          );
       return;
     }
     const oweGroup: { [userId: string]: number } = {};
@@ -194,7 +198,11 @@ const Page = () => {
     });
 
     return oweGroup;
-  }, [appUser, associatedTransactionArray.data]);
+  }, [
+    appUser,
+    associatedTransactionArray.data,
+    associatedTransactionArray.status,
+  ]);
 
   return appUser ? (
     <section className="flex flex-col gap-y-4">
