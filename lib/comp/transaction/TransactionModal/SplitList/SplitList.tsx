@@ -113,7 +113,16 @@ const SplitList = (props: Props) => {
 
                 <ActionBtn
                   variant="negative"
-                  onClick={() => setIsManaging(false)}
+                  onClick={() => {
+                    setIsManaging(false);
+                    if (!transaction) {
+                      console.error(
+                        "Can't reset splitArray. transaction is undefined"
+                      );
+                      return;
+                    }
+                    setUnsavedSplitArray(transaction.splitArray);
+                  }}
                 >
                   Cancel
                 </ActionBtn>

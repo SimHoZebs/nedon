@@ -41,7 +41,7 @@ const CategoryPicker = forwardRef(
     const editingMergedCategory =
       props.unsavedMergedCategoryArray[props.editingMergedCategoryIndex];
 
-    const cleanup = () => {
+    const resetPicker = () => {
       if (!categoryOptionArray.data) {
         console.error("cleanup denied. categoryOptionArray.data is undefined.");
 
@@ -164,14 +164,26 @@ const CategoryPicker = forwardRef(
         await updateManyCategoryNameArray(updatedMergedCategory.nameArray);
       }
 
-      props.closePicker();
-
       queryClient.transaction.invalidate();
     };
 
     useEffect(() => {
-      setCurrentOptionArray(categoryOptionArray.data || []);
-    }, [categoryOptionArray.data]);
+      if (!categoryOptionArray.data) {
+        if (categoryOptionArray.status === "loading") {
+          console.debug(
+            "Unable to set currentOptionArray. categoryOption is loading."
+          );
+        } else {
+          console.error(
+            "Unable to set currentOptionArray. categoryOption failed to load."
+          );
+        }
+
+        return;
+      }
+
+      setCurrentOptionArray(categoryOptionArray.data);
+    }, [categoryOptionArray.data, categoryOptionArray.status]);
 
     return (
       <div>
@@ -189,7 +201,7 @@ const CategoryPicker = forwardRef(
                     className="flex"
                     onClick={() => {
                       setCurrentOptionArray(categoryOptionArray.data);
-                      cleanup();
+                      resetPicker();
                     }}
                   >
                     <Icon icon="mdi:chevron-left" height={24} />
@@ -203,6 +215,7 @@ const CategoryPicker = forwardRef(
                   onClick={async () => {
                     if (editingMergedCategory.id === null) {
                       syncCategory();
+                      resetPicker();
                     }
                   }}
                 >
@@ -212,7 +225,7 @@ const CategoryPicker = forwardRef(
                   className="text-pink-300 hover:text-pink-400"
                   onClick={(e) => {
                     e.stopPropagation();
-                    cleanup();
+                    resetPicker();
                   }}
                 >
                   cancel
@@ -227,8 +240,8 @@ const CategoryPicker = forwardRef(
                 <button
                   onClick={async () => {
                     if (category.subCategoryArray.length === 0) {
-                      console.debug("syncing");
                       syncCategory(category);
+                      resetPicker();
                     } else {
                       setCurrentOptionArray(category.subCategoryArray);
                     }
