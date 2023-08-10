@@ -123,13 +123,8 @@ export const useStore = create<Store>()(
 
     resetTransactionOnModal: () =>
       set((store) => {
-        console.log("resetting");
+        if (!store.transactionOnModal) return store;
 
-        if (
-          !store.transactionOnModal ||
-          !isFullTransactionInDB(store.transactionOnModal)
-        )
-          return store;
         const transaction = resetFullTransaction(store.transactionOnModal);
 
         return {

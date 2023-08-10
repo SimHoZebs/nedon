@@ -11,21 +11,20 @@ import {
 import { emptyCategory } from "./category";
 
 export const resetFullTransaction = (
-  fullTransactionInDB: FullTransactionInDB
+  fullTransaction: FullTransaction
 ): FullTransaction => ({
-  ...fullTransactionInDB,
+  ...fullTransaction,
   splitArray: [
     {
       id: null,
-      userId: fullTransactionInDB.ownerId,
-      transactionId: fullTransactionInDB.id,
+      userId: fullTransaction.ownerId,
+      transactionId: null,
       categoryArray: [
         {
           id: null,
           splitId: null,
-          nameArray:
-            fullTransactionInDB.splitArray[0].categoryArray[0].nameArray,
-          amount: fullTransactionInDB.amount,
+          nameArray: fullTransaction.category || [],
+          amount: fullTransaction.amount,
         },
       ],
     },
@@ -45,7 +44,7 @@ export const convertToFullTransaction = (
       {
         id: null,
         userId,
-        transactionId: plaidTransaction.transaction_id,
+        transactionId: null,
         categoryArray: [
           emptyCategory({
             nameArray: plaidTransaction.category || [],

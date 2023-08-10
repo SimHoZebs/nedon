@@ -16,7 +16,6 @@ const TransactionModal = (props: Props) => {
   const transaction = useStore((state) => state.transactionOnModal);
   const refreshDBData = useStore((state) => state.refreshDBData);
   const resetTransaction = useStore((state) => state.resetTransactionOnModal);
-  const unsavedSplitArray = useStore((state) => state.unsavedSplitArray);
   const setUnsavedSplitArray = useStore((state) => state.setUnsavedSplitArray);
 
   const transactionWithoutPlaid = trpc.transaction.getWithoutPlaid.useQuery(
@@ -59,17 +58,15 @@ const TransactionModal = (props: Props) => {
             </div>
           </div>
 
-          {unsavedSplitArray.length && (
-            <div className="flex justify-between">
-              <div className="flex flex-col ">
-                <SplitList>
-                  <H1>${amount * -1}</H1>
-                </SplitList>
-              </div>
-
-              <Category />
+          <div className="flex justify-between">
+            <div className="flex flex-col ">
+              <SplitList>
+                <H1>${amount * -1}</H1>
+              </SplitList>
             </div>
-          )}
+
+            <Category />
+          </div>
         </div>
 
         <div className="flex w-full justify-between">

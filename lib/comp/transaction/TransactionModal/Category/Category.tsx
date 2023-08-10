@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import { SplitClientSide } from "@/util/types";
 import CategoryPicker from "./CategoryPicker";
 import { emptyCategory, mergeCategoryArray } from "@/util/category";
 import { useStore } from "@/util/store";
