@@ -14,11 +14,11 @@ const CategoryChip = (props: Props) => {
   return (
     <div className="flex flex-col gap-2">
       <div
-        className="group flex items-center gap-x-2 rounded-lg p-1 px-3 text-xs text-zinc-400 hover:cursor-pointer hover:bg-zinc-800 hover:text-zinc-300 sm:text-sm"
+        className="group flex items-center gap-x-1 rounded-lg p-2 text-xs text-zinc-400 hover:cursor-pointer hover:bg-zinc-700 hover:text-zinc-300 sm:text-sm "
         onClick={(e) => props.categoryChipClick(e)}
       >
         <Icon
-          className={`flex rounded-full bg-zinc-900 p-1 group-hover:bg-zinc-800 ${
+          className={`flex rounded-full p-1 ${
             getCategoryStyle(props.category.nameArray)?.textColor
           }`}
           icon={
@@ -36,7 +36,7 @@ const CategoryChip = (props: Props) => {
             <p onClick={(e) => e.stopPropagation()}>
               ${" "}
               <input
-                className="w-14 bg-zinc-900 group-hover:bg-zinc-800 "
+                className="w-14 bg-zinc-800 group-hover:bg-zinc-700 "
                 type="number"
                 min={0}
                 value={props.category.amount}

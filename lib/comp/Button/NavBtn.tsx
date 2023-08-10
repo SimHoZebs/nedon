@@ -12,19 +12,19 @@ interface Props extends React.HtmlHTMLAttributes<HTMLButtonElement> {
 const NavBtn = (props: Props) => {
   return (
     <Button
-      className={`group justify-center gap-x-2 hover:bg-zinc-800 sm:w-full sm:justify-start ${
+      className={`group justify-center gap-x-2 rounded-none hover:text-indigo-200 sm:w-full sm:justify-start ${
         props.router.pathname === props.route
-          ? "bg-zinc-800 text-zinc-200"
+          ? "border-l-2 border-indigo-200 text-indigo-200"
           : "text-zinc-300"
       }`}
       onClick={() => props.router.push(props.route)}
     >
       {props.icon && (
         <Icon
-          className={`group-hover:text-zinc-400 ${
+          className={`group-hover:text-indigo-200 ${
             props.router.pathname === props.route
-              ? "text-zinc-400"
-              : "text-zinc-500"
+              ? "text-indigo-200"
+              : "text-zinc-400"
           }`}
           icon={props.icon}
           height={24}

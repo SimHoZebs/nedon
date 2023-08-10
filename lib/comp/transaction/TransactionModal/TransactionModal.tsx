@@ -68,7 +68,7 @@ const TransactionModal = (props: Props) => {
             variant="negative"
             onClick={() => props.setShowModal(false)}
           >
-            Cancel
+            Close
           </ActionBtn>
 
           <ActionBtn
@@ -89,13 +89,6 @@ const TransactionModal = (props: Props) => {
             Reset transaction data
           </ActionBtn>
         </div>
-
-        <details className="" onClick={(e) => e.stopPropagation()}>
-          <summary>Raw Data</summary>
-          <pre className="max-h-[50vh] overflow-y-scroll whitespace-pre-wrap">
-            {JSON.stringify(transaction, null, 2)}
-          </pre>
-        </details>
       </Modal>
     )
   );

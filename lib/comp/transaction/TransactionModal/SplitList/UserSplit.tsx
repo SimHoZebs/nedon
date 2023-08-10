@@ -6,7 +6,7 @@ import { useTransactionStore } from "@/util/transactionStore";
 import { calcSplitAmount } from "@/util/split";
 
 const inputStyle =
-  "h-7 w-16 border-b-2 border-zinc-900 bg-zinc-900 p-1 hover:border-zinc-500 focus-visible:outline-none sm:w-24";
+  "h-7 w-16 border-b-2 border-zinc-800 bg-zinc-800 p-1 hover:border-zinc-500 focus-visible:outline-none sm:w-24";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   index: number;
@@ -126,13 +126,13 @@ const UserSplit = (props: Props) => {
       </div>
 
       <button
-        className={`group mb-5 flex w-full flex-col justify-center overflow-hidden rounded-b-lg bg-zinc-800 ${
+        className={`group mb-5 flex w-full flex-col justify-center overflow-hidden rounded-b-lg bg-zinc-700 ${
           showDetail || "h-1 hover:m-0 hover:h-fit"
         }`}
         onClick={() => setShowDetail(!showDetail)}
       >
         {showDetail && (
-          <div className="flex w-full flex-col items-center border-x-2 border-t-2 border-zinc-800 bg-zinc-900">
+          <div className="flex w-full flex-col items-center border-x-2 border-t-2 border-zinc-700 bg-zinc-800">
             {split.categoryArray.map((category, i) => (
               <div className="my-1 flex items-center gap-x-1" key={i}>
                 <Icon
@@ -154,7 +154,7 @@ const UserSplit = (props: Props) => {
             ))}
           </div>
         )}
-        <div className="m-1 flex h-fit w-full justify-center bg-zinc-800">
+        <div className="m-1 flex h-fit w-full justify-center bg-zinc-700">
           <Icon icon="formkit:open" width={16} height={16} />
         </div>
       </button>

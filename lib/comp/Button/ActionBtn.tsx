@@ -9,10 +9,10 @@ const ActionBtn = (props: Props) => {
 
   return (
     <Button
-      className={`font-semibold text-zinc-800 hover:text-zinc-900 ${
+      className={`font-semibold text-zinc-900 hover:text-zinc-950 ${
         variant === "negative"
-          ? "bg-pink-300 hover:bg-pink-400"
-          : "bg-indigo-400 hover:bg-indigo-500"
+          ? "bg-pink-400 hover:bg-pink-500"
+          : "bg-indigo-500 hover:bg-indigo-600"
       } ${className}`}
       {...rest}
     >

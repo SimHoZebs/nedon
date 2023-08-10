@@ -190,7 +190,7 @@ const CategoryPicker = forwardRef(
         {categoryOptionArray.data && (
           <div
             ref={ref}
-            className="absolute left-0 flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 sm:w-96"
+            className="absolute left-0 flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-lg sm:w-96"
             onClick={(e) => e.stopPropagation()}
             style={{ top: props.position.y, left: props.position.x }}
           >
@@ -222,7 +222,7 @@ const CategoryPicker = forwardRef(
                   save
                 </button>
                 <button
-                  className="text-pink-300 hover:text-pink-400"
+                  className="text-pink-400 hover:text-pink-500"
                   onClick={(e) => {
                     e.stopPropagation();
                     resetPicker();
@@ -248,13 +248,13 @@ const CategoryPicker = forwardRef(
                   }}
                   key={i}
                   className={
-                    "my-1 mr-2 flex aspect-square flex-col items-center justify-center  gap-y-1 hyphens-auto  rounded-lg border border-zinc-400 text-center"
+                    "group my-1 mr-2 flex aspect-square flex-col items-center  justify-center gap-y-1  hyphens-auto rounded-lg border border-zinc-400 text-center hover:bg-zinc-700 hover:text-zinc-200"
                   }
                 >
                   <Icon
                     className={
                       categoryStyleArray[category.name]?.textColor ||
-                      "text-zinc-500"
+                      "text-zinc-500 group-hover:text-zinc-400"
                     }
                     icon={
                       categoryStyleArray[category.name]?.icon ||
@@ -263,7 +263,7 @@ const CategoryPicker = forwardRef(
                     height={24}
                   />
                   <p>{category.name}</p>
-                  <p className="text-zinc-500">
+                  <p className="text-zinc-500 group-hover:text-zinc-400">
                     {category.subCategoryArray.length > 0 &&
                       category.subCategoryArray.length + " subcategories"}
                   </p>

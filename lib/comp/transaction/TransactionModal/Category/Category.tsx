@@ -3,6 +3,8 @@ import CategoryPicker from "./CategoryPicker";
 import { emptyCategory, mergeCategoryArray } from "@/util/category";
 import CategoryChip from "./CategoryChip";
 import { useTransactionStore } from "@/util/transactionStore";
+import H4 from "@/comp/H4";
+import { Icon } from "@iconify-icon/react";
 
 const Category = () => {
   const unsavedSplitArray = useTransactionStore(
@@ -26,12 +28,14 @@ const Category = () => {
     y: number;
   }>({ x: -400, y: 0 });
 
+  const pickerOffsets = categoryPickerRef.current?.getBoundingClientRect();
+
   return (
-    <div>
-      <div>
-        <h4 className="text-lg font-medium">Categories</h4>
+    <div className="flex flex-col gap-y-2">
+      <div className="flex w-full justify-between gap-x-3">
+        <H4>Categories</H4>
         <button
-          className="rounded-lg bg-zinc-800 p-2"
+          className="flex items-center gap-x-2 rounded-lg p-2 text-xs text-indigo-400 hover:text-indigo-500"
           onClick={async (e) => {
             const mergedCategoryArrayClone = structuredClone(
               unsavedMergedCategoryArray
@@ -58,9 +62,6 @@ const Category = () => {
             //The index is referenced from the clone instead of the react state as they are identical and the react state wouldn't have updated yet (See: batch state update)
             setEditingMergedCategoryIndex(mergedCategoryArrayClone.length - 1);
 
-            const pickerOffsets =
-              categoryPickerRef.current?.getBoundingClientRect();
-
             if (!pickerOffsets) {
               console.error(
                 `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`
@@ -76,6 +77,7 @@ const Category = () => {
             });
           }}
         >
+          <Icon icon="mdi:shape-plus-outline" />
           Create category
         </button>
       </div>
@@ -94,9 +96,6 @@ const Category = () => {
               }
               categoryChipClick={(e) => {
                 setEditingMergedCategoryIndex(index);
-
-                const pickerOffsets =
-                  categoryPickerRef.current?.getBoundingClientRect();
 
                 if (!pickerOffsets) {
                   console.error;

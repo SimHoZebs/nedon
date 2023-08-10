@@ -59,7 +59,7 @@ const Home: NextPage = () => {
             allUsers.data.map((user) => (
               <div
                 key={user.id}
-                className="flex w-full items-center justify-between border-b border-zinc-600 p-3 hover:cursor-pointer sm:gap-x-16"
+                className="flex w-full items-center justify-between border-b border-zinc-700 p-3 first:rounded-t-md hover:cursor-pointer hover:bg-zinc-800 sm:gap-x-16"
                 onClick={async (e) => {
                   setAppUser(user);
 
@@ -93,8 +93,8 @@ const Home: NextPage = () => {
                           appGroup.userArray?.find(
                             (groupUser) => groupUser.id === user.id
                           )
-                            ? "text-pink-300"
-                            : "text-blue-300"
+                            ? "text-pink-400"
+                            : "text-indigo-400"
                         }`}
                         onClick={async (e) => {
                           e.stopPropagation();
@@ -129,7 +129,7 @@ const Home: NextPage = () => {
 
                   <Button
                     title="Delete user"
-                    className="text-pink-300"
+                    className="text-pink-400 hover:text-pink-500"
                     onClick={async (e) => {
                       e.stopPropagation();
                       if (user.groupArray && user.groupArray.length > 0) {
@@ -182,7 +182,7 @@ const CreateUserBtn = (props: Props) => {
 
   return (
     <Button
-      className="flex w-full items-center justify-center gap-x-2 rounded-none rounded-b-md text-xl font-semibold"
+      className="flex w-full items-center justify-center gap-x-2 rounded-none rounded-b-md text-xl font-semibold hover:bg-zinc-800 hover:text-zinc-200"
       onClick={async (e) => {
         setLoading(true);
         e.stopPropagation();
