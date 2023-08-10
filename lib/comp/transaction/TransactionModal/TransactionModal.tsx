@@ -17,13 +17,21 @@ const TransactionModal = (props: Props) => {
   const setUnsavedSplitArray = useTransactionStore(
     (state) => state.setUnsavedSplitArray
   );
+  const resetTransaction = useTransactionStore(
+    (state) => state.resetTransaction
+  );
 
   const deleteTransaction = trpc.transaction.delete.useMutation();
   const queryClient = trpc.useContext();
 
   useEffect(() => {
     console.debug("dependency updated");
-    if (!transaction) return;
+    if (!transaction) {
+      console.error(
+        "Unable to set unsavedSplitArray. transaction is undefined"
+      );
+      return;
+    }
 
     setUnsavedSplitArray(transaction.splitArray);
   }, [setUnsavedSplitArray, transaction]);
@@ -73,11 +81,10 @@ const TransactionModal = (props: Props) => {
                 return;
               }
 
-              await deleteTransaction.mutateAsync({
-                id: transaction.id,
-              });
+              resetTransaction();
+              await deleteTransaction.mutateAsync({ id: transaction.id });
 
-              await queryClient.transaction.invalidate();
+              queryClient.transaction.invalidate();
             }}
           >
             Reset transaction data

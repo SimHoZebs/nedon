@@ -21,6 +21,7 @@ const SplitList = (props: Props) => {
 
   const appUser = useStore((state) => state.appUser);
   const transaction = useTransactionStore((state) => state.transactionOnModal);
+  const refreshDBData = useTransactionStore((state) => state.refreshDBData);
   const unsavedSplitArray = useTransactionStore(
     (state) => state.unsavedSplitArray
   );
@@ -66,11 +67,13 @@ const SplitList = (props: Props) => {
     });
 
     if (!transaction.id) {
-      await createTransaction.mutateAsync({
+      const transactionDBData = await createTransaction.mutateAsync({
         userId: appUser.id,
         transactionId: transaction.transaction_id,
         splitArray: unsavedSplitArray,
       });
+
+      refreshDBData(transactionDBData);
     } else {
       unsavedSplitArray.forEach(async (split) => {
         if (!isSplitInDB(split)) {
@@ -88,7 +91,7 @@ const SplitList = (props: Props) => {
     }
 
     setIsManaging(false);
-    await queryClient.transaction.getWithoutPlaid.refetch();
+    queryClient.transaction.invalidate();
   };
 
   return (

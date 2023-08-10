@@ -158,7 +158,11 @@ const transactionRouter = router({
           },
         },
         include: {
-          splitArray: {},
+          splitArray: {
+            include: {
+              categoryArray: true,
+            },
+          },
         },
       });
 

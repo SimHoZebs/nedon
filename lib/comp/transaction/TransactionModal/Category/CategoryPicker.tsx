@@ -3,10 +3,11 @@ import { trpc } from "@/util/trpc";
 import { Icon } from "@iconify-icon/react";
 import { TreedCategory, MergedCategory } from "@/util/types";
 import categoryStyleArray from "@/util/categoryStyle";
+import { useStore } from "@/util/store";
+import { useTransactionStore } from "@/util/transactionStore";
+import { emptyCategory } from "@/util/category";
 
 interface Props {
-  createCategoryForManySplit: (nameArray: string[]) => void;
-  updateManyCategoryNameArray: (newNameArray: string[]) => Promise<void>;
   unsavedMergedCategoryArray: MergedCategory[];
   editingMergedCategoryIndex: number;
   closePicker: () => void;
@@ -15,20 +16,30 @@ interface Props {
 
 const CategoryPicker = forwardRef(
   (props: Props, ref: ForwardedRef<HTMLDivElement>) => {
-    const editingMergedCategory =
-      props.unsavedMergedCategoryArray[props.editingMergedCategoryIndex];
-
+    const createCategory = trpc.category.create.useMutation();
+    const createSplit = trpc.split.create.useMutation();
+    const upsertManySplit = trpc.split.upsertMany.useMutation();
+    const createTransaction = trpc.transaction.create.useMutation();
     const categoryOptionArray = trpc.getCategoryOptionArray.useQuery(
       undefined,
-      {
-        staleTime: Infinity,
-      }
+      { staleTime: Infinity }
     );
     const queryClient = trpc.useContext();
 
+    const appUser = useStore((state) => state.appUser);
+    const transaction = useTransactionStore(
+      (state) => state.transactionOnModal
+    );
+    const refreshDBData = useTransactionStore((state) => state.refreshDBData);
+    const unsavedSplitArray = useTransactionStore(
+      (state) => state.unsavedSplitArray
+    );
     const [currentOptionArray, setCurrentOptionArray] = useState<
       TreedCategory[]
     >([]);
+
+    const editingMergedCategory =
+      props.unsavedMergedCategoryArray[props.editingMergedCategoryIndex];
 
     const cleanup = () => {
       if (!categoryOptionArray.data) {
@@ -41,6 +52,99 @@ const CategoryPicker = forwardRef(
       props.closePicker();
     };
 
+    const createCategoryForManySplit = async (nameArray: string[]) => {
+      if (!appUser || !transaction) {
+        console.error(
+          "appUser or transactionOnModal or transaction is undefined."
+        );
+        return;
+      }
+
+      if (!transaction.id) {
+        if (props.editingMergedCategoryIndex === undefined) {
+          console.error("editingMergedCategoryIndex is undefined.");
+          return;
+        }
+
+        const split = structuredClone(unsavedSplitArray[0]);
+        split.categoryArray[props.editingMergedCategoryIndex] = emptyCategory({
+          nameArray,
+          splitId: split.id,
+          amount: 0,
+        });
+
+        const transactionDBData = await createTransaction.mutateAsync({
+          userId: appUser.id,
+          transactionId: transaction.transaction_id,
+          splitArray: [split],
+        });
+
+        refreshDBData(transactionDBData);
+
+        return;
+      }
+
+      //Only one category may be created at a time, so find is more suitable than filter.
+      unsavedSplitArray.forEach(async (unsavedSplit) => {
+        if (unsavedSplit.id === null) {
+          const split = structuredClone(unsavedSplit);
+          split.categoryArray.push(
+            emptyCategory({ nameArray, splitId: split.id, amount: 0 })
+          );
+
+          //transaction.id boolean was checked before
+          createSplit.mutateAsync({ transactionId: transaction.id!, split });
+
+          return;
+        }
+
+        await createCategory.mutateAsync({
+          splitId: unsavedSplit.id!, // never null because of the if check
+          amount: 0,
+          nameArray: nameArray,
+        });
+      });
+    };
+
+    const updateManyCategoryNameArray = async (updatedNameArray: string[]) => {
+      if (!transaction) return console.error("transaction is undefined.");
+
+      if (!transaction.id) {
+        const transactionDBData = await createTransaction.mutateAsync({
+          userId: appUser!.id,
+          transactionId: transaction.transaction_id,
+          splitArray: unsavedSplitArray.map((split) => ({
+            ...split,
+            categoryArray: split.categoryArray.map((category) => ({
+              ...category,
+              nameArray: updatedNameArray,
+            })),
+          })),
+        });
+
+        refreshDBData(transactionDBData);
+        return;
+      }
+
+      if (props.editingMergedCategoryIndex === undefined) {
+        console.error("editingMergedCategoryIndex is undefined.");
+        return;
+      }
+
+      const updatedSplitArray = unsavedSplitArray.map((unsavedSplit) => {
+        const updatedSplit = structuredClone(unsavedSplit);
+
+        updatedSplit.categoryArray[props.editingMergedCategoryIndex].nameArray =
+          updatedNameArray;
+
+        return updatedSplit;
+      });
+
+      await upsertManySplit.mutateAsync({
+        transactionId: transaction.id,
+        splitArray: updatedSplitArray,
+      });
+    };
     /**
      *
      * @param clickedTreedCategory  if the category is assigned by click instead of the "save" button.
@@ -55,11 +159,9 @@ const CategoryPicker = forwardRef(
 
       //The only diff between categories inDB and not inDB
       if (editingMergedCategory.nameArray.length === 0) {
-        props.createCategoryForManySplit(updatedMergedCategory.nameArray);
+        createCategoryForManySplit(updatedMergedCategory.nameArray);
       } else {
-        await props.updateManyCategoryNameArray(
-          updatedMergedCategory.nameArray
-        );
+        await updateManyCategoryNameArray(updatedMergedCategory.nameArray);
       }
 
       props.closePicker();

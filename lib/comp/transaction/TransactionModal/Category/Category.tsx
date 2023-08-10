@@ -1,17 +1,10 @@
 import React, { useState, useRef } from "react";
 import CategoryPicker from "./CategoryPicker";
 import { emptyCategory, mergeCategoryArray } from "@/util/category";
-import { useStore } from "@/util/store";
 import CategoryChip from "./CategoryChip";
-import { trpc } from "@/util/trpc";
 import { useTransactionStore } from "@/util/transactionStore";
 
 const Category = () => {
-  const createTransaction = trpc.transaction.create.useMutation();
-  const createSplit = trpc.split.create.useMutation();
-  const upsertManySplit = trpc.split.upsertMany.useMutation();
-  const createCategory = trpc.category.create.useMutation();
-
   const unsavedSplitArray = useTransactionStore(
     (state) => state.unsavedSplitArray
   );
@@ -19,99 +12,9 @@ const Category = () => {
     (state) => state.setUnsavedSplitArray
   );
   const transaction = useTransactionStore((state) => state.transactionOnModal);
-  const appUser = useStore((state) => state.appUser);
   const categoryPickerRef = useRef<HTMLDivElement>(null);
 
   const unsavedMergedCategoryArray = mergeCategoryArray(unsavedSplitArray);
-
-  const createCategoryForManySplit = (nameArray: string[]) => {
-    if (!appUser || !transaction) {
-      console.error(
-        "appUser or transactionOnModal or transaction is undefined."
-      );
-      return;
-    }
-
-    if (!transaction.id) {
-      if (editingMergedCategoryIndex === undefined) {
-        console.error("editingMergedCategoryIndex is undefined.");
-        return;
-      }
-
-      const split = structuredClone(unsavedSplitArray[0]);
-      split.categoryArray[editingMergedCategoryIndex] = emptyCategory({
-        nameArray,
-        splitId: split.id,
-        amount: 0,
-      });
-
-      createTransaction.mutateAsync({
-        userId: appUser.id,
-        transactionId: transaction.transaction_id,
-        splitArray: [split],
-      });
-      return;
-    }
-
-    //Only one category may be created at a time, so find is more suitable than filter.
-    unsavedSplitArray.forEach(async (unsavedSplit) => {
-      if (unsavedSplit.id === null) {
-        const split = structuredClone(unsavedSplit);
-        split.categoryArray.push(
-          emptyCategory({ nameArray, splitId: split.id, amount: 0 })
-        );
-
-        //transaction.id boolean was checked before
-        createSplit.mutateAsync({ transactionId: transaction.id!, split });
-
-        return;
-      }
-
-      await createCategory.mutateAsync({
-        splitId: unsavedSplit.id!, // never null because of the if check
-        amount: 0,
-        nameArray: nameArray,
-      });
-    });
-  };
-
-  const updateManyCategoryNameArray = async (updatedNameArray: string[]) => {
-    if (!transaction) return console.error("transaction is undefined.");
-
-    if (!transaction.id) {
-      createTransaction.mutateAsync({
-        userId: appUser!.id,
-        transactionId: transaction.transaction_id,
-        splitArray: unsavedSplitArray.map((split) => ({
-          ...split,
-          categoryArray: split.categoryArray.map((category) => ({
-            ...category,
-            nameArray: updatedNameArray,
-          })),
-        })),
-      });
-      return;
-    }
-
-    if (editingMergedCategoryIndex === undefined) {
-      console.error("editingMergedCategoryIndex is undefined.");
-      return;
-    }
-
-    const updatedSplitArray = unsavedSplitArray.map((unsavedSplit) => {
-      const updatedSplit = structuredClone(unsavedSplit);
-
-      updatedSplit.categoryArray[editingMergedCategoryIndex].nameArray =
-        updatedNameArray;
-
-      return updatedSplit;
-    });
-
-    await upsertManySplit.mutateAsync({
-      transactionId: transaction.id,
-      splitArray: updatedSplitArray,
-    });
-  };
 
   //Indicator for if (undefined) and which (number) category is being edited. 'if' is needed for CategoryChip.tsx to highlight the editing category.
   const [editingMergedCategoryIndex, setEditingMergedCategoryIndex] =
@@ -214,8 +117,6 @@ const Category = () => {
         {transaction && (
           <CategoryPicker
             ref={categoryPickerRef}
-            updateManyCategoryNameArray={updateManyCategoryNameArray}
-            createCategoryForManySplit={createCategoryForManySplit}
             //Fallback to 0 for initial boundingClient size.
             unsavedMergedCategoryArray={unsavedMergedCategoryArray}
             editingMergedCategoryIndex={editingMergedCategoryIndex || 0}

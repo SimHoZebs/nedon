@@ -1,16 +1,22 @@
-import { Transaction } from "plaid";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { resetFullTransaction } from "./transaction";
-import { FullTransaction, SplitInDB, SplitClientSide } from "./types";
+import {
+  FullTransaction,
+  SplitInDB,
+  SplitClientSide,
+  TransactionInDB,
+} from "./types";
+import { Transaction } from "@prisma/client";
 
 interface Store {
   transactionOnModal: FullTransaction | undefined;
   setTransactionOnModal: (transaction: FullTransaction | undefined) => void;
+
   refreshDBData: (
-    transaction: (Transaction & { splitArray: SplitInDB[] }) | null
+    transaction: Transaction & { splitArray: SplitInDB[] }
   ) => void;
-  resetTransactionOnModal: () => void;
+  resetTransaction: () => void;
 
   unsavedSplitArray: SplitClientSide[];
   setUnsavedSplitArray: (splitArray: SplitClientSide[]) => void;
@@ -22,31 +28,22 @@ export const useTransactionStore = create<Store>()(
     setTransactionOnModal: (transasction: FullTransaction | undefined) =>
       set({ transactionOnModal: transasction }),
 
-    refreshDBData: (
-      transaction: (Transaction & { splitArray: SplitInDB[] }) | null
-    ) => {
+    refreshDBData: (dbData: TransactionInDB) => {
       set((store) => {
         if (!store.transactionOnModal) return store;
 
         const clone = structuredClone(store.transactionOnModal);
-        const test = {
-          transactionOnModal: {
-            ...clone,
-            ...transaction,
-          },
-        };
-        console.log("test", test);
 
         return {
           transactionOnModal: {
             ...clone,
-            ...transaction,
+            ...dbData,
           },
         };
       });
     },
 
-    resetTransactionOnModal: () =>
+    resetTransaction: () =>
       set((store) => {
         if (!store.transactionOnModal) return store;
 

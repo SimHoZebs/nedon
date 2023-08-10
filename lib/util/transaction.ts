@@ -14,6 +14,7 @@ export const resetFullTransaction = (
   fullTransaction: FullTransaction
 ): FullTransaction => ({
   ...fullTransaction,
+  id: null,
   splitArray: [
     {
       id: null,
@@ -38,7 +39,7 @@ export const convertToFullTransaction = (
 ): FullTransaction => {
   return {
     ...plaidTransaction,
-    id: null,
+    id: transactionInDB?.id || null,
     ownerId: userId,
     splitArray: transactionInDB?.splitArray || [
       {
