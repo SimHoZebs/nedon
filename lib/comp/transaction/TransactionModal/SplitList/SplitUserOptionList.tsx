@@ -2,13 +2,20 @@ import React from "react";
 import { useStore } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import Button from "@/comp/Button/Button";
+import { useTransactionStore } from "@/util/transactionStore";
 
 const SplitUserOptionList = () => {
   const appUser = useStore((state) => state.appUser);
   const appGroup = useStore((state) => state.appGroup);
-  const transactionInModal = useStore((state) => state.transactionOnModal);
-  const unsavedSplitArray = useStore((state) => state.unsavedSplitArray);
-  const setUnsavedSplitArray = useStore((state) => state.setUnsavedSplitArray);
+  const transactionInModal = useTransactionStore(
+    (state) => state.transactionOnModal
+  );
+  const unsavedSplitArray = useTransactionStore(
+    (state) => state.unsavedSplitArray
+  );
+  const setUnsavedSplitArray = useTransactionStore(
+    (state) => state.setUnsavedSplitArray
+  );
 
   return (
     appUser &&

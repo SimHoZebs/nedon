@@ -6,40 +6,27 @@ import Category from "./Category/Category";
 import H1 from "@/comp/H1";
 import SplitList from "./SplitList/SplitList";
 import { trpc } from "@/util/trpc";
+import { useTransactionStore } from "@/util/transactionStore";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const TransactionModal = (props: Props) => {
-  const appUser = useStore((state) => state.appUser);
-  const transaction = useStore((state) => state.transactionOnModal);
-  const refreshDBData = useStore((state) => state.refreshDBData);
-  const resetTransaction = useStore((state) => state.resetTransactionOnModal);
-  const setUnsavedSplitArray = useStore((state) => state.setUnsavedSplitArray);
-
-  const transactionWithoutPlaid = trpc.transaction.getWithoutPlaid.useQuery(
-    { transactionId: transaction?.id || "", userId: appUser?.id || "" },
-    { enabled: !!transaction && !!appUser?.id }
+  const transaction = useTransactionStore((state) => state.transactionOnModal);
+  const setUnsavedSplitArray = useTransactionStore(
+    (state) => state.setUnsavedSplitArray
   );
+
   const deleteTransaction = trpc.transaction.delete.useMutation();
   const queryClient = trpc.useContext();
 
   useEffect(() => {
     console.debug("dependency updated");
-    //data is null when transaction not inDB.
-    if (transactionWithoutPlaid.data === null) {
-      resetTransaction();
-    } else if (transactionWithoutPlaid.data) {
-      refreshDBData(transactionWithoutPlaid.data);
-      setUnsavedSplitArray(transactionWithoutPlaid.data.splitArray);
-    }
-  }, [
-    refreshDBData,
-    resetTransaction,
-    setUnsavedSplitArray,
-    transactionWithoutPlaid.data,
-  ]);
+    if (!transaction) return;
+
+    setUnsavedSplitArray(transaction.splitArray);
+  }, [setUnsavedSplitArray, transaction]);
 
   const amount = transaction ? transaction.amount : 0;
 

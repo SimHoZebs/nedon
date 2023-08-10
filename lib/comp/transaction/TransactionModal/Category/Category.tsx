@@ -4,6 +4,7 @@ import { emptyCategory, mergeCategoryArray } from "@/util/category";
 import { useStore } from "@/util/store";
 import CategoryChip from "./CategoryChip";
 import { trpc } from "@/util/trpc";
+import { useTransactionStore } from "@/util/transactionStore";
 
 const Category = () => {
   const createTransaction = trpc.transaction.create.useMutation();
@@ -11,12 +12,15 @@ const Category = () => {
   const upsertManySplit = trpc.split.upsertMany.useMutation();
   const createCategory = trpc.category.create.useMutation();
 
-  const unsavedSplitArray = useStore((state) => state.unsavedSplitArray);
-  const setUnsavedSplitArray = useStore((state) => state.setUnsavedSplitArray);
-  const categoryPickerRef = useRef<HTMLDivElement>(null);
-
+  const unsavedSplitArray = useTransactionStore(
+    (state) => state.unsavedSplitArray
+  );
+  const setUnsavedSplitArray = useTransactionStore(
+    (state) => state.setUnsavedSplitArray
+  );
+  const transaction = useTransactionStore((state) => state.transactionOnModal);
   const appUser = useStore((state) => state.appUser);
-  const transaction = useStore((state) => state.transactionOnModal);
+  const categoryPickerRef = useRef<HTMLDivElement>(null);
 
   const unsavedMergedCategoryArray = mergeCategoryArray(unsavedSplitArray);
 

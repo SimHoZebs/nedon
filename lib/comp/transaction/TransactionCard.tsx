@@ -3,6 +3,7 @@ import { useStore } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import { FullTransaction } from "@/util/types";
 import { getCategoryStyle } from "@/util/category";
+import { useTransactionStore } from "@/util/transactionStore";
 
 interface Props {
   transaction: FullTransaction;
@@ -10,7 +11,7 @@ interface Props {
 }
 const TransactionCard = (props: Props) => {
   const appUser = useStore((state) => state.appUser);
-  const setTransactionOnModal = useStore(
+  const setTransactionOnModal = useTransactionStore(
     (state) => state.setTransactionOnModal
   );
 

@@ -8,21 +8,25 @@ import { useStore } from "@/util/store";
 import SplitUserOptionList from "./SplitUserOptionList";
 import H3 from "@/comp/H3";
 import Button from "@/comp/Button/Button";
+import { useTransactionStore } from "@/util/transactionStore";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {}
 
 const SplitList = (props: Props) => {
-  const appUser = useStore((state) => state.appUser);
-  const transaction = useStore((state) => state.transactionOnModal);
-
-  const deleteSplit = trpc.split.delete.useMutation();
-  const queryClient = trpc.useContext();
   const createTransaction = trpc.transaction.create.useMutation();
+  const deleteSplit = trpc.split.delete.useMutation();
   const createSplit = trpc.split.create.useMutation();
   const upsertManyCategory = trpc.category.upsertMany.useMutation();
+  const queryClient = trpc.useContext();
 
-  const unsavedSplitArray = useStore((state) => state.unsavedSplitArray);
-  const setUnsavedSplitArray = useStore((state) => state.setUnsavedSplitArray);
+  const appUser = useStore((state) => state.appUser);
+  const transaction = useTransactionStore((state) => state.transactionOnModal);
+  const unsavedSplitArray = useTransactionStore(
+    (state) => state.unsavedSplitArray
+  );
+  const setUnsavedSplitArray = useTransactionStore(
+    (state) => state.setUnsavedSplitArray
+  );
   const [isManaging, setIsManaging] = useState(false);
   useState<SplitClientSide[]>();
 

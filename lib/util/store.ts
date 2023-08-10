@@ -1,16 +1,7 @@
-import {
-  FullTransaction,
-  GroupClientSide,
-  SplitClientSide,
-  SplitInDB,
-  UserClientSide,
-  isFullTransactionInDB,
-} from "./types";
+import { GroupClientSide, UserClientSide } from "./types";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { useState, useEffect } from "react";
-import { Transaction } from "@prisma/client";
-import { resetFullTransaction } from "./transaction";
 
 export const useLocalStoreDelay = <T, F>(
   store: (callback: (state: T) => unknown) => unknown,
@@ -68,16 +59,6 @@ interface Store {
   appGroup?: GroupClientSide;
   setAppGroup: (group: GroupClientSide | undefined) => void;
 
-  transactionOnModal: FullTransaction | undefined;
-  setTransactionOnModal: (transaction: FullTransaction | undefined) => void;
-  refreshDBData: (
-    transaction: (Transaction & { splitArray: SplitInDB[] }) | null
-  ) => void;
-  resetTransactionOnModal: () => void;
-
-  unsavedSplitArray: SplitClientSide[];
-  setUnsavedSplitArray: (splitArray: SplitClientSide[]) => void;
-
   verticalCategoryPicker: boolean;
   setVerticalCategoryPicker: (verticalCategoryPicker: boolean) => void;
 }
@@ -92,50 +73,6 @@ export const useStore = create<Store>()(
 
     appGroup: undefined,
     setAppGroup: (appGroup: GroupClientSide | undefined) => set({ appGroup }),
-
-    transactionOnModal: undefined,
-    setTransactionOnModal: (transasction: FullTransaction | undefined) =>
-      set({ transactionOnModal: transasction }),
-
-    refreshDBData: (
-      transaction: (Transaction & { splitArray: SplitInDB[] }) | null
-    ) => {
-      set((store) => {
-        if (!store.transactionOnModal) return store;
-
-        const clone = structuredClone(store.transactionOnModal);
-        const test = {
-          transactionOnModal: {
-            ...clone,
-            ...transaction,
-          },
-        };
-        console.log("test", test);
-
-        return {
-          transactionOnModal: {
-            ...clone,
-            ...transaction,
-          },
-        };
-      });
-    },
-
-    resetTransactionOnModal: () =>
-      set((store) => {
-        if (!store.transactionOnModal) return store;
-
-        const transaction = resetFullTransaction(store.transactionOnModal);
-
-        return {
-          transactionOnModal: transaction,
-          unsavedSplitArray: transaction.splitArray,
-        };
-      }),
-
-    unsavedSplitArray: [],
-    setUnsavedSplitArray: (splitArray: SplitClientSide[]) =>
-      set({ unsavedSplitArray: splitArray }),
 
     verticalCategoryPicker: false,
     setVerticalCategoryPicker: (verticalCategoryPicker: boolean) =>
