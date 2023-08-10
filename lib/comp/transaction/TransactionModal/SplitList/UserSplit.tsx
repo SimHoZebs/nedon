@@ -1,46 +1,79 @@
 import React, { useState } from "react";
 import { Icon } from "@iconify-icon/react";
-import { SplitClientSide } from "@/util/types";
 import { useStore } from "@/util/store";
 import { getCategoryStyle } from "@/util/category";
+import { useTransactionStore } from "@/util/transactionStore";
+import { calcSplitAmount } from "@/util/split";
 
 const inputStyle =
   "h-7 w-16 border-b-2 border-zinc-900 bg-zinc-900 p-1 hover:border-zinc-500 focus-visible:outline-none sm:w-24";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
-  splitAmount: number;
-  userId: string;
-  transactionAmount: number;
-  onAmountChange: (amount: number) => void;
-  split: SplitClientSide;
-  onRemoveUser: () => void;
+  index: number;
   isManaging: boolean;
 }
 
 const UserSplit = (props: Props) => {
   const appUser = useStore((state) => state.appUser);
+  const transaction = useTransactionStore((state) => state.transactionOnModal);
+  const unsavedSplitArray = useTransactionStore(
+    (state) => state.unsavedSplitArray
+  );
+  const setUnsavedSplitArray = useTransactionStore(
+    (state) => state.setUnsavedSplitArray
+  );
   const [showDetail, setShowDetail] = useState(false);
+
+  const split = unsavedSplitArray[props.index];
+  const splitAmount = calcSplitAmount(split);
+  const transactionAmount = transaction ? transaction.amount : 0;
+
+  const removeUser = () => {
+    const updatedSplitArray = structuredClone(unsavedSplitArray);
+    const splicedSplit = updatedSplitArray.splice(props.index, 1);
+    const amount = splicedSplit[0].categoryArray.reduce(
+      (total, category) => total + category.amount,
+      0
+    );
+
+    updatedSplitArray.forEach((split) => {
+      split.categoryArray.forEach((category) => {
+        category.amount += amount / updatedSplitArray.length;
+      });
+    });
+
+    setUnsavedSplitArray(updatedSplitArray);
+  };
+
+  const changeAmount = (amount: number) => {
+    const updatedSplitArray = structuredClone(unsavedSplitArray);
+    updatedSplitArray[props.index].categoryArray.forEach((category) => {
+      category.amount =
+        amount / updatedSplitArray[props.index].categoryArray.length;
+    });
+
+    setUnsavedSplitArray(updatedSplitArray);
+  };
 
   return (
     <div className="flex flex-col gap-y-1">
       <div className="flex w-full justify-between gap-x-2 ">
-        {appUser &&
-          (props.split.userId === appUser.id || !props.isManaging ? (
-            <div className="aspect-square w-5"></div>
-          ) : (
-            <button
-              title="Remove user from split"
-              className="group flex w-5"
-              onClick={() => props.onRemoveUser()}
-            >
-              <Icon
-                icon="clarity:remove-line"
-                className="text-zinc-500 group-hover:text-pink-400"
-                width={20}
-                height={20}
-              />
-            </button>
-          ))}
+        {split.userId === appUser?.id || !props.isManaging ? (
+          <div className="aspect-square w-5"></div>
+        ) : (
+          <button
+            title="Remove user from split"
+            className="group flex w-5"
+            onClick={() => removeUser()}
+          >
+            <Icon
+              icon="clarity:remove-line"
+              className="text-zinc-500 group-hover:text-pink-400"
+              width={20}
+              height={20}
+            />
+          </button>
+        )}
         <div>{props.children}</div>
 
         <div>
@@ -52,11 +85,9 @@ const UserSplit = (props: Props) => {
                 className={inputStyle}
                 type="number"
                 min={0}
-                max={props.transactionAmount}
-                value={props.splitAmount}
-                onChange={(e) =>
-                  props.onAmountChange(parseFloat(e.target.value))
-                }
+                max={transactionAmount}
+                value={splitAmount}
+                onChange={(e) => changeAmount(parseFloat(e.target.value))}
                 step={0.01}
               />
             </div>
@@ -64,33 +95,32 @@ const UserSplit = (props: Props) => {
             <div className="flex items-center text-xl">
               <input
                 title="ratio"
+                id="ratio"
                 className={inputStyle}
                 type="number"
                 min={0}
                 max={100}
                 value={parseFloat(
-                  ((props.splitAmount / props.transactionAmount) * 100).toFixed(
-                    2
-                  )
+                  ((splitAmount / transactionAmount) * 100).toFixed(2)
                 )}
                 onChange={(e) => {
                   const updatedSplitAmount = parseFloat(
                     (
                       (parseFloat(e.target.value) / 100) *
-                      props.transactionAmount
+                      transactionAmount
                     ).toFixed(2)
                   );
 
-                  props.onAmountChange(updatedSplitAmount);
+                  changeAmount(updatedSplitAmount);
                 }}
                 step={0.01}
               />
-              %
+              <label htmlFor="ratior">%</label>
             </div>
           </div>
 
           <p className="text-xs font-light text-zinc-400">
-            {props.userId?.slice(0, 8)}
+            {split.userId?.slice(0, 8)}
           </p>
         </div>
       </div>
@@ -101,9 +131,9 @@ const UserSplit = (props: Props) => {
         }`}
         onClick={() => setShowDetail(!showDetail)}
       >
-        {showDetail ? (
+        {showDetail && (
           <div className="flex w-full flex-col items-center border-x-2 border-t-2 border-zinc-800 bg-zinc-900">
-            {props.split.categoryArray.map((category, i) => (
+            {split.categoryArray.map((category, i) => (
               <div className="my-1 flex items-center gap-x-1" key={i}>
                 <Icon
                   className={
@@ -123,7 +153,7 @@ const UserSplit = (props: Props) => {
               </div>
             ))}
           </div>
-        ) : null}
+        )}
         <div className="m-1 flex h-fit w-full justify-center bg-zinc-800">
           <Icon icon="formkit:open" width={16} height={16} />
         </div>

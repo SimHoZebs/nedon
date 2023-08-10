@@ -9,6 +9,7 @@ import SplitUserOptionList from "./SplitUserOptionList";
 import H3 from "@/comp/H3";
 import Button from "@/comp/Button/Button";
 import { useTransactionStore } from "@/util/transactionStore";
+import { calcSplitAmount } from "@/util/split";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -33,13 +34,6 @@ const SplitList = (props: Props) => {
 
   const transactionAmount = transaction ? transaction.amount : 0;
 
-  const calcSplitAmount = (split: SplitClientSide) => {
-    return split.categoryArray.reduce(
-      (total, category) => total + category.amount,
-      0
-    );
-  };
-
   let updatedSplitAmount = parseFloat(
     unsavedSplitArray
       .reduce((amount, split) => amount + calcSplitAmount(split), 0)
@@ -49,7 +43,7 @@ const SplitList = (props: Props) => {
   const saveChanges = async () => {
     if (!appUser || !transaction) {
       console.error(
-        "appUser or transaction is undefined. Appuser:",
+        "appUser or transaction is undefined. appuser:",
         appUser,
         "transaction:",
         transaction
@@ -143,38 +137,7 @@ const SplitList = (props: Props) => {
               key={i}
               className="flex w-full items-center gap-x-2 sm:gap-x-3"
             >
-              <UserSplit
-                isManaging={isManaging}
-                onRemoveUser={() => {
-                  const updatedSplitArray = structuredClone(unsavedSplitArray);
-                  const splicedSplit = updatedSplitArray.splice(i, 1);
-                  const amount = splicedSplit[0].categoryArray.reduce(
-                    (total, category) => total + category.amount,
-                    0
-                  );
-
-                  updatedSplitArray.forEach((split) => {
-                    split.categoryArray.forEach((category) => {
-                      category.amount += amount / updatedSplitArray.length;
-                    });
-                  });
-
-                  setUnsavedSplitArray(updatedSplitArray);
-                }}
-                onAmountChange={(amount: number) => {
-                  const updatedSplitArray = structuredClone(unsavedSplitArray);
-                  updatedSplitArray[i].categoryArray.forEach((category) => {
-                    category.amount =
-                      amount / updatedSplitArray[i].categoryArray.length;
-                  });
-
-                  setUnsavedSplitArray(updatedSplitArray);
-                }}
-                transactionAmount={transactionAmount}
-                split={split}
-                splitAmount={calcSplitAmount(split)}
-                userId={split.userId}
-              >
+              <UserSplit isManaging={isManaging} index={i}>
                 <div className="flex items-center gap-x-2">
                   <Icon
                     icon="mdi:account"
