@@ -7,9 +7,7 @@ import { useTransactionStore } from "@/util/transactionStore";
 const SplitUserOptionList = () => {
   const appUser = useStore((state) => state.appUser);
   const appGroup = useStore((state) => state.appGroup);
-  const transactionInModal = useTransactionStore(
-    (state) => state.transactionOnModal
-  );
+  const transaction = useTransactionStore((state) => state.transactionOnModal);
   const unsavedSplitArray = useTransactionStore(
     (state) => state.unsavedSplitArray
   );
@@ -32,7 +30,7 @@ const SplitUserOptionList = () => {
           <Button
             className="bg-zinc-800 text-indigo-300"
             onClick={() => {
-              if (!transactionInModal) {
+              if (!transaction) {
                 console.error("no transaction data for modal");
                 return;
               }
@@ -42,9 +40,7 @@ const SplitUserOptionList = () => {
                   ...split,
                   categoryArray: split.categoryArray.map((category) => ({
                     ...category,
-                    amount:
-                      transactionInModal.amount /
-                      (unsavedSplitArray.length + 1),
+                    amount: category.amount / (unsavedSplitArray.length + 1),
                   })),
                 })
               );
