@@ -4,6 +4,7 @@ import {
   SplitClientSide,
   SplitInDB,
   UserClientSide,
+  isFullTransactionInDB,
 } from "./types";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
@@ -26,7 +27,7 @@ export const useLocalStoreDelay = <T, F>(
 };
 
 interface LocalStore {
-  userIdArray: string[] | never[];
+  userIdArray: string[];
   setUserIdArray: (userIdArray: string[]) => void;
   addUserId: (userId: string) => void;
   deleteUserId: (userId: string) => void;
@@ -124,7 +125,11 @@ export const useStore = create<Store>()(
       set((store) => {
         console.log("resetting");
 
-        if (!store.transactionOnModal) return store;
+        if (
+          !store.transactionOnModal ||
+          !isFullTransactionInDB(store.transactionOnModal)
+        )
+          return store;
         const transaction = resetFullTransaction(store.transactionOnModal);
 
         return {

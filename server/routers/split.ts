@@ -7,6 +7,7 @@ const splitRouter = router({
   create: procedure
     .input(
       z.object({
+        transactionId: z.string(),
         split: SplitClientSideModel,
       })
     )
@@ -15,6 +16,7 @@ const splitRouter = router({
       return await db.split.create({
         data: {
           ...rest,
+          transactionId: input.transactionId,
           categoryArray: {
             createMany: {
               data: categoryArray.map((category) => ({
@@ -32,12 +34,12 @@ const splitRouter = router({
   update: procedure
     .input(
       z.object({
+        transactionId: z.string(),
         split: SplitClientSideModel,
       })
     )
     .mutation(async ({ input }) => {
       const { id, categoryArray, ...rest } = input.split;
-      const { id: categoryID, ...categoryRest } = categoryArray[0];
 
       const updatedTransactionArray = id
         ? await db.split.update({
@@ -62,7 +64,7 @@ const splitRouter = router({
             },
           })
         : await db.split.create({
-            data: rest,
+            data: { ...rest, transactionId: input.transactionId },
             include: {
               categoryArray: true,
             },
@@ -74,6 +76,7 @@ const splitRouter = router({
   upsertMany: procedure
     .input(
       z.object({
+        transactionId: z.string(),
         splitArray: z.array(SplitClientSideModel),
       })
     )
@@ -85,7 +88,7 @@ const splitRouter = router({
 
       const updatedTransaction = await db.transaction.update({
         where: {
-          id: input.splitArray[0].transactionId,
+          id: input.transactionId,
         },
         data: {
           splitArray: {

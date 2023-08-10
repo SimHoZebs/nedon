@@ -8,7 +8,7 @@ export const SplitModel = z.object({
 })
 
 export interface CompleteSplit extends z.infer<typeof SplitModel> {
-  transaction?: CompleteTransaction | null
+  transaction: CompleteTransaction
   categoryArray: CompleteCategory[]
   user: CompleteUser
 }
@@ -19,7 +19,7 @@ export interface CompleteSplit extends z.infer<typeof SplitModel> {
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
 export const RelatedSplitModel: z.ZodSchema<CompleteSplit> = z.lazy(() => SplitModel.extend({
-  transaction: RelatedTransactionModel.nullish(),
+  transaction: RelatedTransactionModel,
   categoryArray: RelatedCategoryModel.array(),
   user: RelatedUserModel,
 }))

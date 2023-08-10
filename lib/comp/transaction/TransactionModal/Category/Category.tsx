@@ -29,7 +29,7 @@ const Category = () => {
       return;
     }
 
-    if (!transaction.inDB) {
+    if (!transaction.id) {
       if (editingMergedCategoryIndex === undefined) {
         console.error("editingMergedCategoryIndex is undefined.");
         return;
@@ -44,7 +44,7 @@ const Category = () => {
 
       createTransaction.mutateAsync({
         userId: appUser.id,
-        transactionId: transaction.id,
+        transactionId: transaction.transaction_id,
         splitArray: [split],
       });
       return;
@@ -58,7 +58,8 @@ const Category = () => {
           emptyCategory({ nameArray, splitId: split.id, amount: 0 })
         );
 
-        createSplit.mutateAsync({ split });
+        //transaction.id boolean was checked before
+        createSplit.mutateAsync({ transactionId: transaction.id!, split });
 
         return;
       }
@@ -74,10 +75,10 @@ const Category = () => {
   const updateManyCategoryNameArray = async (updatedNameArray: string[]) => {
     if (!transaction) return console.error("transaction is undefined.");
 
-    if (!transaction.inDB) {
+    if (!transaction.id) {
       createTransaction.mutateAsync({
         userId: appUser!.id,
-        transactionId: transaction!.id,
+        transactionId: transaction.transaction_id,
         splitArray: unsavedSplitArray.map((split) => ({
           ...split,
           categoryArray: split.categoryArray.map((category) => ({
@@ -104,6 +105,7 @@ const Category = () => {
     });
 
     await upsertManySplit.mutateAsync({
+      transactionId: transaction.id,
       splitArray: updatedSplitArray,
     });
   };

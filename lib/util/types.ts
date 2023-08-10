@@ -45,20 +45,37 @@ export function isSplitInDB(split: SplitClientSide): split is SplitInDB {
 }
 export type SplitInDB = z.infer<typeof SplitInDBModel>;
 const SplitInDBModel = SplitModel.extend({
+  transactionId: z.string(),
   categoryArray: z.array(CategoryModel),
 });
 
 export type SplitClientSide = z.infer<typeof SplitClientSideModel>;
 export const SplitClientSideModel = SplitModel.extend({
+  transactionId: z.string().nullable(),
   id: z.string().nullable(),
   categoryArray: z.array(CategoryClientSideModel),
 });
 
-export type FullTransaction = Transaction &
-  Omit<PlaidTransaction, "category" | "transaction_id"> & {
+export function isFullTransactionInDB(
+  transaction: FullTransaction
+): transaction is FullTransactionInDB {
+  return !!transaction.id;
+}
+export type FullTransactionInDB = Transaction &
+  PlaidTransaction & {
+    id: string;
     splitArray: SplitClientSide[];
-    inDB: boolean;
   };
+
+export type FullTransaction = Omit<Transaction, "id"> &
+  PlaidTransaction & {
+    id: string | null;
+    splitArray: SplitClientSide[];
+  };
+
+export type TransactionInDB = Transaction & {
+  splitArray: SplitInDB[];
+};
 
 export function isPlaidTransaction(
   plaidTransaction: unknown

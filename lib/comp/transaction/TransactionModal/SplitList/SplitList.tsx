@@ -61,16 +61,20 @@ const SplitList = (props: Props) => {
       if (split.id) await deleteSplit.mutateAsync({ splitId: split.id });
     });
 
-    if (!transaction.inDB) {
+    if (!transaction.id) {
       await createTransaction.mutateAsync({
         userId: appUser.id,
-        transactionId: transaction.id,
+        transactionId: transaction.transaction_id,
         splitArray: unsavedSplitArray,
       });
     } else {
       unsavedSplitArray.forEach(async (split) => {
         if (!isSplitInDB(split)) {
-          await createSplit.mutateAsync({ split });
+          await createSplit.mutateAsync({
+            //id boolean was checked in if statement
+            transactionId: transaction.id!,
+            split,
+          });
         } else {
           await upsertManyCategory.mutateAsync({
             categoryArray: split.categoryArray,

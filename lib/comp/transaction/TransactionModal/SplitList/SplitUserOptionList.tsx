@@ -2,12 +2,11 @@ import React from "react";
 import { useStore } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import Button from "@/comp/Button/Button";
-import { SplitClientSide } from "@/util/types";
 
 const SplitUserOptionList = () => {
   const appUser = useStore((state) => state.appUser);
   const appGroup = useStore((state) => state.appGroup);
-  const transactionInDB = useStore((state) => state.transactionOnModal);
+  const transactionInModal = useStore((state) => state.transactionOnModal);
   const unsavedSplitArray = useStore((state) => state.unsavedSplitArray);
   const setUnsavedSplitArray = useStore((state) => state.setUnsavedSplitArray);
 
@@ -26,8 +25,8 @@ const SplitUserOptionList = () => {
           <Button
             className="bg-zinc-800 text-indigo-300"
             onClick={() => {
-              if (!transactionInDB) {
-                console.error("transaction is null");
+              if (!transactionInModal) {
+                console.error("no transaction data for modal");
                 return;
               }
 
@@ -37,7 +36,8 @@ const SplitUserOptionList = () => {
                   categoryArray: split.categoryArray.map((category) => ({
                     ...category,
                     amount:
-                      transactionInDB.amount / (unsavedSplitArray.length + 1),
+                      transactionInModal.amount /
+                      (unsavedSplitArray.length + 1),
                   })),
                 })
               );
@@ -53,7 +53,7 @@ const SplitUserOptionList = () => {
 
               updatedSplitArray.push({
                 id: null,
-                transactionId: transactionInDB.id,
+                transactionId: null,
                 userId: user.id,
                 categoryArray: structuredClone(appUserCategoryArray),
               });

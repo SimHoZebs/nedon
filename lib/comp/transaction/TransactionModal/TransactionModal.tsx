@@ -82,7 +82,7 @@ const TransactionModal = (props: Props) => {
 
           <ActionBtn
             onClick={async () => {
-              if (!transaction.inDB) {
+              if (!transaction.id) {
                 console.error(
                   "deleteTransaction denied. transaction not in db."
                 );

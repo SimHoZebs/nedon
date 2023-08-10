@@ -5,26 +5,27 @@ import {
   FullTransaction,
   PlaidTransaction,
   TreedCategoryWithTransaction,
+  FullTransactionInDB,
 } from "./types";
 
 import { emptyCategory } from "./category";
 
 export const resetFullTransaction = (
-  fullTransaction: FullTransaction
+  fullTransactionInDB: FullTransactionInDB
 ): FullTransaction => ({
-  ...fullTransaction,
-  inDB: false,
+  ...fullTransactionInDB,
   splitArray: [
     {
       id: null,
-      userId: fullTransaction.ownerId,
-      transactionId: fullTransaction.id,
+      userId: fullTransactionInDB.ownerId,
+      transactionId: fullTransactionInDB.id,
       categoryArray: [
         {
           id: null,
           splitId: null,
-          nameArray: fullTransaction.splitArray[0].categoryArray[0].nameArray,
-          amount: fullTransaction.amount,
+          nameArray:
+            fullTransactionInDB.splitArray[0].categoryArray[0].nameArray,
+          amount: fullTransactionInDB.amount,
         },
       ],
     },
@@ -36,13 +37,10 @@ export const convertToFullTransaction = (
   plaidTransaction: PlaidTransaction,
   transactionInDB?: Transaction & { splitArray: SplitClientSide[] }
 ): FullTransaction => {
-  const { category, transaction_id, ...rest } = plaidTransaction;
-
   return {
-    ...rest,
-    id: transaction_id,
+    ...plaidTransaction,
+    id: null,
     ownerId: userId,
-    inDB: !!transactionInDB,
     splitArray: transactionInDB?.splitArray || [
       {
         id: null,

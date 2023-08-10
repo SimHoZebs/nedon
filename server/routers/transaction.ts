@@ -6,6 +6,7 @@ import {
   FullTransaction,
   SplitClientSideModel,
   PlaidTransaction,
+  TransactionInDB,
 } from "@/util/types";
 import { client } from "../util";
 import { SplitModel } from "../../prisma/zod";
@@ -32,10 +33,7 @@ const transactionRouter = router({
 
       if (!transactionInDB) return null;
 
-      return {
-        ...transactionInDB,
-        inDB: !!transactionInDB,
-      };
+      return transactionInDB;
     }),
 
   getAll: procedure
