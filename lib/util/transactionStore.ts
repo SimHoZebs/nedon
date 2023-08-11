@@ -13,9 +13,7 @@ interface Store {
   transactionOnModal: FullTransaction | undefined;
   setTransactionOnModal: (transaction: FullTransaction | undefined) => void;
 
-  refreshDBData: (
-    transaction: Transaction & { splitArray: SplitInDB[] }
-  ) => void;
+  refreshDBData: (transaction: TransactionInDB | SplitClientSide[]) => void;
   resetTransaction: () => void;
 
   unsavedSplitArray: SplitClientSide[];
@@ -28,18 +26,26 @@ export const useTransactionStore = create<Store>()(
     setTransactionOnModal: (transasction: FullTransaction | undefined) =>
       set({ transactionOnModal: transasction }),
 
-    refreshDBData: (dbData: TransactionInDB) => {
+    refreshDBData: (dbData: TransactionInDB | SplitClientSide[]) => {
       set((store) => {
         if (!store.transactionOnModal) return store;
 
         const clone = structuredClone(store.transactionOnModal);
-
-        return {
-          transactionOnModal: {
-            ...clone,
-            ...dbData,
-          },
-        };
+        if (Array.isArray(dbData)) {
+          return {
+            transactionOnModal: {
+              ...clone,
+              splitArray: dbData,
+            },
+          };
+        } else {
+          return {
+            transactionOnModal: {
+              ...clone,
+              ...dbData,
+            },
+          };
+        }
       });
     },
 

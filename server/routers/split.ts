@@ -123,6 +123,13 @@ const splitRouter = router({
             ),
           },
         },
+        include: {
+          splitArray: {
+            include: {
+              categoryArray: true,
+            },
+          },
+        },
       });
 
       return updatedTransaction;

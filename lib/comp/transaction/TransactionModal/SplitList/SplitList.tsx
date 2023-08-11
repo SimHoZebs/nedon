@@ -85,7 +85,7 @@ const SplitList = (props: Props) => {
         })
       );
 
-      setUnsavedSplitArray(dbUpdatedSplitArray);
+      refreshDBData(dbUpdatedSplitArray);
     }
 
     setIsManaging(false);

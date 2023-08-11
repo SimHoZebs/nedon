@@ -1,7 +1,7 @@
 import React, { ForwardedRef, forwardRef, useEffect, useState } from "react";
 import { trpc } from "@/util/trpc";
 import { Icon } from "@iconify-icon/react";
-import { TreedCategory, MergedCategory } from "@/util/types";
+import { TreedCategory, MergedCategory, SplitInDB } from "@/util/types";
 import categoryStyleArray from "@/util/categoryStyle";
 import { useStore } from "@/util/store";
 import { useTransactionStore } from "@/util/transactionStore";
@@ -108,7 +108,7 @@ const CategoryPicker = forwardRef(
         return split;
       });
 
-      setUnsavedSplitArray(updatedSplitArray);
+      refreshDBData(updatedSplitArray);
 
       const dbUpdatedSplitArray = await Promise.all(
         updatedSplitArray.map(async (updatedSplit) => {
@@ -133,11 +133,11 @@ const CategoryPicker = forwardRef(
             updatedSplit.categoryArray.length - 1
           ] = newCategory;
 
-          return updatedSplitClone;
+          return updatedSplitClone as SplitInDB;
         })
       );
 
-      setUnsavedSplitArray(dbUpdatedSplitArray);
+      refreshDBData(dbUpdatedSplitArray);
     };
 
     const updateManyCategoryNameArray = async (updatedNameArray: string[]) => {
@@ -174,12 +174,12 @@ const CategoryPicker = forwardRef(
         return updatedSplit;
       });
 
-      setUnsavedSplitArray(updatedSplitArray);
-
-      await upsertManySplit.mutateAsync({
+      refreshDBData(updatedSplitArray);
+      const dbUpdatedTransaction = await upsertManySplit.mutateAsync({
         transactionId: transaction.id,
         splitArray: updatedSplitArray,
       });
+      refreshDBData(dbUpdatedTransaction);
     };
 
     /**
