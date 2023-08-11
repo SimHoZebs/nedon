@@ -28,8 +28,6 @@ const Category = () => {
     y: number;
   }>({ x: -400, y: 0 });
 
-  const pickerOffsets = categoryPickerRef.current?.getBoundingClientRect();
-
   return (
     <div className="flex flex-col gap-y-2">
       <div className="flex w-full justify-between gap-x-3">
@@ -62,6 +60,9 @@ const Category = () => {
             //The index is referenced from the clone instead of the react state as they are identical and the react state wouldn't have updated yet (See: batch state update)
             setEditingMergedCategoryIndex(mergedCategoryArrayClone.length - 1);
 
+            //pickerOffset is sometimes undefined if it's outside
+            const pickerOffsets =
+              categoryPickerRef.current?.getBoundingClientRect();
             if (!pickerOffsets) {
               console.error(
                 `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`
@@ -71,6 +72,7 @@ const Category = () => {
 
             const clickPositionOffsets =
               e.currentTarget.getBoundingClientRect();
+
             setPickerPosition({
               x: clickPositionOffsets.right - pickerOffsets?.width,
               y: clickPositionOffsets.bottom + 8,
@@ -94,9 +96,12 @@ const Category = () => {
                   ? unsavedMergedCategoryArray[index]
                   : category
               }
-              categoryChipClick={(e) => {
+              findAndSetPickerPosition={(e) => {
                 setEditingMergedCategoryIndex(index);
 
+                //pickerOffset is sometimes undefined if it's outside
+                const pickerOffsets =
+                  categoryPickerRef.current?.getBoundingClientRect();
                 if (!pickerOffsets) {
                   console.error;
                   `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`;

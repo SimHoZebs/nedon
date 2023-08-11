@@ -5,7 +5,9 @@ import { Icon } from "@iconify-icon/react";
 
 type Props = {
   category: MergedCategory;
-  categoryChipClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  findAndSetPickerPosition: (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => void;
   isMultiCategory: boolean;
   isEditing: boolean;
 };
@@ -15,7 +17,7 @@ const CategoryChip = (props: Props) => {
     <div className="flex flex-col gap-2">
       <div
         className="group flex items-center gap-x-1 rounded-lg p-2 text-xs text-zinc-400 hover:cursor-pointer hover:bg-zinc-700 hover:text-zinc-300 sm:text-sm "
-        onClick={(e) => props.categoryChipClick(e)}
+        onClick={(e) => props.findAndSetPickerPosition(e)}
       >
         <Icon
           className={`flex rounded-full p-1 ${
