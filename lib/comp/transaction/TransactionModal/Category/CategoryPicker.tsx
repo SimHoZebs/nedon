@@ -97,25 +97,47 @@ const CategoryPicker = forwardRef(
         return;
       }
 
-      unsavedSplitArray.forEach(async (unsavedSplit) => {
-        if (unsavedSplit.id === null) {
-          const split = structuredClone(unsavedSplit);
-          split.categoryArray.push(
-            emptyCategory({ nameArray, splitId: split.id, amount: 0 })
-          );
-
-          //transaction.id boolean was checked before
-          createSplit.mutateAsync({ transactionId: transaction.id!, split });
-
-          return;
-        }
-
-        await createCategory.mutateAsync({
-          splitId: unsavedSplit.id!, // never null because of the if check
+      const updatedSplitArray = unsavedSplitArray.map((unsavedSplit) => {
+        const split = structuredClone(unsavedSplit);
+        split.categoryArray[split.categoryArray.length - 1] = emptyCategory({
+          nameArray,
+          splitId: split.id,
           amount: 0,
-          nameArray: nameArray,
         });
+
+        return split;
       });
+
+      setUnsavedSplitArray(updatedSplitArray);
+
+      const dbUpdatedSplitArray = await Promise.all(
+        updatedSplitArray.map(async (updatedSplit) => {
+          if (updatedSplit.id === null) {
+            //transaction.id boolean was checked before
+            const newSplit = await createSplit.mutateAsync({
+              transactionId: transaction.id!,
+              split: updatedSplit,
+            });
+
+            return newSplit;
+          }
+
+          const updatedSplitClone = structuredClone(updatedSplit);
+          const newCategory = await createCategory.mutateAsync({
+            splitId: updatedSplit.id!, // never null because of the if check
+            amount: 0,
+            nameArray: nameArray,
+          });
+
+          updatedSplitClone.categoryArray[
+            updatedSplit.categoryArray.length - 1
+          ] = newCategory;
+
+          return updatedSplitClone;
+        })
+      );
+
+      setUnsavedSplitArray(dbUpdatedSplitArray);
     };
 
     const updateManyCategoryNameArray = async (updatedNameArray: string[]) => {
@@ -159,11 +181,14 @@ const CategoryPicker = forwardRef(
         splitArray: updatedSplitArray,
       });
     };
+
     /**
      *
      * @param clickedTreedCategory  if the category is assigned by click instead of the "save" button.
      */
-    const syncCategory = async (clickedTreedCategory?: TreedCategory) => {
+    const applyChangesToCategory = async (
+      clickedTreedCategory?: TreedCategory
+    ) => {
       const updatedMergedCategory = structuredClone(editingMergedCategory);
       const updatedNameArray = structuredClone(unsavedNameArray);
 
@@ -213,7 +238,6 @@ const CategoryPicker = forwardRef(
                   <button
                     className="flex"
                     onClick={() => {
-                      setCurrentOptionArray(categoryOptionArray.data);
                       resetPicker();
                     }}
                   >
@@ -227,7 +251,7 @@ const CategoryPicker = forwardRef(
                   className="text-indigo-300 hover:text-indigo-400"
                   onClick={async () => {
                     if (editingMergedCategory.id === null) {
-                      await syncCategory();
+                      await applyChangesToCategory();
                       resetPicker();
                     }
                   }}
@@ -258,7 +282,7 @@ const CategoryPicker = forwardRef(
                 <button
                   onClick={async () => {
                     if (category.subCategoryArray.length === 0) {
-                      await syncCategory(category);
+                      await applyChangesToCategory(category);
                       resetPicker();
                     } else {
                       setCurrentOptionArray(category.subCategoryArray);

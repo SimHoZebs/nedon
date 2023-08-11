@@ -11,7 +11,7 @@ const categoryRouter = router({
       CategoryClientSideModel.extend({ splitId: z.string(), id: z.undefined() })
     )
     .mutation(async ({ input }) => {
-      await db.category.create({
+      return await db.category.create({
         data: input,
       });
     }),
