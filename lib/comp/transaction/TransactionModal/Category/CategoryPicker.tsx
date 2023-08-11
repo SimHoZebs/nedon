@@ -238,6 +238,11 @@ const CategoryPicker = forwardRef(
                   className="text-pink-400 hover:text-pink-500"
                   onClick={(e) => {
                     e.stopPropagation();
+                    if (!transaction)
+                      return console.error(
+                        "Can't reset unsavedSplitArray. transaction is undefined."
+                      );
+                    setUnsavedSplitArray(transaction.splitArray);
                     resetPicker();
                   }}
                 >
