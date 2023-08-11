@@ -34,6 +34,10 @@ const CategoryPicker = forwardRef(
     const unsavedSplitArray = useTransactionStore(
       (state) => state.unsavedSplitArray
     );
+    const setUnsavedSplitArray = useTransactionStore(
+      (state) => state.setUnsavedSplitArray
+    );
+    const [unsavedNameArray, setCurrentNameArray] = useState<string[]>([]);
     const [currentOptionArray, setCurrentOptionArray] = useState<
       TreedCategory[]
     >([]);
@@ -42,14 +46,22 @@ const CategoryPicker = forwardRef(
       props.unsavedMergedCategoryArray[props.editingMergedCategoryIndex];
 
     const resetPicker = () => {
+      setCurrentNameArray([]);
+
       if (!categoryOptionArray.data) {
         console.error(
           "Can't reset picker. categoryOptionArray is undefined. How did you get here?"
         );
-
+        return;
+      }
+      if (!transaction) {
+        console.error(
+          "Can't reset picker. transaction is undefined. How did you get here?"
+        );
         return;
       }
 
+      setUnsavedSplitArray(transaction.splitArray);
       setCurrentOptionArray(categoryOptionArray.data);
       props.closePicker();
     };
@@ -153,11 +165,12 @@ const CategoryPicker = forwardRef(
      */
     const syncCategory = async (clickedTreedCategory?: TreedCategory) => {
       const updatedMergedCategory = structuredClone(editingMergedCategory);
+      const updatedNameArray = structuredClone(unsavedNameArray);
 
       if (clickedTreedCategory) {
-        //FIX: this only pushes the last name
-        updatedMergedCategory.nameArray.push(clickedTreedCategory.name);
+        updatedNameArray.push(clickedTreedCategory.name);
       }
+      updatedMergedCategory.nameArray = updatedNameArray;
 
       //The only diff between categories inDB and not inDB
       if (editingMergedCategory.nameArray.length === 0) {
@@ -244,6 +257,7 @@ const CategoryPicker = forwardRef(
                       resetPicker();
                     } else {
                       setCurrentOptionArray(category.subCategoryArray);
+                      setCurrentNameArray((prev) => [...prev, category.name]);
                     }
                   }}
                   key={i}
