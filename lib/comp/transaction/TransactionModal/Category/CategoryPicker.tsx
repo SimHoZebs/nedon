@@ -61,7 +61,6 @@ const CategoryPicker = forwardRef(
         return;
       }
 
-      setUnsavedSplitArray(transaction.splitArray);
       setCurrentOptionArray(categoryOptionArray.data);
       props.closePicker();
     };
@@ -98,7 +97,6 @@ const CategoryPicker = forwardRef(
         return;
       }
 
-      //Only one category may be created at a time, so find is more suitable than filter.
       unsavedSplitArray.forEach(async (unsavedSplit) => {
         if (unsavedSplit.id === null) {
           const split = structuredClone(unsavedSplit);
@@ -154,6 +152,8 @@ const CategoryPicker = forwardRef(
         return updatedSplit;
       });
 
+      setUnsavedSplitArray(updatedSplitArray);
+
       await upsertManySplit.mutateAsync({
         transactionId: transaction.id,
         splitArray: updatedSplitArray,
@@ -174,7 +174,7 @@ const CategoryPicker = forwardRef(
 
       //The only diff between categories inDB and not inDB
       if (editingMergedCategory.nameArray.length === 0) {
-        createCategoryForManySplit(updatedMergedCategory.nameArray);
+        await createCategoryForManySplit(updatedMergedCategory.nameArray);
       } else {
         await updateManyCategoryNameArray(updatedMergedCategory.nameArray);
       }
@@ -227,7 +227,7 @@ const CategoryPicker = forwardRef(
                   className="text-indigo-300 hover:text-indigo-400"
                   onClick={async () => {
                     if (editingMergedCategory.id === null) {
-                      syncCategory();
+                      await syncCategory();
                       resetPicker();
                     }
                   }}
@@ -253,7 +253,7 @@ const CategoryPicker = forwardRef(
                 <button
                   onClick={async () => {
                     if (category.subCategoryArray.length === 0) {
-                      syncCategory(category);
+                      await syncCategory(category);
                       resetPicker();
                     } else {
                       setCurrentOptionArray(category.subCategoryArray);
