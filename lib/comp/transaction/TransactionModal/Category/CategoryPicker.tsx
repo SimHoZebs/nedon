@@ -62,7 +62,6 @@ const CategoryPicker = forwardRef(
       }
 
       setCurrentOptionArray(categoryOptionArray.data);
-      props.closePicker();
     };
 
     const createCategoryForManySplit = async (nameArray: string[]) => {
@@ -220,8 +219,20 @@ const CategoryPicker = forwardRef(
         return;
       }
 
-      setCurrentOptionArray(categoryOptionArray.data);
-    }, [categoryOptionArray.data, categoryOptionArray.status]);
+      const filteredOptionArray = categoryOptionArray.data.filter(
+        (option) =>
+          !props.unsavedMergedCategoryArray.find(
+            (unsavedCategory) =>
+              unsavedCategory.nameArray.at(-1) === option.name
+          )
+      );
+
+      setCurrentOptionArray(filteredOptionArray);
+    }, [
+      categoryOptionArray.data,
+      categoryOptionArray.status,
+      props.unsavedMergedCategoryArray,
+    ]);
 
     return (
       <div>
@@ -238,6 +249,10 @@ const CategoryPicker = forwardRef(
                   <button
                     className="flex"
                     onClick={() => {
+                      if (!transaction)
+                        return console.error(
+                          "Can't reset unsavedSplitArray. transaction is undefined."
+                        );
                       resetPicker();
                     }}
                   >
@@ -253,6 +268,7 @@ const CategoryPicker = forwardRef(
                     if (editingMergedCategory.id === null) {
                       await applyChangesToCategory();
                       resetPicker();
+                      props.closePicker();
                     }
                   }}
                 >
@@ -268,6 +284,7 @@ const CategoryPicker = forwardRef(
                       );
                     setUnsavedSplitArray(transaction.splitArray);
                     resetPicker();
+                    props.closePicker();
                   }}
                 >
                   cancel
@@ -284,8 +301,19 @@ const CategoryPicker = forwardRef(
                     if (category.subCategoryArray.length === 0) {
                       await applyChangesToCategory(category);
                       resetPicker();
+                      props.closePicker();
                     } else {
-                      setCurrentOptionArray(category.subCategoryArray);
+                      const updatedOptionArray = category.subCategoryArray;
+
+                      const filteredOptionArray = updatedOptionArray.filter(
+                        (option) =>
+                          !props.unsavedMergedCategoryArray.find(
+                            (unsavedCategory) =>
+                              unsavedCategory.nameArray.at(-1) === option.name
+                          )
+                      );
+
+                      setCurrentOptionArray(filteredOptionArray);
                       setCurrentNameArray((prev) => [...prev, category.name]);
                     }
                   }}
