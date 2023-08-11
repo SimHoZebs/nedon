@@ -38,7 +38,9 @@ const UserSplit = (props: Props) => {
 
     updatedSplitArray.forEach((split) => {
       split.categoryArray.forEach((category) => {
-        category.amount += amount / updatedSplitArray.length;
+        category.amount += parseFloat(
+          (amount / updatedSplitArray.length).toFixed(2)
+        );
       });
     });
 
@@ -48,8 +50,11 @@ const UserSplit = (props: Props) => {
   const changeAmount = (amount: number) => {
     const updatedSplitArray = structuredClone(unsavedSplitArray);
     updatedSplitArray[props.index].categoryArray.forEach((category) => {
-      category.amount =
-        amount / updatedSplitArray[props.index].categoryArray.length;
+      category.amount = parseFloat(
+        (amount / updatedSplitArray[props.index].categoryArray.length).toFixed(
+          2
+        )
+      );
     });
 
     setUnsavedSplitArray(updatedSplitArray);

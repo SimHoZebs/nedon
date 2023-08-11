@@ -3,6 +3,7 @@ import { useStore } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
 import Button from "@/comp/Button/Button";
 import { useTransactionStore } from "@/util/transactionStore";
+import { mergeCategoryArray } from "@/util/category";
 
 const SplitUserOptionList = () => {
   const appUser = useStore((state) => state.appUser);
@@ -35,12 +36,20 @@ const SplitUserOptionList = () => {
                 return;
               }
 
+              const mergedCategoryArray = mergeCategoryArray(unsavedSplitArray);
+
               const updatedSplitArray = structuredClone(unsavedSplitArray).map(
                 (split) => ({
                   ...split,
-                  categoryArray: split.categoryArray.map((category) => ({
+                  categoryArray: split.categoryArray.map((category, i) => ({
                     ...category,
-                    amount: category.amount / (unsavedSplitArray.length + 1),
+                    amount: parseFloat(
+                      //categories are expected to be ordered identically
+                      (
+                        mergedCategoryArray[i].amount /
+                        (unsavedSplitArray.length + 1)
+                      ).toFixed(2)
+                    ),
                   })),
                 })
               );
