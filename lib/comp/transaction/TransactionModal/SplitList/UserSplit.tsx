@@ -31,15 +31,13 @@ const UserSplit = (props: Props) => {
   const removeUser = () => {
     const updatedSplitArray = structuredClone(unsavedSplitArray);
     const splicedSplit = updatedSplitArray.splice(props.index, 1);
-    const amount = splicedSplit[0].categoryArray.reduce(
-      (total, category) => total + category.amount,
-      0
-    );
 
     updatedSplitArray.forEach((split) => {
-      split.categoryArray.forEach((category) => {
+      split.categoryArray.forEach((category, i) => {
         category.amount += parseFloat(
-          (amount / updatedSplitArray.length).toFixed(2)
+          (
+            splicedSplit[0].categoryArray[i].amount / updatedSplitArray.length
+          ).toFixed(2)
         );
       });
     });
