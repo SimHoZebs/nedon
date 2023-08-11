@@ -69,19 +69,23 @@ const SplitList = (props: Props) => {
 
       refreshDBData(transactionDBData);
     } else {
-      unsavedSplitArray.forEach(async (split) => {
-        if (!isSplitInDB(split)) {
-          await createSplit.mutateAsync({
-            //id boolean was checked in if statement
-            transactionId: transaction.id!,
-            split,
-          });
-        } else {
-          await upsertManyCategory.mutateAsync({
-            categoryArray: split.categoryArray,
-          });
-        }
-      });
+      const dbUpdatedSplitArray = await Promise.all(
+        unsavedSplitArray.map(async (split) => {
+          if (!isSplitInDB(split)) {
+            return await createSplit.mutateAsync({
+              //id boolean was checked in if statement
+              transactionId: transaction.id!,
+              split,
+            });
+          } else {
+            return await upsertManyCategory.mutateAsync({
+              categoryArray: split.categoryArray,
+            });
+          }
+        })
+      );
+
+      setUnsavedSplitArray(dbUpdatedSplitArray);
     }
 
     setIsManaging(false);

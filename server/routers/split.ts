@@ -20,6 +20,7 @@ const splitRouter = router({
           categoryArray: {
             createMany: {
               data: categoryArray.map((category) => ({
+                nameArray: category.nameArray,
                 amount: category.amount,
               })),
             },
