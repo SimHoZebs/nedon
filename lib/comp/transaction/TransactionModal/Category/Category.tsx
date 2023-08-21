@@ -3,10 +3,9 @@ import CategoryPicker from "./CategoryPicker";
 import { emptyCategory, mergeCategoryArray } from "@/util/category";
 import CategoryChip from "./CategoryChip";
 import { useTransactionStore } from "@/util/transactionStore";
-import H4 from "@/comp/H4";
 import { Icon } from "@iconify-icon/react";
 import H3 from "@/comp/H3";
-import SecondaryBtn from "@/comp/Button/SecondaryBtn";
+import Button from "@/comp/Button/Button";
 
 const Category = () => {
   const unsavedSplitArray = useTransactionStore(
@@ -34,8 +33,8 @@ const Category = () => {
     <div className="flex flex-col gap-y-2">
       <div className="flex w-full justify-between gap-x-3">
         <H3>Categories</H3>
-        <SecondaryBtn
-          variant="small"
+        <Button
+          className="gap-x-1 rounded-lg text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
           onClick={async (e) => {
             const mergedCategoryArrayClone = structuredClone(
               unsavedMergedCategoryArray
@@ -83,7 +82,7 @@ const Category = () => {
         >
           <Icon icon="mdi:shape-plus-outline" />
           Create category
-        </SecondaryBtn>
+        </Button>
       </div>
 
       <div className="flex flex-col gap-y-1">

@@ -107,7 +107,7 @@ const SplitList = (props: Props) => {
 
       {(unsavedSplitArray.length > 1 || isManaging) && (
         <div className="flex flex-col gap-y-2">
-          <div className="flex w-full justify-between">
+          <div className="flex w-full gap-x-2">
             <H3>Split</H3>
             {isManaging ? (
               <div className="flex gap-x-2">

@@ -243,7 +243,7 @@ const CategoryPicker = forwardRef(
       >
         <div className="flex w-full justify-between px-2 py-1">
           <div className="flex w-fit items-center">
-            {categoryOptionArray.data !== currentOptionArray && (
+            {unsavedNameArray.length > 0 && (
               <button
                 className="flex"
                 onClick={() => {
