@@ -131,7 +131,7 @@ const SplitList = (props: Props) => {
               </div>
             ) : (
               <Button
-                className="flex gap-x-2 bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
+                className="flex gap-x-2 rounded-lg bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
                 onClick={() => setIsManaging(true)}
               >
                 <Icon icon={"mdi:edit"} />

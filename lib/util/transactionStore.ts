@@ -1,13 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { resetFullTransaction } from "./transaction";
-import {
-  FullTransaction,
-  SplitInDB,
-  SplitClientSide,
-  TransactionInDB,
-} from "./types";
-import { Transaction } from "@prisma/client";
+import { FullTransaction, SplitClientSide, TransactionInDB } from "./types";
 
 interface Store {
   transactionOnModal: FullTransaction | undefined;
