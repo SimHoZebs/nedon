@@ -16,7 +16,9 @@ const CategoryChip = (props: Props) => {
   return (
     <div className="flex flex-col gap-2">
       <div
-        className="group flex items-center gap-x-1 rounded-lg p-2 text-xs text-zinc-400 hover:cursor-pointer hover:bg-zinc-700 hover:text-zinc-300 sm:text-sm "
+        className={`group flex items-center gap-x-1 rounded-lg p-2 text-xs text-zinc-400 hover:cursor-pointer hover:bg-zinc-700 hover:text-zinc-300 sm:text-sm ${
+          props.isEditing && "animate-pulse bg-zinc-700"
+        } `}
         onClick={(e) => props.findAndSetPickerPosition(e)}
       >
         <Icon
@@ -30,7 +32,7 @@ const CategoryChip = (props: Props) => {
           height={24}
         />
 
-        <div className="flex h-full flex-col items-start text-zinc-300 ">
+        <div className={"flex h-full flex-col items-start text-zinc-300 "}>
           <p className={props.isEditing ? "animate-pulse" : ""}>
             {props.category.nameArray.at(-1)}
           </p>
@@ -38,6 +40,7 @@ const CategoryChip = (props: Props) => {
             <p onClick={(e) => e.stopPropagation()}>
               ${" "}
               <input
+                readOnly
                 className="w-14 bg-zinc-800 group-hover:bg-zinc-700 "
                 type="number"
                 min={0}

@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { SplitClientSide, isSplitInDB } from "@/util/types";
 import ActionBtn from "@/comp/Button/ActionBtn";
 import UserSplit from "./UserSplit";
@@ -10,6 +10,7 @@ import H3 from "@/comp/H3";
 import Button from "@/comp/Button/Button";
 import { useTransactionStore } from "@/util/transactionStore";
 import { calcSplitAmount } from "@/util/split";
+import SecondaryBtn from "@/comp/Button/SecondaryBtn";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -94,10 +95,13 @@ const SplitList = (props: Props) => {
 
   return (
     <div className="flex w-full flex-col gap-y-3">
-      <div className="flex gap-x-2">
+      <div className="flex items-center gap-x-2">
         {props.children}
         {unsavedSplitArray.length === 1 && !isManaging && (
-          <ActionBtn onClick={() => setIsManaging(true)}>Split</ActionBtn>
+          <SecondaryBtn onClick={() => setIsManaging(true)}>
+            <Icon icon="lucide:split" className="m-1" width={16} height={16} />
+            Split
+          </SecondaryBtn>
         )}
       </div>
 

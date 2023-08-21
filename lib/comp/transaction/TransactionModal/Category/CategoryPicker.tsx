@@ -234,117 +234,113 @@ const CategoryPicker = forwardRef(
       props.unsavedMergedCategoryArray,
     ]);
 
-    return (
-      <div>
-        {categoryOptionArray.data && (
-          <div
-            ref={ref}
-            className="absolute left-0 flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-lg sm:w-96"
-            onClick={(e) => e.stopPropagation()}
-            style={{ top: props.position.y, left: props.position.x }}
-          >
-            <div className="flex w-full justify-between px-2 py-1">
-              <div className="flex w-fit items-center">
-                {categoryOptionArray.data !== currentOptionArray && (
-                  <button
-                    className="flex"
-                    onClick={() => {
-                      if (!transaction)
-                        return console.error(
-                          "Can't reset unsavedSplitArray. transaction is undefined."
-                        );
-                      resetPicker();
-                    }}
-                  >
-                    <Icon icon="mdi:chevron-left" height={24} />
-                  </button>
-                )}
-              </div>
-
-              <div className="flex gap-x-2 ">
-                <button
-                  className="text-indigo-300 hover:text-indigo-400"
-                  onClick={async () => {
-                    if (editingMergedCategory.id === null) {
-                      await applyChangesToCategory();
-                      resetPicker();
-                      props.closePicker();
-                    }
-                  }}
-                >
-                  save
-                </button>
-                <button
-                  className="text-pink-400 hover:text-pink-500"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!transaction)
-                      return console.error(
-                        "Can't reset unsavedSplitArray. transaction is undefined."
-                      );
-                    setUnsavedSplitArray(transaction.splitArray);
-                    resetPicker();
-                    props.closePicker();
-                  }}
-                >
-                  cancel
-                </button>
-              </div>
-            </div>
-
-            <hr className="w-full border-zinc-700" />
-
-            <div className="grid w-full auto-cols-fr grid-cols-3 overflow-x-hidden overflow-y-scroll bg-zinc-800 pb-1 pl-2 text-xs ">
-              {currentOptionArray.map((category, i) => (
-                <button
-                  onClick={async () => {
-                    if (category.subCategoryArray.length === 0) {
-                      await applyChangesToCategory(category);
-                      resetPicker();
-                      props.closePicker();
-                    } else {
-                      const updatedOptionArray = category.subCategoryArray;
-
-                      const filteredOptionArray = updatedOptionArray.filter(
-                        (option) =>
-                          !props.unsavedMergedCategoryArray.find(
-                            (unsavedCategory) =>
-                              unsavedCategory.nameArray.at(-1) === option.name
-                          )
-                      );
-
-                      setCurrentOptionArray(filteredOptionArray);
-                      setCurrentNameArray((prev) => [...prev, category.name]);
-                    }
-                  }}
-                  key={i}
-                  className={
-                    "group my-1 mr-2 flex aspect-square flex-col items-center  justify-center gap-y-1  hyphens-auto rounded-lg border border-zinc-400 text-center hover:bg-zinc-700 hover:text-zinc-200"
-                  }
-                >
-                  <Icon
-                    className={
-                      categoryStyleArray[category.name]?.textColor ||
-                      "text-zinc-500 group-hover:text-zinc-400"
-                    }
-                    icon={
-                      categoryStyleArray[category.name]?.icon ||
-                      "material-symbols:category-outline"
-                    }
-                    height={24}
-                  />
-                  <p>{category.name}</p>
-                  <p className="text-zinc-500 group-hover:text-zinc-400">
-                    {category.subCategoryArray.length > 0 &&
-                      category.subCategoryArray.length + " subcategories"}
-                  </p>
-                </button>
-              ))}
-            </div>
+    return categoryOptionArray.data ? (
+      <div
+        ref={ref}
+        className="absolute left-0 flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900 sm:w-96"
+        onClick={(e) => e.stopPropagation()}
+        style={{ top: props.position.y, left: props.position.x }}
+      >
+        <div className="flex w-full justify-between px-2 py-1">
+          <div className="flex w-fit items-center">
+            {categoryOptionArray.data !== currentOptionArray && (
+              <button
+                className="flex"
+                onClick={() => {
+                  if (!transaction)
+                    return console.error(
+                      "Can't reset unsavedSplitArray. transaction is undefined."
+                    );
+                  resetPicker();
+                }}
+              >
+                <Icon icon="mdi:chevron-left" height={24} />
+              </button>
+            )}
           </div>
-        )}
+
+          <div className="flex gap-x-2 ">
+            <button
+              className="text-indigo-300 hover:text-indigo-400"
+              onClick={async () => {
+                if (editingMergedCategory.id === null) {
+                  await applyChangesToCategory();
+                  resetPicker();
+                  props.closePicker();
+                }
+              }}
+            >
+              save
+            </button>
+            <button
+              className="text-pink-400 hover:text-pink-500"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!transaction)
+                  return console.error(
+                    "Can't reset unsavedSplitArray. transaction is undefined."
+                  );
+                setUnsavedSplitArray(transaction.splitArray);
+                resetPicker();
+                props.closePicker();
+              }}
+            >
+              cancel
+            </button>
+          </div>
+        </div>
+
+        <hr className="w-full border-zinc-700" />
+
+        <div className="grid w-full auto-cols-fr grid-cols-3 overflow-x-hidden overflow-y-scroll bg-zinc-800 pb-1 pl-2 text-xs ">
+          {currentOptionArray.map((category, i) => (
+            <button
+              onClick={async () => {
+                if (category.subCategoryArray.length === 0) {
+                  await applyChangesToCategory(category);
+                  resetPicker();
+                  props.closePicker();
+                } else {
+                  const updatedOptionArray = category.subCategoryArray;
+
+                  const filteredOptionArray = updatedOptionArray.filter(
+                    (option) =>
+                      !props.unsavedMergedCategoryArray.find(
+                        (unsavedCategory) =>
+                          unsavedCategory.nameArray.at(-1) === option.name
+                      )
+                  );
+
+                  setCurrentOptionArray(filteredOptionArray);
+                  setCurrentNameArray((prev) => [...prev, category.name]);
+                }
+              }}
+              key={i}
+              className={
+                "group my-1 mr-2 flex aspect-square flex-col items-center  justify-center gap-y-1  hyphens-auto rounded-lg border border-zinc-400 text-center hover:bg-zinc-700 hover:text-zinc-200"
+              }
+            >
+              <Icon
+                className={
+                  categoryStyleArray[category.name]?.textColor ||
+                  "text-zinc-500 group-hover:text-zinc-400"
+                }
+                icon={
+                  categoryStyleArray[category.name]?.icon ||
+                  "material-symbols:category-outline"
+                }
+                height={24}
+              />
+              <p>{category.name}</p>
+              <p className="text-zinc-500 group-hover:text-zinc-400">
+                {category.subCategoryArray.length > 0 &&
+                  category.subCategoryArray.length + " subcategories"}
+              </p>
+            </button>
+          ))}
+        </div>
       </div>
-    );
+    ) : null;
   }
 );
 

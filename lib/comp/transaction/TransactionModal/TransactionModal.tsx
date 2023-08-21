@@ -6,6 +6,7 @@ import H1 from "@/comp/H1";
 import SplitList from "./SplitList/SplitList";
 import { trpc } from "@/util/trpc";
 import { useTransactionStore } from "@/util/transactionStore";
+import { Icon } from "@iconify-icon/react";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -40,54 +41,56 @@ const TransactionModal = (props: Props) => {
   return (
     transaction && (
       <Modal setShowModal={props.setShowModal}>
-        <div className="flex flex-col justify-between gap-y-2">
-          <div className="flex items-start justify-between gap-y-2">
+        <div className="flex justify-between gap-y-2">
+          <div className="flex flex-col items-start gap-y-2">
             <H1>{transaction.name}</H1>
-            <div className="flex flex-col text-sm font-light text-zinc-400">
+
+            <SplitList>
+              <H1>${amount * -1}</H1>
+            </SplitList>
+          </div>
+
+          <div className="flex flex-col items-end gap-y-1">
+            <button
+              className="mb-1 flex"
+              onClick={() => props.setShowModal(false)}
+            >
+              <Icon
+                icon="iconamoon:close-fill"
+                width={24}
+                height={24}
+                className="rounded-full text-zinc-400 outline outline-1 hover:text-pink-400"
+              />
+            </button>
+
+            <div className="flex flex-col items-end text-sm font-light text-zinc-400">
               <p>Created at {transaction.datetime || "1970-01-23 12:34:56"}</p>
               <p>
                 Authorized at{" "}
                 {transaction.authorized_datetime || "1970-01-23 12:34:56"}
               </p>
             </div>
-          </div>
-
-          <div className="flex justify-between">
-            <div className="flex flex-col ">
-              <SplitList>
-                <H1>${amount * -1}</H1>
-              </SplitList>
-            </div>
 
             <Category />
+
+            <ActionBtn
+              onClick={async () => {
+                if (!transaction.id) {
+                  console.error(
+                    "Can't delete transaction. transaction not in db."
+                  );
+                  return;
+                }
+
+                resetTransaction();
+                await deleteTransaction.mutateAsync({ id: transaction.id });
+
+                queryClient.transaction.invalidate();
+              }}
+            >
+              Reset transaction data
+            </ActionBtn>
           </div>
-        </div>
-
-        <div className="flex w-full justify-between">
-          <ActionBtn
-            variant="negative"
-            onClick={() => props.setShowModal(false)}
-          >
-            Close
-          </ActionBtn>
-
-          <ActionBtn
-            onClick={async () => {
-              if (!transaction.id) {
-                console.error(
-                  "Can't delete transaction. transaction not in db."
-                );
-                return;
-              }
-
-              resetTransaction();
-              await deleteTransaction.mutateAsync({ id: transaction.id });
-
-              queryClient.transaction.invalidate();
-            }}
-          >
-            Reset transaction data
-          </ActionBtn>
         </div>
       </Modal>
     )

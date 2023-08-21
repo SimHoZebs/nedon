@@ -1,5 +1,7 @@
 import type { Config } from "tailwindcss";
 
+import defaultTheme from "tailwindcss/defaultTheme";
+
 export default {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -8,7 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-poppins)"],
+        sans: ["var(--font-custom)", ...defaultTheme.fontFamily.sans],
       },
     },
   },
