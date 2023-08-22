@@ -60,6 +60,22 @@ const categoryRouter = router({
 
       return upsertedSplit;
     }),
+
+  deleteMany: procedure
+    .input(
+      z.object({
+        categoryArray: z.array(CategoryModel),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const deletedCategoryArray = await db.category.deleteMany({
+        where: {
+          OR: input.categoryArray.map(({ id }) => ({ id })),
+        },
+      });
+
+      return deletedCategoryArray;
+    }),
 });
 
 export default categoryRouter;

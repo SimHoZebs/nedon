@@ -92,7 +92,7 @@ const Category = () => {
               key={index}
               isMultiCategory={unsavedMergedCategoryArray.length > 1}
               isEditing={editingMergedCategoryIndex === index}
-              category={
+              mergedCategory={
                 editingMergedCategoryIndex === index
                   ? unsavedMergedCategoryArray[index]
                   : category
