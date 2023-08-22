@@ -8,8 +8,9 @@ import { Category } from "@prisma/client";
 
 type Props = {
   mergedCategory: MergedCategory;
+  index: number;
   findAndSetPickerPosition: (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => void;
   isMultiCategory: boolean;
   isEditing: boolean;
@@ -18,11 +19,14 @@ type Props = {
 const CategoryChip = (props: Props) => {
   const transaction = useTransactionStore((store) => store.transactionOnModal);
   const unsavedSplitArray = useTransactionStore(
-    (store) => store.unsavedSplitArray
+    (store) => store.unsavedSplitArray,
   );
   const refreshDBData = useTransactionStore((store) => store.refreshDBData);
   const deleteManyCategory = trpc.category.deleteMany.useMutation();
   const queryClient = trpc.useContext();
+  const setUnsavedSplitArray = useTransactionStore(
+    (store) => store.setUnsavedSplitArray,
+  );
 
   return (
     <div className="flex flex-col gap-2">
@@ -33,9 +37,9 @@ const CategoryChip = (props: Props) => {
         onClick={(e) => props.findAndSetPickerPosition(e)}
       >
         <Icon
-          className={`flex rounded-full p-1 ${
-            getCategoryStyle(props.mergedCategory.nameArray)?.textColor
-          }`}
+          className={`flex rounded-full p-1 ${getCategoryStyle(
+            props.mergedCategory.nameArray,
+          )?.textColor}`}
           icon={
             getCategoryStyle(props.mergedCategory.nameArray)?.icon ||
             "mdi:shape-plus-outline"
@@ -61,7 +65,7 @@ const CategoryChip = (props: Props) => {
                       e.stopPropagation();
                       if (!transaction.id) {
                         console.error(
-                          "Unable to delete category; this transaction does not exist in db."
+                          "Unable to delete category; this transaction does not exist in db.",
                         );
                         return;
                       }
@@ -80,7 +84,7 @@ const CategoryChip = (props: Props) => {
                                 if (!isCategoryInSplitInDB(category)) {
                                   console.error(
                                     "Can't add this category to toDeleteArray. It does not have id. category:",
-                                    category
+                                    category,
                                   );
                                   return;
                                 }
@@ -93,7 +97,7 @@ const CategoryChip = (props: Props) => {
                             ...split,
                             categoryArray: updatedCategoryArray,
                           };
-                        }
+                        },
                       );
 
                       refreshDBData(updatedSplitArray);
@@ -119,18 +123,27 @@ const CategoryChip = (props: Props) => {
             <p onClick={(e) => e.stopPropagation()}>
               ${" "}
               <input
-                readOnly
                 className="w-14 bg-zinc-800 group-hover:bg-zinc-700 "
                 type="number"
                 min={0}
                 value={props.mergedCategory.amount}
                 //on change, the other categories will have to reduce its contribution.
                 //Changing value in categories mean changing the amount of category in every contributor
-                // onChange={(e) => {
-                //   const updatedCategoryArray = [...unsavedCategoryArray];
-                //   updatedCategoryArray[index].amount = e.target.valueAsNumber;
-                //   setUnsavedCategoryArray(updatedCategoryArray);
-                // }}
+                onChange={(e) => {
+                  if (!transaction) {
+                    console.error("some error");
+                    return;
+                  }
+                  const changeAmount =
+                    parseFloat(e.target.value) - props.mergedCategory.amount;
+
+                  const splitArrayClone = structuredClone(unsavedSplitArray);
+
+                  splitArrayClone[0].categoryArray[props.index].amount +=
+                    changeAmount;
+
+                  setUnsavedSplitArray(splitArrayClone);
+                }}
               />
             </p>
           )}

@@ -7,6 +7,7 @@ interface Store {
   transactionOnModal: FullTransaction | undefined;
   setTransactionOnModal: (transaction: FullTransaction | undefined) => void;
 
+  //This is only for data that has been SAVED.
   refreshDBData: (transaction: TransactionInDB | SplitClientSide[]) => void;
   resetTransaction: () => void;
 

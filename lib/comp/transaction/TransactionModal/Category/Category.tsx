@@ -90,6 +90,7 @@ const Category = () => {
           {unsavedMergedCategoryArray.map((category, index) => (
             <CategoryChip
               key={index}
+              index={index}
               isMultiCategory={unsavedMergedCategoryArray.length > 1}
               isEditing={editingMergedCategoryIndex === index}
               mergedCategory={
