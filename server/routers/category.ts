@@ -8,7 +8,10 @@ import { CategoryClientSideModel } from "@/util/types";
 const categoryRouter = router({
   create: procedure
     .input(
-      CategoryClientSideModel.extend({ splitId: z.string(), id: z.undefined() })
+      CategoryClientSideModel.extend({
+        splitId: z.string(),
+        id: z.undefined(),
+      }),
     )
     .mutation(async ({ input }) => {
       return await db.category.create({
@@ -20,16 +23,16 @@ const categoryRouter = router({
     .input(
       z.object({
         categoryArray: z.array(
-          CategoryModel.extend({ id: z.string().nullable() })
+          CategoryModel.extend({ id: z.string().nullable() }),
         ),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const categoryToUpdateArray = input.categoryArray.filter(
-        (category) => category.id
+        (category) => category.id,
       ) as Category[];
       const categoryToCreateArray = input.categoryArray.filter(
-        (category) => !category.id
+        (category) => !category.id,
       );
 
       const upsertedSplit = await db.split.update({
@@ -42,7 +45,7 @@ const categoryRouter = router({
               ({ id, splitId, ...rest }) => ({
                 where: { id },
                 data: rest,
-              })
+              }),
             ),
 
             createMany: {
@@ -65,7 +68,7 @@ const categoryRouter = router({
     .input(
       z.object({
         categoryArray: z.array(CategoryModel),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const deletedCategoryArray = await db.category.deleteMany({

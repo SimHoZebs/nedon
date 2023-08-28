@@ -14,6 +14,8 @@ type Props = {
   ) => void;
   isMultiCategory: boolean;
   isEditing: boolean;
+  isManaging: boolean;
+  setIsManaging: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const CategoryChip = (props: Props) => {
@@ -127,6 +129,7 @@ const CategoryChip = (props: Props) => {
                 type="number"
                 min={0}
                 value={props.mergedCategory.amount}
+                onFocus={() => props.setIsManaging(true)}
                 //on change, the other categories will have to reduce its contribution.
                 //Changing value in categories mean changing the amount of category in every contributor
                 onChange={(e) => {
