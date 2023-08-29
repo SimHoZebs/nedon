@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Icon } from "@iconify-icon/react";
 import { useStore } from "@/util/store";
-import { getCategoryStyle } from "@/util/category";
 import { useTransactionStore } from "@/util/transactionStore";
 import { calcSplitAmount } from "@/util/split";
+import UserSplitCategory from "../UserSplitCategory";
 
 const inputStyle =
   "h-7 w-16 border-b-2 border-zinc-800 bg-zinc-800 p-1 hover:border-zinc-500 focus-visible:outline-none sm:w-24";
@@ -17,10 +17,10 @@ const UserSplit = (props: Props) => {
   const appUser = useStore((state) => state.appUser);
   const transaction = useTransactionStore((state) => state.transactionOnModal);
   const unsavedSplitArray = useTransactionStore(
-    (state) => state.unsavedSplitArray
+    (state) => state.unsavedSplitArray,
   );
   const setUnsavedSplitArray = useTransactionStore(
-    (state) => state.setUnsavedSplitArray
+    (state) => state.setUnsavedSplitArray,
   );
   const [showDetail, setShowDetail] = useState(false);
 
@@ -37,7 +37,7 @@ const UserSplit = (props: Props) => {
         category.amount += parseFloat(
           (
             splicedSplit[0].categoryArray[i].amount / updatedSplitArray.length
-          ).toFixed(2)
+          ).toFixed(2),
         );
       });
     });
@@ -50,8 +50,8 @@ const UserSplit = (props: Props) => {
     updatedSplitArray[props.index].categoryArray.forEach((category) => {
       category.amount = parseFloat(
         (amount / updatedSplitArray[props.index].categoryArray.length).toFixed(
-          2
-        )
+          2,
+        ),
       );
     });
 
@@ -104,14 +104,14 @@ const UserSplit = (props: Props) => {
                 min={0}
                 max={100}
                 value={parseFloat(
-                  ((splitAmount / transactionAmount) * 100).toFixed(2)
+                  ((splitAmount / transactionAmount) * 100).toFixed(2),
                 )}
                 onChange={(e) => {
                   const updatedSplitAmount = parseFloat(
                     (
                       (parseFloat(e.target.value) / 100) *
                       transactionAmount
-                    ).toFixed(2)
+                    ).toFixed(2),
                   );
 
                   changeAmount(updatedSplitAmount);
@@ -129,31 +129,15 @@ const UserSplit = (props: Props) => {
       </div>
 
       <button
-        className={`group mb-5 flex w-full flex-col justify-center overflow-hidden rounded-b-lg bg-zinc-700 ${
+        className={`group mb-5 flex w-full flex-col items-center justify-center overflow-hidden rounded-b-lg bg-zinc-700 ${
           showDetail || "h-1 hover:m-0 hover:h-fit"
         }`}
         onClick={() => setShowDetail(!showDetail)}
       >
         {showDetail && (
-          <div className="flex w-full flex-col items-center border-x-2 border-t-2 border-zinc-700 bg-zinc-800">
+          <div className="flex w-full items-center justify-evenly border-x-2 border-t-2 border-zinc-700 bg-zinc-800">
             {split.categoryArray.map((category, i) => (
-              <div className="my-1 flex items-center gap-x-1" key={i}>
-                <Icon
-                  className={
-                    getCategoryStyle(category.nameArray).bgColor +
-                    " rounded-full p-1 text-zinc-900"
-                  }
-                  icon={getCategoryStyle(category.nameArray).icon}
-                />
-                <div>
-                  <p className="text-xs font-light text-zinc-300">
-                    {category.nameArray.at(-1)}
-                  </p>
-                  <p className="text-xs font-light text-zinc-300">
-                    ${category.amount}
-                  </p>
-                </div>
-              </div>
+              <UserSplitCategory category={category} key={i} />
             ))}
           </div>
         )}
