@@ -4,13 +4,12 @@ import { useStore } from "@/util/store";
 import { useTransactionStore } from "@/util/transactionStore";
 import { calcSplitAmount } from "@/util/split";
 import UserSplitCategory from "../UserSplitCategory";
-
-const inputStyle =
-  "h-7 w-16 border-b-2 border-zinc-800 bg-zinc-800 p-1 hover:border-zinc-500 focus-visible:outline-none sm:w-24";
+import Input from "@/comp/Input";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   index: number;
   isManaging: boolean;
+  setIsManaging: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const UserSplit = (props: Props) => {
@@ -83,9 +82,8 @@ const UserSplit = (props: Props) => {
           <div className="flex gap-x-2">
             <div className="flex items-center justify-between gap-x-2 text-2xl">
               <label htmlFor="amount">$</label>
-              <input
+              <Input
                 id="amount"
-                className={inputStyle}
                 type="number"
                 min={0}
                 max={transactionAmount}
@@ -96,10 +94,9 @@ const UserSplit = (props: Props) => {
             </div>
 
             <div className="flex items-center text-xl">
-              <input
+              <Input
                 title="ratio"
                 id="ratio"
-                className={inputStyle}
                 type="number"
                 min={0}
                 max={100}
@@ -137,7 +134,12 @@ const UserSplit = (props: Props) => {
         {showDetail && (
           <div className="flex w-full items-center justify-evenly border-x-2 border-t-2 border-zinc-700 bg-zinc-800">
             {split.categoryArray.map((category, i) => (
-              <UserSplitCategory category={category} key={i} />
+              <UserSplitCategory
+                setIsManaging={props.setIsManaging}
+                splitIndex={props.index}
+                categoryIndex={i}
+                key={i}
+              />
             ))}
           </div>
         )}

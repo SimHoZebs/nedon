@@ -25,10 +25,10 @@ const SplitList = (props: Props) => {
   const transaction = useTransactionStore((state) => state.transactionOnModal);
   const refreshDBData = useTransactionStore((state) => state.refreshDBData);
   const unsavedSplitArray = useTransactionStore(
-    (state) => state.unsavedSplitArray
+    (state) => state.unsavedSplitArray,
   );
   const setUnsavedSplitArray = useTransactionStore(
-    (state) => state.setUnsavedSplitArray
+    (state) => state.setUnsavedSplitArray,
   );
   const [isManaging, setIsManaging] = useState(false);
   useState<SplitClientSide[]>();
@@ -38,7 +38,7 @@ const SplitList = (props: Props) => {
   let updatedSplitAmount = parseFloat(
     unsavedSplitArray
       .reduce((amount, split) => amount + calcSplitAmount(split), 0)
-      .toFixed(2)
+      .toFixed(2),
   );
 
   const saveChanges = async () => {
@@ -47,14 +47,14 @@ const SplitList = (props: Props) => {
         "appUser or transaction is undefined. appuser:",
         appUser,
         "transaction:",
-        transaction
+        transaction,
       );
       return;
     }
 
     const splitToDeleteArray = transaction.splitArray.filter(
       (split) =>
-        !unsavedSplitArray.find((unsavedSplit) => unsavedSplit.id === split.id)
+        !unsavedSplitArray.find((unsavedSplit) => unsavedSplit.id === split.id),
     );
 
     splitToDeleteArray.forEach(async (split) => {
@@ -83,7 +83,7 @@ const SplitList = (props: Props) => {
               categoryArray: split.categoryArray,
             });
           }
-        })
+        }),
       );
 
       refreshDBData(dbUpdatedSplitArray);
@@ -119,7 +119,7 @@ const SplitList = (props: Props) => {
                     setIsManaging(false);
                     if (!transaction) {
                       console.error(
-                        "Can't reset splitArray. transaction is undefined"
+                        "Can't reset splitArray. transaction is undefined",
                       );
                       return;
                     }
@@ -145,7 +145,11 @@ const SplitList = (props: Props) => {
               key={i}
               className="flex w-full items-center gap-x-2 sm:gap-x-3"
             >
-              <UserSplit isManaging={isManaging} index={i}>
+              <UserSplit
+                setIsManaging={setIsManaging}
+                isManaging={isManaging}
+                index={i}
+              >
                 <div className="flex items-center gap-x-2">
                   <Icon
                     icon="mdi:account"
