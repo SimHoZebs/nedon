@@ -46,12 +46,22 @@ const UserSplit = (props: Props) => {
 
   const changeAmount = (amount: number) => {
     const updatedSplitArray = structuredClone(unsavedSplitArray);
-    updatedSplitArray[props.index].categoryArray.forEach((category) => {
-      category.amount = parseFloat(
-        (amount / updatedSplitArray[props.index].categoryArray.length).toFixed(
-          2,
-        ),
-      );
+    const change = parseFloat((amount - splitAmount).toFixed(2));
+
+    let amountToDistribute = change;
+    updatedSplitArray[props.index].categoryArray.forEach((category, index) => {
+      if (index === updatedSplitArray[props.index].categoryArray.length - 1) {
+        category.amount = parseFloat(
+          (category.amount + amountToDistribute).toFixed(2),
+        );
+      } else {
+        const share = parseFloat(
+          ((category.amount / splitAmount) * change).toFixed(2),
+        );
+
+        category.amount = parseFloat((category.amount + share).toFixed(2));
+        amountToDistribute -= share;
+      }
     });
 
     setUnsavedSplitArray(updatedSplitArray);
@@ -88,7 +98,9 @@ const UserSplit = (props: Props) => {
                 min={0}
                 max={transactionAmount}
                 value={splitAmount}
-                onChange={(e) => changeAmount(parseFloat(e.target.value))}
+                onChange={(e) => {
+                  changeAmount(parseFloat(e.target.value));
+                }}
                 step={0.01}
               />
             </div>
