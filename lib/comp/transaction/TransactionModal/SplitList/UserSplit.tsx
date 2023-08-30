@@ -99,6 +99,7 @@ const UserSplit = (props: Props) => {
                 max={transactionAmount}
                 value={splitAmount}
                 onChange={(e) => {
+                  props.setIsManaging(true);
                   changeAmount(parseFloat(e.target.value));
                 }}
                 step={0.01}
@@ -116,6 +117,7 @@ const UserSplit = (props: Props) => {
                   ((splitAmount / transactionAmount) * 100).toFixed(2),
                 )}
                 onChange={(e) => {
+                  props.setIsManaging(true);
                   const updatedSplitAmount = parseFloat(
                     (
                       (parseFloat(e.target.value) / 100) *
