@@ -11,6 +11,7 @@ import Button from "@/comp/Button/Button";
 import { useTransactionStore } from "@/util/transactionStore";
 import { calcSplitAmount } from "@/util/split";
 import SecondaryBtn from "@/comp/Button/SecondaryBtn";
+import parseMoney from "@/util/parseMoney";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -35,10 +36,11 @@ const SplitList = (props: Props) => {
 
   const transactionAmount = transaction?.amount || 0;
 
-  let updatedSplitAmount = parseFloat(
-    unsavedSplitArray
-      .reduce((amount, split) => amount + calcSplitAmount(split), 0)
-      .toFixed(2),
+  let updatedSplitAmount = parseMoney(
+    unsavedSplitArray.reduce(
+      (amount, split) => amount + calcSplitAmount(split),
+      0,
+    ),
   );
 
   const isWrongSplit =

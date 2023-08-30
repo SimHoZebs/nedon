@@ -18,7 +18,7 @@ const SettleModal = (props: Props) => {
     trpc.transaction.createManually.useMutation();
   const associatedTransactionArray = trpc.transaction.getAllAssociated.useQuery(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: !!appUser }
+    { staleTime: 3600000, enabled: !!appUser },
   );
 
   return appUser && props.oweUser ? (

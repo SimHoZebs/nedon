@@ -5,6 +5,7 @@ import { useTransactionStore } from "@/util/transactionStore";
 import { calcSplitAmount } from "@/util/split";
 import UserSplitCategory from "../UserSplitCategory";
 import Input from "@/comp/Input";
+import parseMoney from "@/util/parseMoney";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   index: number;
@@ -33,10 +34,8 @@ const UserSplit = (props: Props) => {
 
     updatedSplitArray.forEach((split) => {
       split.categoryArray.forEach((category, i) => {
-        category.amount += parseFloat(
-          (
-            splicedSplit[0].categoryArray[i].amount / updatedSplitArray.length
-          ).toFixed(2),
+        category.amount += parseMoney(
+          splicedSplit[0].categoryArray[i].amount / updatedSplitArray.length,
         );
       });
     });
@@ -44,23 +43,28 @@ const UserSplit = (props: Props) => {
     setUnsavedSplitArray(updatedSplitArray);
   };
 
-  const changeAmount = (amount: number) => {
+  const changeAmount = (newAmount: number) => {
     const updatedSplitArray = structuredClone(unsavedSplitArray);
-    const change = parseFloat((amount - splitAmount).toFixed(2));
+    const change = splitAmount
+      ? parseMoney(newAmount - splitAmount)
+      : newAmount;
 
     let amountToDistribute = change;
     updatedSplitArray[props.index].categoryArray.forEach((category, index) => {
-      if (index === updatedSplitArray[props.index].categoryArray.length - 1) {
-        category.amount = parseFloat(
-          (category.amount + amountToDistribute).toFixed(2),
-        );
-      } else {
-        const share = parseFloat(
-          ((category.amount / splitAmount) * change).toFixed(2),
-        );
+      const categoryAmount = category.amount || 0;
 
-        category.amount = parseFloat((category.amount + share).toFixed(2));
-        amountToDistribute -= share;
+      if (index === updatedSplitArray[props.index].categoryArray.length - 1) {
+        category.amount = parseMoney(categoryAmount + amountToDistribute);
+      } else {
+        let share = splitAmount
+          ? parseMoney((categoryAmount / splitAmount) * change)
+          : parseMoney(
+              change / updatedSplitArray[props.index].categoryArray.length,
+            );
+
+        category.amount = parseMoney(categoryAmount + share);
+
+        amountToDistribute = parseMoney(amountToDistribute - share);
       }
     });
 
@@ -113,16 +117,11 @@ const UserSplit = (props: Props) => {
                 type="number"
                 min={0}
                 max={100}
-                value={parseFloat(
-                  ((splitAmount / transactionAmount) * 100).toFixed(2),
-                )}
+                value={parseMoney((splitAmount / transactionAmount) * 100)}
                 onChange={(e) => {
                   props.setIsManaging(true);
-                  const updatedSplitAmount = parseFloat(
-                    (
-                      (parseFloat(e.target.value) / 100) *
-                      transactionAmount
-                    ).toFixed(2),
+                  const updatedSplitAmount = parseMoney(
+                    (parseFloat(e.target.value) / 100) * transactionAmount,
                   );
 
                   changeAmount(updatedSplitAmount);

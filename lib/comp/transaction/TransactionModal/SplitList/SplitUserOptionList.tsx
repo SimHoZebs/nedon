@@ -4,16 +4,17 @@ import { Icon } from "@iconify-icon/react";
 import Button from "@/comp/Button/Button";
 import { useTransactionStore } from "@/util/transactionStore";
 import { mergeCategoryArray } from "@/util/category";
+import parseMoney from "@/util/parseMoney";
 
 const SplitUserOptionList = () => {
   const appUser = useStore((state) => state.appUser);
   const appGroup = useStore((state) => state.appGroup);
   const transaction = useTransactionStore((state) => state.transactionOnModal);
   const unsavedSplitArray = useTransactionStore(
-    (state) => state.unsavedSplitArray
+    (state) => state.unsavedSplitArray,
   );
   const setUnsavedSplitArray = useTransactionStore(
-    (state) => state.setUnsavedSplitArray
+    (state) => state.setUnsavedSplitArray,
   );
 
   return (
@@ -43,19 +44,17 @@ const SplitUserOptionList = () => {
                   ...split,
                   categoryArray: split.categoryArray.map((category, i) => ({
                     ...category,
-                    amount: parseFloat(
+                    amount: parseMoney(
                       //categories are expected to be ordered identically
-                      (
-                        mergedCategoryArray[i].amount /
-                        (unsavedSplitArray.length + 1)
-                      ).toFixed(2)
+                      mergedCategoryArray[i].amount /
+                        (unsavedSplitArray.length + 1),
                     ),
                   })),
-                })
+                }),
               );
 
               const appUserCategoryArray = updatedSplitArray.find(
-                (split) => split.userId === appUser.id
+                (split) => split.userId === appUser.id,
               )?.categoryArray;
 
               if (!appUserCategoryArray) {
@@ -76,7 +75,7 @@ const SplitUserOptionList = () => {
             Split
           </Button>
         </div>
-      )
+      ),
     )
   );
 };

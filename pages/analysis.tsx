@@ -15,10 +15,11 @@ import {
 import H2 from "../lib/comp/H2";
 import H4 from "../lib/comp/H4";
 import { z } from "zod";
+import parseMoney from "@/util/parseMoney";
 
 const subCategoryTotal = (
   parentCategory: TreedCategoryWithTransaction,
-  transactionType: "received" | "spending"
+  transactionType: "received" | "spending",
 ): number => {
   const spending = parentCategory.subCategoryArray.reduce(
     (total, subCategory) => {
@@ -28,7 +29,7 @@ const subCategoryTotal = (
           : subCategory.spending;
       return total + amount + subCategoryTotal(subCategory, transactionType);
     },
-    0
+    0,
   );
 
   return spending;
@@ -36,7 +37,7 @@ const subCategoryTotal = (
 
 const categoryArrayTotal = (
   categoryArray: TreedCategoryWithTransaction[],
-  transactionType: "received" | "spending"
+  transactionType: "received" | "spending",
 ): number => {
   const spending = categoryArray.reduce((total, category) => {
     let amount =
@@ -85,21 +86,21 @@ const Page = () => {
 
   const transactionArray = trpc.transaction.getAll.useQuery<FullTransaction[]>(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: !!appUser }
+    { staleTime: 3600000, enabled: !!appUser },
   );
   const associatedTransactionArray = trpc.transaction.getAllAssociated.useQuery(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: !!appUser }
+    { staleTime: 3600000, enabled: !!appUser },
   );
 
   useEffect(() => {
     if (!transactionArray.data) {
       transactionArray.status === "loading"
         ? console.debug(
-            "can't set date nor scopedTransactionArray. transactionArray is loading."
+            "can't set date nor scopedTransactionArray. transactionArray is loading.",
           )
         : console.error(
-            "can't set date nor scopedTransactionArray. Fetching transactionArray failed."
+            "can't set date nor scopedTransactionArray. Fetching transactionArray failed.",
           );
 
       return;
@@ -120,7 +121,7 @@ const Page = () => {
     const filteredArray = filterTransactionByDate(
       transactionArray.data,
       date,
-      rangeFormat
+      rangeFormat,
     );
 
     setScopedTransactionArray(filteredArray);
@@ -158,10 +159,10 @@ const Page = () => {
     if (!associatedTransactionArray.data) {
       associatedTransactionArray.status === "loading"
         ? console.debug(
-            "Can't run calcOweGroup. associatedTransactionArray is loading."
+            "Can't run calcOweGroup. associatedTransactionArray is loading.",
           )
         : console.error(
-            "Can't run calcOweGroup. Fetching associatedTransactionArray failed."
+            "Can't run calcOweGroup. Fetching associatedTransactionArray failed.",
           );
       return;
     }
@@ -176,7 +177,7 @@ const Page = () => {
       transaction.splitArray.forEach((split) => {
         const splitAmount = split.categoryArray.reduce(
           (total, category) => total + category.amount,
-          0
+          0,
         );
 
         if (transaction.ownerId === appUser.id) {
@@ -218,16 +219,14 @@ const Page = () => {
                 <div>{userId.slice(0, 8)}</div>
                 <div>
                   {calcOweGroup[userId] < 0 ? "You owe: " : "They owe: "}$
-                  {Math.abs(parseFloat(calcOweGroup[userId].toFixed(2)))}
+                  {Math.abs(parseMoney(calcOweGroup[userId]))}
                 </div>
                 <ActionBtn
                   onClick={() => {
                     setShowModal(true);
                     setOweUser({
                       id: userId,
-                      amount: parseFloat(
-                        (calcOweGroup[userId] * 100).toFixed(2)
-                      ),
+                      amount: parseMoney(calcOweGroup[userId] * 100),
                     });
                   }}
                 >
@@ -243,14 +242,14 @@ const Page = () => {
           Total spending:{" "}
           {categoryArrayTotal(
             organizeTransactionByCategory(scopedTransactionArray),
-            "spending"
+            "spending",
           )}
         </p>
         <p>
           Total received:{" "}
           {categoryArrayTotal(
             organizeTransactionByCategory(scopedTransactionArray),
-            "received"
+            "received",
           ) * -1}
         </p>
 
@@ -259,7 +258,7 @@ const Page = () => {
           {organizeTransactionByCategory(scopedTransactionArray).map(
             (category, i) => (
               <div key={i} style={{ width: `%` }}></div>
-            )
+            ),
           )}
         </div>
 

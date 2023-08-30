@@ -10,6 +10,7 @@ import ActionBtn from "@/comp/Button/ActionBtn";
 import { isSplitInDB } from "@/util/types";
 import { trpc } from "@/util/trpc";
 import { calcSplitAmount } from "@/util/split";
+import parseMoney from "@/util/parseMoney";
 
 const Category = () => {
   const unsavedSplitArray = useTransactionStore(
@@ -37,10 +38,11 @@ const Category = () => {
     y: number;
   }>({ x: -400, y: 0 });
 
-  let updatedSplitAmount = parseFloat(
-    unsavedSplitArray
-      .reduce((amount, split) => amount + calcSplitAmount(split), 0)
-      .toFixed(2),
+  let updatedSplitAmount = parseMoney(
+    unsavedSplitArray.reduce(
+      (amount, split) => amount + calcSplitAmount(split),
+      0,
+    ),
   );
 
   const transactionAmount = transaction?.amount || 0;
