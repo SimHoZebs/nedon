@@ -33,13 +33,16 @@ const SplitList = (props: Props) => {
   const [isManaging, setIsManaging] = useState(false);
   useState<SplitClientSide[]>();
 
-  const transactionAmount = transaction ? transaction.amount : 0;
+  const transactionAmount = transaction?.amount || 0;
 
   let updatedSplitAmount = parseFloat(
     unsavedSplitArray
       .reduce((amount, split) => amount + calcSplitAmount(split), 0)
       .toFixed(2),
   );
+
+  const isWrongSplit =
+    updatedSplitAmount !== transactionAmount && unsavedSplitArray.length > 0;
 
   const saveChanges = async () => {
     if (!appUser || !transaction) {
@@ -111,7 +114,9 @@ const SplitList = (props: Props) => {
             <H3>Split</H3>
             {isManaging ? (
               <div className="flex gap-x-2">
-                <ActionBtn onClick={saveChanges}>Save changes</ActionBtn>
+                <ActionBtn disabled={isWrongSplit} onClick={saveChanges}>
+                  Save changes
+                </ActionBtn>
 
                 <ActionBtn
                   variant="negative"

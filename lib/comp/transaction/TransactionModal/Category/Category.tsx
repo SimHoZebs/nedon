@@ -9,6 +9,7 @@ import Button from "@/comp/Button/Button";
 import ActionBtn from "@/comp/Button/ActionBtn";
 import { isSplitInDB } from "@/util/types";
 import { trpc } from "@/util/trpc";
+import { calcSplitAmount } from "@/util/split";
 
 const Category = () => {
   const unsavedSplitArray = useTransactionStore(
@@ -36,6 +37,17 @@ const Category = () => {
     y: number;
   }>({ x: -400, y: 0 });
 
+  let updatedSplitAmount = parseFloat(
+    unsavedSplitArray
+      .reduce((amount, split) => amount + calcSplitAmount(split), 0)
+      .toFixed(2),
+  );
+
+  const transactionAmount = transaction?.amount || 0;
+
+  const isWrongSplit =
+    updatedSplitAmount !== transactionAmount && unsavedSplitArray.length > 0;
+
   return (
     <div className="flex flex-col gap-y-2">
       <div className="flex w-full justify-between gap-x-3">
@@ -44,6 +56,7 @@ const Category = () => {
         {isManaging ? (
           <div className="flex gap-x-2">
             <ActionBtn
+              disabled={isWrongSplit}
               onClick={async () => {
                 const splitArrayClone = structuredClone(unsavedSplitArray);
                 const targetSplit = splitArrayClone[0];
