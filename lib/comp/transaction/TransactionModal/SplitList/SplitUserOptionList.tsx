@@ -17,66 +17,68 @@ const SplitUserOptionList = () => {
     (state) => state.setUnsavedSplitArray,
   );
 
-  return (
-    appUser &&
-    appGroup?.userArray?.map((user, i) =>
-      unsavedSplitArray.find((split) => split.userId === user.id) ||
-      user.id === appUser.id ? null : (
-        <div key={i} className="flex items-center gap-x-2">
-          <Icon
-            className="rounded-full border-2 border-zinc-400 bg-zinc-800 p-2"
-            icon="mdi:account"
-            width={20}
-          />
-          <div>{user.id.slice(0, 8)}</div>
-          <Button
-            className="bg-zinc-800 text-indigo-300"
-            onClick={() => {
-              if (!transaction) {
-                console.error("no transaction data for modal");
-                return;
-              }
+  return appGroup?.userArray?.map((user, i) =>
+    unsavedSplitArray.find((split) => split.userId === user.id) ||
+    user.id === appUser?.id ? null : (
+      <div key={i} className="flex items-center gap-x-2">
+        <Icon
+          className="rounded-full border-2 border-zinc-400 bg-zinc-800 p-2"
+          icon="mdi:account"
+          width={20}
+        />
+        <div>{user.id.slice(0, 8)}</div>
+        <Button
+          className="bg-zinc-800 text-indigo-300"
+          onClick={() => {
+            if (!transaction) {
+              console.error("no transaction data for modal");
+              return;
+            }
 
-              const mergedCategoryArray = mergeCategoryArray(unsavedSplitArray);
+            if (!appUser) {
+              console.error("no appUser");
+              return;
+            }
 
-              const updatedSplitArray = structuredClone(unsavedSplitArray).map(
-                (split) => ({
-                  ...split,
-                  categoryArray: split.categoryArray.map((category, i) => ({
-                    ...category,
-                    amount: parseMoney(
-                      //categories are expected to be ordered identically
-                      mergedCategoryArray[i].amount /
-                        (unsavedSplitArray.length + 1),
-                    ),
-                  })),
-                }),
-              );
+            const mergedCategoryArray = mergeCategoryArray(unsavedSplitArray);
 
-              const appUserCategoryArray = updatedSplitArray.find(
-                (split) => split.userId === appUser.id,
-              )?.categoryArray;
+            const updatedSplitArray = structuredClone(unsavedSplitArray).map(
+              (split) => ({
+                ...split,
+                categoryArray: split.categoryArray.map((category, i) => ({
+                  ...category,
+                  amount: parseMoney(
+                    //categories are expected to be ordered identically
+                    mergedCategoryArray[i].amount /
+                      (unsavedSplitArray.length + 1),
+                  ),
+                })),
+              }),
+            );
 
-              if (!appUserCategoryArray) {
-                console.error("appUser has no category array");
-                return;
-              }
+            const appUserCategoryArray = updatedSplitArray.find(
+              (split) => split.userId === appUser.id,
+            )?.categoryArray;
 
-              updatedSplitArray.push({
-                id: null,
-                transactionId: null,
-                userId: user.id,
-                categoryArray: structuredClone(appUserCategoryArray),
-              });
+            if (!appUserCategoryArray) {
+              console.error("appUser has no category array");
+              return;
+            }
 
-              setUnsavedSplitArray(updatedSplitArray);
-            }}
-          >
-            Split
-          </Button>
-        </div>
-      ),
-    )
+            updatedSplitArray.push({
+              id: null,
+              transactionId: null,
+              userId: user.id,
+              categoryArray: structuredClone(appUserCategoryArray),
+            });
+
+            setUnsavedSplitArray(updatedSplitArray);
+          }}
+        >
+          Split
+        </Button>
+      </div>
+    ),
   );
 };
 

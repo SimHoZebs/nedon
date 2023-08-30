@@ -41,6 +41,7 @@ const UserSplitCategory = (props: Props) => {
             id="amount"
             type="number"
             value={category.amount}
+            step={0.01}
             onChange={(e) => {
               props.setIsManaging(true);
               const unsavedSplitArrayClone = structuredClone(unsavedSplitArray);

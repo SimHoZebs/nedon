@@ -174,10 +174,10 @@ const SplitList = (props: Props) => {
       <div className="h-5 text-red-800">
         {updatedSplitAmount !== transactionAmount &&
           unsavedSplitArray.length > 0 &&
-          `Split is ${
-            updatedSplitAmount > transactionAmount ? "greater " : "less "
-          }
-          than the amount (${`updatedTotalSplit $${updatedSplitAmount}`})`}
+          `Current split total is $${updatedSplitAmount}; $${parseMoney(
+            Math.abs(transactionAmount - updatedSplitAmount),
+          )} ${updatedSplitAmount > transactionAmount ? "greater " : "less "}
+          than needed`}
       </div>
 
       {isManaging && <SplitUserOptionList />}
