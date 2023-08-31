@@ -11,6 +11,8 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   index: number;
   isManaging: boolean;
   setIsManaging: React.Dispatch<React.SetStateAction<boolean>>;
+  modifiedSplitIndexArray: number[];
+  setModifiedSplitIndexArray: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
 const UserSplit = (props: Props) => {
@@ -27,6 +29,10 @@ const UserSplit = (props: Props) => {
   const split = unsavedSplitArray[props.index];
   const splitAmount = calcSplitAmount(split);
   const transactionAmount = transaction ? transaction.amount : 0;
+  const isModified =
+    props.modifiedSplitIndexArray.find(
+      (modifiedIndex) => modifiedIndex === props.index,
+    ) !== undefined;
 
   const removeUser = () => {
     const updatedSplitArray = structuredClone(unsavedSplitArray);
@@ -72,7 +78,7 @@ const UserSplit = (props: Props) => {
   };
 
   return (
-    <div className="flex flex-col gap-y-1">
+    <div className={`flex flex-col gap-y-1 p-2 rounded-lg `}>
       <div className="flex w-full justify-between gap-x-2 ">
         {split.userId === appUser?.id || !props.isManaging ? (
           <div className="aspect-square w-5"></div>
@@ -97,6 +103,9 @@ const UserSplit = (props: Props) => {
             <div className="flex items-center justify-between gap-x-2 text-2xl">
               <label htmlFor="amount">$</label>
               <Input
+                className={
+                  isModified ? "outline outline-2 outline-zinc-700" : ""
+                }
                 id="amount"
                 type="number"
                 min={0}
@@ -104,6 +113,15 @@ const UserSplit = (props: Props) => {
                 value={splitAmount}
                 onChange={(e) => {
                   props.setIsManaging(true);
+
+                  if (!isModified) {
+                    const updatedArray = structuredClone(
+                      props.modifiedSplitIndexArray,
+                    );
+                    updatedArray.push(props.index);
+                    props.setModifiedSplitIndexArray(updatedArray);
+                  }
+
                   changeAmount(parseFloat(e.target.value));
                 }}
                 step={0.01}
@@ -112,6 +130,7 @@ const UserSplit = (props: Props) => {
 
             <div className="flex items-center text-xl">
               <Input
+                className="sm:w-20"
                 title="ratio"
                 id="ratio"
                 type="number"

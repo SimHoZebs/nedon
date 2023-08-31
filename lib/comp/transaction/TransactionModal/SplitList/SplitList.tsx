@@ -33,6 +33,9 @@ const SplitList = (props: Props) => {
   );
   const [isManaging, setIsManaging] = useState(false);
   useState<SplitClientSide[]>();
+  const [modifiedSplitIndexArray, setModifiedSplitIndexArray] = useState<
+    number[]
+  >([]);
 
   const transactionAmount = transaction?.amount || 0;
 
@@ -95,6 +98,7 @@ const SplitList = (props: Props) => {
     }
 
     setIsManaging(false);
+    setModifiedSplitIndexArray([]);
     queryClient.transaction.invalidate();
   };
 
@@ -111,7 +115,7 @@ const SplitList = (props: Props) => {
       </div>
 
       {(unsavedSplitArray.length > 1 || isManaging) && (
-        <div className="flex flex-col gap-y-2">
+        <div className="flex flex-col gap-y-1">
           <div className="flex w-full gap-x-2">
             <H3>Split</H3>
             {isManaging ? (
@@ -124,6 +128,7 @@ const SplitList = (props: Props) => {
                   variant="negative"
                   onClick={() => {
                     setIsManaging(false);
+                    setModifiedSplitIndexArray([]);
                     if (!transaction) {
                       console.error(
                         "Can't reset splitArray. transaction is undefined",
@@ -155,6 +160,8 @@ const SplitList = (props: Props) => {
               <UserSplit
                 setIsManaging={setIsManaging}
                 isManaging={isManaging}
+                modifiedSplitIndexArray={modifiedSplitIndexArray}
+                setModifiedSplitIndexArray={setModifiedSplitIndexArray}
                 index={i}
               >
                 <div className="flex items-center gap-x-2">
