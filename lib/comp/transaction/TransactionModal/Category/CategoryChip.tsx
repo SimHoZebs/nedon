@@ -5,6 +5,7 @@ import { Icon } from "@iconify-icon/react";
 import { useTransactionStore } from "@/util/transactionStore";
 import { trpc } from "@/util/trpc";
 import { Category } from "@prisma/client";
+import parseMoney from "@/util/parseMoney";
 
 type Props = {
   mergedCategory: MergedCategory;
@@ -138,13 +139,20 @@ const CategoryChip = (props: Props) => {
                     console.error("some error");
                     return;
                   }
-                  const changeAmount =
-                    parseFloat(e.target.value) - props.mergedCategory.amount;
+
+                  const newValue = parseFloat(e.target.value) || 0;
+
+                  const changeAmount = parseMoney(
+                    newValue - props.mergedCategory.amount,
+                  );
 
                   const splitArrayClone = structuredClone(unsavedSplitArray);
 
-                  splitArrayClone[0].categoryArray[props.index].amount +=
-                    changeAmount;
+                  splitArrayClone[0].categoryArray[props.index].amount =
+                    parseMoney(
+                      splitArrayClone[0].categoryArray[props.index].amount +
+                        changeAmount,
+                    );
 
                   setUnsavedSplitArray(splitArrayClone);
                 }}

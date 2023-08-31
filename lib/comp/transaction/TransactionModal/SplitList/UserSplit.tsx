@@ -167,9 +167,9 @@ const UserSplit = (props: Props) => {
                     updatedArray.push(props.index);
                     props.setModifiedSplitIndexArray(updatedArray);
                   }
-                  const newValue = parseFloat(e.target.value);
+                  const newValue = parseFloat(e.target.value) || 0;
 
-                  changeAmount(Number.isNaN(newValue) ? 0 : newValue);
+                  changeAmount(newValue);
                 }}
                 step={0.01}
               />
@@ -186,11 +186,10 @@ const UserSplit = (props: Props) => {
                 value={parseMoney((splitAmount / transactionAmount) * 100)}
                 onChange={(e) => {
                   props.setIsManaging(true);
-                  const newValue = parseFloat(e.target.value);
+                  const newValue = parseFloat(e.target.value) || 0;
 
                   const updatedSplitAmount = parseMoney(
-                    (Number.isNaN(newValue) ? 0 : newValue / 100) *
-                      transactionAmount,
+                    (newValue / 100) * transactionAmount,
                   );
 
                   changeAmount(updatedSplitAmount);
