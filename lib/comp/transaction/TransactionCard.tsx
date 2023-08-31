@@ -4,6 +4,7 @@ import { Icon } from "@iconify-icon/react";
 import { FullTransaction } from "@/util/types";
 import { getCategoryStyle } from "@/util/category";
 import { useTransactionStore } from "@/util/transactionStore";
+import parseMoney from "@/util/parseMoney";
 
 interface Props {
   transaction: FullTransaction;
@@ -12,12 +13,15 @@ interface Props {
 const TransactionCard = (props: Props) => {
   const appUser = useStore((state) => state.appUser);
   const setTransactionOnModal = useTransactionStore(
-    (state) => state.setTransactionOnModal
+    (state) => state.setTransactionOnModal,
   );
 
   const splitAmount = props.transaction.splitArray
     .find((split) => split.userId === appUser?.id)
-    ?.categoryArray.reduce((total, category) => total + category.amount, 0);
+    ?.categoryArray.reduce(
+      (total, category) => parseMoney(total + category.amount),
+      0,
+    );
 
   return (
     <div
@@ -74,7 +78,7 @@ const TransactionCard = (props: Props) => {
                 />
                 <p className="text-xs">{category.nameArray.at(-1)}</p>
               </div>
-            )
+            ),
           )}
         </div>
       </div>

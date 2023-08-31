@@ -128,6 +128,7 @@ const CategoryChip = (props: Props) => {
                 className="w-14 bg-zinc-800 group-hover:bg-zinc-700 "
                 type="number"
                 min={0}
+                step={0.01}
                 value={props.mergedCategory.amount}
                 onFocus={() => props.setIsManaging(true)}
                 //on change, the other categories will have to reduce its contribution.
