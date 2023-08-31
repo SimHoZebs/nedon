@@ -6,6 +6,7 @@ import { calcSplitAmount } from "@/util/split";
 import UserSplitCategory from "../UserSplitCategory";
 import Input from "@/comp/Input";
 import parseMoney from "@/util/parseMoney";
+import { SplitClientSide } from "@/util/types";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   index: number;
@@ -49,28 +50,73 @@ const UserSplit = (props: Props) => {
     setUnsavedSplitArray(updatedSplitArray);
   };
 
-  const changeAmount = (newAmount: number) => {
-    const updatedSplitArray = structuredClone(unsavedSplitArray);
-    const change = splitAmount
-      ? parseMoney(newAmount - splitAmount)
-      : newAmount;
-
+  const updateSplitCategoryAmount = (
+    split: SplitClientSide,
+    oldAmount: number,
+    newAmount: number,
+  ) => {
+    const change = parseMoney(newAmount - oldAmount);
     let amountToDistribute = change;
-    updatedSplitArray[props.index].categoryArray.forEach((category, index) => {
+    split.categoryArray.forEach((category, index) => {
       const categoryAmount = category.amount || 0;
 
-      if (index === updatedSplitArray[props.index].categoryArray.length - 1) {
+      if (index === split.categoryArray.length - 1) {
         category.amount = parseMoney(categoryAmount + amountToDistribute);
       } else {
-        let share = splitAmount
-          ? parseMoney((categoryAmount / splitAmount) * change)
-          : parseMoney(
-              change / updatedSplitArray[props.index].categoryArray.length,
-            );
+        let share = oldAmount
+          ? parseMoney((categoryAmount / oldAmount) * change)
+          : parseMoney(change / split.categoryArray.length);
 
         category.amount = parseMoney(categoryAmount + share);
 
         amountToDistribute = parseMoney(amountToDistribute - share);
+      }
+    });
+  };
+
+  const changeAmount = (newAmount: number) => {
+    const updatedSplitArray = structuredClone(unsavedSplitArray);
+
+    updateSplitCategoryAmount(
+      updatedSplitArray[props.index],
+      splitAmount,
+      newAmount,
+    );
+
+    if (!transaction) {
+      console.error("can not update other split. transaction is undefined.");
+      return;
+    }
+
+    let unmodifiedSplitArray: SplitClientSide[] = [];
+    const modifiedSplitAmountTotal = updatedSplitArray
+      .filter((split, index) => {
+        if (
+          props.modifiedSplitIndexArray.find(
+            (modifiedIndex) => modifiedIndex === index,
+          ) !== undefined ||
+          index === props.index
+        ) {
+          return split;
+        } else {
+          unmodifiedSplitArray.push(split);
+        }
+      })
+      .reduce((total, split) => calcSplitAmount(split) + total, 0);
+
+    let remainder = transaction.amount - modifiedSplitAmountTotal;
+    unmodifiedSplitArray.forEach((split, index) => {
+      if (index === unmodifiedSplitArray.length - 1) {
+        updateSplitCategoryAmount(split, calcSplitAmount(split), remainder);
+      } else {
+        updateSplitCategoryAmount(
+          split,
+          calcSplitAmount(split),
+          parseMoney(remainder / unmodifiedSplitArray.length),
+        );
+        remainder = parseMoney(
+          remainder - remainder / unmodifiedSplitArray.length,
+        );
       }
     });
 
@@ -110,7 +156,7 @@ const UserSplit = (props: Props) => {
                 type="number"
                 min={0}
                 max={transactionAmount}
-                value={splitAmount}
+                value={splitAmount || 0}
                 onChange={(e) => {
                   props.setIsManaging(true);
 
@@ -121,8 +167,9 @@ const UserSplit = (props: Props) => {
                     updatedArray.push(props.index);
                     props.setModifiedSplitIndexArray(updatedArray);
                   }
+                  const newValue = parseFloat(e.target.value);
 
-                  changeAmount(parseFloat(e.target.value));
+                  changeAmount(Number.isNaN(newValue) ? 0 : newValue);
                 }}
                 step={0.01}
               />
@@ -139,8 +186,11 @@ const UserSplit = (props: Props) => {
                 value={parseMoney((splitAmount / transactionAmount) * 100)}
                 onChange={(e) => {
                   props.setIsManaging(true);
+                  const newValue = parseFloat(e.target.value);
+
                   const updatedSplitAmount = parseMoney(
-                    (parseFloat(e.target.value) / 100) * transactionAmount,
+                    (Number.isNaN(newValue) ? 0 : newValue / 100) *
+                      transactionAmount,
                   );
 
                   changeAmount(updatedSplitAmount);
