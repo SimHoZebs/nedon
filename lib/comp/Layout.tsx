@@ -1,12 +1,12 @@
-import React, { useEffect } from "react";
-import { useRouter } from "next/router";
-import { useStore } from "../util/store";
-
-import { Open_Sans } from "next/font/google";
-import NavBtn from "./Button/NavBtn";
 import { Icon } from "@iconify-icon/react";
-import Button from "./Button/Button";
+import { Open_Sans } from "next/font/google";
+import { useRouter } from "next/router";
+import React, { useEffect } from "react";
+
+import { useStore } from "../util/store";
 import ActionBtn from "./Button/ActionBtn";
+import Button from "./Button/Button";
+import NavBtn from "./Button/NavBtn";
 
 const customFont = Open_Sans({
   weight: "variable",
@@ -23,7 +23,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       console.debug(
         "Pushing to basePath. User is on path:" +
           router.pathname +
-          " but did not log in."
+          " but did not log in.",
       );
 
       router.push("/");

@@ -1,6 +1,6 @@
-import { User, Group } from "@prisma/client";
-import { CounterpartyType, Transaction as PTransaction } from "plaid";
+import { Group, User } from "@prisma/client";
 import { Transaction } from "@prisma/client";
+import { CounterpartyType, Transaction as PTransaction } from "plaid";
 import { CategoryModel, SplitModel } from "prisma/zod";
 import { z } from "zod";
 
@@ -35,7 +35,7 @@ export const CategoryClientSideModel = CategoryModel.extend({
 });
 
 export function isCategoryInSplitInDB(
-  category: CategoryClientSide
+  category: CategoryClientSide,
 ): category is z.infer<typeof CategoryModel> {
   return !!category.splitId;
 }
@@ -57,7 +57,7 @@ export const SplitClientSideModel = SplitModel.extend({
 });
 
 export function isFullTransactionInDB(
-  transaction: FullTransaction
+  transaction: FullTransaction,
 ): transaction is FullTransactionInDB {
   return !!transaction.id;
 }
@@ -78,7 +78,7 @@ export type TransactionInDB = Transaction & {
 };
 
 export function isPlaidTransaction(
-  plaidTransaction: unknown
+  plaidTransaction: unknown,
 ): plaidTransaction is FullTransaction {
   return (plaidTransaction as FullTransaction).id !== undefined;
 }

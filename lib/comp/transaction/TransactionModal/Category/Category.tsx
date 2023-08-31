@@ -1,16 +1,19 @@
-import React, { useState, useRef } from "react";
-import CategoryPicker from "./CategoryPicker";
-import { emptyCategory, mergeCategoryArray } from "@/util/category";
-import CategoryChip from "./CategoryChip";
-import { useTransactionStore } from "@/util/transactionStore";
 import { Icon } from "@iconify-icon/react";
-import H3 from "@/comp/H3";
-import Button from "@/comp/Button/Button";
+import React, { useRef, useState } from "react";
+
 import ActionBtn from "@/comp/Button/ActionBtn";
-import { isSplitInDB } from "@/util/types";
-import { trpc } from "@/util/trpc";
-import { calcSplitAmount } from "@/util/split";
+import Button from "@/comp/Button/Button";
+import H3 from "@/comp/H3";
+
+import { emptyCategory, mergeCategoryArray } from "@/util/category";
 import parseMoney from "@/util/parseMoney";
+import { calcSplitAmount } from "@/util/split";
+import { useTransactionStore } from "@/util/transactionStore";
+import { trpc } from "@/util/trpc";
+import { isSplitInDB } from "@/util/types";
+
+import CategoryChip from "./CategoryChip";
+import CategoryPicker from "./CategoryPicker";
 
 const Category = () => {
   const unsavedSplitArray = useTransactionStore(

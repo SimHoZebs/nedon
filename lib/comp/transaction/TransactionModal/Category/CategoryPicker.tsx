@@ -1,11 +1,12 @@
-import React, { ForwardedRef, forwardRef, useEffect, useState } from "react";
-import { trpc } from "@/util/trpc";
 import { Icon } from "@iconify-icon/react";
-import { TreedCategory, MergedCategory, SplitInDB } from "@/util/types";
+import React, { ForwardedRef, forwardRef, useEffect, useState } from "react";
+
+import { emptyCategory } from "@/util/category";
 import categoryStyleArray from "@/util/categoryStyle";
 import { useStore } from "@/util/store";
 import { useTransactionStore } from "@/util/transactionStore";
-import { emptyCategory } from "@/util/category";
+import { trpc } from "@/util/trpc";
+import { MergedCategory, SplitInDB, TreedCategory } from "@/util/types";
 
 interface Props {
   unsavedMergedCategoryArray: MergedCategory[];
@@ -22,20 +23,20 @@ const CategoryPicker = forwardRef(
     const createTransaction = trpc.transaction.create.useMutation();
     const categoryOptionArray = trpc.getCategoryOptionArray.useQuery(
       undefined,
-      { staleTime: Infinity }
+      { staleTime: Infinity },
     );
     const queryClient = trpc.useContext();
 
     const appUser = useStore((state) => state.appUser);
     const transaction = useTransactionStore(
-      (state) => state.transactionOnModal
+      (state) => state.transactionOnModal,
     );
     const refreshDBData = useTransactionStore((state) => state.refreshDBData);
     const unsavedSplitArray = useTransactionStore(
-      (state) => state.unsavedSplitArray
+      (state) => state.unsavedSplitArray,
     );
     const setUnsavedSplitArray = useTransactionStore(
-      (state) => state.setUnsavedSplitArray
+      (state) => state.setUnsavedSplitArray,
     );
     const [unsavedNameArray, setCurrentNameArray] = useState<string[]>([]);
     const [currentOptionArray, setCurrentOptionArray] = useState<
@@ -50,13 +51,13 @@ const CategoryPicker = forwardRef(
 
       if (!categoryOptionArray.data) {
         console.error(
-          "Can't reset picker. categoryOptionArray is undefined. How did you get here?"
+          "Can't reset picker. categoryOptionArray is undefined. How did you get here?",
         );
         return;
       }
       if (!transaction) {
         console.error(
-          "Can't reset picker. transaction is undefined. How did you get here?"
+          "Can't reset picker. transaction is undefined. How did you get here?",
         );
         return;
       }
@@ -67,7 +68,7 @@ const CategoryPicker = forwardRef(
     const createCategoryForManySplit = async (nameArray: string[]) => {
       if (!appUser || !transaction) {
         console.error(
-          "appUser or transactionOnModal or transaction is undefined."
+          "appUser or transactionOnModal or transaction is undefined.",
         );
         return;
       }
@@ -133,7 +134,7 @@ const CategoryPicker = forwardRef(
           ] = newCategory;
 
           return updatedSplitClone as SplitInDB;
-        })
+        }),
       );
 
       refreshDBData(dbUpdatedSplitArray);
@@ -186,7 +187,7 @@ const CategoryPicker = forwardRef(
      * @param clickedTreedCategory  if the category is assigned by click instead of the "save" button.
      */
     const applyChangesToCategory = async (
-      clickedTreedCategory?: TreedCategory
+      clickedTreedCategory?: TreedCategory,
     ) => {
       const updatedMergedCategory = structuredClone(editingMergedCategory);
       const updatedNameArray = structuredClone(unsavedNameArray);
@@ -210,10 +211,10 @@ const CategoryPicker = forwardRef(
       if (!categoryOptionArray.data) {
         categoryOptionArray.status === "loading"
           ? console.debug(
-              "Can't sync currentOptionArray. categoryOptionArray is loading."
+              "Can't sync currentOptionArray. categoryOptionArray is loading.",
             )
           : console.error(
-              "Can't sync currentOptionArray. fetching categoryOptionArray failed."
+              "Can't sync currentOptionArray. fetching categoryOptionArray failed.",
             );
 
         return;
@@ -223,8 +224,8 @@ const CategoryPicker = forwardRef(
         (option) =>
           !props.unsavedMergedCategoryArray.find(
             (unsavedCategory) =>
-              unsavedCategory.nameArray.at(-1) === option.name
-          )
+              unsavedCategory.nameArray.at(-1) === option.name,
+          ),
       );
 
       setCurrentOptionArray(filteredOptionArray);
@@ -249,7 +250,7 @@ const CategoryPicker = forwardRef(
                 onClick={() => {
                   if (!transaction)
                     return console.error(
-                      "Can't reset unsavedSplitArray. transaction is undefined."
+                      "Can't reset unsavedSplitArray. transaction is undefined.",
                     );
                   resetPicker();
                 }}
@@ -278,7 +279,7 @@ const CategoryPicker = forwardRef(
                 e.stopPropagation();
                 if (!transaction)
                   return console.error(
-                    "Can't reset unsavedSplitArray. transaction is undefined."
+                    "Can't reset unsavedSplitArray. transaction is undefined.",
                   );
                 setUnsavedSplitArray(transaction.splitArray);
                 resetPicker();
@@ -307,8 +308,8 @@ const CategoryPicker = forwardRef(
                     (option) =>
                       !props.unsavedMergedCategoryArray.find(
                         (unsavedCategory) =>
-                          unsavedCategory.nameArray.at(-1) === option.name
-                      )
+                          unsavedCategory.nameArray.at(-1) === option.name,
+                      ),
                   );
 
                   setCurrentOptionArray(filteredOptionArray);
@@ -341,7 +342,7 @@ const CategoryPicker = forwardRef(
         </div>
       </div>
     ) : null;
-  }
+  },
 );
 
 CategoryPicker.displayName = "CategoryPicker";

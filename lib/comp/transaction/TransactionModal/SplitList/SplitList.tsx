@@ -1,17 +1,20 @@
 import { Icon } from "@iconify-icon/react";
 import React, { useState } from "react";
-import { SplitClientSide, isSplitInDB } from "@/util/types";
+
 import ActionBtn from "@/comp/Button/ActionBtn";
-import UserSplit from "./UserSplit";
-import { trpc } from "@/util/trpc";
-import { useStore } from "@/util/store";
-import SplitUserOptionList from "./SplitUserOptionList";
-import H3 from "@/comp/H3";
 import Button from "@/comp/Button/Button";
-import { useTransactionStore } from "@/util/transactionStore";
-import { calcSplitAmount } from "@/util/split";
 import SecondaryBtn from "@/comp/Button/SecondaryBtn";
+import H3 from "@/comp/H3";
+
 import parseMoney from "@/util/parseMoney";
+import { calcSplitAmount } from "@/util/split";
+import { useStore } from "@/util/store";
+import { useTransactionStore } from "@/util/transactionStore";
+import { trpc } from "@/util/trpc";
+import { SplitClientSide, isSplitInDB } from "@/util/types";
+
+import SplitUserOptionList from "./SplitUserOptionList";
+import UserSplit from "./UserSplit";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {}
 

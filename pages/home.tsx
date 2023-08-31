@@ -1,11 +1,12 @@
-import React, { useRef, useState } from "react";
-import { useStore } from "../lib/util/store";
 import { NextPage } from "next";
-
-import { trpc } from "../lib/util/trpc";
 import { AccountBase, AuthGetResponse } from "plaid";
-import Modal from "../lib/comp/Modal";
-import AccountCard from "../lib/comp/home/AccountCard";
+import React, { useRef, useState } from "react";
+
+import Modal from "@/comp/Modal";
+import AccountCard from "@/comp/home/AccountCard";
+
+import { useStore } from "@/util/store";
+import { trpc } from "@/util/trpc";
 
 const User: NextPage = () => {
   const appUser = useStore((state) => state.appUser);
@@ -14,11 +15,11 @@ const User: NextPage = () => {
 
   const auth = trpc.auth.useQuery(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: !!appUser }
+    { staleTime: 3600000, enabled: !!appUser },
   );
 
   const loading = useRef(
-    <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700"></div>
+    <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700"></div>,
   );
 
   return (
@@ -54,7 +55,7 @@ const User: NextPage = () => {
                 <p>{account.name}</p>
                 <p>${account.balances.available}</p>
               </AccountCard>
-            )
+            ),
         )}
     </section>
   );

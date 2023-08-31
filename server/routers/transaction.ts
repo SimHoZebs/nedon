@@ -1,16 +1,17 @@
-import { router, procedure } from "../trpc";
-import { z } from "zod";
-import db from "@/util/db";
 import { RemovedTransaction, TransactionsSyncRequest } from "plaid";
+import { z } from "zod";
+
+import db from "@/util/db";
+import { convertToFullTransaction } from "@/util/transaction";
 import {
   FullTransaction,
-  SplitClientSideModel,
   PlaidTransaction,
-  TransactionInDB,
+  SplitClientSideModel,
 } from "@/util/types";
-import { client } from "../util";
+
 import { SplitModel } from "../../prisma/zod";
-import { convertToFullTransaction } from "@/util/transaction";
+import { procedure, router } from "../trpc";
+import { client } from "../util";
 
 // Retrieve Transactions for an Item
 // https://plaid.com/docs/#transactions
@@ -91,13 +92,13 @@ const transactionRouter = router({
 
       const full: FullTransaction[] = added.map((plaidTransaction) => {
         const matchingTransaction = transactionArray.find(
-          (transaction) => transaction.id === plaidTransaction.transaction_id
+          (transaction) => transaction.id === plaidTransaction.transaction_id,
         );
 
         return convertToFullTransaction(
           user.id,
           plaidTransaction,
-          matchingTransaction
+          matchingTransaction,
         );
       });
 
@@ -134,7 +135,7 @@ const transactionRouter = router({
         userId: z.string(),
         transactionId: z.string(),
         splitArray: z.array(SplitClientSideModel),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const data = {
@@ -178,9 +179,9 @@ const transactionRouter = router({
           SplitModel.extend({
             id: z.undefined(),
             transactionId: z.undefined(),
-          })
+          }),
         ),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const transaction = await db.transaction.create({

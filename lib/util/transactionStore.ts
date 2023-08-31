@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
+
 import { resetFullTransaction } from "./transaction";
 import { FullTransaction, SplitClientSide, TransactionInDB } from "./types";
 
@@ -59,5 +60,5 @@ export const useTransactionStore = create<Store>()(
     unsavedSplitArray: [],
     setUnsavedSplitArray: (splitArray: SplitClientSide[]) =>
       set({ unsavedSplitArray: splitArray }),
-  }))
+  })),
 );

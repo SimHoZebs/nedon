@@ -1,9 +1,11 @@
-import React, { useState } from "react";
-import Modal from "../Modal";
-import { useStore } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
-import Button from "../Button/ActionBtn";
+import React, { useState } from "react";
+
+import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
+
+import Button from "../Button/ActionBtn";
+import Modal from "../Modal";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;

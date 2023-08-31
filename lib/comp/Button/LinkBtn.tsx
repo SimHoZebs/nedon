@@ -1,9 +1,10 @@
+import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { usePlaidLink } from "react-plaid-link";
 
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
-import { useRouter } from "next/router";
+
 import Button from "./ActionBtn";
 
 const LinkBtn = () => {
@@ -40,7 +41,7 @@ const LinkBtn = () => {
 
       router.push("/home");
     },
-    [appUser, router, setAccessToken, setAppUser]
+    [appUser, router, setAccessToken, setAppUser],
   );
 
   let isOauth = false;

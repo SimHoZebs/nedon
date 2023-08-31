@@ -1,26 +1,28 @@
 import { NextPage } from "next";
 import React, { useEffect, useMemo, useState } from "react";
-import { trpc } from "../lib/util/trpc";
-import { useStore } from "../lib/util/store";
-import TransactionCard from "../lib/comp/transaction/TransactionCard";
-import { FullTransaction } from "../lib/util/types";
+import { z } from "zod";
+
+import Button from "@/comp/Button/Button";
+import H1 from "@/comp/H1";
+import H2 from "@/comp/H2";
+import H3 from "@/comp/H3";
+import TransactionCard from "@/comp/transaction/TransactionCard";
+import TransactionModal from "@/comp/transaction/TransactionModal/TransactionModal";
+
+import { useStore } from "@/util/store";
 import {
   filterTransactionByDate,
   organizeTransactionByTime,
-} from "../lib/util/transaction";
-import TransactionModal from "../lib/comp/transaction/TransactionModal/TransactionModal";
-import H1 from "../lib/comp/H1";
-import H2 from "../lib/comp/H2";
-import H3 from "../lib/comp/H3";
-import Button from "../lib/comp/Button/Button";
-import { z } from "zod";
+} from "@/util/transaction";
+import { trpc } from "@/util/trpc";
+import { FullTransaction } from "@/util/types";
 
 const Page: NextPage = () => {
   const appUser = useStore((state) => state.appUser);
 
   const transactionArray = trpc.transaction.getAll.useQuery(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken }
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken },
   );
 
   const [showModal, setShowModal] = useState(false);
@@ -56,7 +58,7 @@ const Page: NextPage = () => {
     const filteredArray = filterTransactionByDate(
       transactionArray.data,
       date,
-      rangeFormat
+      rangeFormat,
     );
 
     setScopedTransactionArray(filteredArray);
@@ -164,7 +166,7 @@ const Page: NextPage = () => {
                             transaction={transaction}
                             key={l}
                           />
-                        )
+                        ),
                     )}
                   </div>
                 ))}

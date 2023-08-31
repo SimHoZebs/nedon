@@ -1,10 +1,12 @@
-import React from "react";
-import { useStore } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
+import React from "react";
+
 import Button from "@/comp/Button/Button";
-import { useTransactionStore } from "@/util/transactionStore";
+
 import { mergeCategoryArray } from "@/util/category";
 import parseMoney from "@/util/parseMoney";
+import { useStore } from "@/util/store";
+import { useTransactionStore } from "@/util/transactionStore";
 
 const SplitUserOptionList = () => {
   const appUser = useStore((state) => state.appUser);

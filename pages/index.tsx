@@ -1,19 +1,21 @@
-import type { NextPage } from "next";
-import { trpc } from "../lib/util/trpc";
-import { useLocalStoreDelay, useLocalStore, useStore } from "../lib/util/store";
-import { emptyUser } from "../lib/util/user";
-import { useRouter } from "next/router";
 import { Icon } from "@iconify-icon/react";
-import Button from "../lib/comp/Button/Button";
+import type { NextPage } from "next";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import H1 from "../lib/comp/H1";
+
+import Button from "@/comp/Button/Button";
+import H1 from "@/comp/H1";
+
+import { useLocalStore, useLocalStoreDelay, useStore } from "@/util/store";
+import { trpc } from "@/util/trpc";
+import { emptyUser } from "@/util/user";
 
 const Home: NextPage = () => {
   const router = useRouter();
   const server = trpc.useContext();
   const userIdArray = useLocalStoreDelay(
     useLocalStore,
-    (state) => state.userIdArray
+    (state) => state.userIdArray,
   );
   const addUserId = useLocalStore((state) => state.addUserId);
   const deleteUserId = useLocalStore((state) => state.deleteUserId);
@@ -74,7 +76,7 @@ const Home: NextPage = () => {
 
                   if (!group) {
                     console.error(
-                      "Cannot login. server returned undefined group."
+                      "Cannot login. server returned undefined group.",
                     );
                     return;
                   }
@@ -91,7 +93,7 @@ const Home: NextPage = () => {
                       <Button
                         className={`after:h-full after:w-px after:bg-zinc-500 ${
                           appGroup.userArray?.find(
-                            (groupUser) => groupUser.id === user.id
+                            (groupUser) => groupUser.id === user.id,
                           )
                             ? "text-pink-400"
                             : "text-indigo-400"
@@ -100,7 +102,7 @@ const Home: NextPage = () => {
                           e.stopPropagation();
 
                           const updatedAppGroup = appGroup.userArray?.find(
-                            (groupUser) => groupUser.id === user.id
+                            (groupUser) => groupUser.id === user.id,
                           )
                             ? await removeUserFromGroup.mutateAsync({
                                 groupId: appGroup.id,
@@ -115,7 +117,7 @@ const Home: NextPage = () => {
                         }}
                       >
                         {appGroup.userArray?.find(
-                          (groupUser) => groupUser.id === user.id
+                          (groupUser) => groupUser.id === user.id,
                         ) ? (
                           <Icon icon="mdi:user-remove-outline" width={20} />
                         ) : (
@@ -175,7 +177,7 @@ const CreateUserBtn = (props: Props) => {
 
   const sandboxPublicToken = trpc.sandBoxAccess.useQuery(
     { instituteID: undefined },
-    { staleTime: 360000, enabled: false }
+    { staleTime: 360000, enabled: false },
   );
   const setAccessToken = trpc.setAccessToken.useMutation();
   const [loading, setLoading] = useState(false);

@@ -1,12 +1,15 @@
-import React, { useState } from "react";
 import { Icon } from "@iconify-icon/react";
+import React, { useState } from "react";
+
+import Input from "@/comp/Input";
+
+import parseMoney from "@/util/parseMoney";
+import { calcSplitAmount } from "@/util/split";
 import { useStore } from "@/util/store";
 import { useTransactionStore } from "@/util/transactionStore";
-import { calcSplitAmount } from "@/util/split";
-import UserSplitCategory from "../UserSplitCategory";
-import Input from "@/comp/Input";
-import parseMoney from "@/util/parseMoney";
 import { SplitClientSide } from "@/util/types";
+
+import UserSplitCategory from "../UserSplitCategory";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   index: number;

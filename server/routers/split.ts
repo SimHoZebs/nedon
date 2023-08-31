@@ -1,7 +1,9 @@
 import { z } from "zod";
+
 import db from "@/util/db";
-import { procedure, router } from "../trpc";
 import { SplitClientSideModel, SplitInDB } from "@/util/types";
+
+import { procedure, router } from "../trpc";
 
 const splitRouter = router({
   create: procedure
@@ -9,7 +11,7 @@ const splitRouter = router({
       z.object({
         transactionId: z.string(),
         split: SplitClientSideModel,
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const { id, categoryArray, ...rest } = input.split;
@@ -37,7 +39,7 @@ const splitRouter = router({
       z.object({
         transactionId: z.string(),
         split: SplitClientSideModel,
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const { id, categoryArray, ...rest } = input.split;
@@ -79,11 +81,11 @@ const splitRouter = router({
       z.object({
         transactionId: z.string(),
         splitArray: z.array(SplitClientSideModel),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const splitToUpdateArray = input.splitArray.filter(
-        (split) => split.id
+        (split) => split.id,
       ) as SplitInDB[];
       const splitToCreateArray = input.splitArray.filter((split) => !split.id);
 
@@ -101,7 +103,7 @@ const splitRouter = router({
                     ...category,
                   })),
                 },
-              })
+              }),
             ),
 
             update: splitToUpdateArray.map(
@@ -115,11 +117,11 @@ const splitRouter = router({
                         data: {
                           ...category,
                         },
-                      })
+                      }),
                     ),
                   },
                 },
-              })
+              }),
             ),
           },
         },

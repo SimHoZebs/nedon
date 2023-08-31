@@ -1,22 +1,24 @@
-import { z } from "zod";
-import { procedure, router } from "../trpc";
+import { User } from "@prisma/client";
 import {
+  ACHClass,
   PlaidApi,
   Products,
-  TransferType,
   TransferNetwork,
-  ACHClass,
+  TransferType,
 } from "plaid";
-import userRouter from "./user";
-import db from "@/util/db";
-import { User } from "@prisma/client";
-import { groupRouter } from "./group";
-import transactionRouter from "./transaction";
-import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS, client } from "../util";
+import { z } from "zod";
+
 import { convertPlaidCategoriesToHierarchicalArray } from "@/util/category";
-import splitRouter from "./split";
-import categoryRouter from "./category";
+import db from "@/util/db";
 import { stripUserSecrets } from "@/util/user";
+
+import { procedure, router } from "../trpc";
+import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS, client } from "../util";
+import categoryRouter from "./category";
+import { groupRouter } from "./group";
+import splitRouter from "./split";
+import transactionRouter from "./transaction";
+import userRouter from "./user";
 
 const setAccessToken = async ({
   publicToken,
@@ -38,7 +40,7 @@ const setAccessToken = async ({
 
   if (PLAID_PRODUCTS.includes(Products.Transfer)) {
     userUpdateData.TRANSFER_ID = await authorizeAndCreateTransfer(
-      exchangeResponse.data.item_id
+      exchangeResponse.data.item_id,
     );
   }
 
@@ -92,7 +94,7 @@ export const appRouter = router({
       z.object({
         publicToken: z.string(),
         id: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       return setAccessToken(input);
@@ -134,7 +136,7 @@ const getAssetReportWithRetries = (
   plaidClient: PlaidApi,
   asset_report_token: string,
   ms = 1000,
-  retriesLeft = 20
+  retriesLeft = 20,
 ) =>
   new Promise((resolve, reject) => {
     const request = {
@@ -154,7 +156,7 @@ const getAssetReportWithRetries = (
             plaidClient,
             asset_report_token,
             ms,
-            retriesLeft - 1
+            retriesLeft - 1,
           ).then(resolve);
         }, ms);
       });

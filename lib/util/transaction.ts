@@ -1,17 +1,16 @@
-import { fillArrayByCategory, mergeCategoryArray } from "./category";
 import { Transaction } from "@prisma/client";
+
+import { fillArrayByCategory, mergeCategoryArray } from "./category";
+import { emptyCategory } from "./category";
 import {
-  SplitClientSide,
   FullTransaction,
   PlaidTransaction,
+  SplitClientSide,
   TreedCategoryWithTransaction,
-  FullTransactionInDB,
 } from "./types";
 
-import { emptyCategory } from "./category";
-
 export const resetFullTransaction = (
-  fullTransaction: FullTransaction
+  fullTransaction: FullTransaction,
 ): FullTransaction => ({
   ...fullTransaction,
   id: null,
@@ -35,7 +34,7 @@ export const resetFullTransaction = (
 export const convertToFullTransaction = (
   userId: string,
   plaidTransaction: PlaidTransaction,
-  transactionInDB?: Transaction & { splitArray: SplitClientSide[] }
+  transactionInDB?: Transaction & { splitArray: SplitClientSide[] },
 ): FullTransaction => {
   return {
     ...plaidTransaction,
@@ -59,7 +58,7 @@ export const convertToFullTransaction = (
 };
 
 export const organizeTransactionByCategory = (
-  transactionArray: FullTransaction[]
+  transactionArray: FullTransaction[],
 ) => {
   const categoryArray: TreedCategoryWithTransaction[] = [];
 
@@ -75,12 +74,12 @@ export const organizeTransactionByCategory = (
 };
 
 export const organizeTransactionByTime = (
-  transactionArray: FullTransaction[]
+  transactionArray: FullTransaction[],
 ) => {
   const transactionSortedByTimeArray = transactionArray.sort(
     (a, b) =>
       new Date(b.datetime ? b.datetime : b.date).getTime() -
-      new Date(a.datetime ? a.datetime : a.date).getTime()
+      new Date(a.datetime ? a.datetime : a.date).getTime(),
   );
   const transactionOrganizedByTimeArray: FullTransaction[][][][] = [[[[]]]];
 
@@ -115,7 +114,7 @@ export const organizeTransactionByTime = (
     }
 
     transactionOrganizedByTimeArray[yearIndex][monthIndex][dateIndex].push(
-      transaction
+      transaction,
     );
 
     lastDate = date;
@@ -127,7 +126,7 @@ export const organizeTransactionByTime = (
 export const filterTransactionByDate = (
   transactionArray: FullTransaction[],
   date: Date,
-  rangeFormat: "year" | "month" | "date"
+  rangeFormat: "year" | "month" | "date",
 ) => {
   return transactionArray.filter((transaction) => {
     const transactionDate = new Date(transaction.date);

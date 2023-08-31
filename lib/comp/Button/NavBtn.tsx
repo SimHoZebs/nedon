@@ -1,7 +1,8 @@
-import React from "react";
-import { NextRouter } from "next/router";
-import Button from "./Button";
 import { Icon } from "@iconify-icon/react";
+import { NextRouter } from "next/router";
+import React from "react";
+
+import Button from "./Button";
 
 interface Props extends React.HtmlHTMLAttributes<HTMLButtonElement> {
   icon?: string;

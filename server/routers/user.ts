@@ -1,10 +1,12 @@
-import { router, procedure } from "../trpc";
-import { z } from "zod";
-import db from "@/util/db";
-import { PLAID_PRODUCTS } from "../util";
 import { Group, User } from "@prisma/client";
+import { z } from "zod";
+
+import db from "@/util/db";
 import { UserClientSide } from "@/util/types";
 import { stripUserSecrets } from "@/util/user";
+
+import { procedure, router } from "../trpc";
+import { PLAID_PRODUCTS } from "../util";
 
 const userRouter = router({
   get: procedure.input(z.string()).query(async ({ input }) => {
@@ -48,7 +50,7 @@ const userRouter = router({
       }
 
       const clientSideUserArray = userArray.map(
-        (user) => user && stripUserSecrets(user)
+        (user) => user && stripUserSecrets(user),
       );
 
       return clientSideUserArray.filter((user) => !!user) as UserClientSide[];

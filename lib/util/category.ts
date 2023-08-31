@@ -1,3 +1,6 @@
+import { Category as PlaidCategory } from "plaid";
+
+import categoryStyleArray from "./categoryStyle";
 import {
   CategoryClientSide,
   FullTransaction,
@@ -6,8 +9,6 @@ import {
   TreedCategory,
   TreedCategoryWithTransaction,
 } from "./types";
-import { Category as PlaidCategory } from "plaid";
-import categoryStyleArray from "./categoryStyle";
 
 export const emptyCategory = ({
   nameArray,
@@ -38,14 +39,14 @@ export const mergeCategoryArray = (splitArray: SplitClientSide[]) => {
     split.categoryArray.forEach(({ nameArray, amount, ...rest }) => {
       const storedCategory = mergedCategoryArray.find(
         ({ nameArray: storedNameArray }) =>
-          storedNameArray.at(-1) === nameArray.at(-1)
+          storedNameArray.at(-1) === nameArray.at(-1),
       );
 
       if (storedCategory) {
         storedCategory.amount += amount;
       } else {
         mergedCategoryArray.push(
-          structuredClone({ nameArray, amount, ...rest })
+          structuredClone({ nameArray, amount, ...rest }),
         );
       }
     });
@@ -54,7 +55,7 @@ export const mergeCategoryArray = (splitArray: SplitClientSide[]) => {
 };
 
 export const convertPlaidCategoriesToHierarchicalArray = (
-  plaidCategoryArray: PlaidCategory[]
+  plaidCategoryArray: PlaidCategory[],
 ) => {
   const resultArray: TreedCategory[] = [];
 
@@ -67,7 +68,7 @@ export const convertPlaidCategoriesToHierarchicalArray = (
 export const fillArrayByCategory = (
   resultArray: TreedCategoryWithTransaction[],
   transaction: FullTransaction,
-  category: MergedCategory
+  category: MergedCategory,
 ): TreedCategoryWithTransaction[] => {
   const nameArray = category.nameArray;
 
@@ -113,7 +114,7 @@ export const fillArrayByCategory = (
     resultArray[index].subCategoryArray = fillArrayByCategory(
       resultArray[index].subCategoryArray,
       transactionCopy,
-      newCategory
+      newCategory,
     );
   }
 
@@ -122,14 +123,14 @@ export const fillArrayByCategory = (
 
 export const fillCategoryInHierarchy = (
   resultArray: TreedCategory[],
-  plaidCategory: PlaidCategory
+  plaidCategory: PlaidCategory,
 ): TreedCategory[] => {
   const hierarchy = plaidCategory.hierarchy;
 
   const firstCategory = hierarchy[0];
 
   let index = resultArray.findIndex(
-    (category) => category.name === firstCategory
+    (category) => category.name === firstCategory,
   );
 
   if (index === -1) {
@@ -151,7 +152,7 @@ export const fillCategoryInHierarchy = (
 
     resultArray[index].subCategoryArray = fillCategoryInHierarchy(
       resultArray[index].subCategoryArray,
-      plaidCategory
+      plaidCategory,
     );
   }
 

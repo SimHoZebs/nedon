@@ -1,18 +1,20 @@
-import React from "react";
-import { useStore } from "../lib/util/store";
-import Button from "../lib/comp/Button/ActionBtn";
-import { useRouter } from "next/router";
 import { Icon } from "@iconify-icon/react";
+import { useRouter } from "next/router";
+import React from "react";
+
+import Button from "@/comp/Button/ActionBtn";
+
+import { useStore } from "@/util/store";
 
 const Page = () => {
   const router = useRouter();
   const verticalCategoryPicker = useStore(
-    (state) => state.verticalCategoryPicker
+    (state) => state.verticalCategoryPicker,
   );
   const setAppUser = useStore((state) => state.setAppUser);
   const setAppGroup = useStore((state) => state.setAppGroup);
   const setVerticalCategoryPicker = useStore(
-    (state) => state.setVerticalCategoryPicker
+    (state) => state.setVerticalCategoryPicker,
   );
 
   return (

@@ -1,8 +1,10 @@
-import Input from "@/comp/Input";
-import { getCategoryStyle } from "@/util/category";
-import { useTransactionStore } from "@/util/transactionStore";
 import { Icon } from "@iconify-icon/react";
 import React from "react";
+
+import Input from "@/comp/Input";
+
+import { getCategoryStyle } from "@/util/category";
+import { useTransactionStore } from "@/util/transactionStore";
 
 interface Props {
   splitIndex: number;

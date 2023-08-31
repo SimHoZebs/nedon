@@ -1,10 +1,11 @@
-import React from "react";
-import { useStore } from "@/util/store";
 import { Icon } from "@iconify-icon/react";
-import { FullTransaction } from "@/util/types";
+import React from "react";
+
 import { getCategoryStyle } from "@/util/category";
-import { useTransactionStore } from "@/util/transactionStore";
 import parseMoney from "@/util/parseMoney";
+import { useStore } from "@/util/store";
+import { useTransactionStore } from "@/util/transactionStore";
+import { FullTransaction } from "@/util/types";
 
 interface Props {
   transaction: FullTransaction;

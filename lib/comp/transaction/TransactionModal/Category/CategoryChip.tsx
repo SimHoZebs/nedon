@@ -1,11 +1,12 @@
-import React from "react";
-import { getCategoryStyle } from "@/util/category";
-import { MergedCategory, isCategoryInSplitInDB } from "@/util/types";
 import { Icon } from "@iconify-icon/react";
+import { Category } from "@prisma/client";
+import React from "react";
+
+import { getCategoryStyle } from "@/util/category";
+import parseMoney from "@/util/parseMoney";
 import { useTransactionStore } from "@/util/transactionStore";
 import { trpc } from "@/util/trpc";
-import { Category } from "@prisma/client";
-import parseMoney from "@/util/parseMoney";
+import { MergedCategory, isCategoryInSplitInDB } from "@/util/types";
 
 type Props = {
   mergedCategory: MergedCategory;

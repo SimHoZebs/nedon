@@ -1,9 +1,11 @@
 import { Category } from "@prisma/client";
 import { z } from "zod";
+
 import db from "@/util/db";
+import { CategoryClientSideModel } from "@/util/types";
+
 import { CategoryModel } from "../../prisma/zod";
 import { procedure, router } from "../trpc";
-import { CategoryClientSideModel } from "@/util/types";
 
 const categoryRouter = router({
   create: procedure

@@ -1,12 +1,15 @@
-import React, { useEffect } from "react";
-import Modal from "@/comp/Modal";
-import ActionBtn from "@/comp/Button/ActionBtn";
-import Category from "./Category/Category";
-import H1 from "@/comp/H1";
-import SplitList from "./SplitList/SplitList";
-import { trpc } from "@/util/trpc";
-import { useTransactionStore } from "@/util/transactionStore";
 import { Icon } from "@iconify-icon/react";
+import React, { useEffect } from "react";
+
+import ActionBtn from "@/comp/Button/ActionBtn";
+import H1 from "@/comp/H1";
+import Modal from "@/comp/Modal";
+
+import { useTransactionStore } from "@/util/transactionStore";
+import { trpc } from "@/util/trpc";
+
+import Category from "./Category/Category";
+import SplitList from "./SplitList/SplitList";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -15,10 +18,10 @@ interface Props {
 const TransactionModal = (props: Props) => {
   const transaction = useTransactionStore((state) => state.transactionOnModal);
   const setUnsavedSplitArray = useTransactionStore(
-    (state) => state.setUnsavedSplitArray
+    (state) => state.setUnsavedSplitArray,
   );
   const resetTransaction = useTransactionStore(
-    (state) => state.resetTransaction
+    (state) => state.resetTransaction,
   );
 
   const deleteTransaction = trpc.transaction.delete.useMutation();
@@ -28,7 +31,7 @@ const TransactionModal = (props: Props) => {
     console.debug("transactionModal dependencies updated");
     if (!transaction) {
       console.error(
-        "Unable to set unsavedSplitArray. transaction is undefined"
+        "Unable to set unsavedSplitArray. transaction is undefined",
       );
       return;
     }
@@ -77,7 +80,7 @@ const TransactionModal = (props: Props) => {
               onClick={async () => {
                 if (!transaction.id) {
                   console.error(
-                    "Can't delete transaction. transaction not in db."
+                    "Can't delete transaction. transaction not in db.",
                   );
                   return;
                 }

@@ -1,11 +1,12 @@
-import { GroupClientSide, UserClientSide } from "./types";
+import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { useState, useEffect } from "react";
+
+import { GroupClientSide, UserClientSide } from "./types";
 
 export const useLocalStoreDelay = <T, F>(
   store: (callback: (state: T) => unknown) => unknown,
-  callback: (state: T) => F
+  callback: (state: T) => F,
 ) => {
   const result = store(callback) as F;
   const [data, setData] = useState<F>();
@@ -44,9 +45,9 @@ export const useLocalStore = create<LocalStore>()(
           })),
       }),
 
-      { name: "local-storage" }
-    )
-  )
+      { name: "local-storage" },
+    ),
+  ),
 );
 
 interface Store {
@@ -77,5 +78,5 @@ export const useStore = create<Store>()(
     verticalCategoryPicker: false,
     setVerticalCategoryPicker: (verticalCategoryPicker: boolean) =>
       set({ verticalCategoryPicker }),
-  }))
+  })),
 );
