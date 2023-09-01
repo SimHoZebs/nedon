@@ -1,9 +1,8 @@
 import { Icon } from "@iconify-icon/react";
 import React, { useRef, useState } from "react";
 
-import ActionBtn from "@/comp/Button/ActionBtn";
-import Button from "@/comp/Button/Button";
-import H3 from "@/comp/H3";
+import { ActionBtn, Button } from "@/comp/Button";
+import { H3 } from "@/comp/Heading";
 
 import { emptyCategory, mergeCategoryArray } from "@/util/category";
 import parseMoney from "@/util/parseMoney";

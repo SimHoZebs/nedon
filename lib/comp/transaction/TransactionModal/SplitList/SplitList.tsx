@@ -1,10 +1,8 @@
 import { Icon } from "@iconify-icon/react";
 import React, { useState } from "react";
 
-import ActionBtn from "@/comp/Button/ActionBtn";
-import Button from "@/comp/Button/Button";
-import SecondaryBtn from "@/comp/Button/SecondaryBtn";
-import H3 from "@/comp/H3";
+import { ActionBtn, Button, SecondaryBtn } from "@/comp/Button";
+import { H3 } from "@/comp/Heading";
 
 import parseMoney from "@/util/parseMoney";
 import { calcSplitAmount } from "@/util/split";

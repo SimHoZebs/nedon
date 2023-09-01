@@ -4,9 +4,7 @@ import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 
 import { useStore } from "../util/store";
-import ActionBtn from "./Button/ActionBtn";
-import Button from "./Button/Button";
-import NavBtn from "./Button/NavBtn";
+import { ActionBtn, Button, NavBtn } from "./Button";
 
 const customFont = Open_Sans({
   weight: "variable",

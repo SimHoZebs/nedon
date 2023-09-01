@@ -9,7 +9,7 @@ import { useStore } from "@/util/store";
 import { useTransactionStore } from "@/util/transactionStore";
 import { SplitClientSide } from "@/util/types";
 
-import UserSplitCategory from "../UserSplitCategory";
+import UserSplitCategory from "./UserSplitCategory";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   index: number;

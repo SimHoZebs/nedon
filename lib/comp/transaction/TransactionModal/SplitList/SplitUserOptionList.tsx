@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/react";
 import React from "react";
 
-import Button from "@/comp/Button/Button";
+import { Button } from "@/comp/Button";
 
 import { mergeCategoryArray } from "@/util/category";
 import parseMoney from "@/util/parseMoney";

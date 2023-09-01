@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 
-import Button from "../Button/ActionBtn";
+import { ActionBtn } from "../Button";
 import Modal from "../Modal";
 
 interface Props {
@@ -54,7 +54,7 @@ const SettleModal = (props: Props) => {
         />
       </div>
 
-      <Button
+      <ActionBtn
         disabled={!settleAmount}
         onClick={async () => {
           //Why do I even need this check?
@@ -78,8 +78,8 @@ const SettleModal = (props: Props) => {
         }}
       >
         Settle
-      </Button>
-      <Button>Cancel</Button>
+      </ActionBtn>
+      <ActionBtn>Cancel</ActionBtn>
     </Modal>
   ) : null;
 };

@@ -1,10 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
-import ActionBtn from "@/comp/Button/ActionBtn";
-import Button from "@/comp/Button/Button";
-import H2 from "@/comp/H2";
-import H4 from "@/comp/H4";
+import { ActionBtn, Button } from "@/comp/Button";
+import { H2, H4 } from "@/comp/Heading";
 import SettleModal from "@/comp/analysis/SettleModal";
 
 import parseMoney from "@/util/parseMoney";

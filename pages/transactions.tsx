@@ -2,10 +2,8 @@ import { NextPage } from "next";
 import React, { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
-import Button from "@/comp/Button/Button";
-import H1 from "@/comp/H1";
-import H2 from "@/comp/H2";
-import H3 from "@/comp/H3";
+import { Button } from "@/comp/Button";
+import { H1, H2, H3 } from "@/comp/Heading";
 import TransactionCard from "@/comp/transaction/TransactionCard";
 import TransactionModal from "@/comp/transaction/TransactionModal/TransactionModal";
 

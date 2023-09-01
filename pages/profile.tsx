@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/react";
 import { useRouter } from "next/router";
 import React from "react";
 
-import Button from "@/comp/Button/ActionBtn";
+import { ActionBtn } from "@/comp/Button";
 
 import { useStore } from "@/util/store";
 
@@ -19,7 +19,7 @@ const Page = () => {
 
   return (
     <section className="flex h-full w-full flex-col items-start gap-y-3">
-      <Button
+      <ActionBtn
         variant="negative"
         className="gap-x-2"
         onClick={() => {
@@ -34,7 +34,7 @@ const Page = () => {
           width={16}
         />
         logout
-      </Button>
+      </ActionBtn>
       <div className="flex gap-x-2">
         <input
           type="checkbox"

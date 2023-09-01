@@ -1,8 +1,8 @@
 import { Icon } from "@iconify-icon/react";
 import React, { useEffect } from "react";
 
-import ActionBtn from "@/comp/Button/ActionBtn";
-import H1 from "@/comp/H1";
+import { ActionBtn } from "@/comp/Button";
+import { H1 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
 
 import { useTransactionStore } from "@/util/transactionStore";

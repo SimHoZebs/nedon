@@ -3,8 +3,8 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
-import Button from "@/comp/Button/Button";
-import H1 from "@/comp/H1";
+import { Button } from "@/comp/Button";
+import { H1 } from "@/comp/Heading";
 
 import { useLocalStore, useLocalStoreDelay, useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";

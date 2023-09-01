@@ -5,7 +5,7 @@ import { usePlaidLink } from "react-plaid-link";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 
-import Button from "./ActionBtn";
+import { ActionBtn } from "./Button";
 
 const LinkBtn = () => {
   const appUser = useStore((state) => state.appUser);
@@ -68,9 +68,9 @@ const LinkBtn = () => {
   }, [ready, open, isOauth]);
 
   return (
-    <Button onClick={() => open()}>
+    <ActionBtn onClick={() => open()}>
       {linkToken.data ? "Link a bank account" : "Waiting for link token..."}
-    </Button>
+    </ActionBtn>
   );
 };
 
