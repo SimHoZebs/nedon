@@ -2,6 +2,7 @@ import { NextPage } from "next";
 import { AccountBase, AuthGetResponse } from "plaid";
 import React, { useRef, useState } from "react";
 
+import { H1, H2, H3 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
 import AccountCard from "@/comp/home/AccountCard";
 
@@ -24,9 +25,12 @@ const User: NextPage = () => {
 
   return (
     <section className="flex h-full w-full flex-col gap-y-3">
-      {showModal && (
+      {showModal && clickedAccount && (
         <Modal setShowModal={setShowModal}>
-          <pre>{JSON.stringify(clickedAccount, null, 2)}</pre>
+          <H1>{clickedAccount.name}</H1>
+          <p className="text-zinc-400">{clickedAccount.official_name}</p>
+          <H3>Current: ${clickedAccount.balances.available}</H3>
+          <H3>Available: ${clickedAccount.balances.current}</H3>
         </Modal>
       )}
 
