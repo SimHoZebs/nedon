@@ -1,11 +1,13 @@
 import { Icon } from "@iconify-icon/react";
 import Image from "next/image";
+import { AuthGetResponse } from "plaid";
 import React, { useEffect } from "react";
 
 import { ActionBtn } from "@/comp/Button";
 import { H1 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
 
+import { useStore } from "@/util/store";
 import { useTransactionStore } from "@/util/transactionStore";
 import { trpc } from "@/util/trpc";
 
@@ -18,6 +20,7 @@ interface Props {
 
 const TransactionModal = (props: Props) => {
   const transaction = useTransactionStore((state) => state.transactionOnModal);
+  const appUser = useStore((state) => state.appUser);
   const setUnsavedSplitArray = useTransactionStore(
     (state) => state.setUnsavedSplitArray,
   );
@@ -26,6 +29,10 @@ const TransactionModal = (props: Props) => {
   );
 
   const deleteTransaction = trpc.transaction.delete.useMutation();
+  const auth = trpc.auth.useQuery(
+    { id: appUser ? appUser.id : "" },
+    { staleTime: 3600000, enabled: !!appUser },
+  );
   const queryClient = trpc.useContext();
 
   useEffect(() => {
@@ -51,7 +58,7 @@ const TransactionModal = (props: Props) => {
               {transaction.counterparties &&
                 transaction.counterparties[0]?.logo_url && (
                   <Image
-                    // className="rounded-full"
+                    className="rounded-lg"
                     src={transaction.counterparties[0].logo_url}
                     alt=""
                     width={56}
@@ -61,7 +68,18 @@ const TransactionModal = (props: Props) => {
 
               <H1>{transaction.name}</H1>
             </div>
-            <p>{transaction.account_id}</p>
+
+            <p
+              className={`h-6 w-40 ${
+                auth.isLoading && "animate-pulse bg-zinc-700"
+              } `}
+            >
+              {auth.isLoading
+                ? ""
+                : (auth.data as unknown as AuthGetResponse).accounts.find(
+                    (account) => account.account_id === transaction.account_id,
+                  )?.name || ""}
+            </p>
 
             <SplitList>
               <H1>${amount * -1}</H1>
