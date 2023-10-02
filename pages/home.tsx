@@ -1,3 +1,4 @@
+import { Icon } from "@iconify-icon/react";
 import { NextPage } from "next";
 import { AccountBase, AuthGetResponse } from "plaid";
 import React, { useRef, useState } from "react";
@@ -34,27 +35,44 @@ const User: NextPage = () => {
       <H1>All Accounts</H1>
       {showModal && clickedAccount && (
         <Modal setShowModal={setShowModal}>
-          <div className="flex w-full justify-between h-full">
-            <div>
-              <H1>{clickedAccount.name}</H1>
-              <p className="text-zinc-400">{clickedAccount.official_name}</p>
-              <H3>Current: ${clickedAccount.balances.available}</H3>
-              <H3>Available: ${clickedAccount.balances.current}</H3>
-            </div>
+          <div className="w-full flex flex-col justify-between h-full items-end">
+            <button className="mb-1 flex" onClick={() => setShowModal(false)}>
+              <Icon
+                icon="iconamoon:close-fill"
+                width={24}
+                height={24}
+                className="rounded-full text-zinc-400 outline outline-1 hover:text-pink-400"
+              />
+            </button>
 
-            <div className="flex flex-col gap-y-3 overflow-y-scroll w-96 p-1 h-full no-scrollbar">
-              {transactionArray.data
-                ?.filter(
-                  (transaction) =>
-                    transaction.account_id === clickedAccount.account_id,
-                )
-                .map((transaction, i) => (
-                  <TransactionCard
-                    key={i}
-                    transaction={transaction}
-                    setShowModal={() => {}}
-                  />
-                ))}
+            <div className="flex flex-col w-full justify-between h-full lg:flex-row items-end lg:items-start overflow-hidden">
+              <div className="flex w-full flex-row lg:flex-col justify-between lg:justify-normal">
+                <div className="">
+                  <H1>{clickedAccount.name}</H1>
+                  <p className="text-zinc-400 ">
+                    {clickedAccount.official_name}
+                  </p>
+                </div>
+                <div className="flex flex-col items-end lg:items-start">
+                  <H3>Current: ${clickedAccount.balances.available}</H3>
+                  <H3>Available: ${clickedAccount.balances.current}</H3>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-y-3 overflow-y-scroll w-full lg:max-w-lg p-1 h-full no-scrollbar">
+                {transactionArray.data
+                  ?.filter(
+                    (transaction) =>
+                      transaction.account_id === clickedAccount.account_id,
+                  )
+                  .map((transaction, i) => (
+                    <TransactionCard
+                      key={i}
+                      transaction={transaction}
+                      setShowModal={() => {}}
+                    />
+                  ))}
+              </div>
             </div>
           </div>
         </Modal>
