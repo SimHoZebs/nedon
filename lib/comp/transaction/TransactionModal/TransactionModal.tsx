@@ -1,4 +1,5 @@
 import { Icon } from "@iconify-icon/react";
+import Image from "next/image";
 import React, { useEffect } from "react";
 
 import { ActionBtn } from "@/comp/Button";
@@ -46,7 +47,21 @@ const TransactionModal = (props: Props) => {
       <Modal setShowModal={props.setShowModal}>
         <div className="flex justify-between gap-y-2">
           <div className="flex flex-col items-start gap-y-2">
-            <H1>{transaction.name}</H1>
+            <div className="flex gap-3 items-center">
+              {transaction.counterparties &&
+                transaction.counterparties[0]?.logo_url && (
+                  <Image
+                    // className="rounded-full"
+                    src={transaction.counterparties[0].logo_url}
+                    alt=""
+                    width={56}
+                    height={56}
+                  />
+                )}
+
+              <H1>{transaction.name}</H1>
+            </div>
+            <p>{transaction.account_id}</p>
 
             <SplitList>
               <H1>${amount * -1}</H1>

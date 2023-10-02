@@ -1,4 +1,5 @@
 import { Icon } from "@iconify-icon/react";
+import Image from "next/image";
 import React from "react";
 
 import { getCategoryStyle } from "@/util/category";
@@ -33,7 +34,7 @@ const TransactionCard = (props: Props) => {
       }}
     >
       <div className={`flex w-full justify-between gap-x-4 truncate`}>
-        <div className="flex-start flex h-full flex-col justify-center truncate">
+        <div className="flex-start flex h-full gap-x-2 justify-center truncate">
           <p className="truncate text-base font-semibold sm:text-lg">
             {props.transaction.name}
           </p>
@@ -73,10 +74,21 @@ const TransactionCard = (props: Props) => {
                   getCategoryStyle(category.nameArray).bgColor
                 }`}
               >
-                <Icon
-                  icon={getCategoryStyle(category.nameArray).icon}
-                  width={16}
-                />
+                {props.transaction.counterparties &&
+                props.transaction.counterparties[0]?.logo_url ? (
+                  <Image
+                    className="rounded-full"
+                    src={props.transaction.counterparties[0].logo_url}
+                    alt=""
+                    width={16}
+                    height={16}
+                  />
+                ) : (
+                  <Icon
+                    icon={getCategoryStyle(category.nameArray).icon}
+                    width={16}
+                  />
+                )}
                 <p className="text-xs">{category.nameArray.at(-1)}</p>
               </div>
             ),

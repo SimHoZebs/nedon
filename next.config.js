@@ -2,6 +2,16 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "plaid-merchant-logos.plaid.com",
+        port: "",
+        pathname: "/**"
+      }
+    ]
+  }
 }
 
 module.exports = nextConfig
