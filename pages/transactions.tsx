@@ -144,9 +144,9 @@ const Page: NextPage = () => {
         <option value="all">all</option>
       </select>
 
-      <div className="flex w-full max-w-md flex-col items-center gap-y-2">
+      <ol className="flex w-full max-w-md flex-col items-center gap-y-2">
         {transactionArray.isLoading ? (
-          <div className="flex w-full h-fit items-center flex-col ">
+          <li className="flex w-full h-fit items-center flex-col ">
             <H1>{date.getFullYear()}</H1>
             <div className="flex w-full flex-col gap-y-3">
               <H2>
@@ -162,35 +162,41 @@ const Page: NextPage = () => {
                   ></div>
                 ))}
             </div>
-          </div>
+          </li>
         ) : (
           sortedTransactionArray.map((year, i) => (
-            <div className="flex w-full flex-col items-center " key={i}>
+            <li className="flex w-full flex-col items-center" key={i}>
               <H1>{year[0][0][0]?.date.slice(0, 4)}</H1>
-              {year.map((month, j) => (
-                <div key={j} className="w-full flex-col gap-y-2">
-                  <H2>{month[0][0]?.date.slice(5, 7)}</H2>
-                  {month.map((day, k) => (
-                    <div className="flex w-full flex-col gap-y-3" key={k}>
-                      <H3>{day[0]?.date.slice(8)}</H3>
-                      {day.map(
-                        (transaction, l) =>
-                          transaction && (
-                            <TransactionCard
-                              setShowModal={setShowModal}
-                              transaction={transaction}
-                              key={l}
-                            />
-                          ),
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
+              <ol className="flex flex-col gap-y-1">
+                {year.map((month, j) => (
+                  <li key={j} className="w-full flex-col gap-y-1">
+                    <H2>{month[0][0]?.date.slice(5, 7)}</H2>
+                    <ol className="flex flex-col gap-y-1">
+                      {month.map((day, k) => (
+                        <li className="flex w-full flex-col gap-y-1" key={k}>
+                          <H3>{day[0]?.date.slice(8)}</H3>
+                          <ol className="flex flex-col gap-y-3">
+                            {day.map(
+                              (transaction, l) =>
+                                transaction && (
+                                  <TransactionCard
+                                    setShowModal={setShowModal}
+                                    transaction={transaction}
+                                    key={l}
+                                  />
+                                ),
+                            )}
+                          </ol>
+                        </li>
+                      ))}
+                    </ol>
+                  </li>
+                ))}
+              </ol>
+            </li>
           ))
         )}
-      </div>
+      </ol>
     </section>
   );
 };

@@ -1,14 +1,15 @@
 import { Icon } from "@iconify-icon/react";
 import { NextPage } from "next";
 import { AccountBase, AuthGetResponse } from "plaid";
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 
-import { H1, H3 } from "@/comp/Heading";
+import { H1, H2, H3, H4 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
 import AccountCard from "@/comp/home/AccountCard";
 import TransactionCard from "@/comp/transaction/TransactionCard";
 
 import { useStore } from "@/util/store";
+import { organizeTransactionByTime } from "@/util/transaction";
 import { trpc } from "@/util/trpc";
 
 const User: NextPage = () => {
@@ -29,6 +30,14 @@ const User: NextPage = () => {
   const loading = useRef(
     <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700"></div>,
   );
+
+  const sortedTransactionArray = useMemo(() => {
+    if (!transactionArray.data) return [[[[]]]];
+    const filteredTxArray = transactionArray.data.filter(
+      (tx) => tx.account_id === clickedAccount?.account_id,
+    );
+    return organizeTransactionByTime(filteredTxArray);
+  }, [clickedAccount?.account_id, transactionArray.data]);
 
   return (
     <section className="flex h-full w-full items-center flex-col gap-y-3">
@@ -59,20 +68,42 @@ const User: NextPage = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-y-3 overflow-y-scroll w-full lg:max-w-lg p-1 h-full no-scrollbar">
-                {transactionArray.data
-                  ?.filter(
-                    (transaction) =>
-                      transaction.account_id === clickedAccount.account_id,
-                  )
-                  .map((transaction, i) => (
-                    <TransactionCard
-                      key={i}
-                      transaction={transaction}
-                      setShowModal={() => {}}
-                    />
-                  ))}
-              </div>
+              <ol className="flex flex-col gap-y-3 overflow-y-scroll w-full lg:max-w-lg p-1 h-full no-scrollbar">
+                <H2>Transaction History</H2>
+                {sortedTransactionArray.map((year, i) => (
+                  <li className="flex w-full flex-col" key={i}>
+                    <ol className="flex flex-col gap-y-1">
+                      {year.map((month, j) => (
+                        <li key={j} className="w-full flex-col gap-y-1">
+                          <H3>{month[0][0]?.date.slice(5, 7)}</H3>
+                          <ol className="flex flex-col gap-y-1">
+                            {month.map((day, k) => (
+                              <li
+                                className="flex w-full flex-col gap-y-1"
+                                key={k}
+                              >
+                                <H4>{day[0]?.date.slice(8)}</H4>
+                                <ol className="flex flex-col gap-y-2">
+                                  {day.map(
+                                    (transaction, l) =>
+                                      transaction && (
+                                        <TransactionCard
+                                          setShowModal={setShowModal}
+                                          transaction={transaction}
+                                          key={l}
+                                        />
+                                      ),
+                                  )}
+                                </ol>
+                              </li>
+                            ))}
+                          </ol>
+                        </li>
+                      ))}
+                    </ol>
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
         </Modal>
