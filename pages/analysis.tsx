@@ -42,7 +42,7 @@ const categoryArrayTotal = (
     return total + amount + subCategoryTotal(category, transactionType);
   }, 0);
 
-  return spending;
+  return parseMoney(spending);
 };
 
 const render = (hierarchicalCategoryArray: TreedCategoryWithTransaction[]) =>

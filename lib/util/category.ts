@@ -1,6 +1,7 @@
 import { Category as PlaidCategory } from "plaid";
 
 import categoryStyleArray from "./categoryStyle";
+import parseMoney from "./parseMoney";
 import {
   CategoryClientSide,
   FullTransaction,
@@ -104,7 +105,9 @@ export const fillArrayByCategory = (
   if (slicedNameArray.length === 0) {
     resultArray[index].transactionArray.push(transaction);
     resultArray[index].spending += hierarchicalCategory.spending;
+    resultArray[index].spending = parseMoney(resultArray[index].spending);
     resultArray[index].received += hierarchicalCategory.received;
+    resultArray[index].received = parseMoney(resultArray[index].received);
   } else {
     const transactionCopy = structuredClone(transaction);
     const newCategory = structuredClone(category);
