@@ -71,16 +71,22 @@ const User: NextPage = () => {
               <ol className="flex flex-col gap-y-3 overflow-y-scroll w-full lg:max-w-lg p-1 h-full no-scrollbar">
                 <H2>Transaction History</H2>
                 {sortedTransactionArray.map((year, i) => (
-                  <li className="flex w-full flex-col" key={i}>
+                  <li
+                    className="flex w-full flex-col items-center"
+                    key={Math.random() * (i + 1)}
+                  >
                     <ol className="flex flex-col gap-y-1">
                       {year.map((month, j) => (
-                        <li key={j} className="w-full flex-col gap-y-1">
+                        <li
+                          key={Math.random() * (j + 1)}
+                          className="w-full flex-col gap-y-1"
+                        >
                           <H3>{month[0][0]?.date.slice(5, 7)}</H3>
                           <ol className="flex flex-col gap-y-1">
                             {month.map((day, k) => (
                               <li
                                 className="flex w-full flex-col gap-y-1"
-                                key={k}
+                                key={Math.random() * (k + 1)}
                               >
                                 <H4>{day[0]?.date.slice(8)}</H4>
                                 <ol className="flex flex-col gap-y-2">
@@ -90,7 +96,7 @@ const User: NextPage = () => {
                                         <TransactionCard
                                           setShowModal={setShowModal}
                                           transaction={transaction}
-                                          key={l}
+                                          key={transaction.transaction_id}
                                         />
                                       ),
                                   )}

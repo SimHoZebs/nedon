@@ -157,7 +157,7 @@ const Page: NextPage = () => {
                 .fill(0)
                 .map((i) => (
                   <div
-                    key={i}
+                    key={Math.random() * (i + 1)}
                     className="h-20 w-full bg-zinc-800 animate-pulse rounded-lg"
                   ></div>
                 ))}
@@ -165,15 +165,24 @@ const Page: NextPage = () => {
           </li>
         ) : (
           sortedTransactionArray.map((year, i) => (
-            <li className="flex w-full flex-col items-center" key={i}>
+            <li
+              className="flex w-full flex-col items-center"
+              key={Math.random() * (i + 1)}
+            >
               <H1>{year[0][0][0]?.date.slice(0, 4)}</H1>
               <ol className="flex flex-col gap-y-1">
                 {year.map((month, j) => (
-                  <li key={j} className="w-full flex-col gap-y-1">
+                  <li
+                    key={Math.random() * (j + 1)}
+                    className="w-full flex-col gap-y-1"
+                  >
                     <H2>{month[0][0]?.date.slice(5, 7)}</H2>
                     <ol className="flex flex-col gap-y-1">
                       {month.map((day, k) => (
-                        <li className="flex w-full flex-col gap-y-1" key={k}>
+                        <li
+                          className="flex w-full flex-col gap-y-1"
+                          key={Math.random() * (k + 1)}
+                        >
                           <H3>{day[0]?.date.slice(8)}</H3>
                           <ol className="flex flex-col gap-y-3">
                             {day.map(
@@ -182,7 +191,7 @@ const Page: NextPage = () => {
                                   <TransactionCard
                                     setShowModal={setShowModal}
                                     transaction={transaction}
-                                    key={l}
+                                    key={transaction.transaction_id}
                                   />
                                 ),
                             )}
