@@ -238,7 +238,7 @@ const CategoryPicker = forwardRef(
     return categoryOptionArray.data ? (
       <div
         ref={ref}
-        className="absolute left-0 flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900 sm:w-96"
+        className="absolute flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900 sm:w-96"
         onClick={(e) => e.stopPropagation()}
         style={{ top: props.position.y, left: props.position.x }}
       >

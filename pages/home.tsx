@@ -68,11 +68,11 @@ const User: NextPage = () => {
                 </div>
               </div>
 
-              <ol className="flex flex-col gap-y-3 overflow-y-scroll w-full lg:max-w-lg p-1 h-full no-scrollbar">
+              <ol className="flex flex-col gap-y-3 w-full lg:max-w-lg p-1 h-full">
                 <H2>Transaction History</H2>
                 {sortedTransactionArray.map((year, i) => (
                   <li
-                    className="flex w-full flex-col items-center"
+                    className="no-scrollbar flex w-full flex-col items-center overflow-y-scroll"
                     key={Math.random() * (i + 1)}
                   >
                     <ol className="flex flex-col gap-y-1">

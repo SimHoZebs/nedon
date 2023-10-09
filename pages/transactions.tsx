@@ -144,7 +144,7 @@ const Page: NextPage = () => {
         <option value="all">all</option>
       </select>
 
-      <ol className="flex w-full max-w-md flex-col items-center gap-y-2">
+      <ol className="flex w-full max-w-sm lg:max-w-md flex-col items-center gap-y-2">
         {transactionArray.isLoading ? (
           <li className="flex w-full h-fit items-center flex-col ">
             <H1>{date.getFullYear()}</H1>
@@ -170,7 +170,7 @@ const Page: NextPage = () => {
               key={Math.random() * (i + 1)}
             >
               <H1>{year[0][0][0]?.date.slice(0, 4)}</H1>
-              <ol className="flex flex-col gap-y-1">
+              <ol className="w-full flex flex-col gap-y-1">
                 {year.map((month, j) => (
                   <li
                     key={Math.random() * (j + 1)}

@@ -38,7 +38,7 @@ const Category = () => {
   const [pickerPosition, setPickerPosition] = useState<{
     x: number;
     y: number;
-  }>({ x: -400, y: 0 });
+  }>({ x: -600, y: 0 });
 
   let updatedSplitAmount = parseMoney(
     unsavedSplitArray.reduce(
@@ -213,7 +213,7 @@ const Category = () => {
             closePicker={() => {
               setEditingMergedCategoryIndex(undefined);
               setPickerPosition({
-                x: -400,
+                x: -40,
                 y: 0,
               });
             }}

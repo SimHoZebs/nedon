@@ -50,7 +50,7 @@ export const NavBtn = (props: NavBtnProps) => {
     <Button
       className={`group justify-center gap-x-2 rounded-none hover:text-indigo-200 sm:w-full sm:justify-start ${
         props.router.pathname === props.route
-          ? "border-l-2 border-indigo-200 text-indigo-200"
+          ? "border-t-2 md:border-t-0 md:border-l-2 border-indigo-200 text-indigo-200"
           : "text-zinc-300"
       }`}
       onClick={() => props.router.push(props.route)}
