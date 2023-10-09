@@ -105,7 +105,7 @@ const SplitList = (props: Props) => {
 
   return (
     <div className="flex w-full flex-col gap-y-3">
-      <div className="flex items-center gap-x-2">
+      <div className="flex items-center gap-x-3">
         {props.children}
         {unsavedSplitArray.length === 1 && !isManaging && (
           <SecondaryBtn onClick={() => setIsManaging(true)}>
