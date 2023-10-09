@@ -1,10 +1,12 @@
+import { Icon } from "@iconify-icon/react";
 import React, { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
 import { ActionBtn, Button } from "@/comp/Button";
-import { H2, H4 } from "@/comp/Heading";
+import { H1, H2, H3, H4 } from "@/comp/Heading";
 import SettleModal from "@/comp/analysis/SettleModal";
 
+import { getCategoryStyle } from "@/util/category";
 import parseMoney from "@/util/parseMoney";
 import { useStore } from "@/util/store";
 import {
@@ -47,25 +49,49 @@ const categoryArrayTotal = (
 
 const render = (hierarchicalCategoryArray: TreedCategoryWithTransaction[]) =>
   hierarchicalCategoryArray.map((category, i) => (
-    <div key={i} className="border">
-      <H2>{category.name}</H2>
+    <div key={i} className="p-3 flex flex-col">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center justify-center gap-x-2">
+          <Icon
+            icon={getCategoryStyle([category.name]).icon}
+            className={
+              getCategoryStyle([category.name]).bgColor +
+              " text-zinc-950 rounded-lg"
+            }
+            height={32}
+          />
+          <div>
+            <H3>{category.name}</H3>
 
-      <H4>Spending</H4>
-      <p>This category only: {category.spending}</p>
-      <p>
-        This and its subcatgories:{" "}
-        {category.spending + subCategoryTotal(category, "spending")}
-      </p>
-      <H4>Received</H4>
-      <p>This category only: {category.received}</p>
-      <p>
-        This and its subcatgories:{" "}
-        {category.received + subCategoryTotal(category, "received")}
-      </p>
-      <div className="flex flex-col gap-y-3 p-3">
-        {category.subCategoryArray.length > 0 &&
-          render(category.subCategoryArray)}
+            <p className="text-zinc-400 text-sm">
+              {parseMoney(
+                ((category.spending + subCategoryTotal(category, "spending")) /
+                  1000) *
+                  100,
+              ).toString() + "%"}
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <H4>Spent</H4>
+          <p>${category.spending + subCategoryTotal(category, "spending")}</p>
+        </div>
+
+        <div>
+          <H4>Received</H4>
+          <p>
+            ${-1 * (category.received + subCategoryTotal(category, "received"))}
+          </p>
+        </div>
       </div>
+
+      {category.subCategoryArray.length > 0 && (
+        <details className="flex flex-col gap-y-2">
+          <summary>Sub categories</summary>
+          {render(category.subCategoryArray)}
+        </details>
+      )}
     </div>
   ));
 
@@ -202,111 +228,135 @@ const Page = () => {
     associatedTransactionArray.status,
   ]);
 
+  const spendingTotal = categoryArrayTotal(
+    organizeTransactionByCategory(scopedTransactionArray),
+    "spending",
+  );
+
+  const organizedTxByCategoryArray = useMemo(
+    () => organizeTransactionByCategory(scopedTransactionArray),
+    [scopedTransactionArray],
+  );
+
   return appUser ? (
-    <section className="flex flex-col gap-y-4">
-      <div>
-        {showModal && (
-          <SettleModal oweUser={oweUser} setShowModal={setShowModal} />
-        )}
+    <section className="flex flex-col gap-y-4 items-center">
+      <div className="w-full max-w-lg">
+        <div className="w-full">
+          {showModal && (
+            <SettleModal oweUser={oweUser} setShowModal={setShowModal} />
+          )}
+
+          <div>
+            {calcOweGroup &&
+              Object.keys(calcOweGroup).map((userId, index) => (
+                <div key={index} className="flex flex-row gap-x-2">
+                  <div>{userId.slice(0, 8)}</div>
+                  <div>
+                    {calcOweGroup[userId] < 0 ? "You owe: " : "They owe: "}$
+                    {Math.abs(parseMoney(calcOweGroup[userId]))}
+                  </div>
+                  <ActionBtn
+                    onClick={() => {
+                      setShowModal(true);
+                      setOweUser({
+                        id: userId,
+                        amount: parseMoney(calcOweGroup[userId] * 100),
+                      });
+                    }}
+                  >
+                    Manually settle
+                  </ActionBtn>
+                </div>
+              ))}
+          </div>
+        </div>
 
         <div>
-          {calcOweGroup &&
-            Object.keys(calcOweGroup).map((userId, index) => (
-              <div key={index} className="flex flex-row gap-x-2">
-                <div>{userId.slice(0, 8)}</div>
-                <div>
-                  {calcOweGroup[userId] < 0 ? "You owe: " : "They owe: "}$
-                  {Math.abs(parseMoney(calcOweGroup[userId]))}
-                </div>
-                <ActionBtn
-                  onClick={() => {
-                    setShowModal(true);
-                    setOweUser({
-                      id: userId,
-                      amount: parseMoney(calcOweGroup[userId] * 100),
-                    });
+          <p>
+            Total spending:{" "}
+            {categoryArrayTotal(
+              organizeTransactionByCategory(scopedTransactionArray),
+              "spending",
+            )}
+          </p>
+          <p>
+            Total received:{" "}
+            {categoryArrayTotal(
+              organizeTransactionByCategory(scopedTransactionArray),
+              "received",
+            ) * -1}
+          </p>
+
+          {date && (
+            <div className="flex">
+              <Button
+                onClick={() => {
+                  handleRangeChange(-1);
+                }}
+              >
+                back
+              </Button>
+              <p>
+                {rangeFormat === "year" && date.getFullYear()}
+                {rangeFormat === "month" && date.getMonth() + 1}
+                {rangeFormat === "date" && date.getDate()}
+              </p>
+              <Button
+                onClick={() => {
+                  handleRangeChange(1);
+                }}
+              >
+                next
+              </Button>
+            </div>
+          )}
+
+          <select
+            title="scope"
+            className="bg-zinc-800"
+            name="scope"
+            id=""
+            value={rangeFormat}
+            onChange={(e) => {
+              const test = z.union([
+                z.literal("date"),
+                z.literal("month"),
+                z.literal("year"),
+                z.literal("all"),
+              ]);
+              const result = test.parse(e.target.value);
+              setRangeFormat(result);
+            }}
+          >
+            <option value="date">date</option>
+            <option value="month">month</option>
+            <option value="year">year</option>
+            <option value="all">all</option>
+          </select>
+
+          <div>
+            <div className="gap-x-1 flex h-9 w-full bg-zinc-900 rounded-lg overflow-hidden">
+              {organizedTxByCategoryArray.map((cat, i) => (
+                <div
+                  key={i}
+                  className={"h-full " + getCategoryStyle([cat.name]).bgColor}
+                  style={{
+                    width:
+                      (
+                        ((cat.spending + subCategoryTotal(cat, "spending")) /
+                          spendingTotal) *
+                        100
+                      ).toString() + "%",
                   }}
-                >
-                  Manually settle
-                </ActionBtn>
-              </div>
-            ))}
-        </div>
-      </div>
-
-      <div>
-        <p>
-          Total spending:{" "}
-          {categoryArrayTotal(
-            organizeTransactionByCategory(scopedTransactionArray),
-            "spending",
-          )}
-        </p>
-        <p>
-          Total received:{" "}
-          {categoryArrayTotal(
-            organizeTransactionByCategory(scopedTransactionArray),
-            "received",
-          ) * -1}
-        </p>
-
-        {/*future visualization bar*/}
-        <div className="h-14 w-full rounded-none border border-zinc-500">
-          {organizeTransactionByCategory(scopedTransactionArray).map(
-            (category, i) => (
-              <div key={i} style={{ width: `%` }}></div>
-            ),
-          )}
-        </div>
-
-        {date && (
-          <div className="flex">
-            <Button
-              onClick={() => {
-                handleRangeChange(-1);
-              }}
-            >
-              back
-            </Button>
-            <p>
-              {rangeFormat === "year" && date.getFullYear()}
-              {rangeFormat === "month" && date.getMonth() + 1}
-              {rangeFormat === "date" && date.getDate()}
-            </p>
-            <Button
-              onClick={() => {
-                handleRangeChange(1);
-              }}
-            >
-              next
-            </Button>
+                ></div>
+              ))}
+            </div>
           </div>
-        )}
 
-        <select
-          title="scope"
-          className="bg-zinc-800"
-          name="scope"
-          id=""
-          value={rangeFormat}
-          onChange={(e) => {
-            const test = z.union([
-              z.literal("date"),
-              z.literal("month"),
-              z.literal("year"),
-              z.literal("all"),
-            ]);
-            const result = test.parse(e.target.value);
-            setRangeFormat(result);
-          }}
-        >
-          <option value="date">date</option>
-          <option value="month">month</option>
-          <option value="year">year</option>
-          <option value="all">all</option>
-        </select>
-
-        {render(organizeTransactionByCategory(scopedTransactionArray))}
+          <div className="flex flex-col gap-y-2">
+            {render(organizedTxByCategoryArray)}
+          </div>
+        </div>
       </div>
     </section>
   ) : null;
