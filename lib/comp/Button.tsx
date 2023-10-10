@@ -48,9 +48,9 @@ interface NavBtnProps extends React.HtmlHTMLAttributes<HTMLButtonElement> {
 export const NavBtn = (props: NavBtnProps) => {
   return (
     <Button
-      className={`group justify-center gap-x-2 rounded-none hover:text-indigo-200 sm:w-full sm:justify-start ${
+      className={`group justify-center gap-x-2 hover:text-indigo-200 sm:w-full sm:justify-start rounded-lg hover:bg-indigo-200 hover:bg-opacity-5 ${
         props.router.pathname === props.route
-          ? "border-t-2 md:border-t-0 md:border-l-2 border-indigo-200 text-indigo-200"
+          ? "bg-indigo-200 bg-opacity-20 text-indigo-200"
           : "text-zinc-300"
       }`}
       onClick={() => props.router.push(props.route)}
