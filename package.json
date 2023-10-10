@@ -10,38 +10,37 @@
     "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
   "dependencies": {
-    "@prisma/client": "^5.3.1",
+    "@prisma/client": "^5.4.2",
     "@tailwindcss/container-queries": "^0.1.1",
-    "@tanstack/react-query": "^4.35.7",
-    "@trpc/client": "^10.38.5",
-    "@trpc/next": "^10.38.5",
-    "@trpc/react-query": "^10.38.5",
-    "@trpc/server": "^10.38.5",
-    "next": "13.5.3",
+    "@tanstack/react-query": "^4.36.1",
+    "@trpc/client": "^10.40.0",
+    "@trpc/next": "^10.40.0",
+    "@trpc/react-query": "^10.40.0",
+    "@trpc/server": "^10.40.0",
+    "next": "13.5.4",
     "plaid": "16.0.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-plaid-link": "^3.4.1",
-    "zod": "^3.22.2",
-    "zustand": "^4.4.1"
+    "zod": "^3.22.4",
+    "zustand": "^4.4.3"
   },
   "devDependencies": {
     "@iconify-icon/react": "^1.0.8",
-    "@tanstack/react-query-devtools": "^4.35.7",
+    "@iconify/tailwind": "^0.1.3",
+    "@tanstack/react-query-devtools": "^4.36.1",
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
-    "@types/node": "18.18.1",
+    "@types/node": "18.18.4",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.0",
     "autoprefixer": "^10.4.16",
-    "eslint": "8.50.0",
-    "eslint-config-next": "13.5.3",
+    "eslint": "8.51.0",
+    "eslint-config-next": "13.5.4",
     "postcss": "^8.4.31",
     "prettier": "3.0.3",
-    "prettier-plugin-tailwindcss": "^0.5.4",
-    "prisma": "^5.3.1",
+    "prettier-plugin-tailwindcss": "^0.5.5",
+    "prisma": "^5.4.2",
     "tailwindcss": "^3.3.3",
-    "typescript": "5.2.2",
-    "zod-prisma": "^0.5.4"
-  },
-  "packageManager": "yarn@3.6.1"
+    "typescript": "5.2.2"
+  }
 }
