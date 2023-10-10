@@ -1,3 +1,4 @@
+import { Icon } from "@iconify-icon/react";
 import { NextPage } from "next";
 import React, { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
@@ -26,7 +27,7 @@ const Page: NextPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [rangeFormat, setRangeFormat] = useState<
     "date" | "month" | "year" | "all"
-  >("all");
+  >("month");
   const [date, setDate] = useState<Date>(new Date(Date.now()));
   const [scopedTransactionArray, setScopedTransactionArray] = useState<
     FullTransaction[]
@@ -95,60 +96,55 @@ const Page: NextPage = () => {
   }, [scopedTransactionArray]);
 
   return (
-    <section className="flex w-full flex-col items-center">
+    <section className="flex w-full justify-center">
       {showModal && <TransactionModal setShowModal={setShowModal} />}
 
-      {date && (
-        <div className="flex">
-          <Button
-            onClick={() => {
-              handleRangeChange(-1);
-            }}
-          >
-            back
-          </Button>
-          <p>
-            {rangeFormat === "year" && date.getFullYear()}
-            {rangeFormat === "month" && date.getMonth() + 1}
-            {rangeFormat === "date" && date.getDate()}
-          </p>
-          <Button
-            onClick={() => {
-              handleRangeChange(1);
-            }}
-          >
-            next
-          </Button>
-        </div>
-      )}
+      <div className="flex w-full max-w-sm lg:max-w-md flex-col items-center gap-y-2">
+        {date && (
+          <div className="flex items-center">
+            <Button
+              onClick={() => {
+                handleRangeChange(-1);
+              }}
+            >
+              <Icon icon="tabler:chevron-left" height={32} />
+            </Button>
+            <H1>{date.getMonth() + 1}</H1>
+            <Button
+              onClick={() => {
+                handleRangeChange(1);
+              }}
+            >
+              <Icon icon="tabler:chevron-right" height={32} />
+            </Button>
+          </div>
+        )}
 
-      <select
-        className="bg-zinc-800"
-        name="scope"
-        id=""
-        value={rangeFormat}
-        onChange={(e) => {
-          const test = z.union([
-            z.literal("date"),
-            z.literal("month"),
-            z.literal("year"),
-            z.literal("all"),
-          ]);
-          const result = test.parse(e.target.value);
-          setRangeFormat(result);
-        }}
-      >
-        <option value="date">date</option>
-        <option value="month">month</option>
-        <option value="year">year</option>
-        <option value="all">all</option>
-      </select>
+        <select
+          className="bg-zinc-800"
+          name="scope"
+          id=""
+          value={rangeFormat}
+          onChange={(e) => {
+            const test = z.union([
+              z.literal("date"),
+              z.literal("month"),
+              z.literal("year"),
+              z.literal("all"),
+            ]);
+            const result = test.parse(e.target.value);
+            setRangeFormat(result);
+          }}
+        >
+          <option value="date">date</option>
+          <option value="month">month</option>
+          <option value="year">year</option>
+          <option value="all">all</option>
+        </select>
 
-      <ol className="flex w-full max-w-sm lg:max-w-md flex-col items-center gap-y-2">
-        {transactionArray.isLoading ? (
-          <li className="flex w-full h-fit items-center flex-col ">
-            <H1>{date.getFullYear()}</H1>
-            <div className="flex w-full flex-col gap-y-3">
+        <ol className="flex w-full max-w-sm lg:max-w-md flex-col items-center gap-y-2">
+          {transactionArray.isLoading ? (
+            <li className="flex w-full h-fit flex-col ">
               <H2>
                 {date.getMonth() < 10 ? "0" + date.getMonth() : date.getMonth()}
               </H2>
@@ -161,51 +157,42 @@ const Page: NextPage = () => {
                     className="h-20 w-full bg-zinc-800 animate-pulse rounded-lg"
                   ></div>
                 ))}
-            </div>
-          </li>
-        ) : (
-          sortedTransactionArray.map((year, i) => (
-            <li
-              className="flex w-full flex-col items-center"
-              key={Math.random() * (i + 1)}
-            >
-              <H1>{year[0][0][0]?.date.slice(0, 4)}</H1>
-              <ol className="w-full flex flex-col gap-y-1">
-                {year.map((month, j) => (
-                  <li
-                    key={Math.random() * (j + 1)}
-                    className="w-full flex-col gap-y-1"
-                  >
-                    <H2>{month[0][0]?.date.slice(5, 7)}</H2>
-                    <ol className="flex flex-col gap-y-1">
-                      {month.map((day, k) => (
-                        <li
-                          className="flex w-full flex-col gap-y-1"
-                          key={Math.random() * (k + 1)}
-                        >
-                          <H3>{day[0]?.date.slice(8)}</H3>
-                          <ol className="flex flex-col gap-y-3">
-                            {day.map(
-                              (transaction, l) =>
-                                transaction && (
-                                  <TransactionCard
-                                    setShowModal={setShowModal}
-                                    transaction={transaction}
-                                    key={transaction.transaction_id}
-                                  />
-                                ),
-                            )}
-                          </ol>
-                        </li>
-                      ))}
-                    </ol>
-                  </li>
-                ))}
-              </ol>
             </li>
-          ))
-        )}
-      </ol>
+          ) : (
+            sortedTransactionArray.map((year, i) =>
+              year.map((month, j) => (
+                <li
+                  key={Math.random() * (j + 1)}
+                  className="w-full flex-col gap-y-1"
+                >
+                  <ol className="flex flex-col gap-y-1">
+                    {month.map((day, k) => (
+                      <li
+                        className="flex w-full flex-col gap-y-1"
+                        key={Math.random() * (k + 1)}
+                      >
+                        <H3>{day[0]?.date.slice(8)}</H3>
+                        <ol className="flex flex-col gap-y-3">
+                          {day.map(
+                            (transaction, l) =>
+                              transaction && (
+                                <TransactionCard
+                                  setShowModal={setShowModal}
+                                  transaction={transaction}
+                                  key={transaction.transaction_id}
+                                />
+                              ),
+                          )}
+                        </ol>
+                      </li>
+                    ))}
+                  </ol>
+                </li>
+              )),
+            )
+          )}
+        </ol>
+      </div>
     </section>
   );
 };

@@ -102,10 +102,10 @@ const Category = () => {
           </div>
         ) : (
           <Button
-            className="flex gap-x-2 rounded-lg bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
+            className="flex gap-x-2 rounded-lg bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200 justify-between"
             onClick={() => setIsManaging(true)}
           >
-            <Icon icon={"mdi:edit"} />
+            <Icon icon={"mdi:edit"} height={16} width={16} />
             Manage
           </Button>
         )}

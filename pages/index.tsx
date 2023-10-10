@@ -52,11 +52,13 @@ const Home: NextPage = () => {
   return (
     <section className="flex h-full w-full flex-col items-center justify-center gap-y-3 text-center">
       <H1>
-        {!userIdArray ? "Loading available accounts...." : "Choose an account"}
+        {!allUsers.data
+          ? "Loading available accounts...."
+          : "Choose an account"}
       </H1>
 
       {addUserId && (
-        <div className="flex flex-col items-center rounded-md border border-zinc-600 ">
+        <div className="flex flex-col items-center rounded-md border border-zinc-600 w-full max-w-xs">
           {allUsers.data &&
             allUsers.data.map((user) => (
               <div
@@ -205,9 +207,14 @@ const CreateUserBtn = (props: Props) => {
       }}
     >
       {loading ? (
-        <Icon className="animate-spin" icon="mdi:loading" />
+        <Icon
+          className="animate-spin"
+          icon="mdi:loading"
+          height={16}
+          width={16}
+        />
       ) : (
-        <Icon icon="mdi:plus-thick" />
+        <Icon icon="mdi:plus-thick" height={16} width={16} />
       )}
       create user
     </Button>

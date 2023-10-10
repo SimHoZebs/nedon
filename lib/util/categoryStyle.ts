@@ -5,7 +5,7 @@ const categoryStyleArray: {
 } = {
   Travel: {
     icon: "mdi:car-outline",
-    bgColor: "bg-yellow-300",
+    bgColor: "bg-purple-300",
     textColor: "text-yellow-300",
   },
   Taxi: {

@@ -101,8 +101,8 @@ const Page = () => {
   const [oweUser, setOweUser] = useState<{ id: string; amount: number }>();
   const [rangeFormat, setRangeFormat] = useState<
     "date" | "month" | "year" | "all"
-  >("all");
-  const [date, setDate] = useState<Date>();
+  >("month");
+  const [date, setDate] = useState<Date>(new Date(Date.now()));
   const [scopedTransactionArray, setScopedTransactionArray] = useState<
     FullTransaction[]
   >([]);
@@ -157,7 +157,7 @@ const Page = () => {
     }
 
     if (rangeFormat === "all") {
-      setDate(undefined);
+      setDate(new Date(Date.now()));
       return;
     }
 

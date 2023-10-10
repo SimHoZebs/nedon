@@ -72,7 +72,7 @@ const TransactionModal = (props: Props) => {
                     <H1>{transaction.name}</H1>
                   </div>
                   <button
-                    className="mb-1 flex"
+                    className="mb-1 flex w-6 h-6"
                     onClick={() => props.setShowModal(false)}
                   >
                     <Icon
@@ -100,7 +100,7 @@ const TransactionModal = (props: Props) => {
 
               <div className="flex flex-col items-start  lg:items-end text-sm font-light text-zinc-400">
                 <button
-                  className="mb-1 lg:flex hidden"
+                  className="mb-1 lg:flex hidden w-6 h-6"
                   onClick={() => props.setShowModal(false)}
                 >
                   <Icon
