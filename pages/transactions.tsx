@@ -106,7 +106,7 @@ const Page: NextPage = () => {
                 handleRangeChange(-1);
               }}
             >
-              <span className="icon-[tabler-chevron-left h-8 w-8" />
+              <span className="icon-[tabler--chevron-left] h-8 w-8" />
             </Button>
             <H1>{date.getMonth() + 1}</H1>
             <Button
@@ -114,7 +114,7 @@ const Page: NextPage = () => {
                 handleRangeChange(1);
               }}
             >
-              <span className="icon-[tabler-chevron-right h-8 w-8" />
+              <span className="icon-[tabler--chevron-right] h-8 w-8" />
             </Button>
           </div>
         )}

@@ -264,45 +264,40 @@ const Page = () => {
                   </ActionBtn>
                 </div>
               ))}
+            <p>
+              Total spending:{" "}
+              {categoryArrayTotal(
+                organizeTransactionByCategory(scopedTransactionArray),
+                "spending",
+              )}
+            </p>
+            <p>
+              Total received:{" "}
+              {categoryArrayTotal(
+                organizeTransactionByCategory(scopedTransactionArray),
+                "received",
+              ) * -1}
+            </p>
           </div>
         </div>
 
-        <div>
-          <p>
-            Total spending:{" "}
-            {categoryArrayTotal(
-              organizeTransactionByCategory(scopedTransactionArray),
-              "spending",
-            )}
-          </p>
-          <p>
-            Total received:{" "}
-            {categoryArrayTotal(
-              organizeTransactionByCategory(scopedTransactionArray),
-              "received",
-            ) * -1}
-          </p>
-
+        <div className="flex w-full flex-col items-center gap-y-2">
           {date && (
-            <div className="flex">
+            <div className="flex items-center">
               <Button
                 onClick={() => {
                   handleRangeChange(-1);
                 }}
               >
-                back
+                <span className="icon-[tabler--chevron-left] h-8 w-8" />
               </Button>
-              <p>
-                {rangeFormat === "year" && date.getFullYear()}
-                {rangeFormat === "month" && date.getMonth() + 1}
-                {rangeFormat === "date" && date.getDate()}
-              </p>
+              <H1>{date.getMonth() + 1}</H1>
               <Button
                 onClick={() => {
                   handleRangeChange(1);
                 }}
               >
-                next
+                <span className="icon-[tabler--chevron-right] h-8 w-8" />
               </Button>
             </div>
           )}
@@ -330,26 +325,24 @@ const Page = () => {
             <option value="all">all</option>
           </select>
 
-          <div>
-            <div className="flex h-9 w-full gap-x-1 overflow-hidden rounded-lg bg-zinc-900">
-              {organizedTxByCategoryArray.map((cat, i) => (
-                <div
-                  key={i}
-                  className={"h-full " + getCategoryStyle([cat.name]).bgColor}
-                  style={{
-                    width:
-                      (
-                        ((cat.spending + subCategoryTotal(cat, "spending")) /
-                          spendingTotal) *
-                        100
-                      ).toString() + "%",
-                  }}
-                ></div>
-              ))}
-            </div>
+          <div className="flex h-9 w-full gap-x-1 overflow-hidden rounded-lg bg-zinc-900">
+            {organizedTxByCategoryArray.map((cat, i) => (
+              <div
+                key={i}
+                className={"h-full " + getCategoryStyle([cat.name]).bgColor}
+                style={{
+                  width:
+                    (
+                      ((cat.spending + subCategoryTotal(cat, "spending")) /
+                        spendingTotal) *
+                      100
+                    ).toString() + "%",
+                }}
+              ></div>
+            ))}
           </div>
 
-          <div className="flex flex-col gap-y-2">
+          <div className="flex w-full flex-col gap-y-2">
             {render(organizedTxByCategoryArray)}
           </div>
         </div>
