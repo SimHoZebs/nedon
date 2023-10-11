@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import React, { ForwardedRef, forwardRef, useEffect, useState } from "react";
 
 import { emptyCategory } from "@/util/category";
@@ -246,6 +245,7 @@ const CategoryPicker = forwardRef(
           <div className="flex w-fit items-center">
             {unsavedNameArray.length > 0 && (
               <button
+                aria-label="back"
                 className="flex"
                 onClick={() => {
                   if (!transaction)
@@ -255,7 +255,7 @@ const CategoryPicker = forwardRef(
                   resetPicker();
                 }}
               >
-                <Icon icon="mdi:chevron-left" height={24} />
+                <span className="icon-[mdi--chevron-left] h-6 w-6" />
               </button>
             )}
           </div>
@@ -321,16 +321,14 @@ const CategoryPicker = forwardRef(
                 "group my-1 mr-2 flex aspect-square flex-col items-center  justify-center gap-y-1  hyphens-auto rounded-lg border border-zinc-400 text-center hover:bg-zinc-700 hover:text-zinc-200"
               }
             >
-              <Icon
-                className={
+              <span
+                className={`h-6 w-6 ${
                   categoryStyleArray[category.name]?.textColor ||
                   "text-zinc-500 group-hover:text-zinc-400"
-                }
-                icon={
+                } ${
                   categoryStyleArray[category.name]?.icon ||
                   "material-symbols:category-outline"
-                }
-                height={24}
+                }`}
               />
               <p>{category.name}</p>
               <p className="text-zinc-500 group-hover:text-zinc-400">

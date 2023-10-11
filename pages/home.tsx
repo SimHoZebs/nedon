@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import { NextPage } from "next";
 import { AccountBase, AuthGetResponse } from "plaid";
 import React, { useMemo, useRef, useState } from "react";
@@ -40,22 +39,21 @@ const User: NextPage = () => {
   }, [clickedAccount?.account_id, transactionArray.data]);
 
   return (
-    <section className="flex h-full w-full items-center flex-col gap-y-3">
+    <section className="flex h-full w-full flex-col items-center gap-y-3">
       <H1>All Accounts</H1>
       {showModal && clickedAccount && (
         <Modal setShowModal={setShowModal}>
-          <div className="w-full flex flex-col justify-between h-full items-end">
-            <button className="mb-1 flex" onClick={() => setShowModal(false)}>
-              <Icon
-                icon="iconamoon:close-fill"
-                width={24}
-                height={24}
-                className="rounded-full text-zinc-400 outline outline-1 hover:text-pink-400"
-              />
+          <div className="flex h-full w-full flex-col items-end justify-between">
+            <button
+              aria-label="Close"
+              className="mb-1 flex"
+              onClick={() => setShowModal(false)}
+            >
+              <span className="icon-[iconamoon--close-fill] h-6 w-6 rounded-full text-zinc-400 outline outline-1 hover:text-pink-400" />
             </button>
 
-            <div className="flex flex-col w-full justify-between h-full lg:flex-row items-end lg:items-start overflow-hidden">
-              <div className="flex w-full flex-row lg:flex-col justify-between lg:justify-normal">
+            <div className="flex h-full w-full flex-col items-end justify-between overflow-hidden lg:flex-row lg:items-start">
+              <div className="flex w-full flex-row justify-between lg:flex-col lg:justify-normal">
                 <div className="">
                   <H1>{clickedAccount.name}</H1>
                   <p className="text-zinc-400 ">
@@ -68,7 +66,7 @@ const User: NextPage = () => {
                 </div>
               </div>
 
-              <ol className="flex flex-col gap-y-3 w-full lg:max-w-lg p-1 h-full">
+              <ol className="flex h-full w-full flex-col gap-y-3 p-1 lg:max-w-lg">
                 <H2>Transaction History</H2>
                 {sortedTransactionArray.map((year, i) => (
                   <li
@@ -115,7 +113,7 @@ const User: NextPage = () => {
         </Modal>
       )}
 
-      <div className="max-w-md w-full flex flex-col gap-y-3">
+      <div className="flex w-full max-w-md flex-col gap-y-3">
         {auth.isLoading && (
           <>
             {Array.from({ length: 3 }).map((val, index) => (

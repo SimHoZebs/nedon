@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import React, { useState } from "react";
 
 import Input from "@/comp/Input";
@@ -127,7 +126,7 @@ const UserSplit = (props: Props) => {
   };
 
   return (
-    <div className={`flex flex-col gap-y-1 p-2 rounded-lg `}>
+    <div className={`flex flex-col gap-y-1 rounded-lg p-2 `}>
       <div className="flex w-full justify-between gap-x-2 ">
         {split.userId === appUser?.id || !props.isManaging ? (
           <div className="aspect-square w-5"></div>
@@ -137,12 +136,7 @@ const UserSplit = (props: Props) => {
             className="group flex w-5"
             onClick={() => removeUser()}
           >
-            <Icon
-              icon="clarity:remove-line"
-              className="text-zinc-500 group-hover:text-pink-400"
-              width={20}
-              height={20}
-            />
+            <span className="icon-[clarity--remove-line] h-5 w-5 text-zinc-500 group-hover:text-pink-400" />
           </button>
         )}
         <div>{props.children}</div>
@@ -228,7 +222,7 @@ const UserSplit = (props: Props) => {
           </div>
         )}
         <div className="m-1 flex h-fit w-full justify-center bg-zinc-700">
-          <Icon icon="formkit:open" width={16} height={16} />
+          <span className="icon-[formkit--open] h-4 w-4" />
         </div>
       </button>
     </div>

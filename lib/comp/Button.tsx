@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import { NextRouter } from "next/router";
 import React from "react";
 
@@ -48,7 +47,7 @@ interface NavBtnProps extends React.HtmlHTMLAttributes<HTMLButtonElement> {
 export const NavBtn = (props: NavBtnProps) => {
   return (
     <Button
-      className={`group justify-center gap-x-2 hover:text-indigo-200 sm:w-full sm:justify-start rounded-lg hover:bg-indigo-200 hover:bg-opacity-5 ${
+      className={`group justify-center gap-x-2 rounded-lg hover:bg-indigo-200 hover:bg-opacity-5 hover:text-indigo-200 sm:w-full sm:justify-start ${
         props.router.pathname === props.route
           ? "bg-indigo-200 bg-opacity-20 text-indigo-200"
           : "text-zinc-300"
@@ -56,14 +55,12 @@ export const NavBtn = (props: NavBtnProps) => {
       onClick={() => props.router.push(props.route)}
     >
       {props.icon && (
-        <Icon
-          className={`group-hover:text-indigo-200 ${
+        <span
+          className={`h-6 w-6 group-hover:text-indigo-200 ${
             props.router.pathname === props.route
               ? "text-indigo-200"
               : "text-zinc-400"
-          }`}
-          icon={props.icon}
-          height={24}
+          } ${props.icon}`}
         />
       )}
       <p className="hidden sm:block">{props.children}</p>

@@ -1,3 +1,4 @@
+import { addDynamicIconSelectors } from "@iconify/tailwind";
 import type { Config } from "tailwindcss";
 import defaultTheme from "tailwindcss/defaultTheme";
 
@@ -13,5 +14,8 @@ export default {
       },
     },
   },
-  plugins: [require("@tailwindcss/container-queries")],
+  plugins: [
+    require("@tailwindcss/container-queries"),
+    addDynamicIconSelectors(),
+  ],
 } satisfies Config;

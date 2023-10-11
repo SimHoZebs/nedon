@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import React, { useState } from "react";
 
 import { useStore } from "@/util/store";
@@ -34,11 +33,13 @@ const SettleModal = (props: Props) => {
             className="flex flex-col"
             onClick={() => setAppuserGiving((prev) => !prev)}
           >
-            <Icon
-              className="rounded-full hover:bg-zinc-800"
-              icon="mingcute:arrow-up-line"
-              rotate={appUserGiving ? "90deg" : "-90deg"}
-              width={36}
+            <span
+              className={
+                "icon-[mingcute--arrow-up-line] h-9 w-9 rounded-full hover:bg-zinc-800 " +
+                appUserGiving
+                  ? "rotate-90"
+                  : "-rotate-90"
+              }
             />
             <p className="text-sm">gives</p>
           </button>

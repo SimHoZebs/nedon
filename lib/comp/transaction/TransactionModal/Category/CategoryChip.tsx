@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import { Category } from "@prisma/client";
 import React from "react";
 
@@ -40,15 +39,14 @@ const CategoryChip = (props: Props) => {
         } `}
         onClick={(e) => props.findAndSetPickerPosition(e)}
       >
-        <Icon
-          className={`flex rounded-full p-1 ${getCategoryStyle(
+        <span
+          className={`flex h-6 w-6 rounded-full p-1 ${getCategoryStyle(
             props.mergedCategory.nameArray,
-          )?.textColor}`}
-          icon={
+          )?.textColor} ${
             getCategoryStyle(props.mergedCategory.nameArray)?.icon ||
-            "mdi:shape-plus-outline"
+            "icon-[mdi--shape-plus-outline]"
           }
-          height={24}
+`}
         />
 
         <div
@@ -64,6 +62,7 @@ const CategoryChip = (props: Props) => {
               transaction &&
                 transaction.splitArray[0].categoryArray.length > 1 && (
                   <button
+                    aria-label="Close"
                     className="h-3 w-3"
                     onClick={async (e) => {
                       e.stopPropagation();
@@ -112,12 +111,7 @@ const CategoryChip = (props: Props) => {
                       queryClient.transaction.invalidate();
                     }}
                   >
-                    <Icon
-                      icon="iconamoon:close-fill"
-                      width={12}
-                      height={12}
-                      className="hidden rounded-full text-zinc-400 outline outline-1 hover:text-pink-400 group-hover:block"
-                    />
+                    <span className="icon-[iconamoon--close-fill] hidden h-3 w-3 rounded-full text-zinc-400 outline outline-1 hover:text-pink-400 group-hover:block" />
                   </button>
                 )
             }

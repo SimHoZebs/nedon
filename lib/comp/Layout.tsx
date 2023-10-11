@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import { Open_Sans } from "next/font/google";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
@@ -42,7 +41,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             <NavBtn
               router={router}
               route="/home"
-              icon="mdi:home-variant-outline"
+              icon="icon-[mdi--home-variant-outline]"
             >
               Home
             </NavBtn>
@@ -50,7 +49,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             <NavBtn
               router={router}
               route="/transactions"
-              icon="mdi:swap-horizontal"
+              icon="icon-[mdi--swap-horizontal]"
             >
               Transactions
             </NavBtn>
@@ -58,7 +57,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             <NavBtn
               router={router}
               route="/analysis"
-              icon="mdi:google-analytics"
+              icon="icon-[mdi--google-analytics]"
             >
               Analysis
             </NavBtn>
@@ -66,7 +65,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             <div className="sm:w-full">
               <ActionBtn onClick={() => router.push("/")}>
                 <div className="flex items-center gap-x-2">
-                  <Icon icon="mdi:user-add-outline" height={24} />
+                  <span className="icon-[mdi--user-add-outline] h-6 w-6" />
                   <p>Add friend</p>
                 </div>
               </ActionBtn>
@@ -80,12 +79,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             >
               <div className="flex w-full items-center gap-x-2">
                 <div className="flex rounded-full border-2 border-zinc-300 bg-zinc-800 p-1 sm:p-2">
-                  <Icon
-                    icon="mdi:account"
-                    className="hover:text-zinc-100"
-                    width={24}
-                    height={24}
-                  />
+                  <span className="icon-[mdi--account] h-6 w-6 hover:text-zinc-100" />
                 </div>
 
                 <p className="hidden w-full items-center sm:block">

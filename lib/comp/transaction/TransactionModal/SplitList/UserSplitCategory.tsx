@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import React from "react";
 
 import Input from "@/comp/Input";
@@ -24,13 +23,11 @@ const UserSplitCategory = (props: Props) => {
     unsavedSplitArray[props.splitIndex].categoryArray[props.categoryIndex];
 
   return (
-    <div className="text-sm my- 1 flex items-center gap-x-2">
-      <Icon
-        className={
-          getCategoryStyle(category.nameArray).bgColor +
-          " rounded-full p-1 text-zinc-900"
-        }
-        icon={getCategoryStyle(category.nameArray).icon}
+    <div className="my-1 flex items-center gap-x-2 text-sm">
+      <span
+        className={`rounded-full p-1 text-zinc-900 ${
+          getCategoryStyle(category.nameArray).bgColor
+        } ${getCategoryStyle(category.nameArray).icon}`}
       />
       <div className="flex flex-col items-start">
         <p className="font-light text-zinc-300">{category.nameArray.at(-1)}</p>

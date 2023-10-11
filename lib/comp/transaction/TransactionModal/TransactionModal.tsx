@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import Image from "next/image";
 import { AuthGetResponse } from "plaid";
 import React, { useEffect } from "react";
@@ -50,109 +49,103 @@ const TransactionModal = (props: Props) => {
   const amount = transaction ? transaction.amount : 0;
 
   return (
-    transaction && (
-      <Modal setShowModal={props.setShowModal}>
-        <div className="flex flex-col justify-between gap-y-2">
-          <div className="flex flex-col items-start gap-y-2">
-            <div className="flex flex-col lg:flex-row gap-3 justify-between w-full">
-              <div className="flex flex-col gap-y-1">
-                <div className="flex w-full justify-between">
-                  <div className="flex gap-x-2 items-center">
-                    {transaction.counterparties &&
-                      transaction.counterparties[0]?.logo_url && (
-                        <Image
-                          className="rounded-lg"
-                          src={transaction.counterparties[0].logo_url}
-                          alt=""
-                          width={56}
-                          height={56}
-                        />
-                      )}
+    <>
+      {transaction && (
+        <Modal setShowModal={props.setShowModal}>
+          <div className="flex flex-col justify-between gap-y-2">
+            <div className="flex flex-col items-start gap-y-2">
+              <div className="flex w-full flex-col justify-between gap-3 lg:flex-row">
+                <div className="flex flex-col gap-y-1">
+                  <div className="flex w-full items-start justify-between">
+                    <div className="flex items-center gap-x-2">
+                      {transaction.counterparties &&
+                        transaction.counterparties[0]?.logo_url && (
+                          <Image
+                            className="rounded-lg"
+                            src={transaction.counterparties[0].logo_url}
+                            alt=""
+                            width={56}
+                            height={56}
+                          />
+                        )}
 
-                    <H1>{transaction.name}</H1>
+                      <H1>{transaction.name}</H1>
+                    </div>
+                    <button
+                      aria-label="Close"
+                      className="mb-1 flex rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400"
+                      onClick={() => props.setShowModal(false)}
+                    >
+                      <span className="icon-[iconamoon--close-fill] h-6 w-6 rounded-full text-zinc-400 hover:text-pink-400 lg:hidden"></span>
+                    </button>
                   </div>
-                  <button
-                    className="mb-1 flex w-6 h-6"
-                    onClick={() => props.setShowModal(false)}
+
+                  <p
+                    className={`h-6 w-40 rounded-lg ${
+                      auth.isLoading && "animate-pulse bg-zinc-700"
+                    } `}
                   >
-                    <Icon
-                      icon="iconamoon:close-fill"
-                      width={24}
-                      height={24}
-                      className="rounded-full lg:hidden text-zinc-400 outline outline-1 hover:text-pink-400"
-                    />
-                  </button>
+                    {auth.isLoading
+                      ? ""
+                      : (auth.data as unknown as AuthGetResponse).accounts.find(
+                          (account) =>
+                            account.account_id === transaction.account_id,
+                        )?.name || ""}
+                  </p>
                 </div>
 
-                <p
-                  className={`h-6 w-40 ${
-                    auth.isLoading && "animate-pulse bg-zinc-700"
-                  } `}
-                >
-                  {auth.isLoading
-                    ? ""
-                    : (auth.data as unknown as AuthGetResponse).accounts.find(
-                        (account) =>
-                          account.account_id === transaction.account_id,
-                      )?.name || ""}
-                </p>
+                <div className="flex flex-col items-start  text-sm font-light text-zinc-400 lg:items-end">
+                  <button
+                    aria-label="Close"
+                    className="mb-1 hidden h-6 w-6 rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400 lg:flex"
+                    onClick={() => props.setShowModal(false)}
+                  >
+                    <span className="icon-[iconamoon--close-fill] h-6 w-6 rounded-full text-zinc-400 hover:text-pink-400" />
+                  </button>
+                  <p>
+                    Created at {transaction.datetime || "1970-01-23 12:34:56"}
+                  </p>
+                  <p>
+                    Authorized at{" "}
+                    {transaction.authorized_datetime || "1970-01-23 12:34:56"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-between gap-y-1 ">
+              <div>
+                <SplitList>
+                  <H1>${amount * -1}</H1>
+                </SplitList>
               </div>
 
-              <div className="flex flex-col items-start  lg:items-end text-sm font-light text-zinc-400">
-                <button
-                  className="mb-1 lg:flex hidden w-6 h-6"
-                  onClick={() => props.setShowModal(false)}
+              <div>
+                <Category />
+
+                <ActionBtn
+                  onClick={async () => {
+                    if (!transaction.id) {
+                      console.error(
+                        "Can't delete transaction. transaction not in db.",
+                      );
+                      return;
+                    }
+
+                    resetTransaction();
+                    await deleteTransaction.mutateAsync({ id: transaction.id });
+
+                    queryClient.transaction.invalidate();
+                  }}
                 >
-                  <Icon
-                    icon="iconamoon:close-fill"
-                    width={24}
-                    height={24}
-                    className="rounded-full text-zinc-400 outline outline-1 hover:text-pink-400"
-                  />
-                </button>
-                <p>
-                  Created at {transaction.datetime || "1970-01-23 12:34:56"}
-                </p>
-                <p>
-                  Authorized at{" "}
-                  {transaction.authorized_datetime || "1970-01-23 12:34:56"}
-                </p>
+                  Reset transaction data
+                </ActionBtn>
               </div>
             </div>
           </div>
-
-          <div className="flex justify-between gap-y-1 ">
-            <div>
-              <SplitList>
-                <H1>${amount * -1}</H1>
-              </SplitList>
-            </div>
-
-            <div>
-              <Category />
-
-              <ActionBtn
-                onClick={async () => {
-                  if (!transaction.id) {
-                    console.error(
-                      "Can't delete transaction. transaction not in db.",
-                    );
-                    return;
-                  }
-
-                  resetTransaction();
-                  await deleteTransaction.mutateAsync({ id: transaction.id });
-
-                  queryClient.transaction.invalidate();
-                }}
-              >
-                Reset transaction data
-              </ActionBtn>
-            </div>
-          </div>
-        </div>
-      </Modal>
-    )
+        </Modal>
+      )}
+    </>
   );
 };
 

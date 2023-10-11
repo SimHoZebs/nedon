@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import React, { useState } from "react";
 
 import { ActionBtn, Button, SecondaryBtn } from "@/comp/Button";
@@ -109,7 +108,7 @@ const SplitList = (props: Props) => {
         {props.children}
         {unsavedSplitArray.length === 1 && !isManaging && (
           <SecondaryBtn onClick={() => setIsManaging(true)}>
-            <Icon icon="lucide:split" className="m-1" width={16} height={16} />
+            <span className="icon-[lucide--split] m-1 h-4 w-4" />
             Split
           </SecondaryBtn>
         )}
@@ -147,7 +146,7 @@ const SplitList = (props: Props) => {
                 className="flex gap-x-2 rounded-lg bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
                 onClick={() => setIsManaging(true)}
               >
-                <Icon icon={"mdi:edit"} />
+                <span className="icon-[mdi--edit]" />
                 Manage
               </Button>
             )}
@@ -166,12 +165,7 @@ const SplitList = (props: Props) => {
                 index={i}
               >
                 <div className="flex items-center gap-x-2">
-                  <Icon
-                    icon="mdi:account"
-                    className="rounded-full border-2 border-zinc-400 bg-zinc-800 p-2 hover:text-zinc-100"
-                    width={20}
-                    height={20}
-                  />
+                  <span className="icon-[mdi--account] h-5 w-5 rounded-full border-2 border-zinc-400 bg-zinc-800 p-2 hover:text-zinc-100" />
                 </div>
               </UserSplit>
             </div>

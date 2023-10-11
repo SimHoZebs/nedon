@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import Image from "next/image";
 import React from "react";
 
@@ -34,7 +33,7 @@ const TransactionCard = (props: Props) => {
       }}
     >
       <div className={`flex w-full justify-between gap-x-4 truncate`}>
-        <div className="flex-start flex h-full gap-x-2 justify-center truncate">
+        <div className="flex-start flex h-full justify-center gap-x-2 truncate">
           <p className="truncate text-base font-semibold sm:text-lg">
             {props.transaction.name}
           </p>
@@ -46,7 +45,7 @@ const TransactionCard = (props: Props) => {
           }`}
         >
           {props.transaction.splitArray.length > 1 && (
-            <Icon icon="lucide:split" width={16} className="text-zinc-400" />
+            <span className="icon-[lucide-split h-4 w-4 text-zinc-400" />
           )}
           <div>
             {splitAmount ? splitAmount * -1 : props.transaction.amount * -1}
@@ -84,9 +83,10 @@ const TransactionCard = (props: Props) => {
                     height={16}
                   />
                 ) : (
-                  <Icon
-                    icon={getCategoryStyle(category.nameArray).icon}
-                    width={16}
+                  <span
+                    className={
+                      getCategoryStyle(category.nameArray).icon + " w-4"
+                    }
                   />
                 )}
                 <p className="text-xs">{category.nameArray.at(-1)}</p>

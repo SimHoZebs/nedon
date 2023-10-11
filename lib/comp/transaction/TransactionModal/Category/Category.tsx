@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import React, { useRef, useState } from "react";
 
 import { ActionBtn, Button } from "@/comp/Button";
@@ -102,10 +101,10 @@ const Category = () => {
           </div>
         ) : (
           <Button
-            className="flex gap-x-2 rounded-lg bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200 justify-between"
+            className="flex justify-between gap-x-2 rounded-lg bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
             onClick={() => setIsManaging(true)}
           >
-            <Icon icon={"mdi:edit"} height={16} width={16} />
+            <span className={"icon-[mdi--edit] h-4 w-4"} />
             Manage
           </Button>
         )}
@@ -197,7 +196,7 @@ const Category = () => {
                 });
               }}
             >
-              <Icon icon="mdi:shape-plus-outline" />
+              <span className="icon-[mdi--shape-plus-outline]" />
               Add Category
             </Button>
           )}

@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import React, { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
@@ -49,21 +48,18 @@ const categoryArrayTotal = (
 
 const render = (hierarchicalCategoryArray: TreedCategoryWithTransaction[]) =>
   hierarchicalCategoryArray.map((category, i) => (
-    <div key={i} className="p-3 flex flex-col">
-      <div className="flex justify-between items-center">
+    <div key={i} className="flex flex-col p-3">
+      <div className="flex items-center justify-between">
         <div className="flex items-center justify-center gap-x-2">
-          <Icon
-            icon={getCategoryStyle([category.name]).icon}
-            className={
-              getCategoryStyle([category.name]).bgColor +
-              " text-zinc-950 rounded-lg"
-            }
-            height={32}
+          <span
+            className={`h-8 w-8 rounded-lg text-zinc-950 ${
+              getCategoryStyle([category.name]).icon
+            } ${getCategoryStyle([category.name]).bgColor}`}
           />
           <div>
             <H3>{category.name}</H3>
 
-            <p className="text-zinc-400 text-sm">
+            <p className="text-sm text-zinc-400">
               {parseMoney(
                 ((category.spending + subCategoryTotal(category, "spending")) /
                   1000) *
@@ -239,7 +235,7 @@ const Page = () => {
   );
 
   return appUser ? (
-    <section className="flex flex-col gap-y-4 items-center">
+    <section className="flex flex-col items-center gap-y-4">
       <div className="w-full max-w-lg">
         <div className="w-full">
           {showModal && (
@@ -335,7 +331,7 @@ const Page = () => {
           </select>
 
           <div>
-            <div className="gap-x-1 flex h-9 w-full bg-zinc-900 rounded-lg overflow-hidden">
+            <div className="flex h-9 w-full gap-x-1 overflow-hidden rounded-lg bg-zinc-900">
               {organizedTxByCategoryArray.map((cat, i) => (
                 <div
                   key={i}

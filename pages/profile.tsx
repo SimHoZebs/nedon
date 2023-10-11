@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import { useRouter } from "next/router";
 import React from "react";
 
@@ -28,11 +27,7 @@ const Page = () => {
           setAppGroup(undefined);
         }}
       >
-        <Icon
-          className="text-zinc-600 group-hover:text-zinc-500"
-          icon="mdi:logout"
-          width={16}
-        />
+        <span className="icon-[mdi--logout] h-4 w-4 text-zinc-600 group-hover:text-zinc-500" />
         logout
       </ActionBtn>
       <div className="flex gap-x-2">

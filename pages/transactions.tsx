@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import { NextPage } from "next";
 import React, { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
@@ -99,7 +98,7 @@ const Page: NextPage = () => {
     <section className="flex w-full justify-center">
       {showModal && <TransactionModal setShowModal={setShowModal} />}
 
-      <div className="flex w-full max-w-sm lg:max-w-md flex-col items-center gap-y-2">
+      <div className="flex w-full max-w-sm flex-col items-center gap-y-2 lg:max-w-md">
         {date && (
           <div className="flex items-center">
             <Button
@@ -107,7 +106,7 @@ const Page: NextPage = () => {
                 handleRangeChange(-1);
               }}
             >
-              <Icon icon="tabler:chevron-left" height={32} />
+              <span className="icon-[tabler-chevron-left h-8 w-8" />
             </Button>
             <H1>{date.getMonth() + 1}</H1>
             <Button
@@ -115,7 +114,7 @@ const Page: NextPage = () => {
                 handleRangeChange(1);
               }}
             >
-              <Icon icon="tabler:chevron-right" height={32} />
+              <span className="icon-[tabler-chevron-right h-8 w-8" />
             </Button>
           </div>
         )}
@@ -142,9 +141,9 @@ const Page: NextPage = () => {
           <option value="all">all</option>
         </select>
 
-        <ol className="flex w-full max-w-sm lg:max-w-md flex-col items-center gap-y-2">
+        <ol className="flex w-full max-w-sm flex-col items-center gap-y-2 lg:max-w-md">
           {transactionArray.isLoading ? (
-            <li className="flex w-full h-fit flex-col ">
+            <li className="flex h-fit w-full flex-col gap-y-3">
               <H2>
                 {date.getMonth() < 10 ? "0" + date.getMonth() : date.getMonth()}
               </H2>
@@ -152,10 +151,10 @@ const Page: NextPage = () => {
               {Array(10)
                 .fill(0)
                 .map((i) => (
-                  <div
+                  <ol
                     key={Math.random() * (i + 1)}
-                    className="h-20 w-full bg-zinc-800 animate-pulse rounded-lg"
-                  ></div>
+                    className="h-20 w-full animate-pulse rounded-lg bg-zinc-800"
+                  ></ol>
                 ))}
             </li>
           ) : (

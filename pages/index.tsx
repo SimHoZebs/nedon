@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -58,7 +57,7 @@ const Home: NextPage = () => {
       </H1>
 
       {addUserId && (
-        <div className="flex flex-col items-center rounded-md border border-zinc-600 w-full max-w-xs">
+        <div className="flex w-full max-w-xs flex-col items-center rounded-md border border-zinc-600">
           {allUsers.data &&
             allUsers.data.map((user) => (
               <div
@@ -121,9 +120,9 @@ const Home: NextPage = () => {
                         {appGroup.userArray?.find(
                           (groupUser) => groupUser.id === user.id,
                         ) ? (
-                          <Icon icon="mdi:user-remove-outline" width={20} />
+                          <span className="icon-[mdi--user-remove-outline] h-5 w-5" />
                         ) : (
-                          <Icon icon="mdi:user-add-outline" width={20} />
+                          <span className="icon-[mdi--user-add-outline] h-5 w-5" />
                         )}
                       </Button>
 
@@ -150,7 +149,7 @@ const Home: NextPage = () => {
                       }
                     }}
                   >
-                    <Icon icon="mdi:delete-outline" width={20} />
+                    <span className="icon-[mdi--delete-outline] h-5 w-5" />
                   </Button>
                 </div>
               </div>
@@ -207,14 +206,13 @@ const CreateUserBtn = (props: Props) => {
       }}
     >
       {loading ? (
-        <Icon
-          className="animate-spin"
-          icon="mdi:loading"
-          height={16}
-          width={16}
-        />
+        <div className="flex h-4 w-4">
+          <span className="icon-[mdi--loading] h-4 w-4 animate-spin" />
+        </div>
       ) : (
-        <Icon icon="mdi:plus-thick" height={16} width={16} />
+        <div className="flex h-4 w-4">
+          <span className="icon-[mdi--plus-thick] h-4 w-4" />
+        </div>
       )}
       create user
     </Button>
