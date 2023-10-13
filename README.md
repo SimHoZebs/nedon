@@ -3,17 +3,32 @@
 
 <h4 align="center"> Preview build with sandbox data: <a href="https://nedon.vercel.app">https://nedon.vercel.app</a></h4>
 
-### The problem
+## The problem
 
-You buy some groceries and house supplies from Walmart. Right after your card swipes, a $230 transaction appears on your banking app, labled 'Groceries'. "That's not right", you say, "The other $50 were supplies for the bathrooms."
+You swipe your card for a checkout at a store. Immediately, a $230 transaction appears on your banking app, labled 'Groceries'. "That's not right", you say, "The other $50 were supplies for the bathrooms."
 
-You arrive home and start divvying up the expense with your roommates. It takes some calculation because Jeff doesn't want to be part of the coffee beans and milk purchase. Jeff is annoying, but he brings free food time to time, so whatever.
+You get home and divvy it up with your roommates. You rely on a calulator and a notes app to keep track of how much everyone owes you. It's a labour.
 
-You look back at your banking app - a notification reads that you are getting close to your monthly budget, and in fact, have exceeded your grocery limit. You know that's not true. You know you only spent $80 from that purchase. You know only $35.89 of it is groceries. **Your banking app is useless.**
+You go to your banking app's spending analysis, and it warns that you are getting close to your monthly budget. In fact, you exceeded your grocery budget. You know that's not true. You know you are only responsible for $80 from that purchase. You know only $35.89 of it is groceries. 
 
-### The solution is not a spreadsheet, it's Nedon.
+**Your banking app is useless. The solution? Nedon.**
 
-#### Nedon plans to offer/offers the following key features:
+##  Alternatives comparison
+
+| Features/Apps                      | Nedon        | Mint | RocketMoney  | Google Wallet | SplitWise    | Honeydue                 |
+| ---------------------------------- | ------------ | ---- | ------------ | ------------- | ------------ | ------------------------ |
+| Split with other users/groups      | Users/groups | X    | Paid feature | Users/groups  | Users/groups | Just one                 |
+| Assign multiple categories         | O            | O    | X            | X             | X            | O                        |
+| Assign cost to multiple categories | O            | O    | X            | X             | X            | O                        |
+| Group spending overview            | O            | X    | X            | X             | O            | O                        |
+| Individual spending overview       | O            | O    | O            | O             | O            | Individual accounts only |
+| Receipt scanning                   | Planned      | X    | X            | X             | Paid feature | X                        |
+| Sponsored suggestions              | X            | O    | O            | O             | O            | O                        |
+| Ads                                | X            | X    | X            | X             | O            | O                        |
+| Open source                        | O            | X    | X            | X             | X            | X                        |
+
+
+### Nedon plans to offer/offers the following key features:
 
 - Transactions with multiple categories
 - Transactions with multiple contributors
