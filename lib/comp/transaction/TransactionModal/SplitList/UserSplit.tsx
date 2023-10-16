@@ -127,7 +127,7 @@ const UserSplit = (props: Props) => {
 
   return (
     <div className={`flex flex-col gap-y-1 rounded-lg p-2 `}>
-      <div className="flex w-full justify-between gap-x-2 ">
+      <div className="flex w-full items-center justify-between gap-x-2 ">
         {split.userId === appUser?.id || !props.isManaging ? (
           <div className="aspect-square w-5"></div>
         ) : (
@@ -139,7 +139,7 @@ const UserSplit = (props: Props) => {
             <span className="icon-[clarity--remove-line] h-5 w-5 text-zinc-500 group-hover:text-pink-400" />
           </button>
         )}
-        <div>{props.children}</div>
+        {props.children}
 
         <div>
           <div className="flex gap-x-2">

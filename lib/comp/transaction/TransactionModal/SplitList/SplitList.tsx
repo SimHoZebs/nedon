@@ -164,8 +164,8 @@ const SplitList = (props: Props) => {
                 setModifiedSplitIndexArray={setModifiedSplitIndexArray}
                 index={i}
               >
-                <div className="flex items-center gap-x-2">
-                  <span className="icon-[mdi--account] h-5 w-5 rounded-full border-2 border-zinc-400 bg-zinc-800 p-2 hover:text-zinc-100" />
+                <div className="flex items-center gap-x-2 rounded-full border-2 border-zinc-400">
+                  <span className="2 icon-[mdi--account] h-8 w-8 bg-zinc-400 hover:bg-zinc-100" />
                 </div>
               </UserSplit>
             </div>
