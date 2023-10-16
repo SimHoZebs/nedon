@@ -15,19 +15,19 @@ Soon after, your app warns that you are getting close to your monthly budget. In
 
 ##  Alternatives comparison
 
-| Features/Apps                      | Nedon        | Mint | RocketMoney  | GPay         | SplitWise    | Honeydue                 |
-| ---------------------------------- | ------------ | ---- | ------------ | ------------ | ------------ | ------------------------ |
-| Split with other users/groups      | Users/groups | X    | Paid feature | Users/groups | Users/groups | Just one                 |
-| Assign multiple categories         | O            | O    | X            | X            | X            | O                        |
-| Assign cost to multiple categories | O            | O    | X            | X            | X            | O                        |
-| Group spending overview            | O            | X    | X            | X            | O            | O                        |
-| Individual spending overview       | O            | O    | O            | O            | O            | Individual accounts only |
-| Receipt scanning                   | Planned      | X    | X            | X            | Paid feature | X                        |
-| Sponsored suggestions              | X            | O    | O            | O            | O            | O                        |
-| Ads                                | X            | X    | X            | X            | O            | O                        |
-| Browser                            | O            | O    | X            | X            | X            | X                        | 
-| Mobile app                         | Planned      | O    | O            | O            | O            | O                        |
-| Open source                        | O            | X    | X            | X            | X            | X                        |
+| Features/Apps                      | Nedon   | Mint | RocketMoney  | GPay | SplitWise    | Honeydue        |
+| ---------------------------------- | ------- | ---- | ------------ | ---- | ------------ | --------------- |
+| Split with other users/groups      | O       | X    | Paid feature | O    | O            | Just one member |
+| Custom categories                  | Planned | O    | O            | X    | X            | X               |
+| Assign multiple categories         | O       | O    | X            | X    | X            | O               |
+| Assign cost to multiple categories | O       | O    | X            | X    | X            | O               |
+| Group spending overview            | O       | X    | X            | X    | Paid feature | O               |
+| Individual spending overview       | O       | O    | O            | O    | X            | X               |
+| Net worth tracking                 | Planned | O    | Paid feature | X    | X            | X               |
+| Ad-free                            | O       | O    | O            | O    | X            | X               |
+| Web view                           | O       | O    | X            | X    | X            | X               |
+| Mobile app                         | Planned | O    | O            | O    | O            | O               |
+| Open source                        | O       | X    | X            | X    | X            | X               |
 
 
 
