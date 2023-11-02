@@ -172,15 +172,22 @@ const Page: NextPage = () => {
                       >
                         <H3>{day[0]?.date.slice(8)}</H3>
                         <ol className="flex flex-col gap-y-3">
-                          {day.map(
-                            (transaction, l) =>
-                              transaction && (
-                                <TransactionCard
-                                  setShowModal={setShowModal}
-                                  transaction={transaction}
-                                  key={transaction.transaction_id}
-                                />
-                              ),
+                          {day.length === 0 ? (
+                            <div>
+                              No transaction this month! That{"'"}s a good
+                              thing, right?
+                            </div>
+                          ) : (
+                            day.map(
+                              (transaction, l) =>
+                                transaction && (
+                                  <TransactionCard
+                                    setShowModal={setShowModal}
+                                    transaction={transaction}
+                                    key={transaction.transaction_id}
+                                  />
+                                ),
+                            )
                           )}
                         </ol>
                       </li>
