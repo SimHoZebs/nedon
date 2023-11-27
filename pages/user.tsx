@@ -19,7 +19,7 @@ const Home: NextPage = () => {
 
   const appUser = allUsers.data?.[0];
   const appGroup = trpc.group.get.useQuery(
-    { id: appUser?.groupArray?.[0].id || "" },
+    { id: appUser?.groupArray?.[0]?.id || "" },
     { staleTime: Infinity, enabled: !!appUser },
   );
 
