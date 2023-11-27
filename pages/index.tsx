@@ -7,7 +7,6 @@ import Modal from "@/comp/Modal";
 import AccountCard from "@/comp/home/AccountCard";
 import TransactionCard from "@/comp/transaction/TransactionCard";
 
-import { useStore } from "@/util/store";
 import { organizeTransactionByTime } from "@/util/transaction";
 import { trpc } from "@/util/trpc";
 

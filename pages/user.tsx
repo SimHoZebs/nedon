@@ -1,21 +1,13 @@
 import type { NextPage } from "next";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/comp/Button";
 import { H1 } from "@/comp/Heading";
 
-import { useLocalStore, useLocalStoreDelay, useStore } from "@/util/store";
+import { useLocalStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
-import { emptyUser } from "@/util/user";
 
 const Home: NextPage = () => {
-  const router = useRouter();
-  const server = trpc.useContext();
-  const userIdArray = useLocalStoreDelay(
-    useLocalStore,
-    (state) => state.userIdArray,
-  );
   const addUserId = useLocalStore((state) => state.addUserId);
   const deleteUserId = useLocalStore((state) => state.deleteUserId);
   const setUserIdArray = useLocalStore((state) => state.setUserIdArray);
@@ -29,9 +21,10 @@ const Home: NextPage = () => {
   });
 
   const appUser = allUsers.data?.[0];
-  const appGroup = useStore((state) => state.appGroup);
-  const setAppUser = useStore((state) => state.setAppUser);
-  const setAppGroup = useStore((state) => state.setAppGroup);
+  const appGroup = trpc.group.get.useQuery(
+    { id: appUser?.groupArray?.[0].id || "" },
+    { staleTime: Infinity, enabled: !!appUser },
+  );
 
   const addUserToGroup = trpc.group.addUser.useMutation();
   const removeUserFromGroup = trpc.group.removeUser.useMutation();
@@ -57,102 +50,81 @@ const Home: NextPage = () => {
 
       {addUserId && (
         <div className="flex w-full max-w-xs flex-col items-center rounded-md border border-zinc-600">
-          {allUsers.data &&
-            allUsers.data.map((user) => (
-              <div
-                key={user.id}
-                className="flex w-full items-center justify-between border-b border-zinc-700 p-3 first:rounded-t-md hover:cursor-pointer hover:bg-zinc-800 sm:gap-x-16"
-                onClick={async (e) => {
-                  setAppUser(user);
+          {appUser &&
+            allUsers.data &&
+            allUsers.data.map(
+              (user) =>
+                user.id !== appUser.id && (
+                  <div
+                    key={user.id}
+                    className="flex w-full items-center justify-between border-b border-zinc-700 p-3 first:rounded-t-md hover:cursor-pointer hover:bg-zinc-800 sm:gap-x-16"
+                  >
+                    <div className="flex gap-x-2">
+                      <p>userId: {user.id.slice(0, 8)}</p>
+                    </div>
+                    <div className="flex h-full min-w-fit items-center gap-x-1">
+                      {appUser && appUser.id !== user.id && appGroup.data && (
+                        <>
+                          <Button
+                            className={`after:h-full after:w-px after:bg-zinc-500 ${
+                              appGroup.data.userArray?.find(
+                                (groupUser) => groupUser.id === user.id,
+                              )
+                                ? "text-pink-400"
+                                : "text-indigo-400"
+                            }`}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!appGroup.data) return;
 
-                  if (!user.groupArray) {
-                    console.error("Cannot login. User has no groupArray.");
-                    return;
-                  }
+                              const updatedAppGroup =
+                                appGroup.data.userArray?.find(
+                                  (groupUser) => groupUser.id === user.id,
+                                )
+                                  ? await removeUserFromGroup.mutateAsync({
+                                      groupId: appGroup.data.id,
+                                      userId: user.id,
+                                    })
+                                  : await addUserToGroup.mutateAsync({
+                                      userId: user.id,
+                                      groupId: appGroup.data.id,
+                                    });
+                            }}
+                          >
+                            {appGroup.data.userArray?.find(
+                              (groupUser) => groupUser.id === user.id,
+                            ) ? (
+                              <span className="icon-[mdi--user-remove-outline] h-5 w-5" />
+                            ) : (
+                              <span className="icon-[mdi--user-add-outline] h-5 w-5" />
+                            )}
+                          </Button>
 
-                  const group = await server.group.get.fetch({
-                    id: user.groupArray[0].id,
-                  });
+                          <div className="flex h-full w-px bg-zinc-500"></div>
+                        </>
+                      )}
 
-                  if (!group) {
-                    console.error(
-                      "Cannot login. server returned undefined group.",
-                    );
-                    return;
-                  }
-                  setAppGroup(group);
-                  router.push("/transactions");
-                }}
-              >
-                <div className="flex gap-x-2">
-                  <p>userId: {user.id.slice(0, 8)}</p>
-                </div>
-                <div className="flex h-full min-w-fit items-center gap-x-1">
-                  {appUser && appUser.id !== user.id && appGroup && (
-                    <>
                       <Button
-                        className={`after:h-full after:w-px after:bg-zinc-500 ${
-                          appGroup.userArray?.find(
-                            (groupUser) => groupUser.id === user.id,
-                          )
-                            ? "text-pink-400"
-                            : "text-indigo-400"
-                        }`}
+                        title="Delete user"
+                        className="text-pink-400 hover:text-pink-500"
                         onClick={async (e) => {
                           e.stopPropagation();
+                          if (user.groupArray && user.groupArray.length > 0) {
+                            await deleteGroup.mutateAsync({
+                              id: user.groupArray[0].id,
+                            });
+                          }
 
-                          const updatedAppGroup = appGroup.userArray?.find(
-                            (groupUser) => groupUser.id === user.id,
-                          )
-                            ? await removeUserFromGroup.mutateAsync({
-                                groupId: appGroup.id,
-                                userId: user.id,
-                              })
-                            : await addUserToGroup.mutateAsync({
-                                userId: user.id,
-                                groupId: appGroup.id,
-                              });
-
-                          setAppGroup(updatedAppGroup);
+                          await deleteUser.mutateAsync(user.id);
+                          deleteUserId(user.id);
                         }}
                       >
-                        {appGroup.userArray?.find(
-                          (groupUser) => groupUser.id === user.id,
-                        ) ? (
-                          <span className="icon-[mdi--user-remove-outline] h-5 w-5" />
-                        ) : (
-                          <span className="icon-[mdi--user-add-outline] h-5 w-5" />
-                        )}
+                        <span className="icon-[mdi--delete-outline] h-5 w-5" />
                       </Button>
-
-                      <div className="flex h-full w-px bg-zinc-500"></div>
-                    </>
-                  )}
-
-                  <Button
-                    title="Delete user"
-                    className="text-pink-400 hover:text-pink-500"
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      if (user.groupArray && user.groupArray.length > 0) {
-                        await deleteGroup.mutateAsync({
-                          id: user.groupArray[0].id,
-                        });
-                      }
-
-                      await deleteUser.mutateAsync(user.id);
-                      deleteUserId(user.id);
-
-                      if (appUser && appUser.id === user.id) {
-                        setAppUser(emptyUser);
-                      }
-                    }}
-                  >
-                    <span className="icon-[mdi--delete-outline] h-5 w-5" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+                    </div>
+                  </div>
+                ),
+            )}
 
           <CreateUserBtn addUserId={addUserId} />
         </div>

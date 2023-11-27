@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { usePlaidLink } from "react-plaid-link";
 
-import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 
 import { ActionBtn } from "./Button";
@@ -13,7 +12,6 @@ const LinkBtn = () => {
   });
 
   const appUser = allUsers.data?.[0];
-  const setAppUser = useStore((state) => state.setAppUser);
   const setAccessToken = trpc.setAccessToken.useMutation();
   const linkToken = trpc.createLinkToken.useQuery(undefined, {
     staleTime: 360000,
@@ -37,15 +35,13 @@ const LinkBtn = () => {
         if (!user.hasAccessToken) {
           console.error("unable to set access token from server");
         }
-
-        setAppUser({ ...user });
       };
 
       getUserAccessToken();
 
       router.push("/home");
     },
-    [appUser, router, setAccessToken, setAppUser],
+    [appUser, router, setAccessToken],
   );
 
   let isOauth = false;

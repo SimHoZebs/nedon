@@ -7,7 +7,6 @@ import { H1, H2, H3 } from "@/comp/Heading";
 import TransactionCard from "@/comp/transaction/TransactionCard";
 import TransactionModal from "@/comp/transaction/TransactionModal/TransactionModal";
 
-import { useStore } from "@/util/store";
 import {
   filterTransactionByDate,
   organizeTransactionByTime,

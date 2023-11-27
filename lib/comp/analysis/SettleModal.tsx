@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 
 import { ActionBtn } from "../Button";
@@ -18,7 +17,7 @@ const SettleModal = (props: Props) => {
   const appUser = allUsers.data?.[0];
 
   const [settleAmount, setSettleAmount] = useState(0);
-  const [appUserGiving, setAppuserGiving] = useState(true);
+  const [appUserGiving, setAppUserGiving] = useState(true);
 
   const createTransactionManually =
     trpc.transaction.createManually.useMutation();
@@ -36,7 +35,7 @@ const SettleModal = (props: Props) => {
           {appUser?.id.slice(0, 8)}
           <button
             className="flex flex-col"
-            onClick={() => setAppuserGiving((prev) => !prev)}
+            onClick={() => setAppUserGiving((prev) => !prev)}
           >
             <span
               className={

@@ -2,12 +2,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
 import { ActionBtn, Button } from "@/comp/Button";
-import { H1, H2, H3, H4 } from "@/comp/Heading";
+import { H1, H3, H4 } from "@/comp/Heading";
 import SettleModal from "@/comp/analysis/SettleModal";
 
 import { getCategoryStyle } from "@/util/category";
 import parseMoney from "@/util/parseMoney";
-import { useStore } from "@/util/store";
 import {
   filterTransactionByDate,
   organizeTransactionByCategory,

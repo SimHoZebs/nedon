@@ -10,8 +10,6 @@ const Page = () => {
   const verticalCategoryPicker = useStore(
     (state) => state.verticalCategoryPicker,
   );
-  const setAppUser = useStore((state) => state.setAppUser);
-  const setAppGroup = useStore((state) => state.setAppGroup);
   const setVerticalCategoryPicker = useStore(
     (state) => state.setVerticalCategoryPicker,
   );
@@ -23,8 +21,6 @@ const Page = () => {
         className="gap-x-2"
         onClick={() => {
           router.push("/");
-          setAppUser(undefined);
-          setAppGroup(undefined);
         }}
       >
         <span className="icon-[mdi--logout] h-4 w-4 text-zinc-600 group-hover:text-zinc-500" />

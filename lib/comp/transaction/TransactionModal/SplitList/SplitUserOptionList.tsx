@@ -4,7 +4,6 @@ import { Button } from "@/comp/Button";
 
 import { mergeCategoryArray } from "@/util/category";
 import parseMoney from "@/util/parseMoney";
-import { useStore } from "@/util/store";
 import { useTransactionStore } from "@/util/transactionStore";
 import { trpc } from "@/util/trpc";
 
@@ -14,7 +13,12 @@ const SplitUserOptionList = () => {
   });
 
   const appUser = allUsers.data?.[0];
-  const appGroup = useStore((state) => state.appGroup);
+  const appGroup = trpc.group.get.useQuery(
+    { id: appUser?.groupArray?.[0].id || "" },
+    { staleTime: Infinity, enabled: !!appUser },
+  );
+
+  // const appGroup = useStore((state) => state.appGroup);
   const transaction = useTransactionStore((state) => state.transactionOnModal);
   const unsavedSplitArray = useTransactionStore(
     (state) => state.unsavedSplitArray,
@@ -25,8 +29,8 @@ const SplitUserOptionList = () => {
 
   return (
     <>
-      {appGroup?.userArray
-        ? appGroup.userArray.map((user, i) =>
+      {appGroup.data?.userArray
+        ? appGroup.data.userArray.map((user, i) =>
             unsavedSplitArray.find((split) => split.userId === user.id) ||
             user.id === appUser?.id ? null : (
               <div key={i} className="flex items-center gap-x-2">
