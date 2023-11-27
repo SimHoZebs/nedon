@@ -5,6 +5,7 @@ import { getCategoryStyle } from "@/util/category";
 import parseMoney from "@/util/parseMoney";
 import { useStore } from "@/util/store";
 import { useTransactionStore } from "@/util/transactionStore";
+import { trpc } from "@/util/trpc";
 import { FullTransaction } from "@/util/types";
 
 interface Props {
@@ -12,7 +13,11 @@ interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const TransactionCard = (props: Props) => {
-  const appUser = useStore((state) => state.appUser);
+  const allUsers = trpc.user.getAll.useQuery(undefined, {
+    staleTime: Infinity,
+  });
+
+  const appUser = allUsers.data?.[0];
   const setTransactionOnModal = useTransactionStore(
     (state) => state.setTransactionOnModal,
   );

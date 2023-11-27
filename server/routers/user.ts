@@ -28,26 +28,16 @@ const userRouter = router({
   }),
 
   getAll: procedure
-    .input(z.array(z.string()))
-    .query(async ({ input: userIdArray }) => {
-      let userArray: ((User & { groupArray: Group[] }) | null)[] = [];
+    .input(z.undefined())
+    .query(async () => {
+      let userArray: ((User & { groupArray: Group[]; }) | null)[] = [];
 
-      if (process.env.NODE_ENV === "production") {
-        userArray =
-          userIdArray.length > 0
-            ? await db.user.findMany({
-                where: { id: { in: userIdArray } },
-                include: { groupArray: true },
-              })
-            : [];
-      } else {
-        //developers get to see all accounts
-        userArray = await db.user.findMany({
-          include: {
-            groupArray: true,
-          },
-        });
-      }
+      //developers get to see all accounts
+      userArray = await db.user.findMany({
+        include: {
+          groupArray: true,
+        },
+      });
 
       const clientSideUserArray = userArray.map(
         (user) => user && stripUserSecrets(user),

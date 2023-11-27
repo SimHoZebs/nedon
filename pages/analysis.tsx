@@ -92,7 +92,11 @@ const render = (hierarchicalCategoryArray: TreedCategoryWithTransaction[]) =>
   ));
 
 const Page = () => {
-  const appUser = useStore((state) => state.appUser);
+  const allUsers = trpc.user.getAll.useQuery(undefined, {
+    staleTime: Infinity,
+  });
+
+  const appUser = allUsers.data?.[0];
   const [showModal, setShowModal] = useState(false);
   const [oweUser, setOweUser] = useState<{ id: string; amount: number }>();
   const [rangeFormat, setRangeFormat] = useState<

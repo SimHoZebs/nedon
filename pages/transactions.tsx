@@ -16,7 +16,11 @@ import { trpc } from "@/util/trpc";
 import { FullTransaction } from "@/util/types";
 
 const Page: NextPage = () => {
-  const appUser = useStore((state) => state.appUser);
+  const allUsers = trpc.user.getAll.useQuery(undefined, {
+    staleTime: Infinity,
+  });
+
+  const appUser = allUsers.data?.[0];
 
   const transactionArray = trpc.transaction.getAll.useQuery(
     { id: appUser ? appUser.id : "" },

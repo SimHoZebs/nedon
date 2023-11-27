@@ -6,9 +6,14 @@ import { mergeCategoryArray } from "@/util/category";
 import parseMoney from "@/util/parseMoney";
 import { useStore } from "@/util/store";
 import { useTransactionStore } from "@/util/transactionStore";
+import { trpc } from "@/util/trpc";
 
 const SplitUserOptionList = () => {
-  const appUser = useStore((state) => state.appUser);
+  const allUsers = trpc.user.getAll.useQuery(undefined, {
+    staleTime: Infinity,
+  });
+
+  const appUser = allUsers.data?.[0];
   const appGroup = useStore((state) => state.appGroup);
   const transaction = useTransactionStore((state) => state.transactionOnModal);
   const unsavedSplitArray = useTransactionStore(

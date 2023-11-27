@@ -1,222 +1,155 @@
-import type { NextPage } from "next";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { NextPage } from "next";
+import { AccountBase, AuthGetResponse } from "plaid";
+import React, { useMemo, useRef, useState } from "react";
 
-import { Button } from "@/comp/Button";
-import { H1 } from "@/comp/Heading";
+import { H1, H2, H3, H4 } from "@/comp/Heading";
+import Modal from "@/comp/Modal";
+import AccountCard from "@/comp/home/AccountCard";
+import TransactionCard from "@/comp/transaction/TransactionCard";
 
-import { useLocalStore, useLocalStoreDelay, useStore } from "@/util/store";
+import { useStore } from "@/util/store";
+import { organizeTransactionByTime } from "@/util/transaction";
 import { trpc } from "@/util/trpc";
-import { emptyUser } from "@/util/user";
 
-const Home: NextPage = () => {
-  const router = useRouter();
-  const server = trpc.useContext();
-  const userIdArray = useLocalStoreDelay(
-    useLocalStore,
-    (state) => state.userIdArray,
-  );
-  const addUserId = useLocalStore((state) => state.addUserId);
-  const deleteUserId = useLocalStore((state) => state.deleteUserId);
-  const setUserIdArray = useLocalStore((state) => state.setUserIdArray);
+const User: NextPage = () => {
+  // const appUser = useStore((state) => state.appUser);
+  const [showModal, setShowModal] = useState(false);
+  const [clickedAccount, setClickedAccount] = useState<AccountBase>();
 
-  //userIdArray will never be undefined due to enable condition.
-  const allUsers = trpc.user.getAll.useQuery(userIdArray!, {
+  const allUsers = trpc.user.getAll.useQuery(undefined, {
     staleTime: Infinity,
-    enabled: !!userIdArray && userIdArray.length > 0,
   });
 
-  const deleteUser = trpc.user.delete.useMutation();
-  const deleteGroup = trpc.group.delete.useMutation();
+  const appUser = allUsers.data?.[0];
 
-  const appUser = useStore((state) => state.appUser);
-  const appGroup = useStore((state) => state.appGroup);
-  const setAppUser = useStore((state) => state.setAppUser);
-  const setAppGroup = useStore((state) => state.setAppGroup);
+  const transactionArray = trpc.transaction.getAll.useQuery(
+    { id: appUser ? appUser.id : "" },
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken },
+  );
 
-  const addUserToGroup = trpc.group.addUser.useMutation();
-  const removeUserFromGroup = trpc.group.removeUser.useMutation();
+  const auth = trpc.auth.useQuery(
+    { id: appUser ? appUser.id : "" },
+    { staleTime: 3600000, enabled: !!appUser },
+  );
 
-  useEffect(() => {
-    if (!allUsers.data) {
-      allUsers.status === "loading"
-        ? console.debug("Can't sync userIdArray. allUsers is loading.")
-        : console.error("Can't sync serIdArray. Fetching allUsers failed.");
-      return;
-    }
+  const loading = useRef(
+    <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700"></div>,
+  );
 
-    setUserIdArray(allUsers.data.map((user) => user.id));
-  }, [allUsers.data, allUsers.status, setUserIdArray]);
+  const sortedTransactionArray = useMemo(() => {
+    if (!transactionArray.data) return [[[[]]]];
+    const filteredTxArray = transactionArray.data.filter(
+      (tx) => tx.account_id === clickedAccount?.account_id,
+    );
+    return organizeTransactionByTime(filteredTxArray);
+  }, [clickedAccount?.account_id, transactionArray.data]);
 
   return (
-    <section className="flex h-full w-full flex-col items-center justify-center gap-y-3 text-center">
-      <H1>
-        {!allUsers.data
-          ? "Loading available accounts...."
-          : "Choose an account"}
-      </H1>
+    <section className="flex h-full w-full flex-col items-center gap-y-3">
+      <H1>All Accounts</H1>
+      {showModal && clickedAccount && (
+        <Modal setShowModal={setShowModal}>
+          <div className="flex h-full w-full flex-col items-end justify-between">
+            <button
+              aria-label="Close"
+              className="mb-1 flex"
+              onClick={() => setShowModal(false)}
+            >
+              <span className="icon-[iconamoon--close-fill] h-6 w-6 rounded-full text-zinc-400 outline outline-1 hover:text-pink-400" />
+            </button>
 
-      {addUserId && (
-        <div className="flex w-full max-w-xs flex-col items-center rounded-md border border-zinc-600">
-          {allUsers.data &&
-            allUsers.data.map((user) => (
-              <div
-                key={user.id}
-                className="flex w-full items-center justify-between border-b border-zinc-700 p-3 first:rounded-t-md hover:cursor-pointer hover:bg-zinc-800 sm:gap-x-16"
-                onClick={async (e) => {
-                  setAppUser(user);
-
-                  if (!user.groupArray) {
-                    console.error("Cannot login. User has no groupArray.");
-                    return;
-                  }
-
-                  const group = await server.group.get.fetch({
-                    id: user.groupArray[0].id,
-                  });
-
-                  if (!group) {
-                    console.error(
-                      "Cannot login. server returned undefined group.",
-                    );
-                    return;
-                  }
-                  setAppGroup(group);
-                  router.push("/transactions");
-                }}
-              >
-                <div className="flex gap-x-2">
-                  <p>userId: {user.id.slice(0, 8)}</p>
+            <div className="flex h-full w-full flex-col items-end justify-between overflow-hidden lg:flex-row lg:items-start">
+              <div className="flex w-full flex-row justify-between lg:flex-col lg:justify-normal">
+                <div className="">
+                  <H1>{clickedAccount.name}</H1>
+                  <p className="text-zinc-400 ">
+                    {clickedAccount.official_name}
+                  </p>
                 </div>
-                <div className="flex h-full min-w-fit items-center gap-x-1">
-                  {appUser && appUser.id !== user.id && appGroup && (
-                    <>
-                      <Button
-                        className={`after:h-full after:w-px after:bg-zinc-500 ${
-                          appGroup.userArray?.find(
-                            (groupUser) => groupUser.id === user.id,
-                          )
-                            ? "text-pink-400"
-                            : "text-indigo-400"
-                        }`}
-                        onClick={async (e) => {
-                          e.stopPropagation();
-
-                          const updatedAppGroup = appGroup.userArray?.find(
-                            (groupUser) => groupUser.id === user.id,
-                          )
-                            ? await removeUserFromGroup.mutateAsync({
-                                groupId: appGroup.id,
-                                userId: user.id,
-                              })
-                            : await addUserToGroup.mutateAsync({
-                                userId: user.id,
-                                groupId: appGroup.id,
-                              });
-
-                          setAppGroup(updatedAppGroup);
-                        }}
-                      >
-                        {appGroup.userArray?.find(
-                          (groupUser) => groupUser.id === user.id,
-                        ) ? (
-                          <span className="icon-[mdi--user-remove-outline] h-5 w-5" />
-                        ) : (
-                          <span className="icon-[mdi--user-add-outline] h-5 w-5" />
-                        )}
-                      </Button>
-
-                      <div className="flex h-full w-px bg-zinc-500"></div>
-                    </>
-                  )}
-
-                  <Button
-                    title="Delete user"
-                    className="text-pink-400 hover:text-pink-500"
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      if (user.groupArray && user.groupArray.length > 0) {
-                        await deleteGroup.mutateAsync({
-                          id: user.groupArray[0].id,
-                        });
-                      }
-
-                      await deleteUser.mutateAsync(user.id);
-                      deleteUserId(user.id);
-
-                      if (appUser && appUser.id === user.id) {
-                        setAppUser(emptyUser);
-                      }
-                    }}
-                  >
-                    <span className="icon-[mdi--delete-outline] h-5 w-5" />
-                  </Button>
+                <div className="flex flex-col items-end lg:items-start">
+                  <H3>Current: ${clickedAccount.balances.available}</H3>
+                  <H3>Available: ${clickedAccount.balances.current}</H3>
                 </div>
               </div>
-            ))}
 
-          <CreateUserBtn addUserId={addUserId} />
-        </div>
+              <ol className="flex h-full w-full flex-col gap-y-3 p-1 lg:max-w-lg">
+                <H2>Transaction History</H2>
+                {sortedTransactionArray.map((year, i) => (
+                  <li
+                    className="no-scrollbar flex w-full flex-col items-center overflow-y-scroll"
+                    key={Math.random() * (i + 1)}
+                  >
+                    <ol className="flex flex-col gap-y-1">
+                      {year.map((month, j) => (
+                        <li
+                          key={Math.random() * (j + 1)}
+                          className="w-full flex-col gap-y-1"
+                        >
+                          <H3>{month[0][0]?.date.slice(5, 7)}</H3>
+                          <ol className="flex flex-col gap-y-1">
+                            {month.map((day, k) => (
+                              <li
+                                className="flex w-full flex-col gap-y-1"
+                                key={Math.random() * (k + 1)}
+                              >
+                                <H4>{day[0]?.date.slice(8)}</H4>
+                                <ol className="flex flex-col gap-y-2">
+                                  {day.map(
+                                    (transaction, l) =>
+                                      transaction && (
+                                        <TransactionCard
+                                          setShowModal={setShowModal}
+                                          transaction={transaction}
+                                          key={transaction.transaction_id}
+                                        />
+                                      ),
+                                  )}
+                                </ol>
+                              </li>
+                            ))}
+                          </ol>
+                        </li>
+                      ))}
+                    </ol>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </Modal>
       )}
 
-      <p>
-        This is a very early preview. Viewing on desktop is recommended, but a
-        responsive mobile view is in the works. Feel free to make issues of any
-        bug found.
-      </p>
+      <div className="flex w-full max-w-md flex-col gap-y-3">
+        {auth.isLoading && (
+          <>
+            {Array.from({ length: 3 }).map((val, index) => (
+              <AccountCard key={index} disabled={true}>
+                {loading.current}
+                {loading.current}
+              </AccountCard>
+            ))}
+          </>
+        )}
+
+        {auth.data &&
+          (auth.data as unknown as AuthGetResponse).accounts.map(
+            (account, index) =>
+              account.balances.available && (
+                <AccountCard
+                  key={index}
+                  onClick={() => {
+                    setClickedAccount(account);
+                    setShowModal(true);
+                  }}
+                >
+                  <p>{account.name}</p>
+                  <p>${account.balances.available}</p>
+                </AccountCard>
+              ),
+          )}
+      </div>
     </section>
   );
 };
 
-interface Props {
-  addUserId: (userId: string) => void;
-}
-
-const CreateUserBtn = (props: Props) => {
-  const createUser = trpc.user.create.useMutation();
-  const createGroup = trpc.group.create.useMutation();
-
-  const sandboxPublicToken = trpc.sandBoxAccess.useQuery(
-    { instituteID: undefined },
-    { staleTime: 360000, enabled: false },
-  );
-  const setAccessToken = trpc.setAccessToken.useMutation();
-  const [loading, setLoading] = useState(false);
-
-  return (
-    <Button
-      className="flex w-full items-center justify-center gap-x-2 rounded-none rounded-b-md text-xl font-semibold hover:bg-zinc-800 hover:text-zinc-200"
-      onClick={async (e) => {
-        setLoading(true);
-        e.stopPropagation();
-        const user = await createUser.mutateAsync();
-        await createGroup.mutateAsync({ id: user.id });
-        if (createGroup.error) console.error(createGroup.error);
-
-        const publicToken = await sandboxPublicToken.refetch();
-        if (!publicToken.data) throw new Error("no public token");
-
-        const userWithAccessToken = await setAccessToken.mutateAsync({
-          publicToken: publicToken.data,
-          id: user.id,
-        });
-
-        props.addUserId(userWithAccessToken.id);
-        setLoading(false);
-      }}
-    >
-      {loading ? (
-        <div className="flex h-4 w-4">
-          <span className="icon-[mdi--loading] h-4 w-4 animate-spin" />
-        </div>
-      ) : (
-        <div className="flex h-4 w-4">
-          <span className="icon-[mdi--plus-thick] h-4 w-4" />
-        </div>
-      )}
-      create user
-    </Button>
-  );
-};
-
-export default Home;
+export default User;

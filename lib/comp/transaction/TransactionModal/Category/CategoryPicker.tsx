@@ -26,7 +26,11 @@ const CategoryPicker = forwardRef(
     );
     const queryClient = trpc.useContext();
 
-    const appUser = useStore((state) => state.appUser);
+    const allUsers = trpc.user.getAll.useQuery(undefined, {
+      staleTime: Infinity,
+    });
+
+    const appUser = allUsers.data?.[0];
     const transaction = useTransactionStore(
       (state) => state.transactionOnModal,
     );

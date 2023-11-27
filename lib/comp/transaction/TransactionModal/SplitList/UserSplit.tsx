@@ -6,6 +6,7 @@ import parseMoney from "@/util/parseMoney";
 import { calcSplitAmount } from "@/util/split";
 import { useStore } from "@/util/store";
 import { useTransactionStore } from "@/util/transactionStore";
+import { trpc } from "@/util/trpc";
 import { SplitClientSide } from "@/util/types";
 
 import UserSplitCategory from "./UserSplitCategory";
@@ -19,7 +20,11 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const UserSplit = (props: Props) => {
-  const appUser = useStore((state) => state.appUser);
+  const allUsers = trpc.user.getAll.useQuery(undefined, {
+    staleTime: Infinity,
+  });
+
+  const appUser = allUsers.data?.[0];
   const transaction = useTransactionStore((state) => state.transactionOnModal);
   const unsavedSplitArray = useTransactionStore(
     (state) => state.unsavedSplitArray,

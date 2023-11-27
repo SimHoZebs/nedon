@@ -2,6 +2,8 @@ import { Open_Sans } from "next/font/google";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 
+import { trpc } from "@/util/trpc";
+
 import { useStore } from "../util/store";
 import { ActionBtn, Button, NavBtn } from "./Button";
 
@@ -13,7 +15,12 @@ const customFont = Open_Sans({
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
-  const appUser = useStore((state) => state.appUser);
+
+  const allUsers = trpc.user.getAll.useQuery(undefined, {
+    staleTime: Infinity,
+  });
+
+  const appUser = allUsers.data?.[0];
 
   useEffect(() => {
     if (!appUser && router.pathname !== "/") {
@@ -40,7 +47,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
           <div className="flex w-full items-center justify-center gap-3 sm:flex-col">
             <NavBtn
               router={router}
-              route="/home"
+              route="/"
               icon="icon-[mdi--home-variant-outline]"
             >
               Home
@@ -63,7 +70,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             </NavBtn>
 
             <div className="sm:w-full">
-              <ActionBtn onClick={() => router.push("/")}>
+              <ActionBtn onClick={() => router.push("/user")}>
                 <div className="flex items-center gap-x-2">
                   <span className="icon-[mdi--user-add-outline] h-6 w-6" />
                   <p>Add friend</p>

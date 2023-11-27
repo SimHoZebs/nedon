@@ -11,7 +11,12 @@ interface Props {
   oweUser: { id: string; amount: number } | undefined;
 }
 const SettleModal = (props: Props) => {
-  const appUser = useStore((state) => state.appUser);
+  const allUsers = trpc.user.getAll.useQuery(undefined, {
+    staleTime: Infinity,
+  });
+
+  const appUser = allUsers.data?.[0];
+
   const [settleAmount, setSettleAmount] = useState(0);
   const [appUserGiving, setAppuserGiving] = useState(true);
 
