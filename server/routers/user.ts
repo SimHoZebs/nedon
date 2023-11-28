@@ -27,24 +27,22 @@ const userRouter = router({
     };
   }),
 
-  getAll: procedure
-    .input(z.undefined())
-    .query(async () => {
-      let userArray: ((User & { groupArray: Group[]; }) | null)[] = [];
+  getAll: procedure.input(z.undefined()).query(async () => {
+    let userArray: ((User & { groupArray: Group[]; }) | null)[] = [];
 
-      //developers get to see all accounts
-      userArray = await db.user.findMany({
-        include: {
-          groupArray: true,
-        },
-      });
+    //developers get to see all accounts
+    userArray = await db.user.findMany({
+      include: {
+        groupArray: true,
+      },
+    });
 
-      const clientSideUserArray = userArray.map(
-        (user) => user && stripUserSecrets(user),
-      );
+    const clientSideUserArray = userArray.map(
+      (user) => user && stripUserSecrets(user),
+    );
 
-      return clientSideUserArray.filter((user) => !!user) as UserClientSide[];
-    }),
+    return clientSideUserArray.filter((user) => !!user) as UserClientSide[];
+  }),
 
   create: procedure.input(z.undefined()).mutation(async () => {
     const user = await db.user.create({
@@ -66,5 +64,12 @@ const userRouter = router({
 
     return user;
   }),
+
+  deleteAll: procedure.input(z.undefined()).mutation(async () => {
+    const user = await db.user.deleteMany({
+    });
+
+    return user.count;
+  })
 });
 export default userRouter;
