@@ -29,6 +29,46 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   const appUser = allUsers.data?.[0];
 
+  useEffect(() => {
+    const createUserWithPlaid = async () => {
+      const user = await createUser.mutateAsync();
+      await createGroup.mutateAsync({ id: user.id });
+
+      if (createGroup.error) console.error(createGroup.error);
+
+      const publicToken = await sandboxPublicToken.refetch();
+      if (!publicToken.data) throw new Error("no public token");
+
+      await setAccessToken.mutateAsync({
+        publicToken: publicToken.data,
+        id: user.id,
+      });
+
+      queryClient.user.getAll.invalidate();
+    };
+
+    if (
+      !appUser &&
+      !allUsers.isFetching &&
+      !sandboxPublicToken.isFetching &&
+      createUser.isIdle &&
+      createGroup.isIdle
+    ) {
+      console.log(
+        "There are no users in db and none are being created at the moment; creating one...",
+      );
+      createUserWithPlaid();
+    }
+  }, [
+    allUsers.isFetching,
+    appUser,
+    createGroup,
+    createUser,
+    queryClient.user.getAll,
+    sandboxPublicToken,
+    setAccessToken,
+  ]);
+
   return (
     <div
       className={`flex h-[100dvh] w-[100dvw] flex-col bg-zinc-900 text-sm font-medium text-zinc-300 sm:flex-row sm:text-base
@@ -79,21 +119,6 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             onClick={async (e) => {
               e.stopPropagation();
               if (appUser) router.push("/profile");
-              else {
-                const user = await createUser.mutateAsync();
-                await createGroup.mutateAsync({ id: user.id });
-                if (createGroup.error) console.error(createGroup.error);
-
-                const publicToken = await sandboxPublicToken.refetch();
-                if (!publicToken.data) throw new Error("no public token");
-
-                await setAccessToken.mutateAsync({
-                  publicToken: publicToken.data,
-                  id: user.id,
-                });
-
-                queryClient.user.getAll.invalidate();
-              }
             }}
           >
             <div className="flex w-full items-center gap-x-2">
@@ -102,7 +127,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
               </div>
 
               <p className="hidden w-full items-center sm:block">
-                {appUser ? appUser.id.slice(0, 8) : "create user"}
+                {appUser && appUser.id.slice(0, 8)}
               </p>
             </div>
           </Button>

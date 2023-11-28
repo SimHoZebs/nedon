@@ -119,33 +119,37 @@ const User: NextPage = () => {
       )}
 
       <div className="flex w-full max-w-md flex-col gap-y-3">
-        {auth.isLoading && (
-          <>
-            {Array.from({ length: 3 }).map((val, index) => (
-              <AccountCard key={index} disabled={true}>
-                {loading.current}
-                {loading.current}
-              </AccountCard>
-            ))}
-          </>
+        {auth.fetchStatus === "idle" ? (
+          auth.data ? (
+            (auth.data as unknown as AuthGetResponse).accounts.map(
+              (account, index) =>
+                account.balances.available && (
+                  <AccountCard
+                    key={index}
+                    onClick={() => {
+                      setClickedAccount(account);
+                      setShowModal(true);
+                    }}
+                  >
+                    <p>{account.name}</p>
+                    <p>${account.balances.available}</p>
+                  </AccountCard>
+                ),
+            )
+          ) : (
+            <div>
+              Your connection is fine, but we could not find any accounts in our
+              database.
+            </div>
+          )
+        ) : (
+          Array.from({ length: 3 }).map((val, index) => (
+            <AccountCard key={index} disabled={true}>
+              {loading.current}
+              {loading.current}
+            </AccountCard>
+          ))
         )}
-
-        {auth.data &&
-          (auth.data as unknown as AuthGetResponse).accounts.map(
-            (account, index) =>
-              account.balances.available && (
-                <AccountCard
-                  key={index}
-                  onClick={() => {
-                    setClickedAccount(account);
-                    setShowModal(true);
-                  }}
-                >
-                  <p>{account.name}</p>
-                  <p>${account.balances.available}</p>
-                </AccountCard>
-              ),
-          )}
       </div>
     </section>
   );
