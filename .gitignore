@@ -13,6 +13,8 @@
 
 # testing
 /coverage
+1-getting-started/
+2-advanced-examples/
 
 # next.js
 /.next/
@@ -34,8 +36,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local env files
-.env*.local
-.env
+.env*
 
 # vercel
 .vercel
