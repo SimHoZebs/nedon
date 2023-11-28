@@ -4,6 +4,7 @@ import React from "react";
 import { ActionBtn } from "@/comp/Button";
 
 import { useStore } from "@/util/store";
+import { trpc } from "@/util/trpc";
 
 const Page = () => {
   const router = useRouter();
@@ -13,6 +14,7 @@ const Page = () => {
   const setVerticalCategoryPicker = useStore(
     (state) => state.setVerticalCategoryPicker,
   );
+  const deleteAll = trpc.user.deleteAll.useMutation();
 
   return (
     <section className="flex h-full w-full flex-col items-start gap-y-3">
@@ -39,6 +41,13 @@ const Page = () => {
           make category picker vertical
         </label>
       </div>
+
+      <ActionBtn
+        variant="negative"
+        onClick={async () => deleteAll.mutateAsync()}
+      >
+        DELETE ALL EXISTING ACCOUNTS
+      </ActionBtn>
     </section>
   );
 };
