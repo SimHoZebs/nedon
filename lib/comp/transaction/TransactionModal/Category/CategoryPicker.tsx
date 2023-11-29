@@ -330,7 +330,7 @@ const CategoryPicker = forwardRef(
                   "text-zinc-500 group-hover:text-zinc-400"
                 } ${
                   categoryStyleArray[category.name]?.icon ||
-                  "material-symbols:category-outline"
+                  "icon-[material-symbols--category-outline]"
                 }`}
               />
               <p>{category.name}</p>
