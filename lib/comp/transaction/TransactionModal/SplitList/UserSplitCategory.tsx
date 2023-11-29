@@ -29,7 +29,7 @@ const UserSplitCategory = (props: Props) => {
           getCategoryStyle(category.nameArray).bgColor
         } ${getCategoryStyle(category.nameArray).icon}`}
       />
-      <div className="flex flex-col items-start">
+      <div className="flex flex-col items-start gap-y-2">
         <p className="font-light text-zinc-300">{category.nameArray.at(-1)}</p>
 
         <div className="flex items-center font-light ">

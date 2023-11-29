@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { ActionBtn, Button } from "@/comp/Button";
 import { H1, H3, H4 } from "@/comp/Heading";
+import AnalysisBar from "@/comp/analysis/AnalysisBar";
 import SettleModal from "@/comp/analysis/SettleModal";
 
 import { getCategoryStyle } from "@/util/category";
@@ -227,11 +228,6 @@ const Page = () => {
     associatedTransactionArray.status,
   ]);
 
-  const spendingTotal = categoryArrayTotal(
-    organizeTransactionByCategory(scopedTransactionArray),
-    "spending",
-  );
-
   const organizedTxByCategoryArray = useMemo(
     () => organizeTransactionByCategory(scopedTransactionArray),
     [scopedTransactionArray],
@@ -329,20 +325,13 @@ const Page = () => {
           </select>
 
           <div className="flex h-9 w-full gap-x-1 overflow-hidden rounded-lg bg-zinc-900">
-            {organizedTxByCategoryArray.map((cat, i) => (
-              <div
-                key={i}
-                className={"h-full " + getCategoryStyle([cat.name]).bgColor}
-                style={{
-                  width:
-                    (
-                      ((cat.spending + subCategoryTotal(cat, "spending")) /
-                        spendingTotal) *
-                      100
-                    ).toString() + "%",
-                }}
-              ></div>
-            ))}
+            <AnalysisBar
+              organizedTxByCategoryArray={organizedTxByCategoryArray}
+              spendingTotal={categoryArrayTotal(
+                organizeTransactionByCategory(scopedTransactionArray),
+                "spending",
+              )}
+            />
           </div>
 
           <div className="flex w-full flex-col gap-y-2">

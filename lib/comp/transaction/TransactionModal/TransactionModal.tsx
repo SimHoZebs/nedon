@@ -6,7 +6,6 @@ import { ActionBtn } from "@/comp/Button";
 import { H1 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
 
-import { useStore } from "@/util/store";
 import { useTransactionStore } from "@/util/transactionStore";
 import { trpc } from "@/util/trpc";
 
@@ -77,7 +76,7 @@ const TransactionModal = (props: Props) => {
                     </div>
                     <button
                       aria-label="Close"
-                      className="mb-1 flex rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400"
+                      className="m-1 flex rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400"
                       onClick={() => props.setShowModal(false)}
                     >
                       <span className="icon-[iconamoon--close-fill] h-6 w-6 rounded-full text-zinc-400 hover:text-pink-400 lg:hidden"></span>
@@ -101,7 +100,7 @@ const TransactionModal = (props: Props) => {
                 <div className="flex flex-col items-start  text-sm font-light text-zinc-400 lg:items-end">
                   <button
                     aria-label="Close"
-                    className="mb-1 hidden h-6 w-6 rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400 lg:flex"
+                    className="m-1 hidden h-6 w-6 rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400 lg:flex"
                     onClick={() => props.setShowModal(false)}
                   >
                     <span className="icon-[iconamoon--close-fill] h-6 w-6 rounded-full text-zinc-400 hover:text-pink-400" />
@@ -117,14 +116,14 @@ const TransactionModal = (props: Props) => {
               </div>
             </div>
 
-            <div className="flex flex-col-reverse justify-between gap-y-1 md:flex-row ">
+            <div className="flex flex-col justify-between gap-y-3 md:flex-row ">
               <div>
                 <SplitList>
                   <H1>${amount * -1}</H1>
                 </SplitList>
               </div>
 
-              <div className="flex flex-col items-start">
+              <div className="flex flex-col items-start gap-y-2">
                 <Category />
 
                 <ActionBtn

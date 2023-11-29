@@ -19,7 +19,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   setModifiedSplitIndexArray: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
-const UserSplit = (props: Props) => {
+const SplitUser = (props: Props) => {
   const allUsers = trpc.user.getAll.useQuery(undefined, {
     staleTime: Infinity,
   });
@@ -234,4 +234,4 @@ const UserSplit = (props: Props) => {
   );
 };
 
-export default UserSplit;
+export default SplitUser;

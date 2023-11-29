@@ -9,8 +9,8 @@ import { useTransactionStore } from "@/util/transactionStore";
 import { trpc } from "@/util/trpc";
 import { SplitClientSide, isSplitInDB } from "@/util/types";
 
+import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
-import UserSplit from "./UserSplit";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -160,7 +160,7 @@ const SplitList = (props: Props) => {
               key={i}
               className="flex w-full items-center gap-x-2 sm:gap-x-3"
             >
-              <UserSplit
+              <SplitUser
                 setIsManaging={setIsManaging}
                 isManaging={isManaging}
                 modifiedSplitIndexArray={modifiedSplitIndexArray}
@@ -170,7 +170,7 @@ const SplitList = (props: Props) => {
                 <div className="flex items-center gap-x-2 rounded-full border-2 border-zinc-400">
                   <span className="2 icon-[mdi--account] h-8 w-8 bg-zinc-400 hover:bg-zinc-100" />
                 </div>
-              </UserSplit>
+              </SplitUser>
             </div>
           ))}
 
