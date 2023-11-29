@@ -13,6 +13,8 @@ import { isSplitInDB } from "@/util/types";
 import CategoryChip from "./CategoryChip";
 import CategoryPicker from "./CategoryPicker";
 
+const offScreen = { x: -600, y: 0 };
+
 const Category = () => {
   const unsavedSplitArray = useTransactionStore(
     (state) => state.unsavedSplitArray,
@@ -37,7 +39,7 @@ const Category = () => {
   const [pickerPosition, setPickerPosition] = useState<{
     x: number;
     y: number;
-  }>({ x: -600, y: 0 });
+  }>(offScreen);
 
   let updatedSplitAmount = parseMoney(
     unsavedSplitArray.reduce(
@@ -211,10 +213,7 @@ const Category = () => {
             position={pickerPosition}
             closePicker={() => {
               setEditingMergedCategoryIndex(undefined);
-              setPickerPosition({
-                x: -40,
-                y: 0,
-              });
+              setPickerPosition(offScreen);
             }}
           />
         )}
