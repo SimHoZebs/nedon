@@ -19,7 +19,7 @@ const SplitList = (props: Props) => {
   const deleteSplit = trpc.split.delete.useMutation();
   const createSplit = trpc.split.create.useMutation();
   const upsertManyCategory = trpc.category.upsertMany.useMutation();
-  const queryClient = trpc.useContext();
+  const queryClient = trpc.useUtils();
 
   const allUsers = trpc.user.getAll.useQuery(undefined, {
     staleTime: Infinity,

@@ -36,7 +36,7 @@ const TransactionModal = (props: Props) => {
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );
-  const queryClient = trpc.useContext();
+  const queryClient = trpc.useUtils();
 
   useEffect(() => {
     console.debug("transactionModal dependencies updated");

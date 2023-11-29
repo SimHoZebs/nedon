@@ -31,7 +31,7 @@ const Category = () => {
   const [editingMergedCategoryIndex, setEditingMergedCategoryIndex] =
     useState<number>();
   const [isManaging, setIsManaging] = useState(false);
-  const queryClient = trpc.useContext();
+  const queryClient = trpc.useUtils();
 
   //Picker always exists; Modal.tsx hides it with overflow-hidden
   const [pickerPosition, setPickerPosition] = useState<{

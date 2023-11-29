@@ -26,7 +26,7 @@ const CategoryChip = (props: Props) => {
   );
   const refreshDBData = useTransactionStore((store) => store.refreshDBData);
   const deleteManyCategory = trpc.category.deleteMany.useMutation();
-  const queryClient = trpc.useContext();
+  const queryClient = trpc.useUtils();
   const setUnsavedSplitArray = useTransactionStore(
     (store) => store.setUnsavedSplitArray,
   );

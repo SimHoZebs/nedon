@@ -11,7 +11,7 @@ const Home: NextPage = () => {
   //userIdArray will never be undefined due to enable condition.
   const deleteUser = trpc.user.delete.useMutation();
   const deleteGroup = trpc.group.delete.useMutation();
-  const queryClient = trpc.useContext();
+  const queryClient = trpc.useUtils();
 
   const allUsers = trpc.user.getAll.useQuery(undefined, {
     staleTime: Infinity,

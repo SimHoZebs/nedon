@@ -2,7 +2,6 @@ import React, { ForwardedRef, forwardRef, useEffect, useState } from "react";
 
 import { emptyCategory } from "@/util/category";
 import categoryStyleArray from "@/util/categoryStyle";
-import { useStore } from "@/util/store";
 import { useTransactionStore } from "@/util/transactionStore";
 import { trpc } from "@/util/trpc";
 import { MergedCategory, SplitInDB, TreedCategory } from "@/util/types";
@@ -24,7 +23,7 @@ const CategoryPicker = forwardRef(
       undefined,
       { staleTime: Infinity },
     );
-    const queryClient = trpc.useContext();
+    const queryClient = trpc.useUtils();
 
     const allUsers = trpc.user.getAll.useQuery(undefined, {
       staleTime: Infinity,
