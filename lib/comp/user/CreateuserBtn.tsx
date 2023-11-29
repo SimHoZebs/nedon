@@ -19,7 +19,7 @@ const CreateUserBtn = () => {
   return (
     <Button
       className="flex w-full items-center justify-center gap-x-2 rounded-none rounded-b-md text-xl font-semibold hover:bg-zinc-800 hover:text-zinc-200"
-      onClick={async (e) => {
+      onClickAsync={async (e) => {
         setLoading(true);
         e.stopPropagation();
         const user = await createUser.mutateAsync();

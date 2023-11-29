@@ -5,7 +5,6 @@ import { H3 } from "@/comp/Heading";
 
 import parseMoney from "@/util/parseMoney";
 import { calcSplitAmount } from "@/util/split";
-import { useStore } from "@/util/store";
 import { useTransactionStore } from "@/util/transactionStore";
 import { trpc } from "@/util/trpc";
 import { SplitClientSide, isSplitInDB } from "@/util/types";
@@ -124,7 +123,7 @@ const SplitList = (props: Props) => {
             <H3>Split</H3>
             {isManaging ? (
               <div className="flex gap-x-2">
-                <ActionBtn disabled={isWrongSplit} onClick={saveChanges}>
+                <ActionBtn disabled={isWrongSplit} onClickAsync={saveChanges}>
                   Save changes
                 </ActionBtn>
 
@@ -174,17 +173,19 @@ const SplitList = (props: Props) => {
               </UserSplit>
             </div>
           ))}
+
+          <div className="h-5 text-red-800">
+            {updatedSplitAmount !== transactionAmount &&
+              unsavedSplitArray.length > 0 &&
+              `Current split total is $${updatedSplitAmount}; $${parseMoney(
+                Math.abs(transactionAmount - updatedSplitAmount),
+              )} ${
+                updatedSplitAmount > transactionAmount ? "greater " : "less "
+              }
+          than needed`}
+          </div>
         </div>
       )}
-
-      <div className="h-5 text-red-800">
-        {updatedSplitAmount !== transactionAmount &&
-          unsavedSplitArray.length > 0 &&
-          `Current split total is $${updatedSplitAmount}; $${parseMoney(
-            Math.abs(transactionAmount - updatedSplitAmount),
-          )} ${updatedSplitAmount > transactionAmount ? "greater " : "less "}
-          than needed`}
-      </div>
 
       {isManaging && <SplitUserOptionList />}
     </div>

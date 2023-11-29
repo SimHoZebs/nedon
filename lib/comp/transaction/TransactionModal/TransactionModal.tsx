@@ -56,7 +56,7 @@ const TransactionModal = (props: Props) => {
     <>
       {transaction && (
         <Modal setShowModal={props.setShowModal}>
-          <div className="flex flex-col justify-between gap-y-2">
+          <div className="flex flex-col justify-between gap-y-2 overflow-clip">
             <div className="flex flex-col items-start gap-y-2">
               <div className="flex w-full flex-col justify-between gap-3 lg:flex-row">
                 <div className="flex flex-col gap-y-1">
@@ -128,7 +128,7 @@ const TransactionModal = (props: Props) => {
                 <Category />
 
                 <ActionBtn
-                  onClick={async () => {
+                  onClickAsync={async () => {
                     if (!transaction.id) {
                       console.error(
                         "Can't delete transaction. transaction not in db.",

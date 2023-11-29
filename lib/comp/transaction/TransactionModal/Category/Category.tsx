@@ -60,7 +60,7 @@ const Category = () => {
           <div className="flex gap-x-2">
             <ActionBtn
               disabled={isWrongSplit}
-              onClick={async () => {
+              onClickAsync={async () => {
                 const splitArrayClone = structuredClone(unsavedSplitArray);
                 const targetSplit = splitArrayClone[0];
 
@@ -149,7 +149,7 @@ const Category = () => {
           {isManaging && (
             <Button
               className="gap-x-1 rounded-lg text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
-              onClick={async (e) => {
+              onClickAsync={async (e) => {
                 const mergedCategoryArrayClone = structuredClone(
                   unsavedMergedCategoryArray,
                 );

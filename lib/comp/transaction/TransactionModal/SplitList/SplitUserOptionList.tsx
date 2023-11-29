@@ -28,72 +28,85 @@ const SplitUserOptionList = () => {
   );
 
   return (
-    <>
-      {appGroup.data?.userArray
-        ? appGroup.data.userArray.map((user, i) =>
-            unsavedSplitArray.find((split) => split.userId === user.id) ||
-            user.id === appUser?.id ? null : (
-              <div key={i} className="flex items-center gap-x-2">
-                <div className="flex items-center gap-x-2 rounded-full border-2 border-zinc-400">
-                  <span className="2 icon-[mdi--account] h-8 w-8 bg-zinc-400 hover:bg-zinc-100" />
-                </div>
-                <div>{user.id.slice(0, 8)}</div>
-                <Button
-                  className="bg-zinc-800 text-indigo-300"
-                  onClick={() => {
-                    if (!transaction) {
-                      console.error("no transaction data for modal");
-                      return;
-                    }
-
-                    if (!appUser) {
-                      console.error("no appUser");
-                      return;
-                    }
-
-                    const mergedCategoryArray =
-                      mergeCategoryArray(unsavedSplitArray);
-
-                    const updatedSplitArray = structuredClone(
-                      unsavedSplitArray,
-                    ).map((split) => ({
-                      ...split,
-                      categoryArray: split.categoryArray.map((category, i) => ({
-                        ...category,
-                        amount: parseMoney(
-                          //categories are expected to be ordered identically
-                          mergedCategoryArray[i].amount /
-                            (unsavedSplitArray.length + 1),
-                        ),
-                      })),
-                    }));
-
-                    const appUserCategoryArray = updatedSplitArray.find(
-                      (split) => split.userId === appUser.id,
-                    )?.categoryArray;
-
-                    if (!appUserCategoryArray) {
-                      console.error("appUser has no category array");
-                      return;
-                    }
-
-                    updatedSplitArray.push({
-                      id: null,
-                      transactionId: null,
-                      userId: user.id,
-                      categoryArray: structuredClone(appUserCategoryArray),
-                    });
-
-                    setUnsavedSplitArray(updatedSplitArray);
-                  }}
-                >
-                  Split
-                </Button>
+    <div className="no-scrollbar flex h-28 w-full flex-col gap-y-2 overflow-y-scroll">
+      {appGroup.isFetching
+        ? Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex w-2/3 animate-pulse rounded-lg bg-zinc-700 p-2 px-1"
+            >
+              <div className="flex items-center gap-x-2 rounded-full border-2 border-zinc-400">
+                <span className="2 icon-[mdi--account] h-8 w-8 bg-zinc-400 hover:bg-zinc-100" />
               </div>
-            ),
-          )
-        : null}
-    </>
+            </div>
+          ))
+        : appGroup.data?.userArray
+          ? appGroup.data.userArray.map((user, i) =>
+              unsavedSplitArray.find((split) => split.userId === user.id) ||
+              user.id === appUser?.id ? null : (
+                <div key={i} className="flex items-center gap-x-2 p-2 px-1">
+                  <div className="flex items-center gap-x-2 rounded-full border-2 border-zinc-400">
+                    <span className="2 icon-[mdi--account] h-8 w-8 bg-zinc-400 hover:bg-zinc-100" />
+                  </div>
+                  <div>{user.id.slice(0, 8)}</div>
+                  <Button
+                    className="bg-zinc-800 text-indigo-300"
+                    onClick={() => {
+                      if (!transaction) {
+                        console.error("no transaction data for modal");
+                        return;
+                      }
+
+                      if (!appUser) {
+                        console.error("no appUser");
+                        return;
+                      }
+
+                      const mergedCategoryArray =
+                        mergeCategoryArray(unsavedSplitArray);
+
+                      const updatedSplitArray = structuredClone(
+                        unsavedSplitArray,
+                      ).map((split) => ({
+                        ...split,
+                        categoryArray: split.categoryArray.map(
+                          (category, i) => ({
+                            ...category,
+                            amount: parseMoney(
+                              //categories are expected to be ordered identically
+                              mergedCategoryArray[i].amount /
+                                (unsavedSplitArray.length + 1),
+                            ),
+                          }),
+                        ),
+                      }));
+
+                      const appUserCategoryArray = updatedSplitArray.find(
+                        (split) => split.userId === appUser.id,
+                      )?.categoryArray;
+
+                      if (!appUserCategoryArray) {
+                        console.error("appUser has no category array");
+                        return;
+                      }
+
+                      updatedSplitArray.push({
+                        id: null,
+                        transactionId: null,
+                        userId: user.id,
+                        categoryArray: structuredClone(appUserCategoryArray),
+                      });
+
+                      setUnsavedSplitArray(updatedSplitArray);
+                    }}
+                  >
+                    Split
+                  </Button>
+                </div>
+              ),
+            )
+          : null}
+    </div>
   );
 };
 

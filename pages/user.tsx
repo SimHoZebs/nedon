@@ -67,7 +67,7 @@ const Home: NextPage = () => {
                               ? "text-pink-400"
                               : "text-indigo-400"
                           }`}
-                          onClick={async (e) => {
+                          onClickAsync={async (e) => {
                             e.stopPropagation();
                             if (!appGroup.data) return;
 
@@ -102,7 +102,7 @@ const Home: NextPage = () => {
                     <Button
                       title="Delete user"
                       className="text-pink-400 hover:text-pink-500"
-                      onClick={async (e) => {
+                      onClickAsync={async (e) => {
                         e.stopPropagation();
                         if (user.groupArray && user.groupArray.length > 0) {
                           await deleteGroup.mutateAsync({

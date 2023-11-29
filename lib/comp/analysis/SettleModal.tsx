@@ -61,7 +61,7 @@ const SettleModal = (props: Props) => {
 
       <ActionBtn
         disabled={!settleAmount}
-        onClick={async () => {
+        onClickAsync={async () => {
           //Why do I even need this check?
           if (!props.oweUser) {
             console.error("oweUser is undefined");

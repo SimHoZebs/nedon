@@ -116,7 +116,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
         <div className="flex sm:w-full">
           <Button
             className="w-full gap-x-1 pr-3 hover:bg-zinc-800 hover:text-zinc-200"
-            onClick={async (e) => {
+            onClickAsync={async (e) => {
               e.stopPropagation();
               if (appUser) router.push("/profile");
             }}

@@ -1,44 +1,74 @@
 import { NextRouter } from "next/router";
 import React from "react";
 
-export const Button = (
-  props: React.ButtonHTMLAttributes<HTMLButtonElement>,
-) => {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  onClickAsync?: (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => Promise<void>;
+}
+
+export const Button = (props: ButtonProps) => {
+  const [loading, setLoading] = React.useState(false);
   const { children, className, ...rest } = props;
+
+  const originalTextColor = className
+    ?.split(" ")
+    .find((style) => style.startsWith("text-"));
 
   return (
     <button
-      className={`flex items-center p-2 text-sm disabled:bg-zinc-400 ${className}`}
       {...rest}
+      className={`flex items-center justify-center gap-x-1 p-2 text-sm disabled:bg-zinc-400 ${
+        loading
+          ? "cursor-wait text-transparent hover:text-transparent"
+          : "cursor-pointer"
+      } ${className}`}
+      onClick={async (e) => {
+        if (props.onClick) {
+          props.onClick(e);
+        }
+
+        if (props.onClickAsync) {
+          setLoading(true);
+          await props.onClickAsync(e);
+          setLoading(false);
+        }
+      }}
     >
+      {loading && (
+        <span
+          className={`icon-[mdi--loading] absolute h-4 w-4 animate-spin ${originalTextColor}`}
+        ></span>
+      )}
       {children}
     </button>
   );
 };
 
-interface ActionBtnProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ActionBtnProps extends ButtonProps {
   variant?: "primary" | "negative";
   rounded?: boolean;
 }
 
 export const ActionBtn = (props: ActionBtnProps) => {
-  const { children, className, variant, ...rest } = props;
+  const { children, className, variant, onClickAsync, ...rest } = props;
 
   return (
     <Button
+      onClickAsync={onClickAsync}
+      {...rest}
       className={`font-semibold text-zinc-900 transition-colors duration-150 hover:text-zinc-950 ${
         variant === "negative"
           ? "bg-pink-400 hover:bg-pink-500"
           : "bg-indigo-500 hover:bg-indigo-600"
       } ${className} ${props.rounded ? "rounded-full" : "rounded-lg"}`}
-      {...rest}
     >
       {children}
     </Button>
   );
 };
 
-interface NavBtnProps extends React.HtmlHTMLAttributes<HTMLButtonElement> {
+interface NavBtnProps extends ButtonProps {
   icon?: string;
   router: NextRouter;
   route: string;
@@ -74,14 +104,16 @@ interface SecondaryBtnProps
 }
 
 export const SecondaryBtn = (props: SecondaryBtnProps) => {
+  const { children, className, variant, ...rest } = props;
+
   return (
     <Button
+      {...rest}
       className={`gap-x-1 rounded-lg bg-indigo-600 bg-opacity-20 font-semibold text-indigo-300 hover:bg-opacity-40 hover:text-indigo-200 ${
         props.variant ? "text-xs" : ""
       }`}
-      {...props}
     >
-      {props.children}
+      {children}
     </Button>
   );
 };

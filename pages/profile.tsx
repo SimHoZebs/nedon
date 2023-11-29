@@ -44,7 +44,9 @@ const Page = () => {
 
       <ActionBtn
         variant="negative"
-        onClick={async () => deleteAll.mutateAsync()}
+        onClickAsync={async () => {
+          deleteAll.mutateAsync();
+        }}
       >
         DELETE ALL EXISTING ACCOUNTS
       </ActionBtn>
