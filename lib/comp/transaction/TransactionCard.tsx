@@ -50,7 +50,7 @@ const TransactionCard = (props: Props) => {
           }`}
         >
           {props.transaction.splitArray.length > 1 && (
-            <span className="icon-[lucide-split h-4 w-4 text-zinc-400" />
+            <span className="icon-[lucide--split] h-4 w-4 text-zinc-400" />
           )}
           <div>
             {splitAmount ? splitAmount * -1 : props.transaction.amount * -1}

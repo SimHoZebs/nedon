@@ -117,14 +117,14 @@ const TransactionModal = (props: Props) => {
               </div>
             </div>
 
-            <div className="flex justify-between gap-y-1 ">
+            <div className="flex flex-col-reverse justify-between gap-y-1 md:flex-row ">
               <div>
                 <SplitList>
                   <H1>${amount * -1}</H1>
                 </SplitList>
               </div>
 
-              <div>
+              <div className="flex flex-col items-start">
                 <Category />
 
                 <ActionBtn

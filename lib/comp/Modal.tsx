@@ -14,7 +14,7 @@ const Modal = (props: Props) => {
       }}
     >
       <div
-        className="flex h-full w-full flex-col gap-y-2 rounded-xl bg-zinc-800 p-4 shadow-lg shadow-zinc-900 outline outline-1 outline-zinc-700 sm:h-4/5 sm:w-4/5"
+        className="flex h-full w-full flex-col gap-y-2 rounded-xl bg-zinc-800 p-4 shadow-lg shadow-zinc-900 outline outline-1 outline-zinc-700 lg:h-4/5 lg:w-4/5"
         onMouseDown={(e) => {
           e.stopPropagation();
         }}
