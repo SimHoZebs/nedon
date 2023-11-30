@@ -2,9 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import DateRangePicker from "@/comp/DateRangePicker";
 import AnalysisBar from "@/comp/analysis/AnalysisBar";
+import LineGraph from "@/comp/analysis/LineGraph";
 import SpendingByCategoryList from "@/comp/analysis/SpendingByCategoryList";
 
-import { categoryArrayTotal } from "@/util/category";
+import { calcCatTypeTotal } from "@/util/category";
 import {
   filterTransactionByDate,
   organizeTransactionByCategory,
@@ -70,6 +71,11 @@ const Page = () => {
     [scopedTransactionArray],
   );
 
+  const spendingTotal = calcCatTypeTotal(
+    organizedTxByCategoryArray,
+    "spending",
+  );
+
   return appUser ? (
     <section className="flex flex-col items-center gap-y-4">
       <div className="w-full max-w-lg">
@@ -81,20 +87,20 @@ const Page = () => {
             setRangeFormat={setRangeFormat}
           />
 
-          <div className="flex h-9 w-full gap-x-1 overflow-hidden rounded-lg bg-zinc-900">
-            <AnalysisBar
-              organizedTxByCategoryArray={organizedTxByCategoryArray}
-              spendingTotal={categoryArrayTotal(
-                organizedTxByCategoryArray,
-                "spending",
-              )}
+          {date && (
+            <LineGraph
+              spendingTotal={spendingTotal}
+              date={date}
+              rangeFormat={rangeFormat}
             />
-          </div>
+          )}
 
-          <p>
-            Total spending: $
-            {categoryArrayTotal(organizedTxByCategoryArray, "spending")}
-          </p>
+          <AnalysisBar
+            organizedTxByCategoryArray={organizedTxByCategoryArray}
+            spendingTotal={spendingTotal}
+          />
+
+          <p>Total spending: $ {spendingTotal}</p>
 
           <div className="flex w-full flex-col gap-y-2">
             <SpendingByCategoryList
