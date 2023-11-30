@@ -161,3 +161,34 @@ export const fillCategoryInHierarchy = (
 
   return resultArray;
 };
+
+export const subCategoryTotal = (
+  parentCategory: TreedCategoryWithTransaction,
+  transactionType: "received" | "spending",
+): number => {
+  const spending = parentCategory.subCategoryArray.reduce(
+    (total, subCategory) => {
+      let amount =
+        transactionType === "received"
+          ? subCategory.received
+          : subCategory.spending;
+      return total + amount + subCategoryTotal(subCategory, transactionType);
+    },
+    0,
+  );
+
+  return spending;
+};
+
+export const categoryArrayTotal = (
+  categoryArray: TreedCategoryWithTransaction[],
+  transactionType: "received" | "spending",
+): number => {
+  const spending = categoryArray.reduce((total, category) => {
+    let amount =
+      transactionType === "received" ? category.received : category.spending;
+    return total + amount + subCategoryTotal(category, transactionType);
+  }, 0);
+
+  return parseMoney(spending);
+};
