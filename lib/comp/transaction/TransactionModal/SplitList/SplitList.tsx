@@ -173,14 +173,16 @@ const SplitList = (props: Props) => {
           than needed`}
           </div>
 
-          <div className="flex items-center gap-x-4 px-2">
-            <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
-              split evenly
-            </Button>
-            <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
-              Remove all
-            </Button>
-          </div>
+          {isManaging && unsavedSplitArray.length > 1 && (
+            <div className="flex items-center gap-x-4 px-2">
+              <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
+                split evenly
+              </Button>
+              <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
+                Remove all
+              </Button>
+            </div>
+          )}
 
           <div className="flex flex-col gap-y-1 md:w-fit">
             {unsavedSplitArray.map((split, i) => (
