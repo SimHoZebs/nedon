@@ -63,7 +63,7 @@ const CategoryChip = (props: Props) => {
                 transaction.splitArray[0].categoryArray.length > 1 && (
                   <button
                     aria-label="Close"
-                    className="h-3 w-3"
+                    className="h-4 w-4"
                     onClick={async (e) => {
                       e.stopPropagation();
                       if (!transaction.id) {
@@ -111,7 +111,7 @@ const CategoryChip = (props: Props) => {
                       queryClient.transaction.invalidate();
                     }}
                   >
-                    <span className="icon-[iconamoon--close-fill] hidden h-3 w-3 rounded-full text-zinc-400 outline outline-1 hover:text-pink-400 group-hover:block" />
+                    <span className="icon-[iconamoon--close-fill] hidden h-4 w-4 rounded-full text-zinc-400 outline outline-1 hover:text-pink-400 group-hover:block" />
                   </button>
                 )
             }

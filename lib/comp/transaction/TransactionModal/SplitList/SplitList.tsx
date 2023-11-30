@@ -155,34 +155,52 @@ const SplitList = (props: Props) => {
             )}
           </div>
 
-          {unsavedSplitArray.map((split, i) => (
-            <div
-              key={i}
-              className="flex w-full items-center gap-x-2 sm:gap-x-3"
-            >
-              <SplitUser
-                setIsManaging={setIsManaging}
-                isManaging={isManaging}
-                modifiedSplitIndexArray={modifiedSplitIndexArray}
-                setModifiedSplitIndexArray={setModifiedSplitIndexArray}
-                index={i}
-              >
-                <div className="flex items-center gap-x-2 rounded-full border-2 border-zinc-400">
-                  <span className="2 icon-[mdi--account] h-8 w-8 bg-zinc-400 hover:bg-zinc-100" />
-                </div>
-              </SplitUser>
-            </div>
-          ))}
-
-          <div className="h-5 text-red-800">
-            {updatedSplitAmount !== transactionAmount &&
-              unsavedSplitArray.length > 0 &&
-              `Current split total is $${updatedSplitAmount}; $${parseMoney(
-                Math.abs(transactionAmount - updatedSplitAmount),
-              )} ${
-                updatedSplitAmount > transactionAmount ? "greater " : "less "
-              }
+          <div
+            className={`h-5 ${
+              updatedSplitAmount !== transactionAmount &&
+              unsavedSplitArray.length > 0
+                ? "text-red-800"
+                : "text-transparent"
+            }`}
+          >
+            {`Current split total is $${updatedSplitAmount.toFixed(
+              2,
+            )}; ${parseMoney(
+              Math.abs(transactionAmount - updatedSplitAmount),
+            ).toFixed(2)} ${
+              updatedSplitAmount > transactionAmount ? "greater " : "less "
+            }
           than needed`}
+          </div>
+
+          <div className="flex items-center gap-x-4 px-2">
+            <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
+              split evenly
+            </Button>
+            <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
+              Remove all
+            </Button>
+          </div>
+
+          <div className="flex flex-col gap-y-1 md:w-fit">
+            {unsavedSplitArray.map((split, i) => (
+              <div
+                key={i}
+                className="flex w-full items-center gap-x-2 sm:gap-x-3"
+              >
+                <SplitUser
+                  setIsManaging={setIsManaging}
+                  isManaging={isManaging}
+                  modifiedSplitIndexArray={modifiedSplitIndexArray}
+                  setModifiedSplitIndexArray={setModifiedSplitIndexArray}
+                  index={i}
+                >
+                  <div className="flex items-center gap-x-2 rounded-full border-2 border-zinc-400">
+                    <span className="2 icon-[mdi--account] h-8 w-8 bg-zinc-400 hover:bg-zinc-100" />
+                  </div>
+                </SplitUser>
+              </div>
+            ))}
           </div>
         </div>
       )}

@@ -131,7 +131,7 @@ const SplitUser = (props: Props) => {
   };
 
   return (
-    <div className={`flex w-full flex-col gap-y-1 rounded-lg `}>
+    <div className={`flex w-full flex-col gap-y-1 rounded-lg lg:w-fit `}>
       <div className="flex w-full items-center justify-start gap-x-2 ">
         {split.userId === appUser?.id || !props.isManaging ? (
           <div className="aspect-square w-5"></div>
