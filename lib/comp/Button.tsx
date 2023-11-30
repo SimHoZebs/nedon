@@ -18,11 +18,9 @@ export const Button = (props: ButtonProps) => {
   return (
     <button
       {...rest}
-      className={`flex items-center justify-center gap-x-1 p-2 text-sm disabled:bg-zinc-400 ${
-        loading
-          ? "cursor-wait text-transparent hover:text-transparent"
-          : "cursor-pointer"
-      } ${className}`}
+      className={`flex items-center justify-center gap-x-1 p-2 text-sm disabled:bg-zinc-400 ${className} ${
+        loading && "cursor-wait text-transparent hover:text-transparent"
+      }`}
       onClick={async (e) => {
         if (props.onClick) {
           props.onClick(e);
