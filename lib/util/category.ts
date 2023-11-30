@@ -180,7 +180,7 @@ export const subCategoryTotal = (
   return spending;
 };
 
-export const categoryArrayTotal = (
+export const calcCatTypeTotal = (
   categoryArray: TreedCategoryWithTransaction[],
   transactionType: "received" | "spending",
 ): number => {

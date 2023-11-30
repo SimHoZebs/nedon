@@ -103,6 +103,14 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             Analysis
           </NavBtn>
 
+          <NavBtn
+            router={router}
+            route="/connections"
+            icon="icon-[mdi--account-group-outline]"
+          >
+            Connections
+          </NavBtn>
+
           <div className="sm:w-full">
             <ActionBtn onClick={() => router.push("/user")}>
               <div className="flex items-center gap-x-2">
