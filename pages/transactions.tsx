@@ -1,9 +1,8 @@
 import { NextPage } from "next";
 import React, { useEffect, useMemo, useState } from "react";
-import { z } from "zod";
 
-import { Button } from "@/comp/Button";
-import { H1, H2, H3 } from "@/comp/Heading";
+import DateRangePicker from "@/comp/DateRangePicker";
+import { H2, H3 } from "@/comp/Heading";
 import TransactionCard from "@/comp/transaction/TransactionCard";
 import TransactionModal from "@/comp/transaction/TransactionModal/TransactionModal";
 
@@ -65,34 +64,6 @@ const Page: NextPage = () => {
     setScopedTransactionArray(filteredArray);
   }, [date, rangeFormat, transactionArray.data, transactionArray.status]);
 
-  const handleRangeChange = (change: 1 | -1) => {
-    if (!date) {
-      console.error("can't run handleRangeChange. date undefined.");
-      return;
-    }
-
-    if (rangeFormat === "all") {
-      setDate(new Date(Date.now()));
-      return;
-    }
-
-    const newDate = new Date(date);
-
-    switch (rangeFormat) {
-      case "date":
-        newDate.setDate(date.getDate() + change);
-        break;
-      case "month":
-        newDate.setMonth(date.getMonth() + change);
-        break;
-      case "year":
-        newDate.setFullYear(date.getFullYear() + change);
-        break;
-    }
-
-    setDate(newDate);
-  };
-
   const sortedTransactionArray = useMemo(() => {
     return organizeTransactionByTime(scopedTransactionArray);
   }, [scopedTransactionArray]);
@@ -102,47 +73,12 @@ const Page: NextPage = () => {
       {showModal && <TransactionModal setShowModal={setShowModal} />}
 
       <div className="flex w-full max-w-sm flex-col items-center gap-y-2 lg:max-w-md">
-        {date && (
-          <div className="flex items-center">
-            <Button
-              onClick={() => {
-                handleRangeChange(-1);
-              }}
-            >
-              <span className="icon-[tabler--chevron-left] h-8 w-8" />
-            </Button>
-            <H1>{date.getMonth() + 1}</H1>
-            <Button
-              onClick={() => {
-                handleRangeChange(1);
-              }}
-            >
-              <span className="icon-[tabler--chevron-right] h-8 w-8" />
-            </Button>
-          </div>
-        )}
-
-        <select
-          className="bg-zinc-800"
-          name="scope"
-          id=""
-          value={rangeFormat}
-          onChange={(e) => {
-            const test = z.union([
-              z.literal("date"),
-              z.literal("month"),
-              z.literal("year"),
-              z.literal("all"),
-            ]);
-            const result = test.parse(e.target.value);
-            setRangeFormat(result);
-          }}
-        >
-          <option value="date">date</option>
-          <option value="month">month</option>
-          <option value="year">year</option>
-          <option value="all">all</option>
-        </select>
+        <DateRangePicker
+          date={date}
+          setDate={setDate}
+          rangeFormat={rangeFormat}
+          setRangeFormat={setRangeFormat}
+        />
 
         <ol className="flex w-full max-w-sm flex-col items-center gap-y-2 lg:max-w-md">
           {transactionArray.isLoading ? (
