@@ -131,7 +131,7 @@ const SplitUser = (props: Props) => {
   };
 
   return (
-    <div className={`flex w-full flex-col gap-y-1 rounded-lg p-2 `}>
+    <div className={`flex w-full flex-col gap-y-1 rounded-lg `}>
       <div className="flex w-full items-center justify-start gap-x-2 ">
         {split.userId === appUser?.id || !props.isManaging ? (
           <div className="aspect-square w-5"></div>
@@ -185,20 +185,38 @@ const SplitUser = (props: Props) => {
                 type="number"
                 min={0}
                 max={100}
+                //0.01 does the same thing 0.01 $ steps
+                step={1}
                 value={parseMoney((splitAmount / transactionAmount) * 100)}
                 onChange={(e) => {
                   props.setIsManaging(true);
-                  const newValue = parseFloat(e.target.value) || 0;
-
-                  const updatedSplitAmount = parseMoney(
-                    (newValue / 100) * transactionAmount,
+                  const prevPercentage = parseMoney(
+                    (splitAmount / transactionAmount) * 100,
                   );
+                  const updatedPercentage = parseFloat(e.target.value);
+
+                  let updatedSplitAmount = parseMoney(
+                    (updatedPercentage / 100) * transactionAmount,
+                  );
+
+                  if (splitAmount === updatedSplitAmount) {
+                    if (prevPercentage < updatedPercentage) {
+                      updatedSplitAmount = parseMoney(
+                        updatedSplitAmount + 0.01,
+                      );
+                    } else {
+                      updatedSplitAmount = parseMoney(
+                        updatedSplitAmount - 0.01,
+                      );
+                    }
+                  }
+
+                  console.log("updatedSplitAmount", updatedSplitAmount);
 
                   changeAmount(updatedSplitAmount);
                 }}
-                step={0.01}
               />
-              <label htmlFor="ratior">%</label>
+              <label htmlFor="ratio">%</label>
             </div>
           </div>
 
