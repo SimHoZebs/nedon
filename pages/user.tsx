@@ -83,7 +83,8 @@ const Home: NextPage = () => {
                                   groupId: appGroup.data.id,
                                 });
 
-                            queryClient.user.getAll.invalidate();
+                            await queryClient.user.getAll.invalidate();
+                            await queryClient.group.get.invalidate();
                           }}
                         >
                           {appGroup.data.userArray?.find(
