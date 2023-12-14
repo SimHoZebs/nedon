@@ -9,7 +9,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button = (props: ButtonProps) => {
   const [loading, setLoading] = React.useState(false);
-  const { children, className, ...rest } = props;
+  const { children, className, onClickAsync, ...rest } = props;
 
   const originalTextColor = className
     ?.split(" ")
@@ -26,9 +26,9 @@ export const Button = (props: ButtonProps) => {
           props.onClick(e);
         }
 
-        if (props.onClickAsync) {
+        if (onClickAsync) {
           setLoading(true);
-          await props.onClickAsync(e);
+          await onClickAsync(e);
           setLoading(false);
         }
       }}
