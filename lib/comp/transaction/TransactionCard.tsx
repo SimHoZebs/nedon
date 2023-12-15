@@ -30,14 +30,14 @@ const TransactionCard = (props: Props) => {
     );
 
   return (
-    <li
+    <section
       className="flex h-fit w-full flex-col justify-between gap-x-4 gap-y-1 rounded-md bg-zinc-800 px-3 py-2 text-start outline outline-1 outline-zinc-700 hover:cursor-pointer hover:bg-zinc-700 hover:text-zinc-200"
       onClick={() => {
         props.setShowModal(true);
         setTransactionOnModal(props.transaction);
       }}
     >
-      <div className={`flex w-full justify-between gap-x-4 truncate`}>
+      <section className={`flex w-full justify-between gap-x-4 truncate`}>
         <div className="flex-start flex h-full justify-center gap-x-2 truncate">
           <p className="truncate text-base font-semibold sm:text-lg">
             {props.transaction.name}
@@ -57,9 +57,9 @@ const TransactionCard = (props: Props) => {
           </div>
           <div>{props.transaction.iso_currency_code}</div>
         </div>
-      </div>
+      </section>
 
-      <div className="flex h-fit w-full justify-between gap-x-1">
+      <section className="flex h-fit w-full justify-between gap-x-1">
         <p className="text-xs text-zinc-400">
           {props.transaction.datetime || "12:34"}
         </p>
@@ -99,8 +99,8 @@ const TransactionCard = (props: Props) => {
             ),
           )}
         </div>
-      </div>
-    </li>
+      </section>
+    </section>
   );
 };
 

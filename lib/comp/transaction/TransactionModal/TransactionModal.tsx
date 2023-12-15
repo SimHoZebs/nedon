@@ -2,7 +2,7 @@ import Image from "next/image";
 import { AuthGetResponse } from "plaid";
 import React, { useEffect } from "react";
 
-import { ActionBtn } from "@/comp/Button";
+import { ActionBtn, CloseBtn } from "@/comp/Button";
 import { H1 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
 
@@ -56,65 +56,52 @@ const TransactionModal = (props: Props) => {
       {transaction && (
         <Modal setShowModal={props.setShowModal}>
           <div className="flex flex-col justify-between gap-y-2 overflow-clip">
-            <div className="flex flex-col items-start gap-y-2">
-              <div className="flex w-full flex-col justify-between gap-3 lg:flex-row">
-                <div className="flex flex-col gap-y-1">
-                  <div className="flex w-full items-start justify-between">
-                    <div className="flex items-center gap-x-2">
-                      {transaction.counterparties &&
-                        transaction.counterparties[0]?.logo_url && (
-                          <Image
-                            className="rounded-lg"
-                            src={transaction.counterparties[0].logo_url}
-                            alt=""
-                            width={56}
-                            height={56}
-                          />
-                        )}
+            <section className="flex w-full flex-col items-start justify-between gap-3 gap-y-2 lg:flex-row">
+              <div className="flex w-full flex-col gap-y-1 lg:w-fit">
+                <div className="flex w-full items-start justify-between">
+                  <div className="flex items-center gap-x-2">
+                    {transaction.counterparties &&
+                      transaction.counterparties[0]?.logo_url && (
+                        <Image
+                          className="rounded-lg"
+                          src={transaction.counterparties[0].logo_url}
+                          alt=""
+                          width={56}
+                          height={56}
+                        />
+                      )}
 
-                      <H1>{transaction.name}</H1>
-                    </div>
-                    <button
-                      aria-label="Close"
-                      className="m-1 flex rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400"
-                      onClick={() => props.setShowModal(false)}
-                    >
-                      <span className="icon-[iconamoon--close-fill] h-6 w-6 rounded-full text-zinc-400 hover:text-pink-400 lg:hidden"></span>
-                    </button>
+                    <H1>{transaction.name}</H1>
                   </div>
 
-                  <p
-                    className={`h-6 w-40 rounded-lg ${
-                      auth.isLoading && "animate-pulse bg-zinc-700"
-                    } `}
-                  >
-                    {auth.isLoading
-                      ? ""
-                      : (auth.data as unknown as AuthGetResponse).accounts.find(
-                          (account) =>
-                            account.account_id === transaction.account_id,
-                        )?.name || ""}
-                  </p>
+                  <CloseBtn isForMobile setShowModal={props.setShowModal} />
                 </div>
 
-                <div className="flex flex-col items-start  text-sm font-light text-zinc-400 lg:items-end">
-                  <button
-                    aria-label="Close"
-                    className="m-1 hidden h-6 w-6 rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400 lg:flex"
-                    onClick={() => props.setShowModal(false)}
-                  >
-                    <span className="icon-[iconamoon--close-fill] h-6 w-6 rounded-full text-zinc-400 hover:text-pink-400" />
-                  </button>
-                  <p>
-                    Created at {transaction.datetime || "1970-01-23 12:34:56"}
-                  </p>
-                  <p>
-                    Authorized at{" "}
-                    {transaction.authorized_datetime || "1970-01-23 12:34:56"}
-                  </p>
-                </div>
+                <p
+                  className={`h-6 w-40 rounded-lg ${
+                    auth.isLoading && "animate-pulse bg-zinc-700"
+                  } `}
+                >
+                  {auth.isLoading
+                    ? ""
+                    : (auth.data as unknown as AuthGetResponse).accounts.find(
+                        (account) =>
+                          account.account_id === transaction.account_id,
+                      )?.name || ""}
+                </p>
               </div>
-            </div>
+
+              <div className="flex flex-col items-start  text-sm font-light text-zinc-400 lg:items-end">
+                <CloseBtn setShowModal={props.setShowModal} />
+                <p>
+                  Created at {transaction.datetime || "1970-01-23 12:34:56"}
+                </p>
+                <p>
+                  Authorized at{" "}
+                  {transaction.authorized_datetime || "1970-01-23 12:34:56"}
+                </p>
+              </div>
+            </section>
 
             <div className="flex flex-col justify-between gap-y-3 md:flex-row ">
               <div>
