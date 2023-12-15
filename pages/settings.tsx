@@ -6,7 +6,7 @@ import { ActionBtn } from "@/comp/Button";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 
-const Page = () => {
+const Settings = () => {
   const router = useRouter();
   const verticalCategoryPicker = useStore(
     (state) => state.verticalCategoryPicker,
@@ -54,4 +54,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default Settings;

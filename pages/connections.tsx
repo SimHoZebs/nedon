@@ -1,3 +1,4 @@
+import router from "next/router";
 import React, { useMemo, useState } from "react";
 
 import { ActionBtn } from "@/comp/Button";
@@ -76,6 +77,15 @@ const Splits = () => {
       {showModal && (
         <SettleModal oweUser={oweUser} setShowModal={setShowModal} />
       )}
+
+      <div className="sm:w-full">
+        <ActionBtn onClick={() => router.push("/user")}>
+          <div className="flex items-center gap-x-2">
+            <span className="icon-[mdi--user-add-outline] h-6 w-6" />
+            <p>Add friend</p>
+          </div>
+        </ActionBtn>
+      </div>
 
       <div className="flex flex-col items-start">
         {calcOweGroup &&

@@ -97,10 +97,10 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
           <NavBtn
             router={router}
-            route="/analysis"
+            route="/analytics"
             icon="icon-[mdi--google-analytics]"
           >
-            Analysis
+            Analytics
           </NavBtn>
 
           <NavBtn
@@ -111,34 +111,25 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             Connections
           </NavBtn>
 
-          <div className="sm:w-full">
-            <ActionBtn onClick={() => router.push("/user")}>
-              <div className="flex items-center gap-x-2">
-                <span className="icon-[mdi--user-add-outline] h-6 w-6" />
-                <p>Add friend</p>
-              </div>
-            </ActionBtn>
-          </div>
+          <NavBtn
+            router={router}
+            route="/settings"
+            icon="icon-[mdi--cog-outline]"
+          >
+            Settings
+          </NavBtn>
         </div>
 
         <div className="flex sm:w-full">
-          <Button
-            className="w-full gap-x-1 pr-3 hover:bg-zinc-800 hover:text-zinc-200"
-            onClickAsync={async (e) => {
-              e.stopPropagation();
-              if (appUser) router.push("/profile");
-            }}
-          >
-            <div className="flex w-full items-center gap-x-2">
-              <div className="flex rounded-full border-2 border-zinc-300 bg-zinc-800 p-1 sm:p-2">
-                <span className="icon-[mdi--account] h-6 w-6 hover:text-zinc-100" />
-              </div>
-
-              <p className="hidden w-full items-center sm:block">
-                {appUser && appUser.id.slice(0, 8)}
-              </p>
+          <div className="flex w-full items-center justify-center gap-x-2">
+            <div className="flex rounded-full border-2 border-zinc-300 bg-zinc-800 p-1 sm:p-2">
+              <span className="icon-[mdi--account] h-6 w-6 hover:text-zinc-100" />
             </div>
-          </Button>
+
+            <p className="hidden items-center sm:block">
+              {appUser && appUser.id.slice(0, 8)}
+            </p>
+          </div>
         </div>
       </nav>
     </div>
