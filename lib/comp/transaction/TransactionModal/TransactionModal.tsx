@@ -110,7 +110,7 @@ const TransactionModal = (props: Props) => {
                 </SplitList>
               </div>
 
-              <div className="flex flex-col items-start gap-y-2">
+              <div className="flex flex-col items-start gap-y-3">
                 <Category />
 
                 <ActionBtn

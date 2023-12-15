@@ -57,13 +57,6 @@ const CategoryPicker = forwardRef(
         );
         return;
       }
-      if (!transaction) {
-        console.error(
-          "Can't reset picker. transaction is undefined. How did you get here?",
-        );
-        return;
-      }
-
       setCurrentOptionArray(categoryOptionArray.data);
     };
 

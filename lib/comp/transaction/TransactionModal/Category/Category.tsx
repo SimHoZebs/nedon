@@ -13,7 +13,7 @@ import { isSplitInDB } from "@/util/types";
 import CategoryChip from "./CategoryChip";
 import CategoryPicker from "./CategoryPicker";
 
-const offScreen = { x: -600, y: 0 };
+const offScreen = { x: -800, y: 0 };
 
 const Category = () => {
   const unsavedSplitArray = useTransactionStore(
@@ -54,7 +54,7 @@ const Category = () => {
     updatedSplitAmount !== transactionAmount && unsavedSplitArray.length > 0;
 
   return (
-    <div className="flex flex-col gap-y-2">
+    <div className="flex flex-col gap-y-1">
       <div className="flex w-full justify-between gap-x-3">
         <H3>Categories</H3>
 

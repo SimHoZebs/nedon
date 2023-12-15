@@ -1,5 +1,6 @@
 import { NextRouter } from "next/router";
 import React from "react";
+import { twMerge } from "tailwind-merge";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   onClickAsync?: (
@@ -13,14 +14,16 @@ export const Button = (props: ButtonProps) => {
 
   const originalTextColor = className
     ?.split(" ")
-    .find((style) => style.startsWith("text-"));
+    .find((style) => style.startsWith("text-") && style.endsWith("0"));
 
   return (
     <button
       {...rest}
-      className={`flex items-center justify-center gap-x-1 p-2 text-sm disabled:bg-zinc-400 ${className} ${
-        loading && "cursor-wait text-transparent hover:text-transparent"
-      }`}
+      className={twMerge(
+        `flex items-center justify-center gap-x-1 p-2 text-sm transition-all active:scale-95 disabled:bg-zinc-400 ${className} ${
+          loading && "cursor-wait text-transparent hover:text-transparent"
+        }`,
+      )}
       onClick={async (e) => {
         if (props.onClick) {
           props.onClick(e);
@@ -35,7 +38,9 @@ export const Button = (props: ButtonProps) => {
     >
       {loading && (
         <span
-          className={`icon-[mdi--loading] absolute h-4 w-4 animate-spin ${originalTextColor}`}
+          className={`icon-[mdi--loading] absolute h-4 w-4 animate-spin ${
+            originalTextColor || "text-zinc-400"
+          }`}
         ></span>
       )}
       {children}

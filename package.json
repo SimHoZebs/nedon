@@ -25,6 +25,7 @@
     "react-dom": "^18.2.0",
     "react-plaid-link": "^3.5.1",
     "recharts": "^2.10.3",
+    "tailwind-merge": "^2.1.0",
     "zod": "^3.22.4",
     "zustand": "^4.4.7"
   },
