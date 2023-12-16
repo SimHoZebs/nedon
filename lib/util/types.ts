@@ -1,7 +1,7 @@
 import { Group, User } from "@prisma/client";
 import { Tx } from "@prisma/client";
 import { CounterpartyType, Transaction as PTx } from "plaid";
-import { CatModel, SplitModel } from "prisma/zod";
+import { CatSchema, SplitSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 export type UserClientSide = Omit<User, "ACCESS_TOKEN"> & {
@@ -29,14 +29,14 @@ export type TreedCatWithTx = {
 export type MergedCat = Omit<CatClientSide, "splitId">;
 
 export type CatClientSide = z.infer<typeof CatClientSideModel>;
-export const CatClientSideModel = CatModel.extend({
+export const CatClientSideModel = CatSchema.extend({
   id: z.string().nullable(),
   splitId: z.string().nullable(),
 });
 
 export function isCatInSplitInDB(
   cat: CatClientSide,
-): cat is z.infer<typeof CatModel> {
+): cat is z.infer<typeof CatSchema> {
   return !!cat.splitId;
 }
 
@@ -44,13 +44,13 @@ export function isSplitInDB(split: SplitClientSide): split is SplitInDB {
   return !!split.id;
 }
 export type SplitInDB = z.infer<typeof SplitInDBModel>;
-const SplitInDBModel = SplitModel.extend({
+const SplitInDBModel = SplitSchema.extend({
   txId: z.string(),
-  catArray: z.array(CatModel),
+  catArray: z.array(CatSchema),
 });
 
 export type SplitClientSide = z.infer<typeof SplitClientSideModel>;
-export const SplitClientSideModel = SplitModel.extend({
+export const SplitClientSideModel = SplitSchema.extend({
   txId: z.string().nullable(),
   id: z.string().nullable(),
   catArray: z.array(CatClientSideModel),

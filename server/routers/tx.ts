@@ -9,7 +9,7 @@ import {
   SplitClientSideModel,
 } from "@/util/types";
 
-import { SplitModel } from "../../prisma/zod";
+import { SplitOptionalDefaultsSchema } from "prisma/generated/zod";
 import { procedure, router } from "../trpc";
 import { client } from "../util";
 
@@ -176,10 +176,7 @@ const txRouter = router({
       z.object({
         userId: z.string(),
         splitArray: z.array(
-          SplitModel.extend({
-            id: z.undefined(),
-            txId: z.undefined(),
-          }),
+          SplitOptionalDefaultsSchema
         ),
       }),
     )

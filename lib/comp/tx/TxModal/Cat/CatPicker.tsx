@@ -85,7 +85,7 @@ const CatPicker = forwardRef(
 
         const txDBData = await createTx.mutateAsync({
           userId: appUser.id,
-          txId: tx.tx_id,
+          txId: tx.transaction_id,
           splitArray: [split],
         });
 
@@ -143,7 +143,7 @@ const CatPicker = forwardRef(
       if (!tx.id) {
         const txDBData = await createTx.mutateAsync({
           userId: appUser!.id,
-          txId: tx.tx_id,
+          txId: tx.transaction_id,
           splitArray: unsavedSplitArray.map((split) => ({
             ...split,
             catArray: split.catArray.map((cat) => ({
@@ -235,7 +235,7 @@ const CatPicker = forwardRef(
     return catOptionArray.data ? (
       <div
         ref={ref}
-        className={"absolute flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900 sm:w-96 " + }
+        className={"absolute flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900 sm:w-96 " }
         onClick={(e) => e.stopPropagation()}
         style={{ top: props.position.y, left: props.position.x }}
       >

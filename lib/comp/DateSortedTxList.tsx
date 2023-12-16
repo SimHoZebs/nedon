@@ -60,7 +60,7 @@ const DateSortedTxList = (props: Props) => {
                             <TxCard
                               setShowModal={props.setShowModal}
                               tx={tx}
-                              key={tx.tx_id}
+                              key={tx.transaction_id}
                             />
                           ),
                       )

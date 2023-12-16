@@ -23,7 +23,7 @@ export const resetFullTx = (
         {
           id: null,
           splitId: null,
-          nameArray: fullTx.cat || [],
+          nameArray: fullTx.category || [],
           amount: fullTx.amount,
         },
       ],
@@ -47,7 +47,7 @@ export const convertToFullTx = (
         txId: null,
         catArray: [
           emptyCat({
-            nameArray: plaidTx.cat || [],
+            nameArray: plaidTx.category || [],
             splitId: null,
             amount: plaidTx.amount,
           }),

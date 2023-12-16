@@ -4,7 +4,7 @@ import { z } from "zod";
 import db from "@/util/db";
 import { CatClientSideModel } from "@/util/types";
 
-import { CatModel } from "../../prisma/zod";
+import { CatSchema, CatOptionalDefaultsSchema } from "prisma/generated/zod";
 import { procedure, router } from "../trpc";
 
 const catRouter = router({
@@ -25,7 +25,7 @@ const catRouter = router({
     .input(
       z.object({
         catArray: z.array(
-          CatModel.extend({ id: z.string().nullable() }),
+          CatOptionalDefaultsSchema
         ),
       }),
     )
@@ -69,7 +69,7 @@ const catRouter = router({
   deleteMany: procedure
     .input(
       z.object({
-        catArray: z.array(CatModel),
+        catArray: z.array(CatSchema),
       }),
     )
     .mutation(async ({ input }) => {

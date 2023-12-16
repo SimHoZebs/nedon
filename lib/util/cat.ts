@@ -1,4 +1,4 @@
-import { Cat as PlaidCat } from "plaid";
+import { Category as PlaidCat } from "plaid";
 
 import catStyleArray from "./catStyle";
 import parseMoney from "./parseMoney";
