@@ -3,15 +3,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import DateRangePicker from "@/comp/DateRangePicker";
 import AnalysisBar from "@/comp/analysis/AnalysisBar";
 import LineGraph from "@/comp/analysis/LineGraph";
-import SpendingByCategoryList from "@/comp/analysis/SpendingByCategoryList";
+import SpendingByCatList from "@/comp/analysis/SpendingByCatList";
 
-import { calcCatTypeTotal } from "@/util/category";
-import {
-  filterTransactionByDate,
-  organizeTransactionByCategory,
-} from "@/util/transaction";
+import { calcCatTypeTotal } from "@/util/cat";
 import { trpc } from "@/util/trpc";
-import { FullTransaction } from "@/util/types";
+import { filterTxByDate, organizeTxByCat } from "@/util/tx";
+import { FullTx } from "@/util/types";
 
 const Page = () => {
   const allUsers = trpc.user.getAll.useQuery(undefined, {
@@ -23,58 +20,47 @@ const Page = () => {
     "date" | "month" | "year" | "all"
   >("month");
   const [date, setDate] = useState<Date>(new Date(Date.now()));
-  const [scopedTransactionArray, setScopedTransactionArray] = useState<
-    FullTransaction[]
-  >([]);
+  const [scopedTxArray, setScopedTxArray] = useState<FullTx[]>([]);
 
-  const transactionArray = trpc.transaction.getAll.useQuery<FullTransaction[]>(
+  const txArray = trpc.tx.getAll.useQuery<FullTx[]>(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );
 
   useEffect(() => {
-    if (!transactionArray.data) {
-      transactionArray.status === "loading"
-        ? console.debug(
-            "can't set date nor scopedTransactionArray. transactionArray is loading.",
-          )
+    if (!txArray.data) {
+      txArray.status === "loading"
+        ? console.debug("can't set date nor scopedTxArray. txArray is loading.")
         : console.error(
-            "can't set date nor scopedTransactionArray. Fetching transactionArray failed.",
+            "can't set date nor scopedTxArray. Fetching txArray failed.",
           );
 
       return;
     }
 
     if (!date) {
-      const initialDate = new Date(transactionArray.data.at(-1)!.date);
+      const initialDate = new Date(txArray.data.at(-1)!.date);
 
       setDate(initialDate);
       return;
     }
 
     if (rangeFormat === "all") {
-      setScopedTransactionArray(transactionArray.data);
+      setScopedTxArray(txArray.data);
       return;
     }
 
-    const filteredArray = filterTransactionByDate(
-      transactionArray.data,
-      date,
-      rangeFormat,
-    );
+    const filteredArray = filterTxByDate(txArray.data, date, rangeFormat);
 
-    setScopedTransactionArray(filteredArray);
-  }, [date, rangeFormat, transactionArray.data, transactionArray.status]);
+    setScopedTxArray(filteredArray);
+  }, [date, rangeFormat, txArray.data, txArray.status]);
 
-  const organizedTxByCategoryArray = useMemo(
-    () => organizeTransactionByCategory(scopedTransactionArray),
-    [scopedTransactionArray],
+  const organizedTxByCatArray = useMemo(
+    () => organizeTxByCat(scopedTxArray),
+    [scopedTxArray],
   );
 
-  const spendingTotal = calcCatTypeTotal(
-    organizedTxByCategoryArray,
-    "spending",
-  );
+  const spendingTotal = calcCatTypeTotal(organizedTxByCatArray, "spending");
 
   return appUser ? (
     <section className="flex flex-col items-center gap-y-4">
@@ -96,16 +82,14 @@ const Page = () => {
           )}
 
           <AnalysisBar
-            organizedTxByCategoryArray={organizedTxByCategoryArray}
+            organizedTxByCatArray={organizedTxByCatArray}
             spendingTotal={spendingTotal}
           />
 
           <p>Total spending: $ {spendingTotal}</p>
 
           <div className="flex w-full flex-col gap-y-2">
-            <SpendingByCategoryList
-              hierarchicalCategoryArray={organizedTxByCategoryArray}
-            />
+            <SpendingByCatList hierarchicalCatArray={organizedTxByCatArray} />
           </div>
         </div>
       </div>

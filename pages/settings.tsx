@@ -8,12 +8,8 @@ import { trpc } from "@/util/trpc";
 
 const Settings = () => {
   const router = useRouter();
-  const verticalCategoryPicker = useStore(
-    (state) => state.verticalCategoryPicker,
-  );
-  const setVerticalCategoryPicker = useStore(
-    (state) => state.setVerticalCategoryPicker,
-  );
+  const verticalCatPicker = useStore((state) => state.verticalCatPicker);
+  const setVerticalCatPicker = useStore((state) => state.setVerticalCatPicker);
   const deleteAll = trpc.user.deleteAll.useMutation();
 
   return (
@@ -31,15 +27,13 @@ const Settings = () => {
       <div className="flex gap-x-2">
         <input
           type="checkbox"
-          id="verticalCategoryPicker"
-          checked={verticalCategoryPicker}
+          id="verticalCatPicker"
+          checked={verticalCatPicker}
           onChange={(e) => {
-            setVerticalCategoryPicker(e.target.checked);
+            setVerticalCatPicker(e.target.checked);
           }}
         />
-        <label htmlFor="verticalCategoryPicker">
-          make category picker vertical
-        </label>
+        <label htmlFor="verticalCatPicker">make cat picker vertical</label>
       </div>
 
       <ActionBtn

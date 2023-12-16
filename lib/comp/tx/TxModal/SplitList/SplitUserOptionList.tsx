@@ -2,10 +2,10 @@ import React from "react";
 
 import { Button } from "@/comp/Button";
 
-import { mergeCategoryArray } from "@/util/category";
+import { mergeCatArray } from "@/util/cat";
 import parseMoney from "@/util/parseMoney";
-import { useTransactionStore } from "@/util/transactionStore";
 import { trpc } from "@/util/trpc";
+import { useTxStore } from "@/util/txStore";
 
 const SplitUserOptionList = () => {
   const allUsers = trpc.user.getAll.useQuery(undefined, {
@@ -19,16 +19,13 @@ const SplitUserOptionList = () => {
   );
 
   // const appGroup = useStore((state) => state.appGroup);
-  const transaction = useTransactionStore((state) => state.transactionOnModal);
-  const unsavedSplitArray = useTransactionStore(
-    (state) => state.unsavedSplitArray,
-  );
-  const setUnsavedSplitArray = useTransactionStore(
+  const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
+  const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
 
   return (
-    <div className="no-scrollbar flex h-28 w-full flex-col gap-y-2 overflow-y-scroll">
+    <div className="no-scrollbar flex h-fit w-full flex-col gap-y-2 overflow-y-scroll">
       {appGroup.isFetching
         ? Array.from({ length: 3 }).map((_, i) => (
             <div
@@ -52,49 +49,41 @@ const SplitUserOptionList = () => {
                   <Button
                     className="bg-zinc-800 text-indigo-300"
                     onClick={() => {
-                      if (!transaction) {
-                        console.error("no transaction data for modal");
-                        return;
-                      }
-
                       if (!appUser) {
                         console.error("no appUser");
                         return;
                       }
 
-                      const mergedCategoryArray =
-                        mergeCategoryArray(unsavedSplitArray);
+                      const mergedCatArray = mergeCatArray(unsavedSplitArray);
 
                       const updatedSplitArray = structuredClone(
                         unsavedSplitArray,
                       ).map((split) => ({
                         ...split,
-                        categoryArray: split.categoryArray.map(
-                          (category, i) => ({
-                            ...category,
-                            amount: parseMoney(
-                              //categories are expected to be ordered identically
-                              mergedCategoryArray[i].amount /
-                                (unsavedSplitArray.length + 1),
-                            ),
-                          }),
-                        ),
+                        catArray: split.catArray.map((cat, i) => ({
+                          ...cat,
+                          amount: parseMoney(
+                            //categories are expected to be ordered identically
+                            mergedCatArray[i].amount /
+                              (unsavedSplitArray.length + 1),
+                          ),
+                        })),
                       }));
 
-                      const appUserCategoryArray = updatedSplitArray.find(
+                      const appUserCatArray = updatedSplitArray.find(
                         (split) => split.userId === appUser.id,
-                      )?.categoryArray;
+                      )?.catArray;
 
-                      if (!appUserCategoryArray) {
-                        console.error("appUser has no category array");
+                      if (!appUserCatArray) {
+                        console.error("appUser has no cat array");
                         return;
                       }
 
                       updatedSplitArray.push({
                         id: null,
-                        transactionId: null,
+                        txId: null,
                         userId: user.id,
-                        categoryArray: structuredClone(appUserCategoryArray),
+                        catArray: structuredClone(appUserCatArray),
                       });
 
                       setUnsavedSplitArray(updatedSplitArray);

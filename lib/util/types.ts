@@ -1,7 +1,7 @@
 import { Group, User } from "@prisma/client";
-import { Transaction } from "@prisma/client";
-import { CounterpartyType, Transaction as PTransaction } from "plaid";
-import { CategoryModel, SplitModel } from "prisma/zod";
+import { Tx } from "@prisma/client";
+import { CounterpartyType, Transaction as PTx } from "plaid";
+import { CatModel, SplitModel } from "prisma/zod";
 import { z } from "zod";
 
 export type UserClientSide = Omit<User, "ACCESS_TOKEN"> & {
@@ -13,31 +13,31 @@ export type GroupClientSide = Group & {
   userArray?: UserClientSide[];
 };
 
-export type TreedCategory = {
+export type TreedCat = {
   name: string;
-  subCategoryArray: TreedCategory[];
+  subCatArray: TreedCat[];
 };
 
-export type TreedCategoryWithTransaction = {
+export type TreedCatWithTx = {
   name: string;
   spending: number;
   received: number;
-  transactionArray: FullTransaction[];
-  subCategoryArray: TreedCategoryWithTransaction[];
+  txArray: FullTx[];
+  subCatArray: TreedCatWithTx[];
 };
 
-export type MergedCategory = Omit<CategoryClientSide, "splitId">;
+export type MergedCat = Omit<CatClientSide, "splitId">;
 
-export type CategoryClientSide = z.infer<typeof CategoryClientSideModel>;
-export const CategoryClientSideModel = CategoryModel.extend({
+export type CatClientSide = z.infer<typeof CatClientSideModel>;
+export const CatClientSideModel = CatModel.extend({
   id: z.string().nullable(),
   splitId: z.string().nullable(),
 });
 
-export function isCategoryInSplitInDB(
-  category: CategoryClientSide,
-): category is z.infer<typeof CategoryModel> {
-  return !!category.splitId;
+export function isCatInSplitInDB(
+  cat: CatClientSide,
+): cat is z.infer<typeof CatModel> {
+  return !!cat.splitId;
 }
 
 export function isSplitInDB(split: SplitClientSide): split is SplitInDB {
@@ -45,90 +45,90 @@ export function isSplitInDB(split: SplitClientSide): split is SplitInDB {
 }
 export type SplitInDB = z.infer<typeof SplitInDBModel>;
 const SplitInDBModel = SplitModel.extend({
-  transactionId: z.string(),
-  categoryArray: z.array(CategoryModel),
+  txId: z.string(),
+  catArray: z.array(CatModel),
 });
 
 export type SplitClientSide = z.infer<typeof SplitClientSideModel>;
 export const SplitClientSideModel = SplitModel.extend({
-  transactionId: z.string().nullable(),
+  txId: z.string().nullable(),
   id: z.string().nullable(),
-  categoryArray: z.array(CategoryClientSideModel),
+  catArray: z.array(CatClientSideModel),
 });
 
-export function isFullTransactionInDB(
-  transaction: FullTransaction,
-): transaction is FullTransactionInDB {
-  return !!transaction.id;
+export function isFullTxInDB(
+  tx: FullTx,
+): tx is FullTxInDB {
+  return !!tx.id;
 }
-export type FullTransactionInDB = Transaction &
-  PlaidTransaction & {
+export type FullTxInDB = Tx &
+  PlaidTx & {
     id: string;
     splitArray: SplitClientSide[];
   };
 
-export type FullTransaction = Omit<Transaction, "id"> &
-  PlaidTransaction & {
+export type FullTx = Omit<Tx, "id"> &
+  PlaidTx & {
     id: string | null;
     splitArray: SplitClientSide[];
   };
 
-export type TransactionInDB = Transaction & {
+export type TxInDB = Tx & {
   splitArray: SplitInDB[];
 };
 
-export function isPlaidTransaction(
-  plaidTransaction: unknown,
-): plaidTransaction is FullTransaction {
-  return (plaidTransaction as FullTransaction).id !== undefined;
+export function isPlaidTx(
+  plaidTx: unknown,
+): plaidTx is FullTx {
+  return (plaidTx as FullTx).id !== undefined;
 }
 //temporary workaround for failing trpc queries
-export interface PlaidTransaction extends PTransaction {
+export interface PlaidTx extends PTx {
   location: {
     /**
-     * The street address where the transaction occurred.
+     * The street address where the tx occurred.
      * @type {string}
      * @memberof Location
      */
     address: string | null;
     /**
-     * The city where the transaction occurred.
+     * The city where the tx occurred.
      * @type {string}
      * @memberof Location
      */
     city: string | null;
     /**
-     * The region or state where the transaction occurred. In API versions 2018-05-22 and earlier, this field is called `state`.
+     * The region or state where the tx occurred. In API versions 2018-05-22 and earlier, this field is called `state`.
      * @type {string}
      * @memberof Location
      */
     region: string | null;
     /**
-     * The postal code where the transaction occurred. In API versions 2018-05-22 and earlier, this field is called `zip`.
+     * The postal code where the tx occurred. In API versions 2018-05-22 and earlier, this field is called `zip`.
      * @type {string}
      * @memberof Location
      */
     postal_code: string | null;
     /**
-     * The ISO 3166-1 alpha-2 country code where the transaction occurred.
+     * The ISO 3166-1 alpha-2 country code where the tx occurred.
      * @type {string}
      * @memberof Location
      */
     country: string | null;
     /**
-     * The latitude where the transaction occurred.
+     * The latitude where the tx occurred.
      * @type {number}
      * @memberof Location
      */
     lat: number | null;
     /**
-     * The longitude where the transaction occurred.
+     * The longitude where the tx occurred.
      * @type {number}
      * @memberof Location
      */
     lon: number | null;
     /**
-     * The merchant defined store number where the transaction occurred.
+     * The merchant defined store number where the tx occurred.
      * @type {string}
      * @memberof Location
      */
@@ -136,7 +136,7 @@ export interface PlaidTransaction extends PTransaction {
   };
   payment_meta: {
     /**
-     * The transaction reference number supplied by the financial institution.
+     * The tx reference number supplied by the financial institution.
      * @type {string}
      * @memberof PaymentMeta
      */
@@ -148,19 +148,19 @@ export interface PlaidTransaction extends PTransaction {
      */
     ppd_id: string | null;
     /**
-     * For transfers, the party that is receiving the transaction.
+     * For transfers, the party that is receiving the tx.
      * @type {string}
      * @memberof PaymentMeta
      */
     payee: string | null;
     /**
-     * The party initiating a wire transfer. Will be `null` if the transaction is not a wire transfer.
+     * The party initiating a wire transfer. Will be `null` if the tx is not a wire transfer.
      * @type {string}
      * @memberof PaymentMeta
      */
     by_order_of: string | null;
     /**
-     * For transfers, the party that is paying the transaction.
+     * For transfers, the party that is paying the tx.
      * @type {string}
      * @memberof PaymentMeta
      */
@@ -185,17 +185,17 @@ export interface PlaidTransaction extends PTransaction {
     reason: string | null;
   };
 
-  personal_finance_category?: {
+  personal_finance_cat?: {
     /**
-     * A high level category that communicates the broad category of the transaction.
+     * A high level cat that communicates the broad cat of the tx.
      * @type {string}
-     * @memberof PersonalFinanceCategory
+     * @memberof PersonalFinanceCat
      */
     primary: string;
     /**
-     * A granular category conveying the transaction\'s intent. This field can also be used as a unique identifier for the category.
+     * A granular cat conveying the tx\'s intent. This field can also be used as a unique identifier for the cat.
      * @type {string}
-     * @memberof PersonalFinanceCategory
+     * @memberof PersonalFinanceCat
      */
     detailed: string;
   } | null;
@@ -204,25 +204,25 @@ export interface PlaidTransaction extends PTransaction {
     /**
      * The name of the counterparty, such as the merchant or the financial institution, as extracted by Plaid from the raw description.
      * @type {string}
-     * @memberof TransactionCounterparty
+     * @memberof TxCounterparty
      */
     name: string;
     /**
      *
      * @type {CounterpartyType}
-     * @memberof TransactionCounterparty
+     * @memberof TxCounterparty
      */
     type: CounterpartyType;
     /**
      * The website associated with the counterparty.
      * @type {string}
-     * @memberof TransactionCounterparty
+     * @memberof TxCounterparty
      */
     website: string | null;
     /**
      * The URL of a logo associated with the counterparty, if available. The logo is formatted as a 100x100 pixel PNG filepath.
      * @type {string}
-     * @memberof TransactionCounterparty
+     * @memberof TxCounterparty
      */
     logo_url: string | null;
   }[];

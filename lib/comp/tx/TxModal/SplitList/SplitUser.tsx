@@ -5,11 +5,11 @@ import Input from "@/comp/Input";
 import parseMoney from "@/util/parseMoney";
 import { calcSplitAmount } from "@/util/split";
 import { useStore } from "@/util/store";
-import { useTransactionStore } from "@/util/transactionStore";
 import { trpc } from "@/util/trpc";
+import { useTxStore } from "@/util/txStore";
 import { SplitClientSide } from "@/util/types";
 
-import UserSplitCategory from "./UserSplitCategory";
+import UserSplitCat from "./UserSplitCat";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   index: number;
@@ -25,18 +25,16 @@ const SplitUser = (props: Props) => {
   });
 
   const appUser = allUsers.data?.[0];
-  const transaction = useTransactionStore((state) => state.transactionOnModal);
-  const unsavedSplitArray = useTransactionStore(
-    (state) => state.unsavedSplitArray,
-  );
-  const setUnsavedSplitArray = useTransactionStore(
+  const tx = useTxStore((state) => state.txOnModal);
+  const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
+  const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
   const [showDetail, setShowDetail] = useState(false);
 
   const split = unsavedSplitArray[props.index];
   const splitAmount = calcSplitAmount(split);
-  const transactionAmount = transaction ? transaction.amount : 0;
+  const txAmount = tx ? tx.amount : 0;
   const isModified =
     props.modifiedSplitIndexArray.find(
       (modifiedIndex) => modifiedIndex === props.index,
@@ -47,9 +45,9 @@ const SplitUser = (props: Props) => {
     const splicedSplit = updatedSplitArray.splice(props.index, 1);
 
     updatedSplitArray.forEach((split) => {
-      split.categoryArray.forEach((category, i) => {
-        category.amount += parseMoney(
-          splicedSplit[0].categoryArray[i].amount / updatedSplitArray.length,
+      split.catArray.forEach((cat, i) => {
+        cat.amount += parseMoney(
+          splicedSplit[0].catArray[i].amount / updatedSplitArray.length,
         );
       });
     });
@@ -57,24 +55,24 @@ const SplitUser = (props: Props) => {
     setUnsavedSplitArray(updatedSplitArray);
   };
 
-  const updateSplitCategoryAmount = (
+  const updateSplitCatAmount = (
     split: SplitClientSide,
     oldAmount: number,
     newAmount: number,
   ) => {
     const change = parseMoney(newAmount - oldAmount);
     let amountToDistribute = change;
-    split.categoryArray.forEach((category, index) => {
-      const categoryAmount = category.amount || 0;
+    split.catArray.forEach((cat, index) => {
+      const catAmount = cat.amount || 0;
 
-      if (index === split.categoryArray.length - 1) {
-        category.amount = parseMoney(categoryAmount + amountToDistribute);
+      if (index === split.catArray.length - 1) {
+        cat.amount = parseMoney(catAmount + amountToDistribute);
       } else {
         let share = oldAmount
-          ? parseMoney((categoryAmount / oldAmount) * change)
-          : parseMoney(change / split.categoryArray.length);
+          ? parseMoney((catAmount / oldAmount) * change)
+          : parseMoney(change / split.catArray.length);
 
-        category.amount = parseMoney(categoryAmount + share);
+        cat.amount = parseMoney(catAmount + share);
 
         amountToDistribute = parseMoney(amountToDistribute - share);
       }
@@ -84,14 +82,14 @@ const SplitUser = (props: Props) => {
   const changeAmount = (newAmount: number) => {
     const updatedSplitArray = structuredClone(unsavedSplitArray);
 
-    updateSplitCategoryAmount(
+    updateSplitCatAmount(
       updatedSplitArray[props.index],
       splitAmount,
       newAmount,
     );
 
-    if (!transaction) {
-      console.error("can not update other split. transaction is undefined.");
+    if (!tx) {
+      console.error("can not update other split. tx is undefined.");
       return;
     }
 
@@ -111,12 +109,12 @@ const SplitUser = (props: Props) => {
       })
       .reduce((total, split) => calcSplitAmount(split) + total, 0);
 
-    let remainder = transaction.amount - modifiedSplitAmountTotal;
+    let remainder = tx.amount - modifiedSplitAmountTotal;
     unmodifiedSplitArray.forEach((split, index) => {
       if (index === unmodifiedSplitArray.length - 1) {
-        updateSplitCategoryAmount(split, calcSplitAmount(split), remainder);
+        updateSplitCatAmount(split, calcSplitAmount(split), remainder);
       } else {
-        updateSplitCategoryAmount(
+        updateSplitCatAmount(
           split,
           calcSplitAmount(split),
           parseMoney(remainder / unmodifiedSplitArray.length),
@@ -157,7 +155,7 @@ const SplitUser = (props: Props) => {
                 id="amount"
                 type="number"
                 min={0}
-                max={transactionAmount}
+                max={txAmount}
                 value={splitAmount || 0}
                 onChange={(e) => {
                   props.setIsManaging(true);
@@ -187,16 +185,16 @@ const SplitUser = (props: Props) => {
                 max={100}
                 //0.01 does the same thing 0.01 $ steps
                 step={1}
-                value={parseMoney((splitAmount / transactionAmount) * 100)}
+                value={parseMoney((splitAmount / txAmount) * 100)}
                 onChange={(e) => {
                   props.setIsManaging(true);
                   const prevPercentage = parseMoney(
-                    (splitAmount / transactionAmount) * 100,
+                    (splitAmount / txAmount) * 100,
                   );
                   const updatedPercentage = parseFloat(e.target.value);
 
                   let updatedSplitAmount = parseMoney(
-                    (updatedPercentage / 100) * transactionAmount,
+                    (updatedPercentage / 100) * txAmount,
                   );
 
                   if (splitAmount === updatedSplitAmount) {
@@ -234,11 +232,11 @@ const SplitUser = (props: Props) => {
       >
         {showDetail && (
           <div className="flex w-full items-center justify-evenly border-x-2 border-t-2 border-zinc-700 bg-zinc-800">
-            {split.categoryArray.map((category, i) => (
-              <UserSplitCategory
+            {split.catArray.map((cat, i) => (
+              <UserSplitCat
                 setIsManaging={props.setIsManaging}
                 splitIndex={props.index}
-                categoryIndex={i}
+                catIndex={i}
                 key={i}
               />
             ))}

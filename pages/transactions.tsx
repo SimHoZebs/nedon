@@ -2,15 +2,12 @@ import { NextPage } from "next";
 import React, { useEffect, useMemo, useState } from "react";
 
 import DateRangePicker from "@/comp/DateRangePicker";
-import DateSortedTransactionList from "@/comp/DateSortedTransactionList";
-import TransactionModal from "@/comp/transaction/TransactionModal/TransactionModal";
+import DateSortedTxList from "@/comp/DateSortedTxList";
+import TxModal from "@/comp/tx/TxModal/TxModal";
 
-import {
-  filterTransactionByDate,
-  organizeTransactionByTime,
-} from "@/util/transaction";
 import { trpc } from "@/util/trpc";
-import { FullTransaction } from "@/util/types";
+import { filterTxByDate, organizeTxByTime } from "@/util/tx";
+import { FullTx } from "@/util/types";
 
 const Page: NextPage = () => {
   const allUsers = trpc.user.getAll.useQuery(undefined, {
@@ -19,7 +16,7 @@ const Page: NextPage = () => {
 
   const appUser = allUsers.data?.[0];
 
-  const transactionArray = trpc.transaction.getAll.useQuery(
+  const txArray = trpc.tx.getAll.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: appUser?.hasAccessToken },
   );
@@ -29,47 +26,41 @@ const Page: NextPage = () => {
     "date" | "month" | "year" | "all"
   >("month");
   const [date, setDate] = useState<Date>(new Date(Date.now()));
-  const [scopedTransactionArray, setScopedTransactionArray] = useState<
-    FullTransaction[]
-  >([]);
+  const [scopedTxArray, setScopedTxArray] = useState<FullTx[]>([]);
 
   useEffect(() => {
-    if (!transactionArray.data) {
-      transactionArray.status === "loading"
-        ? console.debug("Can't set date. transactionArray is loading.")
-        : console.error("Can't set date. Fetching transactionArray failed.");
+    if (!txArray.data) {
+      txArray.status === "loading"
+        ? console.debug("Can't set date. txArray is loading.")
+        : console.error("Can't set date. Fetching txArray failed.");
 
       return;
     }
 
     if (!date) {
-      const initialDate = new Date(transactionArray.data.at(-1)!.date);
+      const initialDate = new Date(txArray.data.at(-1)!.date);
 
       setDate(initialDate);
       return;
     }
 
     if (rangeFormat === "all") {
-      setScopedTransactionArray(transactionArray.data);
+      setScopedTxArray(txArray.data);
       return;
     }
 
-    const filteredArray = filterTransactionByDate(
-      transactionArray.data,
-      date,
-      rangeFormat,
-    );
+    const filteredArray = filterTxByDate(txArray.data, date, rangeFormat);
 
-    setScopedTransactionArray(filteredArray);
-  }, [date, rangeFormat, transactionArray.data, transactionArray.status]);
+    setScopedTxArray(filteredArray);
+  }, [date, rangeFormat, txArray.data, txArray.status]);
 
-  const sortedTransactionArray = useMemo(() => {
-    return organizeTransactionByTime(scopedTransactionArray);
-  }, [scopedTransactionArray]);
+  const sortedTxArray = useMemo(() => {
+    return organizeTxByTime(scopedTxArray);
+  }, [scopedTxArray]);
 
   return (
     <section className="flex w-full justify-center">
-      {showModal && <TransactionModal setShowModal={setShowModal} />}
+      {showModal && <TxModal setShowModal={setShowModal} />}
 
       <div className="flex w-full max-w-sm flex-col items-center gap-y-2 lg:max-w-md">
         <DateRangePicker
@@ -79,9 +70,9 @@ const Page: NextPage = () => {
           setRangeFormat={setRangeFormat}
         />
 
-        <DateSortedTransactionList
+        <DateSortedTxList
           setShowModal={setShowModal}
-          sortedTransactionArray={sortedTransactionArray}
+          sortedTxArray={sortedTxArray}
         />
       </div>
     </section>

@@ -5,8 +5,8 @@ import { H3 } from "@/comp/Heading";
 
 import parseMoney from "@/util/parseMoney";
 import { calcSplitAmount } from "@/util/split";
-import { useTransactionStore } from "@/util/transactionStore";
 import { trpc } from "@/util/trpc";
+import { useTxStore } from "@/util/txStore";
 import { SplitClientSide, isSplitInDB } from "@/util/types";
 
 import SplitUser from "./SplitUser";
@@ -15,10 +15,10 @@ import SplitUserOptionList from "./SplitUserOptionList";
 interface Props extends React.HTMLAttributes<HTMLDivElement> {}
 
 const SplitList = (props: Props) => {
-  const createTransaction = trpc.transaction.create.useMutation();
+  const createTx = trpc.tx.create.useMutation();
   const deleteSplit = trpc.split.delete.useMutation();
   const createSplit = trpc.split.create.useMutation();
-  const upsertManyCategory = trpc.category.upsertMany.useMutation();
+  const upsertManyCat = trpc.cat.upsertMany.useMutation();
   const queryClient = trpc.useUtils();
 
   const allUsers = trpc.user.getAll.useQuery(undefined, {
@@ -26,12 +26,10 @@ const SplitList = (props: Props) => {
   });
 
   const appUser = allUsers.data?.[0];
-  const transaction = useTransactionStore((state) => state.transactionOnModal);
-  const refreshDBData = useTransactionStore((state) => state.refreshDBData);
-  const unsavedSplitArray = useTransactionStore(
-    (state) => state.unsavedSplitArray,
-  );
-  const setUnsavedSplitArray = useTransactionStore(
+  const tx = useTxStore((state) => state.txOnModal);
+  const refreshDBData = useTxStore((state) => state.refreshDBData);
+  const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
+  const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
   const [isManaging, setIsManaging] = useState(false);
@@ -40,7 +38,7 @@ const SplitList = (props: Props) => {
     number[]
   >([]);
 
-  const transactionAmount = transaction?.amount || 0;
+  const txAmount = tx?.amount || 0;
 
   let updatedSplitAmount = parseMoney(
     unsavedSplitArray.reduce(
@@ -50,48 +48,46 @@ const SplitList = (props: Props) => {
   );
 
   const isWrongSplit =
-    updatedSplitAmount !== transactionAmount && unsavedSplitArray.length > 0;
+    updatedSplitAmount !== txAmount && unsavedSplitArray.length > 0;
 
   const saveChanges = async () => {
-    if (!appUser || !transaction) {
-      console.error(
-        "appUser or transaction is undefined. appuser:",
-        appUser,
-        "transaction:",
-        transaction,
-      );
+    if (!appUser || !tx) {
+      console.error("appUser or tx is undefined. appuser:", appUser, "tx:", tx);
       return;
     }
 
-    const splitToDeleteArray = transaction.splitArray.filter(
-      (split) =>
-        !unsavedSplitArray.find((unsavedSplit) => unsavedSplit.id === split.id),
-    );
-
-    splitToDeleteArray.forEach(async (split) => {
-      if (split.id) await deleteSplit.mutateAsync({ splitId: split.id });
+    //delete splits that are not in unsavedSplitArray
+    tx.splitArray.forEach(async (split) => {
+      if (
+        split.id &&
+        !unsavedSplitArray.find((unsavedSplit) => unsavedSplit.id === split.id)
+      )
+        await deleteSplit.mutateAsync({ splitId: split.id });
     });
 
-    if (!transaction.id) {
-      const transactionDBData = await createTransaction.mutateAsync({
+    //if tx doesn't exist, create one
+    if (!tx.id) {
+      const txDBData = await createTx.mutateAsync({
         userId: appUser.id,
-        transactionId: transaction.transaction_id,
+        txId: tx.tx_id,
         splitArray: unsavedSplitArray,
       });
 
-      refreshDBData(transactionDBData);
-    } else {
+      refreshDBData(txDBData);
+    }
+    //otherwise, update the tx
+    else {
       const dbUpdatedSplitArray = await Promise.all(
         unsavedSplitArray.map(async (split) => {
           if (!isSplitInDB(split)) {
             return await createSplit.mutateAsync({
               //id boolean was checked in if statement
-              transactionId: transaction.id!,
+              txId: tx.id!,
               split,
             });
           } else {
-            return await upsertManyCategory.mutateAsync({
-              categoryArray: split.categoryArray,
+            return await upsertManyCat.mutateAsync({
+              catArray: split.catArray,
             });
           }
         }),
@@ -102,7 +98,7 @@ const SplitList = (props: Props) => {
 
     setIsManaging(false);
     setModifiedSplitIndexArray([]);
-    queryClient.transaction.invalidate();
+    queryClient.tx.invalidate();
   };
 
   return (
@@ -132,13 +128,11 @@ const SplitList = (props: Props) => {
                   onClick={() => {
                     setIsManaging(false);
                     setModifiedSplitIndexArray([]);
-                    if (!transaction) {
-                      console.error(
-                        "Can't reset splitArray. transaction is undefined",
-                      );
+                    if (!tx) {
+                      console.error("Can't reset splitArray. tx is undefined");
                       return;
                     }
-                    setUnsavedSplitArray(transaction.splitArray);
+                    setUnsavedSplitArray(tx.splitArray);
                   }}
                 >
                   Cancel
@@ -155,23 +149,20 @@ const SplitList = (props: Props) => {
             )}
           </div>
 
-          <div
+          <p
             className={`h-5 ${
-              updatedSplitAmount !== transactionAmount &&
-              unsavedSplitArray.length > 0
+              updatedSplitAmount !== txAmount && unsavedSplitArray.length > 0
                 ? "text-red-800"
                 : "text-transparent"
             }`}
           >
             {`Current split total is $${updatedSplitAmount.toFixed(
               2,
-            )}; ${parseMoney(
-              Math.abs(transactionAmount - updatedSplitAmount),
-            ).toFixed(2)} ${
-              updatedSplitAmount > transactionAmount ? "greater " : "less "
-            }
+            )}; ${parseMoney(Math.abs(txAmount - updatedSplitAmount)).toFixed(
+              2,
+            )} ${updatedSplitAmount > txAmount ? "greater " : "less "}
           than needed`}
-          </div>
+          </p>
 
           {isManaging && unsavedSplitArray.length > 1 && (
             <div className="flex items-center gap-x-4 px-2">

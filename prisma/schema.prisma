@@ -28,21 +28,21 @@ model User {
   TRANSFER_ID  String? // The transfer_id is only relevant for Transfer ACH product.
   PAYMENT_ID   String? // The payment_id is only relevant for the UK/EU Payment Initiation product.
 
-  transactionArray Transaction[]
-  splitArray       Split[] //a user can be part of a transaction split they do not own
+  txArray    Tx[]
+  splitArray Split[] //a user can be part of a tx split they do not own
 
   myGroup    Group[] @relation("mygroup") //groups I own
   groupArray Group[] //array of groups this user is included in
 }
 
-model Transaction {
-  id         String  @id @default(cuid()) //transaction_id UUID for Plaid transactions, CUID for manually created transactions
+model Tx {
+  id         String  @id @default(cuid()) //tx_id UUID for Plaid txs, CUID for manually created txs
   ownerId    String
   owner      User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   splitArray Split[]
 }
 
-model Category {
+model Cat {
   id        String   @id @default(uuid())
   nameArray String[]
   amount    Float
@@ -54,10 +54,10 @@ model Category {
 model Split {
   id String @id @default(uuid())
 
-  transactionId String
-  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  txId String
+  tx   Tx     @relation(fields: [txId], references: [id], onDelete: Cascade)
 
-  categoryArray Category[]
+  catArray Cat[]
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

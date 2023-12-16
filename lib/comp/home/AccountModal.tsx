@@ -3,11 +3,11 @@ import React, { useMemo } from "react";
 
 import Modal from "@/comp/Modal";
 
-import { organizeTransactionByTime } from "@/util/transaction";
 import { trpc } from "@/util/trpc";
+import { organizeTxByTime } from "@/util/tx";
 
 import { CloseBtn } from "../Button";
-import DateSortedTransactionList from "../DateSortedTransactionList";
+import DateSortedTxList from "../DateSortedTxList";
 import { H1, H2, H3, H4 } from "../Heading";
 
 interface Props {
@@ -21,18 +21,18 @@ const AccountModal = (props: Props) => {
   });
   const appUser = allUsers.data?.[0];
 
-  const transactionArray = trpc.transaction.getAll.useQuery(
+  const txArray = trpc.tx.getAll.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: appUser?.hasAccessToken },
   );
 
-  const sortedTransactionArray = useMemo(() => {
-    if (!transactionArray.data) return [[[[]]]];
-    const filteredTxArray = transactionArray.data.filter(
+  const sortedTxArray = useMemo(() => {
+    if (!txArray.data) return [[[[]]]];
+    const filteredTxArray = txArray.data.filter(
       (tx) => tx.account_id === props.clickedAccount?.account_id,
     );
-    return organizeTransactionByTime(filteredTxArray);
-  }, [props.clickedAccount?.account_id, transactionArray.data]);
+    return organizeTxByTime(filteredTxArray);
+  }, [props.clickedAccount?.account_id, txArray.data]);
 
   return (
     <Modal setShowModal={props.setShowModal}>
@@ -53,9 +53,9 @@ const AccountModal = (props: Props) => {
             </div>
           </div>
           <section className="flex h-full w-full flex-col gap-y-3 p-1 lg:max-w-lg">
-            <H2>Transaction History</H2>
-            <DateSortedTransactionList
-              sortedTransactionArray={sortedTransactionArray}
+            <H2>Tx History</H2>
+            <DateSortedTxList
+              sortedTxArray={sortedTxArray}
               setShowModal={props.setShowModal}
             />
           </section>

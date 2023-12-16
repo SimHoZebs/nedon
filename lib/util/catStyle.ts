@@ -1,7 +1,7 @@
-const categoryStyleArray: {
+const catStyleArray: {
   [key: string]:
-    | { icon: string; bgColor: string; textColor: string }
-    | undefined;
+  | { icon: string; bgColor: string; textColor: string; }
+  | undefined;
 } = {
   Travel: {
     icon: "icon-[mdi--car-outline]",
@@ -105,4 +105,4 @@ const categoryStyleArray: {
   },
 };
 
-export default categoryStyleArray;
+export default catStyleArray;

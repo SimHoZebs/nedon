@@ -3,35 +3,32 @@ import React, { useRef, useState } from "react";
 import { ActionBtn, Button } from "@/comp/Button";
 import { H3 } from "@/comp/Heading";
 
-import { emptyCategory, mergeCategoryArray } from "@/util/category";
+import { emptyCat, mergeCatArray } from "@/util/cat";
 import parseMoney from "@/util/parseMoney";
 import { calcSplitAmount } from "@/util/split";
-import { useTransactionStore } from "@/util/transactionStore";
 import { trpc } from "@/util/trpc";
+import { useTxStore } from "@/util/txStore";
 import { isSplitInDB } from "@/util/types";
 
-import CategoryChip from "./CategoryChip";
-import CategoryPicker from "./CategoryPicker";
+import CatChip from "./CatChip";
+import CatPicker from "./CatPicker";
 
 const offScreen = { x: -800, y: 0 };
 
-const Category = () => {
-  const unsavedSplitArray = useTransactionStore(
-    (state) => state.unsavedSplitArray,
-  );
-  const setUnsavedSplitArray = useTransactionStore(
+const Cat = () => {
+  const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
+  const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
-  const transaction = useTransactionStore((state) => state.transactionOnModal);
-  const refreshDBData = useTransactionStore((state) => state.refreshDBData);
-  const categoryPickerRef = useRef<HTMLDivElement>(null);
-  const upsertManyCategory = trpc.category.upsertMany.useMutation();
+  const tx = useTxStore((state) => state.txOnModal);
+  const refreshDBData = useTxStore((state) => state.refreshDBData);
+  const catPickerRef = useRef<HTMLDivElement>(null);
+  const upsertManyCat = trpc.cat.upsertMany.useMutation();
 
-  const unsavedMergedCategoryArray = mergeCategoryArray(unsavedSplitArray);
+  const unsavedMergedCatArray = mergeCatArray(unsavedSplitArray);
 
-  //Indicator for if (undefined) and which (number) category is being edited. 'if' is needed for CategoryChip.tsx to highlight the editing category.
-  const [editingMergedCategoryIndex, setEditingMergedCategoryIndex] =
-    useState<number>();
+  //Indicator for if (undefined) and which (number) cat is being edited. 'if' is needed for CatChip.tsx to highlight the editing cat.
+  const [editingMergedCatIndex, setEditingMergedCatIndex] = useState<number>();
   const [isManaging, setIsManaging] = useState(false);
   const queryClient = trpc.useUtils();
 
@@ -48,10 +45,10 @@ const Category = () => {
     ),
   );
 
-  const transactionAmount = transaction?.amount || 0;
+  const txAmount = tx?.amount || 0;
 
   const isWrongSplit =
-    updatedSplitAmount !== transactionAmount && unsavedSplitArray.length > 0;
+    updatedSplitAmount !== txAmount && unsavedSplitArray.length > 0;
 
   return (
     <div className="flex flex-col gap-y-1">
@@ -71,15 +68,15 @@ const Category = () => {
                   return;
                 }
 
-                const updatedSplit = await upsertManyCategory.mutateAsync({
-                  categoryArray: targetSplit.categoryArray,
+                const updatedSplit = await upsertManyCat.mutateAsync({
+                  catArray: targetSplit.catArray,
                 });
 
                 splitArrayClone[0] = updatedSplit;
 
                 refreshDBData(splitArrayClone);
                 setIsManaging(false);
-                queryClient.transaction.invalidate();
+                queryClient.tx.invalidate();
               }}
             >
               Save changes
@@ -89,13 +86,11 @@ const Category = () => {
               variant="negative"
               onClick={() => {
                 setIsManaging(false);
-                if (!transaction) {
-                  console.error(
-                    "Can't reset splitArray. transaction is undefined",
-                  );
+                if (!tx) {
+                  console.error("Can't reset splitArray. tx is undefined");
                   return;
                 }
-                setUnsavedSplitArray(transaction.splitArray);
+                setUnsavedSplitArray(tx.splitArray);
               }}
             >
               Cancel
@@ -114,28 +109,28 @@ const Category = () => {
 
       <div className="flex flex-col gap-y-1">
         <div className="relative flex w-full flex-wrap items-center gap-2 ">
-          {unsavedMergedCategoryArray.map((category, index) => (
-            <CategoryChip
+          {unsavedMergedCatArray.map((cat, index) => (
+            <CatChip
               key={index}
               index={index}
               isManaging={isManaging}
               setIsManaging={setIsManaging}
-              isMultiCategory={unsavedMergedCategoryArray.length > 1}
-              isEditing={editingMergedCategoryIndex === index}
-              mergedCategory={
-                editingMergedCategoryIndex === index
-                  ? unsavedMergedCategoryArray[index]
-                  : category
+              isMultiCat={unsavedMergedCatArray.length > 1}
+              isEditing={editingMergedCatIndex === index}
+              mergedCat={
+                editingMergedCatIndex === index
+                  ? unsavedMergedCatArray[index]
+                  : cat
               }
               findAndSetPickerPosition={(e) => {
-                setEditingMergedCategoryIndex(index);
+                setEditingMergedCatIndex(index);
 
                 //pickerOffset is sometimes undefined if it's outside
                 const pickerOffsets =
-                  categoryPickerRef.current?.getBoundingClientRect();
+                  catPickerRef.current?.getBoundingClientRect();
                 if (!pickerOffsets) {
                   console.error;
-                  `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`;
+                  `pickerOffsets is undefined. catPickerRef is: ${catPickerRef.current}`;
 
                   return;
                 }
@@ -152,15 +147,15 @@ const Category = () => {
             <Button
               className="gap-x-1 rounded-lg text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
               onClickAsync={async (e) => {
-                const mergedCategoryArrayClone = structuredClone(
-                  unsavedMergedCategoryArray,
+                const mergedCatArrayClone = structuredClone(
+                  unsavedMergedCatArray,
                 );
 
-                mergedCategoryArrayClone.push(
-                  emptyCategory({ amount: 0, splitId: null }),
+                mergedCatArrayClone.push(
+                  emptyCat({ amount: 0, splitId: null }),
                 );
 
-                const newCategory = emptyCategory({
+                const newCat = emptyCat({
                   amount: 0,
                   splitId: null,
                 });
@@ -168,23 +163,21 @@ const Category = () => {
                 const updatedSplitArray = structuredClone(
                   unsavedSplitArray,
                 ).map((split) => {
-                  split.categoryArray.push(newCategory);
+                  split.catArray.push(newCat);
                   return split;
                 });
 
                 setUnsavedSplitArray(updatedSplitArray);
 
                 //The index is referenced from the clone instead of the react state as they are identical and the react state wouldn't have updated yet (See: batch state update)
-                setEditingMergedCategoryIndex(
-                  mergedCategoryArrayClone.length - 1,
-                );
+                setEditingMergedCatIndex(mergedCatArrayClone.length - 1);
 
                 //pickerOffset is sometimes undefined if it's outside
                 const pickerOffsets =
-                  categoryPickerRef.current?.getBoundingClientRect();
+                  catPickerRef.current?.getBoundingClientRect();
                 if (!pickerOffsets) {
                   console.error(
-                    `pickerOffsets is undefined. categoryPickerRef is: ${categoryPickerRef.current}`,
+                    `pickerOffsets is undefined. catPickerRef is: ${catPickerRef.current}`,
                   );
                   return;
                 }
@@ -199,20 +192,20 @@ const Category = () => {
               }}
             >
               <span className="icon-[mdi--shape-plus-outline]" />
-              Add Category
+              Add Cat
             </Button>
           )}
         </div>
 
-        {transaction && (
-          <CategoryPicker
-            ref={categoryPickerRef}
-            unsavedMergedCategoryArray={unsavedMergedCategoryArray}
+        {tx && (
+          <CatPicker
+            ref={catPickerRef}
+            unsavedMergedCatArray={unsavedMergedCatArray}
             //Fallback to 0 for initial boundingClient size.
-            editingMergedCategoryIndex={editingMergedCategoryIndex || 0}
+            editingMergedCatIndex={editingMergedCatIndex || 0}
             position={pickerPosition}
             closePicker={() => {
-              setEditingMergedCategoryIndex(undefined);
+              setEditingMergedCatIndex(undefined);
               setPickerPosition(offScreen);
             }}
           />
@@ -222,4 +215,4 @@ const Category = () => {
   );
 };
 
-export default Category;
+export default Cat;

@@ -13,12 +13,9 @@ import {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
-import {
-  filterTransactionByDate,
-  organizeTransactionByTime,
-} from "@/util/transaction";
 import { trpc } from "@/util/trpc";
-import { FullTransaction } from "@/util/types";
+import { filterTxByDate, organizeTxByTime } from "@/util/tx";
+import { FullTx } from "@/util/types";
 
 interface Props {
   spendingTotal: number;
@@ -32,18 +29,14 @@ const LineGraph = (props: Props) => {
   });
 
   const appUser = allUsers.data?.[0];
-  const transactionArray = trpc.transaction.getAll.useQuery<FullTransaction[]>(
+  const txArray = trpc.tx.getAll.useQuery<FullTx[]>(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );
 
   const thisMonthTxArray =
-    transactionArray.data && props.rangeFormat !== "all"
-      ? filterTransactionByDate(
-          transactionArray.data,
-          props.date,
-          props.rangeFormat,
-        )
+    txArray.data && props.rangeFormat !== "all"
+      ? filterTxByDate(txArray.data, props.date, props.rangeFormat)
       : [];
 
   // Get the number of days in the month
@@ -53,7 +46,7 @@ const LineGraph = (props: Props) => {
   const numberOfDays = date.getDate();
 
   const thisMonthTimeOrganizedTxArray =
-    organizeTransactionByTime(thisMonthTxArray)[0][0];
+    organizeTxByTime(thisMonthTxArray)[0][0];
 
   const yeet = thisMonthTimeOrganizedTxArray
     .map((day) => ({

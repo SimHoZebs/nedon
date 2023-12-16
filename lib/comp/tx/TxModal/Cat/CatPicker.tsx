@@ -1,25 +1,26 @@
 import React, { ForwardedRef, forwardRef, useEffect, useState } from "react";
 
-import { emptyCategory } from "@/util/category";
-import categoryStyleArray from "@/util/categoryStyle";
-import { useTransactionStore } from "@/util/transactionStore";
+import { emptyCat } from "@/util/cat";
+import catStyleArray from "@/util/catStyle";
+import { useTxStore } from "@/util/txStore";
 import { trpc } from "@/util/trpc";
-import { MergedCategory, SplitInDB, TreedCategory } from "@/util/types";
+import { MergedCat, SplitInDB, TreedCat } from "@/util/types";
+import { useStore } from "@/util/store";
 
 interface Props {
-  unsavedMergedCategoryArray: MergedCategory[];
-  editingMergedCategoryIndex: number;
+  unsavedMergedCatArray: MergedCat[];
+  editingMergedCatIndex: number;
   closePicker: () => void;
   position: { x: number; y: number };
 }
 
-const CategoryPicker = forwardRef(
+const CatPicker = forwardRef(
   (props: Props, ref: ForwardedRef<HTMLDivElement>) => {
-    const createCategory = trpc.category.create.useMutation();
+    const createCat = trpc.cat.create.useMutation();
     const createSplit = trpc.split.create.useMutation();
     const upsertManySplit = trpc.split.upsertMany.useMutation();
-    const createTransaction = trpc.transaction.create.useMutation();
-    const categoryOptionArray = trpc.getCategoryOptionArray.useQuery(
+    const createTx = trpc.tx.create.useMutation();
+    const catOptionArray = trpc.getCatOptionArray.useQuery(
       undefined,
       { staleTime: Infinity },
     );
@@ -30,71 +31,72 @@ const CategoryPicker = forwardRef(
     });
 
     const appUser = allUsers.data?.[0];
-    const transaction = useTransactionStore(
-      (state) => state.transactionOnModal,
+    const tx = useTxStore(
+      (state) => state.txOnModal,
     );
-    const refreshDBData = useTransactionStore((state) => state.refreshDBData);
-    const unsavedSplitArray = useTransactionStore(
+    const refreshDBData = useTxStore((state) => state.refreshDBData);
+    const unsavedSplitArray = useTxStore(
       (state) => state.unsavedSplitArray,
     );
-    const setUnsavedSplitArray = useTransactionStore(
+    const setUnsavedSplitArray = useTxStore(
       (state) => state.setUnsavedSplitArray,
     );
+    const screenType  = useStore((state) => state.screenType);
     const [unsavedNameArray, setCurrentNameArray] = useState<string[]>([]);
     const [currentOptionArray, setCurrentOptionArray] = useState<
-      TreedCategory[]
+      TreedCat[]
     >([]);
 
-    const editingMergedCategory =
-      props.unsavedMergedCategoryArray[props.editingMergedCategoryIndex];
+    const editingMergedCat =
+      props.unsavedMergedCatArray[props.editingMergedCatIndex];
 
     const resetPicker = () => {
       setCurrentNameArray([]);
 
-      if (!categoryOptionArray.data) {
+      if (!catOptionArray.data) {
         console.error(
-          "Can't reset picker. categoryOptionArray is undefined. How did you get here?",
+          "Can't reset picker. catOptionArray is undefined. How did you get here?",
         );
         return;
       }
-      setCurrentOptionArray(categoryOptionArray.data);
+      setCurrentOptionArray(catOptionArray.data);
     };
 
-    const createCategoryForManySplit = async (nameArray: string[]) => {
-      if (!appUser || !transaction) {
+    const createCatForManySplit = async (nameArray: string[]) => {
+      if (!appUser || !tx) {
         console.error(
-          "appUser or transactionOnModal or transaction is undefined.",
+          "appUser or txOnModal or tx is undefined.",
         );
         return;
       }
 
-      if (!transaction.id) {
-        if (props.editingMergedCategoryIndex === undefined) {
-          console.error("editingMergedCategoryIndex is undefined.");
+      if (!tx.id) {
+        if (props.editingMergedCatIndex === undefined) {
+          console.error("editingMergedCatIndex is undefined.");
           return;
         }
 
         const split = structuredClone(unsavedSplitArray[0]);
-        split.categoryArray[props.editingMergedCategoryIndex] = emptyCategory({
+        split.catArray[props.editingMergedCatIndex] = emptyCat({
           nameArray,
           splitId: split.id,
           amount: 0,
         });
 
-        const transactionDBData = await createTransaction.mutateAsync({
+        const txDBData = await createTx.mutateAsync({
           userId: appUser.id,
-          transactionId: transaction.transaction_id,
+          txId: tx.tx_id,
           splitArray: [split],
         });
 
-        refreshDBData(transactionDBData);
+        refreshDBData(txDBData);
 
         return;
       }
 
       const updatedSplitArray = unsavedSplitArray.map((unsavedSplit) => {
         const split = structuredClone(unsavedSplit);
-        split.categoryArray[split.categoryArray.length - 1] = emptyCategory({
+        split.catArray[split.catArray.length - 1] = emptyCat({
           nameArray,
           splitId: split.id,
           amount: 0,
@@ -108,9 +110,9 @@ const CategoryPicker = forwardRef(
       const dbUpdatedSplitArray = await Promise.all(
         updatedSplitArray.map(async (updatedSplit) => {
           if (updatedSplit.id === null) {
-            //transaction.id boolean was checked before
+            //tx.id boolean was checked before
             const newSplit = await createSplit.mutateAsync({
-              transactionId: transaction.id!,
+              txId: tx.id!,
               split: updatedSplit,
             });
 
@@ -118,15 +120,15 @@ const CategoryPicker = forwardRef(
           }
 
           const updatedSplitClone = structuredClone(updatedSplit);
-          const newCategory = await createCategory.mutateAsync({
+          const newCat = await createCat.mutateAsync({
             splitId: updatedSplit.id!, // never null because of the if check
             amount: 0,
             nameArray: nameArray,
           });
 
-          updatedSplitClone.categoryArray[
-            updatedSplit.categoryArray.length - 1
-          ] = newCategory;
+          updatedSplitClone.catArray[
+            updatedSplit.catArray.length - 1
+          ] = newCat;
 
           return updatedSplitClone as SplitInDB;
         }),
@@ -135,105 +137,105 @@ const CategoryPicker = forwardRef(
       refreshDBData(dbUpdatedSplitArray);
     };
 
-    const updateManyCategoryNameArray = async (updatedNameArray: string[]) => {
-      if (!transaction) return console.error("transaction is undefined.");
+    const updateManyCatNameArray = async (updatedNameArray: string[]) => {
+      if (!tx) return console.error("tx is undefined.");
 
-      if (!transaction.id) {
-        const transactionDBData = await createTransaction.mutateAsync({
+      if (!tx.id) {
+        const txDBData = await createTx.mutateAsync({
           userId: appUser!.id,
-          transactionId: transaction.transaction_id,
+          txId: tx.tx_id,
           splitArray: unsavedSplitArray.map((split) => ({
             ...split,
-            categoryArray: split.categoryArray.map((category) => ({
-              ...category,
+            catArray: split.catArray.map((cat) => ({
+              ...cat,
               nameArray: updatedNameArray,
             })),
           })),
         });
 
-        refreshDBData(transactionDBData);
+        refreshDBData(txDBData);
         return;
       }
 
-      if (props.editingMergedCategoryIndex === undefined) {
-        console.error("editingMergedCategoryIndex is undefined.");
+      if (props.editingMergedCatIndex === undefined) {
+        console.error("editingMergedCatIndex is undefined.");
         return;
       }
 
       const updatedSplitArray = unsavedSplitArray.map((unsavedSplit) => {
         const updatedSplit = structuredClone(unsavedSplit);
 
-        updatedSplit.categoryArray[props.editingMergedCategoryIndex].nameArray =
+        updatedSplit.catArray[props.editingMergedCatIndex].nameArray =
           updatedNameArray;
 
         return updatedSplit;
       });
 
       refreshDBData(updatedSplitArray);
-      const dbUpdatedTransaction = await upsertManySplit.mutateAsync({
-        transactionId: transaction.id,
+      const dbUpdatedTx = await upsertManySplit.mutateAsync({
+        txId: tx.id,
         splitArray: updatedSplitArray,
       });
-      refreshDBData(dbUpdatedTransaction);
+      refreshDBData(dbUpdatedTx);
     };
 
     /**
      *
-     * @param clickedTreedCategory  if the category is assigned by click instead of the "save" button.
+     * @param clickedTreedCat  if the cat is assigned by click instead of the "save" button.
      */
-    const applyChangesToCategory = async (
-      clickedTreedCategory?: TreedCategory,
+    const applyChangesToCat = async (
+      clickedTreedCat?: TreedCat,
     ) => {
-      const updatedMergedCategory = structuredClone(editingMergedCategory);
+      const updatedMergedCat = structuredClone(editingMergedCat);
       const updatedNameArray = structuredClone(unsavedNameArray);
 
-      if (clickedTreedCategory) {
-        updatedNameArray.push(clickedTreedCategory.name);
+      if (clickedTreedCat) {
+        updatedNameArray.push(clickedTreedCat.name);
       }
-      updatedMergedCategory.nameArray = updatedNameArray;
+      updatedMergedCat.nameArray = updatedNameArray;
 
       //The only diff between categories inDB and not inDB
-      if (editingMergedCategory.nameArray.length === 0) {
-        await createCategoryForManySplit(updatedMergedCategory.nameArray);
+      if (editingMergedCat.nameArray.length === 0) {
+        await createCatForManySplit(updatedMergedCat.nameArray);
       } else {
-        await updateManyCategoryNameArray(updatedMergedCategory.nameArray);
+        await updateManyCatNameArray(updatedMergedCat.nameArray);
       }
 
-      queryClient.transaction.invalidate();
+      queryClient.tx.invalidate();
     };
 
     useEffect(() => {
-      if (!categoryOptionArray.data) {
-        categoryOptionArray.status === "loading"
+      if (!catOptionArray.data) {
+        catOptionArray.status === "loading"
           ? console.debug(
-              "Can't sync currentOptionArray. categoryOptionArray is loading.",
+              "Can't sync currentOptionArray. catOptionArray is loading.",
             )
           : console.error(
-              "Can't sync currentOptionArray. fetching categoryOptionArray failed.",
+              "Can't sync currentOptionArray. fetching catOptionArray failed.",
             );
 
         return;
       }
 
-      const filteredOptionArray = categoryOptionArray.data.filter(
+      const filteredOptionArray = catOptionArray.data.filter(
         (option) =>
-          !props.unsavedMergedCategoryArray.find(
-            (unsavedCategory) =>
-              unsavedCategory.nameArray.at(-1) === option.name,
+          !props.unsavedMergedCatArray.find(
+            (unsavedCat) =>
+              unsavedCat.nameArray.at(-1) === option.name,
           ),
       );
 
       setCurrentOptionArray(filteredOptionArray);
     }, [
-      categoryOptionArray.data,
-      categoryOptionArray.status,
-      props.unsavedMergedCategoryArray,
+      catOptionArray.data,
+      catOptionArray.status,
+      props.unsavedMergedCatArray,
     ]);
 
-    return categoryOptionArray.data ? (
+    return catOptionArray.data ? (
       <div
         ref={ref}
-        className="absolute flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900 sm:w-96"
+        className={"absolute flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900 sm:w-96 " + }
         onClick={(e) => e.stopPropagation()}
         style={{ top: props.position.y, left: props.position.x }}
       >
@@ -244,9 +246,9 @@ const CategoryPicker = forwardRef(
                 aria-label="back"
                 className="flex"
                 onClick={() => {
-                  if (!transaction)
+                  if (!tx)
                     return console.error(
-                      "Can't reset unsavedSplitArray. transaction is undefined.",
+                      "Can't reset unsavedSplitArray. tx is undefined.",
                     );
                   resetPicker();
                 }}
@@ -260,8 +262,8 @@ const CategoryPicker = forwardRef(
             <button
               className="text-indigo-300 hover:text-indigo-400"
               onClick={async () => {
-                if (editingMergedCategory.id === null) {
-                  await applyChangesToCategory();
+                if (editingMergedCat.id === null) {
+                  await applyChangesToCat();
                   resetPicker();
                   props.closePicker();
                 }
@@ -273,11 +275,11 @@ const CategoryPicker = forwardRef(
               className="text-pink-400 hover:text-pink-500"
               onClick={(e) => {
                 e.stopPropagation();
-                if (!transaction)
+                if (!tx)
                   return console.error(
-                    "Can't reset unsavedSplitArray. transaction is undefined.",
+                    "Can't reset unsavedSplitArray. tx is undefined.",
                   );
-                setUnsavedSplitArray(transaction.splitArray);
+                setUnsavedSplitArray(tx.splitArray);
                 resetPicker();
                 props.closePicker();
               }}
@@ -290,26 +292,26 @@ const CategoryPicker = forwardRef(
         <hr className="w-full border-zinc-700" />
 
         <div className="grid w-full auto-cols-fr grid-cols-3 overflow-x-hidden overflow-y-scroll bg-zinc-800 pb-1 pl-2 text-xs ">
-          {currentOptionArray.map((category, i) => (
+          {currentOptionArray.map((cat, i) => (
             <button
               onClick={async () => {
-                if (category.subCategoryArray.length === 0) {
-                  await applyChangesToCategory(category);
+                if (cat.subCatArray.length === 0) {
+                  await applyChangesToCat(cat);
                   resetPicker();
                   props.closePicker();
                 } else {
-                  const updatedOptionArray = category.subCategoryArray;
+                  const updatedOptionArray = cat.subCatArray;
 
                   const filteredOptionArray = updatedOptionArray.filter(
                     (option) =>
-                      !props.unsavedMergedCategoryArray.find(
-                        (unsavedCategory) =>
-                          unsavedCategory.nameArray.at(-1) === option.name,
+                      !props.unsavedMergedCatArray.find(
+                        (unsavedCat) =>
+                          unsavedCat.nameArray.at(-1) === option.name,
                       ),
                   );
 
                   setCurrentOptionArray(filteredOptionArray);
-                  setCurrentNameArray((prev) => [...prev, category.name]);
+                  setCurrentNameArray((prev) => [...prev, cat.name]);
                 }
               }}
               key={i}
@@ -319,17 +321,17 @@ const CategoryPicker = forwardRef(
             >
               <span
                 className={`h-6 w-6 ${
-                  categoryStyleArray[category.name]?.textColor ||
+                  catStyleArray[cat.name]?.textColor ||
                   "text-zinc-500 group-hover:text-zinc-400"
                 } ${
-                  categoryStyleArray[category.name]?.icon ||
-                  "icon-[material-symbols--category-outline]"
+                  catStyleArray[cat.name]?.icon ||
+                  "icon-[material-symbols--cat-outline]"
                 }`}
               />
-              <p>{category.name}</p>
+              <p>{cat.name}</p>
               <p className="text-zinc-500 group-hover:text-zinc-400">
-                {category.subCategoryArray.length > 0 &&
-                  category.subCategoryArray.length + " subcategories"}
+                {cat.subCatArray.length > 0 &&
+                  cat.subCatArray.length + " subcategories"}
               </p>
             </button>
           ))}
@@ -339,6 +341,6 @@ const CategoryPicker = forwardRef(
   },
 );
 
-CategoryPicker.displayName = "CategoryPicker";
+CatPicker.displayName = "CatPicker";
 
-export default CategoryPicker;
+export default CatPicker;

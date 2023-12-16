@@ -9,27 +9,27 @@ const splitRouter = router({
   create: procedure
     .input(
       z.object({
-        transactionId: z.string(),
+        txId: z.string(),
         split: SplitClientSideModel,
       }),
     )
     .mutation(async ({ input }) => {
-      const { id, categoryArray, ...rest } = input.split;
+      const { id, catArray, ...rest } = input.split;
       return await db.split.create({
         data: {
           ...rest,
-          transactionId: input.transactionId,
-          categoryArray: {
+          txId: input.txId,
+          catArray: {
             createMany: {
-              data: categoryArray.map((category) => ({
-                nameArray: category.nameArray,
-                amount: category.amount,
+              data: catArray.map((cat) => ({
+                nameArray: cat.nameArray,
+                amount: cat.amount,
               })),
             },
           },
         },
         include: {
-          categoryArray: true,
+          catArray: true,
         },
       });
     }),
@@ -37,49 +37,49 @@ const splitRouter = router({
   update: procedure
     .input(
       z.object({
-        transactionId: z.string(),
+        txId: z.string(),
         split: SplitClientSideModel,
       }),
     )
     .mutation(async ({ input }) => {
-      const { id, categoryArray, ...rest } = input.split;
+      const { id, catArray, ...rest } = input.split;
 
-      const updatedTransactionArray = id
+      const updatedTxArray = id
         ? await db.split.update({
-            where: {
-              id,
+          where: {
+            id,
+          },
+          data: {
+            catArray: {
+              updateMany: catArray.map((cat) => ({
+                where: {
+                  splitId: id,
+                },
+                data: {
+                  nameArray: cat.nameArray,
+                  amount: cat.amount,
+                },
+              })),
             },
-            data: {
-              categoryArray: {
-                updateMany: categoryArray.map((category) => ({
-                  where: {
-                    splitId: id,
-                  },
-                  data: {
-                    nameArray: category.nameArray,
-                    amount: category.amount,
-                  },
-                })),
-              },
-            },
-            include: {
-              categoryArray: true,
-            },
-          })
+          },
+          include: {
+            catArray: true,
+          },
+        })
         : await db.split.create({
-            data: { ...rest, transactionId: input.transactionId },
-            include: {
-              categoryArray: true,
-            },
-          });
+          data: { ...rest, txId: input.txId },
+          include: {
+            catArray: true,
+          },
+        });
 
-      return updatedTransactionArray;
+      return updatedTxArray;
     }),
 
   upsertMany: procedure
     .input(
       z.object({
-        transactionId: z.string(),
+        txId: z.string(),
         splitArray: z.array(SplitClientSideModel),
       }),
     )
@@ -89,33 +89,33 @@ const splitRouter = router({
       ) as SplitInDB[];
       const splitToCreateArray = input.splitArray.filter((split) => !split.id);
 
-      const updatedTransaction = await db.transaction.update({
+      const updatedTx = await db.tx.update({
         where: {
-          id: input.transactionId,
+          id: input.txId,
         },
         data: {
           splitArray: {
             create: splitToCreateArray.map(
-              ({ id, transactionId, ...split }) => ({
+              ({ id, txId, ...split }) => ({
                 ...split,
-                categoryArray: {
-                  create: split.categoryArray.map(({ id, ...category }) => ({
-                    ...category,
+                catArray: {
+                  create: split.catArray.map(({ id, ...cat }) => ({
+                    ...cat,
                   })),
                 },
               }),
             ),
 
             update: splitToUpdateArray.map(
-              ({ id: splitId, categoryArray }) => ({
+              ({ id: splitId, catArray }) => ({
                 where: { id: splitId },
                 data: {
-                  categoryArray: {
-                    update: categoryArray.map(
-                      ({ id, splitId, ...category }) => ({
+                  catArray: {
+                    update: catArray.map(
+                      ({ id, splitId, ...cat }) => ({
                         where: { id },
                         data: {
-                          ...category,
+                          ...cat,
                         },
                       }),
                     ),
@@ -128,19 +128,19 @@ const splitRouter = router({
         include: {
           splitArray: {
             include: {
-              categoryArray: true,
+              catArray: true,
             },
           },
         },
       });
 
-      return updatedTransaction;
+      return updatedTx;
     }),
 
   delete: procedure
     .input(z.object({ splitId: z.string() }))
     .mutation(async ({ input }) => {
-      //await so transaction refetch occurs properly.
+      //await so tx refetch occurs properly.
       await db.split.delete({
         where: {
           id: input.splitId,

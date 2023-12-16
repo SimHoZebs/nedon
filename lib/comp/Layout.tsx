@@ -2,6 +2,7 @@ import { Open_Sans } from "next/font/google";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 
+import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 
 import { ActionBtn, Button, NavBtn } from "./Button";
@@ -15,6 +16,7 @@ const customFont = Open_Sans({
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
 
+  const setScreenType = useStore((state) => state.setScreenType);
   const allUsers = trpc.user.getAll.useQuery(undefined, {
     staleTime: Infinity,
   });
@@ -68,6 +70,38 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
     sandboxPublicToken,
     setAccessToken,
   ]);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+
+    //it's not like users will constantly change screen type, but...
+    const trackScreenType = (e: UIEvent) => {
+      // throttle
+      if (timeoutId) {
+        return;
+      }
+
+      timeoutId = setTimeout(() => {
+        const width = window.innerWidth;
+        if (width < 640) {
+          setScreenType("mobile");
+        } else if (width < 768) {
+          setScreenType("tablet");
+        } else {
+          setScreenType("desktop");
+        }
+
+        // Clear the timeout.
+        timeoutId = null;
+      }, 300);
+    };
+
+    window.addEventListener("resize", trackScreenType);
+
+    return () => {
+      window.removeEventListener("resize", trackScreenType);
+    };
+  }, [setScreenType]);
 
   return (
     <div

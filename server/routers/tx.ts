@@ -2,10 +2,10 @@ import { RemovedTransaction, TransactionsSyncRequest } from "plaid";
 import { z } from "zod";
 
 import db from "@/util/db";
-import { convertToFullTransaction } from "@/util/transaction";
+import { convertToFullTx } from "@/util/tx";
 import {
-  FullTransaction,
-  PlaidTransaction,
+  FullTx,
+  PlaidTx,
   SplitClientSideModel,
 } from "@/util/types";
 
@@ -13,28 +13,28 @@ import { SplitModel } from "../../prisma/zod";
 import { procedure, router } from "../trpc";
 import { client } from "../util";
 
-// Retrieve Transactions for an Item
-// https://plaid.com/docs/#transactions
-const transactionRouter = router({
+// Retrieve Txs for an Item
+// https://plaid.com/docs/#txs
+const txRouter = router({
   getWithoutPlaid: procedure
-    .input(z.object({ userId: z.string(), transactionId: z.string() }))
+    .input(z.object({ userId: z.string(), txId: z.string() }))
     .query(async ({ input }) => {
-      const transactionInDB = await db.transaction.findUnique({
+      const txInDB = await db.tx.findUnique({
         where: {
-          id: input.transactionId,
+          id: input.txId,
         },
         include: {
           splitArray: {
             include: {
-              categoryArray: true,
+              catArray: true,
             },
           },
         },
       });
 
-      if (!transactionInDB) return null;
+      if (!txInDB) return null;
 
-      return transactionInDB;
+      return txInDB;
     }),
 
   getAll: procedure
@@ -47,15 +47,15 @@ const transactionRouter = router({
       });
       if (!user || !user.ACCESS_TOKEN) return null;
 
-      // New transaction updates since "cursor"
-      let added: PlaidTransaction[] = [];
-      let modified: PlaidTransaction[] = [];
-      // Removed transaction ids
+      // New tx updates since "cursor"
+      let added: PlaidTx[] = [];
+      let modified: PlaidTx[] = [];
+      // Removed tx ids
       let removed: RemovedTransaction[] = [];
       let hasMore = true;
       let cursor = input.cursor;
 
-      // Iterate through each page of new transaction updates for item
+      // Iterate through each page of new tx updates for item
       while (hasMore) {
         const request: TransactionsSyncRequest = {
           access_token: user.ACCESS_TOKEN,
@@ -71,45 +71,45 @@ const transactionRouter = router({
         removed = removed.concat(data.removed);
 
         // hasMore = data.has_more;
-        hasMore = false; //disabling fetch for over 100 transactions
+        hasMore = false; //disabling fetch for over 100 txs
 
         // Update cursor to the next cursor
         cursor = data.next_cursor;
       }
 
-      const transactionArray = await db.transaction.findMany({
+      const txArray = await db.tx.findMany({
         where: {
           ownerId: user.id,
         },
         include: {
           splitArray: {
             include: {
-              categoryArray: true,
+              catArray: true,
             },
           },
         },
       });
 
-      const full: FullTransaction[] = added.map((plaidTransaction) => {
-        const matchingTransaction = transactionArray.find(
-          (transaction) => transaction.id === plaidTransaction.transaction_id,
+      const full: FullTx[] = added.map((plaidTx) => {
+        const matchingTx = txArray.find(
+          (tx) => tx.id === plaidTx.transaction_id,
         );
 
-        return convertToFullTransaction(
+        return convertToFullTx(
           user.id,
-          plaidTransaction,
-          matchingTransaction,
+          plaidTx,
+          matchingTx,
         );
       });
 
       return full;
     }),
 
-  //all transaction meta including the user
+  //all tx meta including the user
   getAllAssociated: procedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
-      return db.transaction.findMany({
+      return db.tx.findMany({
         where: {
           splitArray: {
             //TODO: is some correct? or every?
@@ -122,7 +122,7 @@ const transactionRouter = router({
         include: {
           splitArray: {
             include: {
-              categoryArray: true,
+              catArray: true,
             },
           },
         },
@@ -133,26 +133,26 @@ const transactionRouter = router({
     .input(
       z.object({
         userId: z.string(),
-        transactionId: z.string(),
+        txId: z.string(),
         splitArray: z.array(SplitClientSideModel),
       }),
     )
     .mutation(async ({ input }) => {
       const data = {
         ownerId: input.userId,
-        id: input.transactionId,
+        id: input.txId,
       };
 
-      const transaction = await db.transaction.create({
+      const tx = await db.tx.create({
         data: {
           ...data,
           splitArray: {
             create: input.splitArray.map((split) => ({
               userId: split.userId,
-              categoryArray: {
-                create: split.categoryArray.map((category) => ({
-                  nameArray: category.nameArray,
-                  amount: category.amount,
+              catArray: {
+                create: split.catArray.map((cat) => ({
+                  nameArray: cat.nameArray,
+                  amount: cat.amount,
                 })),
               },
             })),
@@ -161,16 +161,16 @@ const transactionRouter = router({
         include: {
           splitArray: {
             include: {
-              categoryArray: true,
+              catArray: true,
             },
           },
         },
       });
 
-      return transaction;
+      return tx;
     }),
 
-  //createMeta could've been modified instead but this avoids accidentally missing transactionId for Plaid transactions.
+  //createMeta could've been modified instead but this avoids accidentally missing txId for Plaid txs.
   createManually: procedure
     .input(
       z.object({
@@ -178,13 +178,13 @@ const transactionRouter = router({
         splitArray: z.array(
           SplitModel.extend({
             id: z.undefined(),
-            transactionId: z.undefined(),
+            txId: z.undefined(),
           }),
         ),
       }),
     )
     .mutation(async ({ input }) => {
-      const transaction = await db.transaction.create({
+      const tx = await db.tx.create({
         data: {
           owner: {
             connect: {
@@ -199,13 +199,13 @@ const transactionRouter = router({
         },
       });
 
-      return transaction;
+      return tx;
     }),
 
   delete: procedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
-      await db.transaction.delete({
+      await db.tx.delete({
         where: {
           id: input.id,
         },
@@ -215,7 +215,7 @@ const transactionRouter = router({
   deleteAll: procedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
-      await db.transaction.deleteMany({
+      await db.tx.deleteMany({
         where: {
           ownerId: input.id,
         },
@@ -223,4 +223,4 @@ const transactionRouter = router({
     }),
 });
 
-export default transactionRouter;
+export default txRouter;

@@ -19,9 +19,8 @@ const SettleModal = (props: Props) => {
   const [settleAmount, setSettleAmount] = useState(0);
   const [appUserGiving, setAppUserGiving] = useState(true);
 
-  const createTransactionManually =
-    trpc.transaction.createManually.useMutation();
-  const associatedTransactionArray = trpc.transaction.getAllAssociated.useQuery(
+  const createTxManually = trpc.tx.createManually.useMutation();
+  const associatedTxArray = trpc.tx.getAllAssociated.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );
@@ -68,7 +67,7 @@ const SettleModal = (props: Props) => {
             return;
           }
           // //TODO: probs should not be 1
-          // await createManualTransaction.mutateAsync({
+          // await createManualTx.mutateAsync({
           //   userId: appUser.id,
           //   splitArray: [
           //     { userId: appUser.id },
@@ -78,7 +77,7 @@ const SettleModal = (props: Props) => {
           //   ],
           // });
 
-          associatedTransactionArray.refetch();
+          associatedTxArray.refetch();
           props.setShowModal(false);
         }}
       >

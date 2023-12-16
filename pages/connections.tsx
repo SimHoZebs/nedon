@@ -17,37 +17,35 @@ const Splits = () => {
 
   const appUser = allUsers.data?.[0];
 
-  const associatedTransactionArray = trpc.transaction.getAllAssociated.useQuery(
+  const associatedTxArray = trpc.tx.getAllAssociated.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );
 
   const calcOweGroup = useMemo(() => {
-    if (!associatedTransactionArray.data) {
-      associatedTransactionArray.status === "loading"
-        ? console.debug(
-            "Can't run calcOweGroup. associatedTransactionArray is loading.",
-          )
+    if (!associatedTxArray.data) {
+      associatedTxArray.status === "loading"
+        ? console.debug("Can't run calcOweGroup. associatedTxArray is loading.")
         : console.error(
-            "Can't run calcOweGroup. Fetching associatedTransactionArray failed.",
+            "Can't run calcOweGroup. Fetching associatedTxArray failed.",
           );
       return;
     }
     const oweGroup: { [userId: string]: number } = {};
 
-    associatedTransactionArray.data.forEach((transaction) => {
+    associatedTxArray.data.forEach((tx) => {
       if (!appUser) {
         console.error("appUser not found");
         return;
       }
 
-      transaction.splitArray.forEach((split) => {
-        const splitAmount = split.categoryArray.reduce(
-          (total, category) => total + category.amount,
+      tx.splitArray.forEach((split) => {
+        const splitAmount = split.catArray.reduce(
+          (total, cat) => total + cat.amount,
           0,
         );
 
-        if (transaction.ownerId === appUser.id) {
+        if (tx.ownerId === appUser.id) {
           if (split.userId === appUser.id) return;
 
           //amount others owe appUser
@@ -57,20 +55,16 @@ const Splits = () => {
         } else {
           if (split.userId === appUser.id) {
             //amount appUser owe others subtracted from total owe
-            oweGroup[transaction.ownerId]
-              ? (oweGroup[transaction.ownerId] -= splitAmount)
-              : (oweGroup[transaction.ownerId] = -splitAmount);
+            oweGroup[tx.ownerId]
+              ? (oweGroup[tx.ownerId] -= splitAmount)
+              : (oweGroup[tx.ownerId] = -splitAmount);
           }
         }
       });
     });
 
     return oweGroup;
-  }, [
-    appUser,
-    associatedTransactionArray.data,
-    associatedTransactionArray.status,
-  ]);
+  }, [appUser, associatedTxArray.data, associatedTxArray.status]);
 
   return (
     <section className="flex h-full w-full flex-col items-center">

@@ -1,24 +1,24 @@
 import React from "react";
 
-import { getCategoryStyle, subCategoryTotal } from "@/util/category";
-import { TreedCategoryWithTransaction } from "@/util/types";
+import { getCatStyle, subCatTotal } from "@/util/cat";
+import { TreedCatWithTx } from "@/util/types";
 
 interface Props {
-  organizedTxByCategoryArray: TreedCategoryWithTransaction[];
+  organizedTxByCatArray: TreedCatWithTx[];
   spendingTotal: number;
 }
 
 const AnalysisBar = (props: Props) => {
   return (
     <div className="flex h-5 w-full gap-x-1 overflow-hidden rounded-lg bg-zinc-900">
-      {props.organizedTxByCategoryArray.map((cat, i) => (
+      {props.organizedTxByCatArray.map((cat, i) => (
         <div
           key={i}
-          className={"h-full " + getCategoryStyle([cat.name]).bgColor}
+          className={"h-full " + getCatStyle([cat.name]).bgColor}
           style={{
             width:
               (
-                ((cat.spending + subCategoryTotal(cat, "spending")) /
+                ((cat.spending + subCatTotal(cat, "spending")) /
                   props.spendingTotal) *
                 100
               ).toString() + "%",

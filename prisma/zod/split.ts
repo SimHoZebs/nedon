@@ -1,16 +1,16 @@
-import * as z from "zod"
-import { CompleteTransaction, RelatedTransactionModel, CompleteCategory, RelatedCategoryModel, CompleteUser, RelatedUserModel } from "./index"
+import * as z from "zod";
+import { CompleteTx, RelatedTxModel, CompleteCat, RelatedCatModel, CompleteUser, RelatedUserModel } from "./index";
 
 export const SplitModel = z.object({
   id: z.string(),
-  transactionId: z.string(),
+  txId: z.string(),
   userId: z.string(),
-})
+});
 
 export interface CompleteSplit extends z.infer<typeof SplitModel> {
-  transaction: CompleteTransaction
-  categoryArray: CompleteCategory[]
-  user: CompleteUser
+  tx: CompleteTx;
+  catArray: CompleteCat[];
+  user: CompleteUser;
 }
 
 /**
@@ -19,7 +19,7 @@ export interface CompleteSplit extends z.infer<typeof SplitModel> {
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
 export const RelatedSplitModel: z.ZodSchema<CompleteSplit> = z.lazy(() => SplitModel.extend({
-  transaction: RelatedTransactionModel,
-  categoryArray: RelatedCategoryModel.array(),
+  tx: RelatedTxModel,
+  catArray: RelatedCatModel.array(),
   user: RelatedUserModel,
-}))
+}));

@@ -8,16 +8,16 @@ import {
 } from "plaid";
 import { z } from "zod";
 
-import { convertPlaidCategoriesToHierarchicalArray } from "@/util/category";
+import { convertPlaidCatsToHierarchicalArray } from "@/util/cat";
 import db from "@/util/db";
 import { stripUserSecrets } from "@/util/user";
 
 import { procedure, router } from "../trpc";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS, client } from "../util";
-import categoryRouter from "./category";
+import catRouter from "./cat";
 import { groupRouter } from "./group";
 import splitRouter from "./split";
-import transactionRouter from "./transaction";
+import txRouter from "./tx";
 import userRouter from "./user";
 
 const setAccessToken = async ({
@@ -60,8 +60,8 @@ const setAccessToken = async ({
 export const appRouter = router({
   user: userRouter,
   group: groupRouter,
-  transaction: transactionRouter,
-  category: categoryRouter,
+  tx: txRouter,
+  cat: catRouter,
   split: splitRouter,
 
   sandBoxAccess: procedure
@@ -120,9 +120,9 @@ export const appRouter = router({
       return authResponse.data;
     }),
 
-  getCategoryOptionArray: procedure.input(z.undefined()).query(async () => {
+  getCatOptionArray: procedure.input(z.undefined()).query(async () => {
     const response = await client.categoriesGet({});
-    return convertPlaidCategoriesToHierarchicalArray(response.data.categories);
+    return convertPlaidCatsToHierarchicalArray(response.data.categories);
   }),
 });
 
