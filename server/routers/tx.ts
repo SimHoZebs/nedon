@@ -1,15 +1,11 @@
 import { RemovedTransaction, TransactionsSyncRequest } from "plaid";
+import { SplitOptionalDefaultsSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 import db from "@/util/db";
 import { convertToFullTx } from "@/util/tx";
-import {
-  FullTx,
-  PlaidTx,
-  SplitClientSideModel,
-} from "@/util/types";
+import { FullTx, PlaidTx, SplitClientSideModel } from "@/util/types";
 
-import { SplitOptionalDefaultsSchema } from "prisma/generated/zod";
 import { procedure, router } from "../trpc";
 import { client } from "../util";
 
@@ -95,11 +91,7 @@ const txRouter = router({
           (tx) => tx.id === plaidTx.transaction_id,
         );
 
-        return convertToFullTx(
-          user.id,
-          plaidTx,
-          matchingTx,
-        );
+        return convertToFullTx(user.id, plaidTx, matchingTx);
       });
 
       return full;
@@ -175,9 +167,7 @@ const txRouter = router({
     .input(
       z.object({
         userId: z.string(),
-        splitArray: z.array(
-          SplitOptionalDefaultsSchema
-        ),
+        splitArray: z.array(SplitOptionalDefaultsSchema),
       }),
     )
     .mutation(async ({ input }) => {

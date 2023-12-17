@@ -17,11 +17,11 @@ export const emptyCat = ({
   amount = 0,
 }: {
   nameArray?: string[];
-  splitId: string | null;
+  splitId: string | undefined;
   amount: number;
 }): CatClientSide => {
   return {
-    id: null,
+    id: undefined,
     nameArray: nameArray || [],
     splitId: splitId,
     amount: amount,
@@ -46,9 +46,7 @@ export const mergeCatArray = (splitArray: SplitClientSide[]) => {
       if (storedCat) {
         storedCat.amount += amount;
       } else {
-        mergedCatArray.push(
-          structuredClone({ nameArray, amount, ...rest }),
-        );
+        mergedCatArray.push(structuredClone({ nameArray, amount, ...rest }));
       }
     });
   });
@@ -132,9 +130,7 @@ export const fillCatInHierarchy = (
 
   const firstCat = hierarchy[0];
 
-  let index = resultArray.findIndex(
-    (cat) => cat.name === firstCat,
-  );
+  let index = resultArray.findIndex((cat) => cat.name === firstCat);
 
   if (index === -1) {
     //if the cat doesn't exist, then create it.
@@ -166,16 +162,10 @@ export const subCatTotal = (
   parentCat: TreedCatWithTx,
   txType: "received" | "spending",
 ): number => {
-  const spending = parentCat.subCatArray.reduce(
-    (total, subCat) => {
-      let amount =
-        txType === "received"
-          ? subCat.received
-          : subCat.spending;
-      return total + amount + subCatTotal(subCat, txType);
-    },
-    0,
-  );
+  const spending = parentCat.subCatArray.reduce((total, subCat) => {
+    let amount = txType === "received" ? subCat.received : subCat.spending;
+    return total + amount + subCatTotal(subCat, txType);
+  }, 0);
 
   return spending;
 };
@@ -185,8 +175,7 @@ export const calcCatTypeTotal = (
   txType: "received" | "spending",
 ): number => {
   const spending = catArray.reduce((total, cat) => {
-    let amount =
-      txType === "received" ? cat.received : cat.spending;
+    let amount = txType === "received" ? cat.received : cat.spending;
     return total + amount + subCatTotal(cat, txType);
   }, 0);
 

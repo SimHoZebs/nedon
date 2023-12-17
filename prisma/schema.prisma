@@ -9,6 +9,8 @@ generator zod {
   provider                         = "zod-prisma-types"
   createOptionalDefaultValuesTypes = true
   useTypeAssertions                = true
+  createInputTypes                 = false
+  createRelationValuesTypes        = true
 }
 
 datasource db {

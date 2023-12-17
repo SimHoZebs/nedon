@@ -1,7 +1,14 @@
 import { Group, User } from "@prisma/client";
 import { Tx } from "@prisma/client";
-import { CounterpartyType, Transaction as PTx } from "plaid";
-import { CatSchema, SplitSchema } from "prisma/generated/zod";
+import { CounterpartyType, Transaction } from "plaid";
+import {
+  CatOptionalDefaults,
+  CatOptionalDefaultsSchema,
+  CatSchema,
+  SplitOptionalDefaultsSchema,
+  SplitSchema,
+  TxOptionalDefaults,
+} from "prisma/generated/zod";
 import { z } from "zod";
 
 export type UserClientSide = Omit<User, "ACCESS_TOKEN"> & {
@@ -26,12 +33,11 @@ export type TreedCatWithTx = {
   subCatArray: TreedCatWithTx[];
 };
 
-export type MergedCat = Omit<CatClientSide, "splitId">;
+export type MergedCat = Omit<CatOptionalDefaults, "splitId">;
 
-export type CatClientSide = z.infer<typeof CatClientSideModel>;
-export const CatClientSideModel = CatSchema.extend({
-  id: z.string().nullable(),
-  splitId: z.string().nullable(),
+export type CatClientSide = z.infer<typeof CatClientSideSchema>;
+export const CatClientSideSchema = CatOptionalDefaultsSchema.extend({
+  splitId: z.string().optional(),
 });
 
 export function isCatInSplitInDB(
@@ -43,22 +49,18 @@ export function isCatInSplitInDB(
 export function isSplitInDB(split: SplitClientSide): split is SplitInDB {
   return !!split.id;
 }
-export type SplitInDB = z.infer<typeof SplitInDBModel>;
-const SplitInDBModel = SplitSchema.extend({
-  txId: z.string(),
+export type SplitInDB = z.infer<typeof SplitInDBSchema>;
+export const SplitInDBSchema = SplitSchema.extend({
   catArray: z.array(CatSchema),
 });
 
 export type SplitClientSide = z.infer<typeof SplitClientSideModel>;
-export const SplitClientSideModel = SplitSchema.extend({
-  txId: z.string().nullable(),
-  id: z.string().nullable(),
-  catArray: z.array(CatClientSideModel),
+export const SplitClientSideModel = SplitOptionalDefaultsSchema.extend({
+  txId: z.string().optional(),
+  catArray: z.array(CatClientSideSchema),
 });
 
-export function isFullTxInDB(
-  tx: FullTx,
-): tx is FullTxInDB {
+export function isFullTxInDB(tx: FullTx): tx is FullTxInDB {
   return !!tx.id;
 }
 export type FullTxInDB = Tx &
@@ -67,9 +69,8 @@ export type FullTxInDB = Tx &
     splitArray: SplitClientSide[];
   };
 
-export type FullTx = Omit<Tx, "id"> &
+export type FullTx = TxOptionalDefaults &
   PlaidTx & {
-    id: string | null;
     splitArray: SplitClientSide[];
   };
 
@@ -77,13 +78,11 @@ export type TxInDB = Tx & {
   splitArray: SplitInDB[];
 };
 
-export function isPlaidTx(
-  plaidTx: unknown,
-): plaidTx is FullTx {
+export function isPlaidTx(plaidTx: unknown): plaidTx is FullTx {
   return (plaidTx as FullTx).id !== undefined;
 }
 //temporary workaround for failing trpc queries
-export interface PlaidTx extends PTx {
+export interface PlaidTx extends Transaction {
   location: {
     /**
      * The street address where the tx occurred.

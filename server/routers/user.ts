@@ -28,7 +28,7 @@ const userRouter = router({
   }),
 
   getAll: procedure.input(z.undefined()).query(async () => {
-    let userArray: ((User & { groupArray: Group[]; }) | null)[] = [];
+    let userArray: ((User & { groupArray: Group[] }) | null)[] = [];
 
     //developers get to see all accounts
     userArray = await db.user.findMany({
@@ -66,10 +66,9 @@ const userRouter = router({
   }),
 
   deleteAll: procedure.input(z.undefined()).mutation(async () => {
-    const user = await db.user.deleteMany({
-    });
+    const user = await db.user.deleteMany({});
 
     return user.count;
-  })
+  }),
 });
 export default userRouter;

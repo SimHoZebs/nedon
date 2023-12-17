@@ -80,8 +80,8 @@ const SplitUserOptionList = () => {
                       }
 
                       updatedSplitArray.push({
-                        id: null,
-                        txId: null,
+                        id: undefined,
+                        txId: undefined,
                         userId: user.id,
                         catArray: structuredClone(appUserCatArray),
                       });

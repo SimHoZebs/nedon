@@ -46,32 +46,32 @@ const splitRouter = router({
 
       const updatedTxArray = id
         ? await db.split.update({
-          where: {
-            id,
-          },
-          data: {
-            catArray: {
-              updateMany: catArray.map((cat) => ({
-                where: {
-                  splitId: id,
-                },
-                data: {
-                  nameArray: cat.nameArray,
-                  amount: cat.amount,
-                },
-              })),
+            where: {
+              id,
             },
-          },
-          include: {
-            catArray: true,
-          },
-        })
+            data: {
+              catArray: {
+                updateMany: catArray.map((cat) => ({
+                  where: {
+                    splitId: id,
+                  },
+                  data: {
+                    nameArray: cat.nameArray,
+                    amount: cat.amount,
+                  },
+                })),
+              },
+            },
+            include: {
+              catArray: true,
+            },
+          })
         : await db.split.create({
-          data: { ...rest, txId: input.txId },
-          include: {
-            catArray: true,
-          },
-        });
+            data: { ...rest, txId: input.txId },
+            include: {
+              catArray: true,
+            },
+          });
 
       return updatedTxArray;
     }),
@@ -95,34 +95,28 @@ const splitRouter = router({
         },
         data: {
           splitArray: {
-            create: splitToCreateArray.map(
-              ({ id, txId, ...split }) => ({
-                ...split,
+            create: splitToCreateArray.map(({ id, txId, ...split }) => ({
+              ...split,
+              catArray: {
+                create: split.catArray.map(({ id, ...cat }) => ({
+                  ...cat,
+                })),
+              },
+            })),
+
+            update: splitToUpdateArray.map(({ id: splitId, catArray }) => ({
+              where: { id: splitId },
+              data: {
                 catArray: {
-                  create: split.catArray.map(({ id, ...cat }) => ({
-                    ...cat,
+                  update: catArray.map(({ id, splitId, ...cat }) => ({
+                    where: { id },
+                    data: {
+                      ...cat,
+                    },
                   })),
                 },
-              }),
-            ),
-
-            update: splitToUpdateArray.map(
-              ({ id: splitId, catArray }) => ({
-                where: { id: splitId },
-                data: {
-                  catArray: {
-                    update: catArray.map(
-                      ({ id, splitId, ...cat }) => ({
-                        where: { id },
-                        data: {
-                          ...cat,
-                        },
-                      }),
-                    ),
-                  },
-                },
-              }),
-            ),
+              },
+            })),
           },
         },
         include: {

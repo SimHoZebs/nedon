@@ -2,27 +2,20 @@ import { Tx } from "@prisma/client";
 
 import { fillArrayByCat, mergeCatArray } from "./cat";
 import { emptyCat } from "./cat";
-import {
-  FullTx,
-  PlaidTx,
-  SplitClientSide,
-  TreedCatWithTx,
-} from "./types";
+import { FullTx, PlaidTx, SplitClientSide, TreedCatWithTx } from "./types";
 
-export const resetFullTx = (
-  fullTx: FullTx,
-): FullTx => ({
+export const resetFullTx = (fullTx: FullTx): FullTx => ({
   ...fullTx,
-  id: null,
+  id: undefined,
   splitArray: [
     {
-      id: null,
+      id: undefined,
       userId: fullTx.ownerId,
-      txId: null,
+      txId: undefined,
       catArray: [
         {
-          id: null,
-          splitId: null,
+          id: undefined,
+          splitId: undefined,
           nameArray: fullTx.category || [],
           amount: fullTx.amount,
         },
@@ -38,17 +31,17 @@ export const convertToFullTx = (
 ): FullTx => {
   return {
     ...plaidTx,
-    id: txInDB?.id || null,
+    id: txInDB?.id || undefined,
     ownerId: userId,
     splitArray: txInDB?.splitArray || [
       {
-        id: null,
+        id: undefined,
         userId,
-        txId: null,
+        txId: undefined,
         catArray: [
           emptyCat({
             nameArray: plaidTx.category || [],
-            splitId: null,
+            splitId: undefined,
             amount: plaidTx.amount,
           }),
         ],
@@ -57,9 +50,7 @@ export const convertToFullTx = (
   };
 };
 
-export const organizeTxByCat = (
-  txArray: FullTx[],
-) => {
+export const organizeTxByCat = (txArray: FullTx[]) => {
   const catArray: TreedCatWithTx[] = [];
 
   txArray.forEach((tx) => {
@@ -73,9 +64,7 @@ export const organizeTxByCat = (
   return catArray;
 };
 
-export const organizeTxByTime = (
-  txArray: FullTx[],
-) => {
+export const organizeTxByTime = (txArray: FullTx[]) => {
   const txSortedByTimeArray = txArray.sort(
     (a, b) =>
       new Date(b.datetime ? b.datetime : b.date).getTime() -
@@ -113,9 +102,7 @@ export const organizeTxByTime = (
       txOrganizedByTimeArray[yearIndex][monthIndex][dateIndex] = [];
     }
 
-    txOrganizedByTimeArray[yearIndex][monthIndex][dateIndex].push(
-      tx,
-    );
+    txOrganizedByTimeArray[yearIndex][monthIndex][dateIndex].push(tx);
 
     lastDate = date;
   });

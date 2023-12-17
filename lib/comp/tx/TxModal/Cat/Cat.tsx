@@ -152,12 +152,12 @@ const Cat = () => {
                 );
 
                 mergedCatArrayClone.push(
-                  emptyCat({ amount: 0, splitId: null }),
+                  emptyCat({ amount: 0, splitId: undefined }),
                 );
 
                 const newCat = emptyCat({
                   amount: 0,
-                  splitId: null,
+                  splitId: undefined,
                 });
 
                 const updatedSplitArray = structuredClone(
