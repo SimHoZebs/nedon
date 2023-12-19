@@ -60,8 +60,11 @@ interface Store {
   appGroup?: GroupClientSide;
   setAppGroup: (group: GroupClientSide | undefined) => void;
 
-  verticalCategoryPicker: boolean;
-  setVerticalCategoryPicker: (verticalCategoryPicker: boolean) => void;
+  screenType: "mobile" | "tablet" | "desktop";
+  setScreenType: (screenType: "mobile" | "tablet" | "desktop") => void;
+
+  verticalCatPicker: boolean;
+  setVerticalCatPicker: (verticalCatPicker: boolean) => void;
 }
 
 export const useStore = create<Store>()(
@@ -75,8 +78,12 @@ export const useStore = create<Store>()(
     appGroup: undefined,
     setAppGroup: (appGroup: GroupClientSide | undefined) => set({ appGroup }),
 
-    verticalCategoryPicker: false,
-    setVerticalCategoryPicker: (verticalCategoryPicker: boolean) =>
-      set({ verticalCategoryPicker }),
+    screenType: "desktop",
+    setScreenType: (screenType: "mobile" | "tablet" | "desktop") =>
+      set({ screenType }),
+
+    verticalCatPicker: false,
+    setVerticalCatPicker: (verticalCatPicker: boolean) =>
+      set({ verticalCatPicker }),
   })),
 );

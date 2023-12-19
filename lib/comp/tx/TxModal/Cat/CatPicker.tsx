@@ -2,10 +2,10 @@ import React, { ForwardedRef, forwardRef, useEffect, useState } from "react";
 
 import { emptyCat } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
-import { useTxStore } from "@/util/txStore";
-import { trpc } from "@/util/trpc";
-import { MergedCat, SplitInDB, TreedCat } from "@/util/types";
 import { useStore } from "@/util/store";
+import { trpc } from "@/util/trpc";
+import { useTxStore } from "@/util/txStore";
+import { MergedCat, SplitInDB, TreedCat } from "@/util/types";
 
 interface Props {
   unsavedMergedCatArray: MergedCat[];
@@ -20,10 +20,9 @@ const CatPicker = forwardRef(
     const createSplit = trpc.split.create.useMutation();
     const upsertManySplit = trpc.split.upsertMany.useMutation();
     const createTx = trpc.tx.create.useMutation();
-    const catOptionArray = trpc.getCatOptionArray.useQuery(
-      undefined,
-      { staleTime: Infinity },
-    );
+    const catOptionArray = trpc.getCatOptionArray.useQuery(undefined, {
+      staleTime: Infinity,
+    });
     const queryClient = trpc.useUtils();
 
     const allUsers = trpc.user.getAll.useQuery(undefined, {
@@ -31,21 +30,17 @@ const CatPicker = forwardRef(
     });
 
     const appUser = allUsers.data?.[0];
-    const tx = useTxStore(
-      (state) => state.txOnModal,
-    );
+    const tx = useTxStore((state) => state.txOnModal);
     const refreshDBData = useTxStore((state) => state.refreshDBData);
-    const unsavedSplitArray = useTxStore(
-      (state) => state.unsavedSplitArray,
-    );
+    const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
     const setUnsavedSplitArray = useTxStore(
       (state) => state.setUnsavedSplitArray,
     );
-    const screenType  = useStore((state) => state.screenType);
+    const screenType = useStore((state) => state.screenType);
     const [unsavedNameArray, setCurrentNameArray] = useState<string[]>([]);
-    const [currentOptionArray, setCurrentOptionArray] = useState<
-      TreedCat[]
-    >([]);
+    const [currentOptionArray, setCurrentOptionArray] = useState<TreedCat[]>(
+      [],
+    );
 
     const editingMergedCat =
       props.unsavedMergedCatArray[props.editingMergedCatIndex];
@@ -64,9 +59,7 @@ const CatPicker = forwardRef(
 
     const createCatForManySplit = async (nameArray: string[]) => {
       if (!appUser || !tx) {
-        console.error(
-          "appUser or txOnModal or tx is undefined.",
-        );
+        console.error("appUser or txOnModal or tx is undefined.");
         return;
       }
 
@@ -126,9 +119,7 @@ const CatPicker = forwardRef(
             nameArray: nameArray,
           });
 
-          updatedSplitClone.catArray[
-            updatedSplit.catArray.length - 1
-          ] = newCat;
+          updatedSplitClone.catArray[updatedSplit.catArray.length - 1] = newCat;
 
           return updatedSplitClone as SplitInDB;
         }),
@@ -183,9 +174,7 @@ const CatPicker = forwardRef(
      *
      * @param clickedTreedCat  if the cat is assigned by click instead of the "save" button.
      */
-    const applyChangesToCat = async (
-      clickedTreedCat?: TreedCat,
-    ) => {
+    const applyChangesToCat = async (clickedTreedCat?: TreedCat) => {
       const updatedMergedCat = structuredClone(editingMergedCat);
       const updatedNameArray = structuredClone(unsavedNameArray);
 
@@ -220,8 +209,7 @@ const CatPicker = forwardRef(
       const filteredOptionArray = catOptionArray.data.filter(
         (option) =>
           !props.unsavedMergedCatArray.find(
-            (unsavedCat) =>
-              unsavedCat.nameArray.at(-1) === option.name,
+            (unsavedCat) => unsavedCat.nameArray.at(-1) === option.name,
           ),
       );
 
@@ -235,9 +223,15 @@ const CatPicker = forwardRef(
     return catOptionArray.data ? (
       <div
         ref={ref}
-        className={"absolute flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900 sm:w-96 " }
+        className={
+          "absolute left-0 flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900 sm:w-96 "
+        }
         onClick={(e) => e.stopPropagation()}
-        style={{ top: props.position.y, left: props.position.x }}
+        style={
+          screenType === "desktop"
+            ? { top: props.position.y, left: props.position.x }
+            : { top: props.position.y, left: 0 }
+        }
       >
         <div className="flex w-full justify-between px-2 py-1">
           <div className="flex w-fit items-center">
@@ -325,7 +319,7 @@ const CatPicker = forwardRef(
                   "text-zinc-500 group-hover:text-zinc-400"
                 } ${
                   catStyleArray[cat.name]?.icon ||
-                  "icon-[material-symbols--cat-outline]"
+                  "icon-[material-symbols--category-outline]"
                 }`}
               />
               <p>{cat.name}</p>

@@ -13,7 +13,7 @@ import { isSplitInDB } from "@/util/types";
 import CatChip from "./CatChip";
 import CatPicker from "./CatPicker";
 
-const offScreen = { x: -800, y: 0 };
+const offScreen = { x: -800, y: -800 };
 
 const Cat = () => {
   const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
