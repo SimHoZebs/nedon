@@ -117,7 +117,7 @@ const TxModal = (props: Props) => {
                     queryClient.tx.invalidate();
                   }}
                 >
-                  Reset tx data
+                  Reset transaction data
                 </ActionBtn>
               </div>
             </div>
