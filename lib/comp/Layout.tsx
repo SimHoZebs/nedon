@@ -5,7 +5,7 @@ import React, { useEffect } from "react";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 
-import { ActionBtn, Button, NavBtn } from "./Button";
+import { NavBtn } from "./Button";
 
 const customFont = Open_Sans({
   weight: "variable",
@@ -154,16 +154,14 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
           </NavBtn>
         </div>
 
-        <div className="flex sm:w-full">
-          <div className="flex w-full items-center justify-center gap-x-2">
-            <div className="flex rounded-full border-2 border-zinc-300 bg-zinc-800 p-1 sm:p-2">
-              <span className="icon-[mdi--account] h-6 w-6 hover:text-zinc-100" />
-            </div>
-
-            <p className="hidden items-center sm:block">
-              {appUser && appUser.id.slice(0, 8)}
-            </p>
+        <div className="flex px-2 sm:w-full">
+          <div className="flex rounded-full border-2 border-zinc-300 bg-zinc-800 p-1 sm:p-2">
+            <span className="icon-[mdi--account] h-6 w-6 hover:text-zinc-100" />
           </div>
+
+          <p className="hidden items-center sm:block">
+            {appUser && appUser.id.slice(0, 8)}
+          </p>
         </div>
       </nav>
     </div>

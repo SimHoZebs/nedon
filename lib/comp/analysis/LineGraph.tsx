@@ -54,7 +54,6 @@ const LineGraph = (props: Props) => {
       amount: day.reduce((acc, curr) => acc + curr.amount, 0),
     }))
     .sort((a, b) => parseInt(a.date) - parseInt(b.date));
-  console.log("yeet", yeet);
 
   return (
     <div className="h-64 w-full rounded-lg bg-zinc-800 pr-4 pt-2 text-xs">
