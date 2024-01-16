@@ -4,7 +4,6 @@ import Input from "@/comp/Input";
 
 import parseMoney from "@/util/parseMoney";
 import { calcSplitAmount } from "@/util/split";
-import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 import { SplitClientSide } from "@/util/types";
@@ -167,7 +166,10 @@ const SplitUser = (props: Props) => {
                     updatedArray.push(props.index);
                     props.setModifiedSplitIndexArray(updatedArray);
                   }
-                  const newValue = parseFloat(e.target.value) || 0;
+                  const newValue = Math.min(
+                    parseFloat(e.target.value),
+                    txAmount,
+                  );
 
                   changeAmount(newValue);
                 }}
@@ -191,7 +193,10 @@ const SplitUser = (props: Props) => {
                   const prevPercentage = parseMoney(
                     (splitAmount / txAmount) * 100,
                   );
-                  const updatedPercentage = parseFloat(e.target.value);
+                  let updatedPercentage = Math.min(
+                    parseFloat(e.target.value),
+                    100,
+                  );
 
                   let updatedSplitAmount = parseMoney(
                     (updatedPercentage / 100) * txAmount,
@@ -208,8 +213,6 @@ const SplitUser = (props: Props) => {
                       );
                     }
                   }
-
-                  console.log("updatedSplitAmount", updatedSplitAmount);
 
                   changeAmount(updatedSplitAmount);
                 }}
