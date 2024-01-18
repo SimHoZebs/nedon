@@ -37,6 +37,9 @@ const SplitList = (props: Props) => {
   const [modifiedSplitIndexArray, setModifiedSplitIndexArray] = useState<
     number[]
   >([]);
+  const [editingSplitUserIndex, setEditingSplitUserIndex] = useState<
+    number | undefined
+  >(undefined);
 
   const txAmount = tx?.amount || 0;
 
@@ -164,17 +167,6 @@ const SplitList = (props: Props) => {
           than needed`}
           </p>
 
-          {isManaging && unsavedSplitArray.length > 1 && (
-            <div className="flex items-center gap-x-4 px-2">
-              <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
-                split evenly
-              </Button>
-              <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
-                Remove all
-              </Button>
-            </div>
-          )}
-
           <div className="flex flex-col gap-y-1 md:w-fit">
             {unsavedSplitArray.map((split, i) => (
               <div
@@ -182,6 +174,8 @@ const SplitList = (props: Props) => {
                 className="flex w-full items-center gap-x-2 sm:gap-x-3"
               >
                 <SplitUser
+                  editingSplitUserIndex={editingSplitUserIndex}
+                  setEditingSplitUserIndex={setEditingSplitUserIndex}
                   setIsManaging={setIsManaging}
                   isManaging={isManaging}
                   modifiedSplitIndexArray={modifiedSplitIndexArray}
@@ -195,6 +189,17 @@ const SplitList = (props: Props) => {
               </div>
             ))}
           </div>
+
+          {isManaging && unsavedSplitArray.length > 1 && (
+            <div className="flex items-center gap-x-4 px-2">
+              <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
+                split evenly
+              </Button>
+              <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
+                Remove all
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

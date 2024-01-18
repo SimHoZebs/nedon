@@ -154,12 +154,12 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
           </NavBtn>
         </div>
 
-        <div className="flex px-2 sm:w-full">
+        <div className="flex gap-x-2 px-2 sm:w-full">
           <div className="flex rounded-full border-2 border-zinc-300 bg-zinc-800 p-1 sm:p-2">
             <span className="icon-[mdi--account] h-6 w-6 hover:text-zinc-100" />
           </div>
 
-          <p className="hidden items-center sm:block">
+          <p className="hidden items-center sm:flex">
             {appUser && appUser.id.slice(0, 8)}
           </p>
         </div>

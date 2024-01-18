@@ -4,11 +4,15 @@ import Input from "@/comp/Input";
 
 import parseMoney from "@/util/parseMoney";
 import { calcSplitAmount } from "@/util/split";
+import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 import { SplitClientSide } from "@/util/types";
 
+import Calculator from "./Calculator";
 import UserSplitCat from "./UserSplitCat";
+
+const offScreen = { x: -800, y: -800 };
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   index: number;
@@ -16,6 +20,10 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   setIsManaging: React.Dispatch<React.SetStateAction<boolean>>;
   modifiedSplitIndexArray: number[];
   setModifiedSplitIndexArray: React.Dispatch<React.SetStateAction<number[]>>;
+  editingSplitUserIndex: number | undefined;
+  setEditingSplitUserIndex: React.Dispatch<
+    React.SetStateAction<number | undefined>
+  >;
 }
 
 const SplitUser = (props: Props) => {
@@ -25,11 +33,16 @@ const SplitUser = (props: Props) => {
 
   const appUser = allUsers.data?.[0];
   const tx = useTxStore((state) => state.txOnModal);
+  const screenType = useStore((state) => state.screenType);
   const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
   const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
   const [showDetail, setShowDetail] = useState(false);
+  const [calculatorPos, setCalculatorPos] = useState<{ x: number; y: number }>(
+    offScreen,
+  );
+  const calculatorRef = React.useRef<HTMLDivElement>(null);
 
   const split = unsavedSplitArray[props.index];
   const splitAmount = calcSplitAmount(split);
@@ -52,6 +65,26 @@ const SplitUser = (props: Props) => {
     });
 
     setUnsavedSplitArray(updatedSplitArray);
+  };
+
+  const onFocus = (e: React.FocusEvent<HTMLDivElement, Element>) => {
+    props.setIsManaging(true);
+    props.setEditingSplitUserIndex(props.index);
+
+    const calculatorOffsets = calculatorRef.current?.getBoundingClientRect();
+
+    if (!calculatorOffsets) {
+      console.error;
+      `pickerOffsets is undefined. catPickerRef is: ${calculatorRef.current}`;
+      return;
+    }
+
+    const offsets = e.currentTarget.getBoundingClientRect();
+
+    setCalculatorPos({
+      x: offsets.right - calculatorOffsets?.width,
+      y: offsets.bottom + 8,
+    });
   };
 
   const updateSplitCatAmount = (
@@ -130,6 +163,17 @@ const SplitUser = (props: Props) => {
   return (
     <div className={`flex w-full flex-col gap-y-1 rounded-lg lg:w-fit `}>
       <div className="flex w-full items-center justify-start gap-x-2 ">
+        <Calculator
+          pos={
+            props.isManaging && props.editingSplitUserIndex === props.index
+              ? { top: calculatorPos.y, left: calculatorPos.x }
+              : { top: offScreen.x, left: offScreen.y }
+          }
+          changeAmount={changeAmount}
+          splitAmount={splitAmount}
+          setCalculatorPos={setCalculatorPos}
+          ref={calculatorRef}
+        />
         {split.userId === appUser?.id || !props.isManaging ? (
           <div className="aspect-square w-5"></div>
         ) : (
@@ -151,10 +195,12 @@ const SplitUser = (props: Props) => {
                 className={
                   isModified ? "outline outline-2 outline-zinc-700" : ""
                 }
+                readOnly={screenType === "mobile"}
                 id="amount"
                 type="number"
                 min={0}
                 max={txAmount}
+                onFocus={onFocus}
                 value={splitAmount || 0}
                 onChange={(e) => {
                   props.setIsManaging(true);
@@ -188,6 +234,8 @@ const SplitUser = (props: Props) => {
                 //0.01 does the same thing 0.01 $ steps
                 step={1}
                 value={parseMoney((splitAmount / txAmount) * 100)}
+                readOnly={screenType === "mobile"}
+                onFocus={onFocus}
                 onChange={(e) => {
                   props.setIsManaging(true);
                   const prevPercentage = parseMoney(
