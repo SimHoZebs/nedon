@@ -4,7 +4,8 @@ import { z } from "zod";
 
 import db from "@/util/db";
 import { convertToFullTx } from "@/util/tx";
-import { FullTx, PlaidTx, SplitClientSideModel } from "@/util/types";
+import { FullTx, SplitClientSideModel } from "@/util/types";
+import { Transaction } from "plaid";
 
 import { procedure, router } from "../trpc";
 import { client } from "../util";
@@ -44,8 +45,8 @@ const txRouter = router({
       if (!user || !user.ACCESS_TOKEN) return null;
 
       // New tx updates since "cursor"
-      let added: PlaidTx[] = [];
-      let modified: PlaidTx[] = [];
+      let added: Transaction[] = [];
+      let modified: Transaction[] = [];
       // Removed tx ids
       let removed: RemovedTransaction[] = [];
       let hasMore = true;

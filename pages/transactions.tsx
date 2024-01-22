@@ -30,7 +30,7 @@ const Page: NextPage = () => {
 
   useEffect(() => {
     if (!txArray.data) {
-      txArray.status === "loading"
+      txArray.status === "pending"
         ? console.debug("Can't set date. txArray is loading.")
         : console.error("Can't set date. Fetching txArray failed.");
 

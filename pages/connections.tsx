@@ -24,7 +24,7 @@ const Splits = () => {
 
   const calcOweGroup = useMemo(() => {
     if (!associatedTxArray.data) {
-      associatedTxArray.status === "loading"
+      associatedTxArray.status === "pending"
         ? console.debug("Can't run calcOweGroup. associatedTxArray is loading.")
         : console.error(
             "Can't run calcOweGroup. Fetching associatedTxArray failed.",

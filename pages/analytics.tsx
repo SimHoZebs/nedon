@@ -29,7 +29,7 @@ const Page = () => {
 
   useEffect(() => {
     if (!txArray.data) {
-      txArray.status === "loading"
+      txArray.status === "pending"
         ? console.debug("can't set date nor scopedTxArray. txArray is loading.")
         : console.error(
             "can't set date nor scopedTxArray. Fetching txArray failed.",

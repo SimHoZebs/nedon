@@ -28,7 +28,7 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     if (!allUsers.data) {
-      allUsers.status === "loading"
+      allUsers.status === "pending"
         ? console.debug("Can't sync userIdArray. allUsers is loading.")
         : console.error("Can't sync serIdArray. Fetching allUsers failed.");
       return;

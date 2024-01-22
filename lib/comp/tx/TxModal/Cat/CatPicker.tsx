@@ -195,7 +195,7 @@ const CatPicker = forwardRef(
 
     useEffect(() => {
       if (!catOptionArray.data) {
-        catOptionArray.status === "loading"
+        catOptionArray.status === "pending"
           ? console.debug(
               "Can't sync currentOptionArray. catOptionArray is loading.",
             )

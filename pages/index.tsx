@@ -38,7 +38,7 @@ const User: NextPage = () => {
       )}
 
       <div className="flex w-full max-w-md flex-col gap-y-3">
-        {auth.fetchStatus === "idle" && auth.status !== "loading" ? (
+        {auth.fetchStatus === "idle" && auth.status !== "pending" ? (
           auth.data ? (
             (auth.data as unknown as AuthGetResponse).accounts.map(
               (account, index) =>

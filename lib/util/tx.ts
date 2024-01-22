@@ -2,7 +2,8 @@ import { Tx } from "@prisma/client";
 
 import { fillArrayByCat, mergeCatArray } from "./cat";
 import { emptyCat } from "./cat";
-import { FullTx, PlaidTx, SplitClientSide, TreedCatWithTx } from "./types";
+import { FullTx, SplitClientSide, TreedCatWithTx } from "./types";
+import { Transaction } from "plaid";
 
 export const resetFullTx = (fullTx: FullTx): FullTx => ({
   ...fullTx,
@@ -26,11 +27,11 @@ export const resetFullTx = (fullTx: FullTx): FullTx => ({
 
 export const convertToFullTx = (
   userId: string,
-  plaidTx: PlaidTx,
+  tx: Transaction,
   txInDB?: Tx & { splitArray: SplitClientSide[]; },
 ): FullTx => {
   return {
-    ...plaidTx,
+    ...tx,
     id: txInDB?.id || undefined,
     ownerId: userId,
     splitArray: txInDB?.splitArray || [
@@ -40,9 +41,9 @@ export const convertToFullTx = (
         txId: undefined,
         catArray: [
           emptyCat({
-            nameArray: plaidTx.category || [],
+            nameArray: tx.category || [],
             splitId: undefined,
-            amount: plaidTx.amount,
+            amount: tx.amount,
           }),
         ],
       },
