@@ -51,7 +51,7 @@ const TxModal = (props: Props) => {
       {tx && (
         <Modal setShowModal={props.setShowModal}>
           <div className="flex flex-col justify-between gap-y-2 overflow-clip">
-            <section className="flex w-full flex-col items-start justify-between gap-3 gap-y-2 lg:flex-row">
+            <section className="flex w-full flex-col items-start justify-between gap-3 gap-y-2 px-3 pt-3 lg:flex-row">
               <div className="flex w-full flex-col gap-y-1 lg:w-fit">
                 <div className="flex w-full items-start justify-between">
                   <div className="flex items-center gap-x-2">
@@ -97,7 +97,7 @@ const TxModal = (props: Props) => {
             <div className="flex flex-col justify-between gap-y-3 md:flex-row ">
               <div>
                 <SplitList>
-                  <H1>${amount * -1}</H1>
+                  <H1 className="px-3">${amount * -1}</H1>
                 </SplitList>
               </div>
 

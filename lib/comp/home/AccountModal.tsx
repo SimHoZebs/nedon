@@ -36,7 +36,7 @@ const AccountModal = (props: Props) => {
 
   return (
     <Modal setShowModal={props.setShowModal}>
-      <div className="flex h-full w-full flex-col items-end justify-between">
+      <div className="flex h-full w-full flex-col items-end justify-between p-3">
         <CloseBtn setShowModal={props.setShowModal} />
 
         <div className="flex h-full w-full flex-col items-end justify-between overflow-hidden lg:flex-row lg:items-start">
@@ -59,7 +59,6 @@ const AccountModal = (props: Props) => {
               setShowModal={props.setShowModal}
             />
           </section>
-          C
         </div>
       </div>
     </Modal>

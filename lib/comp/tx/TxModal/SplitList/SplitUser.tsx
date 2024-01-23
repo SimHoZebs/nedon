@@ -9,10 +9,7 @@ import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 import { SplitClientSide } from "@/util/types";
 
-import Calculator from "./Calculator";
 import UserSplitCat from "./UserSplitCat";
-
-const offScreen = { x: -800, y: -800 };
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   index: number;
@@ -39,10 +36,6 @@ const SplitUser = (props: Props) => {
     (state) => state.setUnsavedSplitArray,
   );
   const [showDetail, setShowDetail] = useState(false);
-  const [calculatorPos, setCalculatorPos] = useState<{ x: number; y: number }>(
-    offScreen,
-  );
-  const calculatorRef = React.useRef<HTMLDivElement>(null);
 
   const split = unsavedSplitArray[props.index];
   const splitAmount = calcSplitAmount(split);
@@ -70,21 +63,6 @@ const SplitUser = (props: Props) => {
   const onFocus = (e: React.FocusEvent<HTMLDivElement, Element>) => {
     props.setIsManaging(true);
     props.setEditingSplitUserIndex(props.index);
-
-    const calculatorOffsets = calculatorRef.current?.getBoundingClientRect();
-
-    if (!calculatorOffsets) {
-      console.error;
-      `pickerOffsets is undefined. catPickerRef is: ${calculatorRef.current}`;
-      return;
-    }
-
-    const offsets = e.currentTarget.getBoundingClientRect();
-
-    setCalculatorPos({
-      x: offsets.right - calculatorOffsets?.width,
-      y: offsets.bottom + 8,
-    });
   };
 
   const updateSplitCatAmount = (
@@ -163,17 +141,6 @@ const SplitUser = (props: Props) => {
   return (
     <div className={`flex w-full flex-col gap-y-1 rounded-lg lg:w-fit `}>
       <div className="flex w-full items-center justify-start gap-x-2 ">
-        <Calculator
-          pos={
-            props.isManaging && props.editingSplitUserIndex === props.index
-              ? { top: calculatorPos.y, left: calculatorPos.x }
-              : { top: offScreen.x, left: offScreen.y }
-          }
-          changeAmount={changeAmount}
-          splitAmount={splitAmount}
-          setCalculatorPos={setCalculatorPos}
-          ref={calculatorRef}
-        />
         {split.userId === appUser?.id || !props.isManaging ? (
           <div className="aspect-square w-5"></div>
         ) : (
