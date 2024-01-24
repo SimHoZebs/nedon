@@ -6,6 +6,7 @@ import { ActionBtn, CloseBtn } from "@/comp/Button";
 import { H1 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
 
+import { calcSplitAmount } from "@/util/split";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
@@ -29,8 +30,12 @@ const TxModal = (props: Props) => {
   );
   const queryClient = trpc.useUtils();
 
+  const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
   const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
+  );
+  const setUnCalcSplitAmountArray = useTxStore(
+    (state) => state.setUnCalcSplitAmountArray,
   );
   const resetTx = useTxStore((state) => state.resetTx);
 
@@ -46,11 +51,17 @@ const TxModal = (props: Props) => {
     setUnsavedSplitArray(tx.splitArray);
   }, [setUnsavedSplitArray, tx]);
 
+  useEffect(() => {
+    setUnCalcSplitAmountArray(
+      unsavedSplitArray.map((split) => calcSplitAmount(split).toString()),
+    );
+  }, [setUnCalcSplitAmountArray, unsavedSplitArray]);
+
   return (
     <>
       {tx && (
         <Modal setShowModal={props.setShowModal}>
-          <div className="flex flex-col justify-between gap-y-2 overflow-clip">
+          <div className="flex flex-col justify-between gap-y-2">
             <section className="flex w-full flex-col items-start justify-between gap-3 gap-y-2 px-3 pt-3 lg:flex-row">
               <div className="flex w-full flex-col gap-y-1 lg:w-fit">
                 <div className="flex w-full items-start justify-between">
@@ -68,7 +79,12 @@ const TxModal = (props: Props) => {
                     <H1>{tx.name}</H1>
                   </div>
 
-                  <CloseBtn isForMobile setShowModal={props.setShowModal} />
+                  <CloseBtn
+                    isForMobile
+                    onClose={() => {
+                      props.setShowModal(false);
+                    }}
+                  />
                 </div>
 
                 <p
@@ -85,7 +101,11 @@ const TxModal = (props: Props) => {
               </div>
 
               <div className="flex flex-col items-start  text-sm font-light text-zinc-400 lg:items-end">
-                <CloseBtn setShowModal={props.setShowModal} />
+                <CloseBtn
+                  onClose={() => {
+                    props.setShowModal(false);
+                  }}
+                />
                 <p>Created at {tx.datetime || "1970-01-23 12:34:56"}</p>
                 <p>
                   Authorized at{" "}

@@ -9,7 +9,6 @@ import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 import { SplitClientSide, isSplitInDB } from "@/util/types";
 
-import Calculator from "./Calculator";
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
 
@@ -33,22 +32,18 @@ const SplitList = (props: Props) => {
   const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
+  const unCalcSplitAmountArray = useTxStore(
+    (state) => state.unCalcSplitAmountArray,
+  );
 
-  const [isManaging, setIsManaging] = useState(false);
+  const isEditing = useTxStore((state) => state.isEditingSplit);
+  const setIsEditing = useTxStore((state) => state.setIsEditingSplit);
   useState<SplitClientSide[]>();
   const [modifiedSplitIndexArray, setModifiedSplitIndexArray] = useState<
     number[]
   >([]);
-  const [editingSplitUserIndex, setEditingSplitUserIndex] = useState<
-    number | undefined
-  >(undefined);
 
   const txAmount = tx?.amount || 0;
-  const split =
-    editingSplitUserIndex !== undefined
-      ? unsavedSplitArray[editingSplitUserIndex]
-      : undefined;
-  const splitAmount = split ? calcSplitAmount(split) : undefined;
 
   let updatedSplitAmount = parseMoney(
     unsavedSplitArray.reduce(
@@ -106,106 +101,28 @@ const SplitList = (props: Props) => {
       refreshDBData(dbUpdatedSplitArray);
     }
 
-    setIsManaging(false);
+    setIsEditing(false);
     setModifiedSplitIndexArray([]);
     queryClient.tx.invalidate();
-  };
-
-  const updateSplitCatAmount = (
-    split: SplitClientSide,
-    oldAmount: number,
-    newAmount: number,
-  ) => {
-    const change = parseMoney(newAmount - oldAmount);
-    let amountToDistribute = change;
-    split.catArray.forEach((cat, index) => {
-      const catAmount = cat.amount || 0;
-
-      if (index === split.catArray.length - 1) {
-        cat.amount = parseMoney(catAmount + amountToDistribute);
-      } else {
-        let share = oldAmount
-          ? parseMoney((catAmount / oldAmount) * change)
-          : parseMoney(change / split.catArray.length);
-
-        cat.amount = parseMoney(catAmount + share);
-
-        amountToDistribute = parseMoney(amountToDistribute - share);
-      }
-    });
-  };
-
-  const changeAmount = (newAmount: number) => {
-    const updatedSplitArray = structuredClone(unsavedSplitArray);
-
-    if (editingSplitUserIndex === undefined) {
-      console.error("editingSplitUserIndex is undefined");
-      return;
-    }
-
-    updateSplitCatAmount(
-      updatedSplitArray[editingSplitUserIndex],
-      calcSplitAmount(unsavedSplitArray[editingSplitUserIndex]),
-      newAmount,
-    );
-
-    if (!tx) {
-      console.error("can not update other split. tx is undefined.");
-      return;
-    }
-
-    let unmodifiedSplitArray: SplitClientSide[] = [];
-    const modifiedSplitAmountTotal = updatedSplitArray
-      .filter((split, index) => {
-        if (
-          modifiedSplitIndexArray.find(
-            (modifiedIndex) => modifiedIndex === index,
-          ) !== undefined ||
-          index === editingSplitUserIndex
-        ) {
-          return split;
-        } else {
-          unmodifiedSplitArray.push(split);
-        }
-      })
-      .reduce((total, split) => calcSplitAmount(split) + total, 0);
-
-    let remainder = tx.amount - modifiedSplitAmountTotal;
-    unmodifiedSplitArray.forEach((split, index) => {
-      if (index === unmodifiedSplitArray.length - 1) {
-        updateSplitCatAmount(split, calcSplitAmount(split), remainder);
-      } else {
-        updateSplitCatAmount(
-          split,
-          calcSplitAmount(split),
-          parseMoney(remainder / unmodifiedSplitArray.length),
-        );
-        remainder = parseMoney(
-          remainder - remainder / unmodifiedSplitArray.length,
-        );
-      }
-    });
-
-    setUnsavedSplitArray(updatedSplitArray);
   };
 
   return (
     <div className="flex w-full flex-col gap-y-3">
       <div className="flex items-center gap-x-3">
         {props.children}
-        {unsavedSplitArray.length === 1 && !isManaging && (
-          <SecondaryBtn onClick={() => setIsManaging(true)}>
+        {unsavedSplitArray.length === 1 && !isEditing && (
+          <SecondaryBtn onClick={() => setIsEditing(true)}>
             <span className="icon-[lucide--split] m-1 h-4 w-4" />
             Split
           </SecondaryBtn>
         )}
       </div>
 
-      {(unsavedSplitArray.length > 1 || isManaging) && (
+      {(unsavedSplitArray.length > 1 || isEditing) && (
         <div className="flex flex-col gap-y-1">
           <div className="flex w-full gap-x-2 px-3">
             <H3>Split</H3>
-            {isManaging ? (
+            {isEditing ? (
               <div className="flex gap-x-2">
                 <ActionBtn disabled={isWrongSplit} onClickAsync={saveChanges}>
                   Save changes
@@ -214,7 +131,7 @@ const SplitList = (props: Props) => {
                 <ActionBtn
                   variant="negative"
                   onClick={() => {
-                    setIsManaging(false);
+                    setIsEditing(false);
                     setModifiedSplitIndexArray([]);
                     if (!tx) {
                       console.error("Can't reset splitArray. tx is undefined");
@@ -229,7 +146,7 @@ const SplitList = (props: Props) => {
             ) : (
               <Button
                 className="flex gap-x-2 rounded-lg bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
-                onClick={() => setIsManaging(true)}
+                onClick={() => setIsEditing(true)}
               >
                 <span className="icon-[mdi--edit]" />
                 Manage
@@ -259,10 +176,7 @@ const SplitList = (props: Props) => {
                 className="flex w-full items-center gap-x-2 sm:gap-x-3"
               >
                 <SplitUser
-                  editingSplitUserIndex={editingSplitUserIndex}
-                  setEditingSplitUserIndex={setEditingSplitUserIndex}
-                  setIsManaging={setIsManaging}
-                  isManaging={isManaging}
+                  splitAmount={unCalcSplitAmountArray[i]}
                   modifiedSplitIndexArray={modifiedSplitIndexArray}
                   setModifiedSplitIndexArray={setModifiedSplitIndexArray}
                   index={i}
@@ -275,19 +189,7 @@ const SplitList = (props: Props) => {
             ))}
           </div>
 
-          {isManaging && splitAmount !== undefined && (
-            <Calculator
-              onCalculatorBtnPress={(amount) => {
-                if (amount > -1) {
-                  changeAmount(Math.min(splitAmount * 10 + amount, txAmount));
-                } else {
-                  changeAmount(Math.floor(Math.max(splitAmount / 10, 0)));
-                }
-              }}
-            />
-          )}
-
-          {isManaging && unsavedSplitArray.length > 1 && (
+          {isEditing && unsavedSplitArray.length > 1 && (
             <div className="flex items-center gap-x-4 px-2">
               <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
                 split evenly
@@ -300,7 +202,7 @@ const SplitList = (props: Props) => {
         </div>
       )}
 
-      {isManaging && <SplitUserOptionList />}
+      {isEditing && <SplitUserOptionList />}
     </div>
   );
 };

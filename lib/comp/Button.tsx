@@ -122,7 +122,7 @@ export const SecondaryBtn = (props: SecondaryBtnProps) => {
 };
 
 interface CloseBtnProps {
-  setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   isForMobile?: boolean;
 }
 
@@ -134,7 +134,7 @@ export const CloseBtn = (props: CloseBtnProps) => {
         "m-1 rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400 " +
         (props.isForMobile ? "flex lg:hidden" : "hidden lg:flex")
       }
-      onClick={() => props.setShowModal(false)}
+      onClick={props.onClose}
     >
       <span className="icon-[iconamoon--close-fill] h-6 w-6 rounded-full text-zinc-400 hover:text-pink-400"></span>
     </button>

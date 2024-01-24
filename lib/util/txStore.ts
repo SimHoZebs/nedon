@@ -15,6 +15,15 @@ interface Store {
 
   unsavedSplitArray: SplitClientSide[];
   setUnsavedSplitArray: (splitArray: SplitClientSide[]) => void;
+
+  editingSplitUserIndex: number | undefined;
+  setEditingSplitUserIndex: (index: number | undefined) => void;
+
+  isEditingSplit: boolean;
+  setIsEditingSplit: (isManaging: boolean) => void;
+
+  unCalcSplitAmountArray: string[];
+  setUnCalcSplitAmountArray: (splitArray: string[]) => void;
 }
 
 export const useTxStore = create<Store>()(
@@ -61,5 +70,17 @@ export const useTxStore = create<Store>()(
     unsavedSplitArray: [],
     setUnsavedSplitArray: (splitArray: SplitClientSide[]) =>
       set({ unsavedSplitArray: splitArray }),
+
+    editingSplitUserIndex: undefined,
+    setEditingSplitUserIndex: (index: number | undefined) =>
+      set({ editingSplitUserIndex: index }),
+
+    isEditingSplit: false,
+    setIsEditingSplit: (isEditing: boolean) =>
+      set({ isEditingSplit: isEditing }),
+
+    unCalcSplitAmountArray: [],
+    setUnCalcSplitAmountArray: (splitArray: string[]) =>
+      set({ unCalcSplitAmountArray: splitArray }),
   })),
 );

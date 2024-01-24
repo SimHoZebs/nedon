@@ -8,7 +8,6 @@ import { useTxStore } from "@/util/txStore";
 interface Props {
   splitIndex: number;
   catIndex: number;
-  setIsManaging: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const UserSplitCat = (props: Props) => {
@@ -16,6 +15,7 @@ const UserSplitCat = (props: Props) => {
   const setUnsavedSplitArray = useTxStore(
     (store) => store.setUnsavedSplitArray,
   );
+  const setIsEditing = useTxStore((store) => store.setIsEditingSplit);
 
   const cat = unsavedSplitArray[props.splitIndex].catArray[props.catIndex];
 
@@ -39,7 +39,7 @@ const UserSplitCat = (props: Props) => {
             value={cat.amount}
             step={0.01}
             onChange={(e) => {
-              props.setIsManaging(true);
+              setIsEditing(true);
               const unsavedSplitArrayClone = structuredClone(unsavedSplitArray);
 
               unsavedSplitArrayClone[props.splitIndex].catArray[

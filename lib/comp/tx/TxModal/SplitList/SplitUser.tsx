@@ -1,26 +1,21 @@
 import React, { useState } from "react";
+import { twMerge } from "tailwind-merge";
 
 import Input from "@/comp/Input";
 
 import parseMoney from "@/util/parseMoney";
-import { calcSplitAmount } from "@/util/split";
-import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import { SplitClientSide } from "@/util/types";
 
 import UserSplitCat from "./UserSplitCat";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   index: number;
-  isManaging: boolean;
-  setIsManaging: React.Dispatch<React.SetStateAction<boolean>>;
+
+  //splitAmount could be inferred from unsavedSplitArray[props.index] instead, but that would repeat calculation done in SplitList
+  splitAmount: string;
   modifiedSplitIndexArray: number[];
   setModifiedSplitIndexArray: React.Dispatch<React.SetStateAction<number[]>>;
-  editingSplitUserIndex: number | undefined;
-  setEditingSplitUserIndex: React.Dispatch<
-    React.SetStateAction<number | undefined>
-  >;
 }
 
 const SplitUser = (props: Props) => {
@@ -30,15 +25,21 @@ const SplitUser = (props: Props) => {
 
   const appUser = allUsers.data?.[0];
   const tx = useTxStore((state) => state.txOnModal);
-  const screenType = useStore((state) => state.screenType);
   const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
   const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
   const [showDetail, setShowDetail] = useState(false);
+  const setEditingSplitUserIndex = useTxStore(
+    (state) => state.setEditingSplitUserIndex,
+  );
+  const isEditing = useTxStore((state) => state.isEditingSplit);
+  const setIsEditing = useTxStore((state) => state.setIsEditingSplit);
+  const setUnCalcSplitAmountArray = useTxStore(
+    (state) => state.setUnCalcSplitAmountArray,
+  );
 
   const split = unsavedSplitArray[props.index];
-  const splitAmount = calcSplitAmount(split);
   const txAmount = tx ? tx.amount : 0;
   const isModified =
     props.modifiedSplitIndexArray.find(
@@ -61,87 +62,14 @@ const SplitUser = (props: Props) => {
   };
 
   const onFocus = (e: React.FocusEvent<HTMLDivElement, Element>) => {
-    props.setIsManaging(true);
-    props.setEditingSplitUserIndex(props.index);
-  };
-
-  const updateSplitCatAmount = (
-    split: SplitClientSide,
-    oldAmount: number,
-    newAmount: number,
-  ) => {
-    const change = parseMoney(newAmount - oldAmount);
-    let amountToDistribute = change;
-    split.catArray.forEach((cat, index) => {
-      const catAmount = cat.amount || 0;
-
-      if (index === split.catArray.length - 1) {
-        cat.amount = parseMoney(catAmount + amountToDistribute);
-      } else {
-        let share = oldAmount
-          ? parseMoney((catAmount / oldAmount) * change)
-          : parseMoney(change / split.catArray.length);
-
-        cat.amount = parseMoney(catAmount + share);
-
-        amountToDistribute = parseMoney(amountToDistribute - share);
-      }
-    });
-  };
-
-  const changeAmount = (newAmount: number) => {
-    const updatedSplitArray = structuredClone(unsavedSplitArray);
-
-    updateSplitCatAmount(
-      updatedSplitArray[props.index],
-      splitAmount,
-      newAmount,
-    );
-
-    if (!tx) {
-      console.error("can not update other split. tx is undefined.");
-      return;
-    }
-
-    let unmodifiedSplitArray: SplitClientSide[] = [];
-    const modifiedSplitAmountTotal = updatedSplitArray
-      .filter((split, index) => {
-        if (
-          props.modifiedSplitIndexArray.find(
-            (modifiedIndex) => modifiedIndex === index,
-          ) !== undefined ||
-          index === props.index
-        ) {
-          return split;
-        } else {
-          unmodifiedSplitArray.push(split);
-        }
-      })
-      .reduce((total, split) => calcSplitAmount(split) + total, 0);
-
-    let remainder = tx.amount - modifiedSplitAmountTotal;
-    unmodifiedSplitArray.forEach((split, index) => {
-      if (index === unmodifiedSplitArray.length - 1) {
-        updateSplitCatAmount(split, calcSplitAmount(split), remainder);
-      } else {
-        updateSplitCatAmount(
-          split,
-          calcSplitAmount(split),
-          parseMoney(remainder / unmodifiedSplitArray.length),
-        );
-        remainder = parseMoney(
-          remainder - remainder / unmodifiedSplitArray.length,
-        );
-      }
-    });
-
-    setUnsavedSplitArray(updatedSplitArray);
+    setIsEditing(true);
+    setEditingSplitUserIndex(props.index);
   };
 
   return (
     <div className={`flex w-full flex-col gap-y-1 rounded-lg lg:w-fit `}>
       <div className="flex w-full items-center justify-start gap-x-2 ">
-        {split.userId === appUser?.id || !props.isManaging ? (
+        {split.userId === appUser?.id || !isEditing ? (
           <div className="aspect-square w-5"></div>
         ) : (
           <button
@@ -159,39 +87,24 @@ const SplitUser = (props: Props) => {
             <div className="flex items-center justify-between gap-x-2 text-2xl">
               <label htmlFor="amount">$</label>
               <Input
-                className={
-                  isModified ? "outline outline-2 outline-zinc-700" : ""
-                }
-                readOnly={screenType === "mobile"}
+                className={twMerge(
+                  "w-48 ",
+                  isModified ? "outline outline-2 outline-zinc-700" : "",
+                )}
+                readOnly={isEditing}
                 id="amount"
-                type="number"
+                type="text"
                 min={0}
                 max={txAmount}
                 onFocus={onFocus}
-                value={splitAmount || 0}
-                onChange={(e) => {
-                  props.setIsManaging(true);
-
-                  if (!isModified) {
-                    const updatedArray = structuredClone(
-                      props.modifiedSplitIndexArray,
-                    );
-                    updatedArray.push(props.index);
-                    props.setModifiedSplitIndexArray(updatedArray);
-                  }
-                  const newValue = Math.min(
-                    parseFloat(e.target.value),
-                    txAmount,
-                  );
-
-                  changeAmount(newValue);
-                }}
+                value={props.splitAmount || 0}
                 step={0.01}
+                //no onChange handler; it's handled externally, and the input is readOnly when isManaging.
               />
             </div>
 
             <div className="flex items-center text-xl">
-              <Input
+              {/* <Input
                 className="sm:w-20"
                 title="ratio"
                 id="ratio"
@@ -200,13 +113,13 @@ const SplitUser = (props: Props) => {
                 max={100}
                 //0.01 does the same thing 0.01 $ steps
                 step={1}
-                value={parseMoney((splitAmount / txAmount) * 100)}
+                value={parseMoney((props.splitAmount / txAmount) * 100)}
                 readOnly={screenType === "mobile"}
                 onFocus={onFocus}
                 onChange={(e) => {
                   props.setIsManaging(true);
                   const prevPercentage = parseMoney(
-                    (splitAmount / txAmount) * 100,
+                    (props.splitAmount / txAmount) * 100,
                   );
                   let updatedPercentage = Math.min(
                     parseFloat(e.target.value),
@@ -217,7 +130,7 @@ const SplitUser = (props: Props) => {
                     (updatedPercentage / 100) * txAmount,
                   );
 
-                  if (splitAmount === updatedSplitAmount) {
+                  if (props.splitAmount === updatedSplitAmount) {
                     if (prevPercentage < updatedPercentage) {
                       updatedSplitAmount = parseMoney(
                         updatedSplitAmount + 0.01,
@@ -231,7 +144,7 @@ const SplitUser = (props: Props) => {
 
                   changeAmount(updatedSplitAmount);
                 }}
-              />
+              /> */}
               <label htmlFor="ratio">%</label>
             </div>
           </div>
@@ -251,12 +164,7 @@ const SplitUser = (props: Props) => {
         {showDetail && (
           <div className="flex w-full items-center justify-evenly border-x-2 border-t-2 border-zinc-700 bg-zinc-800">
             {split.catArray.map((cat, i) => (
-              <UserSplitCat
-                setIsManaging={props.setIsManaging}
-                splitIndex={props.index}
-                catIndex={i}
-                key={i}
-              />
+              <UserSplitCat splitIndex={props.index} catIndex={i} key={i} />
             ))}
           </div>
         )}

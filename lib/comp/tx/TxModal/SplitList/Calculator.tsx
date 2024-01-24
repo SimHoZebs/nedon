@@ -1,42 +1,46 @@
 import React from "react";
 
 interface Props {
-  onCalculatorBtnPress: (amount: number) => void;
+  value: string;
+  setValue: (value: string) => void;
 }
+const calcButtons = [
+  ["7", "8", "9", "+"],
+  ["4", "5", "6", "-"],
+  ["1", "2", "3", "*"],
+  ["0", "del", "=", "/"],
+];
 
 const Calculator = (props: Props) => {
-  return (
-    <div className="left-0 z-10 flex h-[33vh] w-full flex-col items-end rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900">
-      <div className="flex h-full w-full">
-        <div className="grid h-full w-2/3 grid-cols-3 ">
-          {Array.from({ length: 10 }, (_, i) => 9 - i).map((j) => (
-            <span
-              className="flex items-center justify-center hover:cursor-pointer"
-              key={j}
-              onClick={() => {
-                props.onCalculatorBtnPress(j);
-              }}
-            >
-              {j}
-            </span>
-          ))}
-          <span
-            className="flex items-center text-center text-xs hover:cursor-pointer"
-            onClick={() => {
-              props.onCalculatorBtnPress(-1);
-            }}
-          >
-            del
-          </span>
-        </div>
+  const onClick = (key: string) => {
+    switch (key) {
+      case "del":
+        props.setValue(props.value.slice(0, -1));
+        break;
+      default:
+        props.setValue(props.value + key);
+        break;
+    }
+  };
 
-        {/* <div className="grid grid-cols-1">
-          {["+", "-", "*", "/"].map((arth, i) => (
-            <span className="flex items-center p-2" key={i}>
-              {arth}
-            </span>
-          ))}
-        </div> */}
+  return (
+    <div className="z-10 flex h-[40vh] w-full flex-col items-end rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900">
+      <div className="grid h-full w-full grid-rows-4">
+        {calcButtons.map((row) => (
+          <div key={row.toString()} className="grid h-full w-full grid-cols-4 ">
+            {row.map((btn) => (
+              <button
+                className="flex items-center justify-center hover:cursor-pointer"
+                key={btn}
+                onClick={() => {
+                  onClick(btn);
+                }}
+              >
+                {btn}
+              </button>
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   );
