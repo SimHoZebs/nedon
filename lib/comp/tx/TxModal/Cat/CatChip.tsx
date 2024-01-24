@@ -38,9 +38,9 @@ const CatChip = (props: Props) => {
         onClick={(e) => props.findAndSetPickerPosition(e)}
       >
         <span
-          className={`flex h-6 w-6 rounded-full p-1 ${getCatStyle(
-            props.mergedCat.nameArray,
-          )?.textColor} ${
+          className={`flex h-6 w-6 rounded-full p-1 ${
+            getCatStyle(props.mergedCat.nameArray)?.textColor
+          } ${
             getCatStyle(props.mergedCat.nameArray)?.icon ||
             "icon-[mdi--shape-plus-outline]"
           }

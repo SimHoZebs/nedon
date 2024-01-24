@@ -2,6 +2,7 @@ import React, { ForwardedRef, forwardRef, useEffect, useState } from "react";
 
 import { emptyCat } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
+import getAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
@@ -25,11 +26,7 @@ const CatPicker = forwardRef(
     });
     const queryClient = trpc.useUtils();
 
-    const allUsers = trpc.user.getAll.useQuery(undefined, {
-      staleTime: Infinity,
-    });
-
-    const appUser = allUsers.data?.[0];
+    const { appUser } = getAppUser();
     const tx = useTxStore((state) => state.txOnModal);
     const refreshDBData = useTxStore((state) => state.refreshDBData);
     const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);

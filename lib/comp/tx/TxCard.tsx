@@ -2,9 +2,8 @@ import Image from "next/image";
 import React from "react";
 
 import { getCatStyle } from "@/util/cat";
+import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
-import { useStore } from "@/util/store";
-import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 import { FullTx } from "@/util/types";
 
@@ -13,11 +12,7 @@ interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const TxCard = (props: Props) => {
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-
-  const appUser = allUsers.data?.[0];
+  const { appUser } = getAppUser();
   const setTxOnModal = useTxStore((state) => state.setTxOnModal);
 
   const splitAmount = props.tx.splitArray

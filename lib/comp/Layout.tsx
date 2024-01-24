@@ -2,6 +2,7 @@ import { Open_Sans } from "next/font/google";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 
+import getAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 
@@ -17,9 +18,6 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
 
   const setScreenType = useStore((state) => state.setScreenType);
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
   const createUser = trpc.user.create.useMutation();
   const createGroup = trpc.group.create.useMutation();
   const sandboxPublicToken = trpc.sandBoxAccess.useQuery(
@@ -29,7 +27,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const setAccessToken = trpc.setAccessToken.useMutation();
   const queryClient = trpc.useUtils();
 
-  const appUser = allUsers.data?.[0];
+  const { appUser, allUsers } = getAppUser();
 
   useEffect(() => {
     const createUserWithPlaid = async () => {

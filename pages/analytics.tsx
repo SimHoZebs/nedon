@@ -6,26 +6,22 @@ import LineGraph from "@/comp/analysis/LineGraph";
 import SpendingByCatList from "@/comp/analysis/SpendingByCatList";
 
 import { calcCatTypeTotal } from "@/util/cat";
+import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { filterTxByDate, organizeTxByCat } from "@/util/tx";
 import { FullTx } from "@/util/types";
+import useDateRange from "@/util/useDateRange";
 
 const Page = () => {
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-
-  const appUser = allUsers.data?.[0];
-  const [rangeFormat, setRangeFormat] = useState<
-    "date" | "month" | "year" | "all"
-  >("month");
-  const [date, setDate] = useState<Date>(new Date(Date.now()));
+  const { appUser } = getAppUser();
   const [scopedTxArray, setScopedTxArray] = useState<FullTx[]>([]);
 
   const txArray = trpc.tx.getAll.useQuery<FullTx[]>(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );
+  const { date, setDate, rangeFormat, setRangeFormat } =
+    useDateRange(undefined);
 
   useEffect(() => {
     if (!txArray.data) {
@@ -35,13 +31,6 @@ const Page = () => {
             "can't set date nor scopedTxArray. Fetching txArray failed.",
           );
 
-      return;
-    }
-
-    if (!date) {
-      const initialDate = new Date(txArray.data.at(-1)!.date);
-
-      setDate(initialDate);
       return;
     }
 

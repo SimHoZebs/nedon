@@ -13,6 +13,7 @@ import {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
+import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { filterTxByDate, organizeTxByTime } from "@/util/tx";
 import { FullTx } from "@/util/types";
@@ -24,11 +25,7 @@ interface Props {
 }
 
 const LineGraph = (props: Props) => {
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-
-  const appUser = allUsers.data?.[0];
+  const { appUser } = getAppUser();
   const txArray = trpc.tx.getAll.useQuery<FullTx[]>(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
@@ -43,7 +40,6 @@ const LineGraph = (props: Props) => {
   const date = new Date(props.date.getFullYear(), props.date.getMonth() + 1, 1);
 
   date.setDate(date.getDate() - 1);
-  const numberOfDays = date.getDate();
 
   const thisMonthTimeOrganizedTxArray =
     organizeTxByTime(thisMonthTxArray)[0][0];

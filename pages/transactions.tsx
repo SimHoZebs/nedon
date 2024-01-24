@@ -6,44 +6,32 @@ import DateSortedTxList from "@/comp/DateSortedTxList";
 import Calculator from "@/comp/tx/TxModal/SplitList/Calculator";
 import TxModal from "@/comp/tx/TxModal/TxModal";
 
+import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { calcSplitAmount } from "@/util/split";
 import { trpc } from "@/util/trpc";
 import { filterTxByDate, organizeTxByTime } from "@/util/tx";
 import { useTxStore } from "@/util/txStore";
 import { FullTx, SplitClientSide } from "@/util/types";
+import useDateRange from "@/util/useDateRange";
 
 const Page: NextPage = () => {
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-
-  const appUser = allUsers.data?.[0];
+  const { appUser } = getAppUser();
 
   const txArray = trpc.tx.getAll.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: appUser?.hasAccessToken },
   );
 
+  const tx = useTxStore((state) => state.txOnModal);
   const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
   const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
-
   const isEditingSplit = useTxStore((state) => state.isEditingSplit);
   const editingSplitUserIndex = useTxStore(
     (state) => state.editingSplitUserIndex,
   );
-  const [showModal, setShowModal] = useState(false);
-  const [rangeFormat, setRangeFormat] = useState<
-    "date" | "month" | "year" | "all"
-  >("month");
-  const [scopedTxArray, setScopedTxArray] = useState<FullTx[]>([]);
-  const [date, setDate] = useState<Date>(new Date(Date.now()));
-  const [modifiedSplitIndexArray, setModifiedSplitIndexArray] = useState<
-    number[]
-  >([]);
-
   const unCalcSplitAmountArray = useTxStore(
     (state) => state.unCalcSplitAmountArray,
   );
@@ -51,19 +39,22 @@ const Page: NextPage = () => {
     (state) => state.setUnCalcSplitAmountArray,
   );
 
+  const [showModal, setShowModal] = useState(false);
+  const [scopedTxArray, setScopedTxArray] = useState<FullTx[]>([]);
+  const [modifiedSplitIndexArray, setModifiedSplitIndexArray] = useState<
+    number[]
+  >([]);
+  const { date, setDate, rangeFormat, setRangeFormat } =
+    useDateRange(undefined);
+
+  const txAmount = tx?.amount || 0;
+
   useEffect(() => {
     if (!txArray.data) {
       txArray.status === "pending"
         ? console.debug("Can't set date. txArray is loading.")
         : console.error("Can't set date. Fetching txArray failed.");
 
-      return;
-    }
-
-    if (!date) {
-      const initialDate = new Date(txArray.data.at(-1)!.date);
-
-      setDate(initialDate);
       return;
     }
 
@@ -80,10 +71,6 @@ const Page: NextPage = () => {
   const sortedTxArray = useMemo(() => {
     return organizeTxByTime(scopedTxArray);
   }, [scopedTxArray]);
-
-  const tx = useTxStore((state) => state.txOnModal);
-
-  const txAmount = tx?.amount || 0;
 
   const updateSplitCatAmount = (
     split: SplitClientSide,
@@ -161,7 +148,6 @@ const Page: NextPage = () => {
     );
     console.log("yeet", yeet);
   };
-  console.log("unCalcSplitAmountArray", unCalcSplitAmountArray);
 
   return (
     <section className="flex w-full justify-center">

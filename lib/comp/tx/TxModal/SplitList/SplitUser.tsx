@@ -3,8 +3,8 @@ import { twMerge } from "tailwind-merge";
 
 import Input from "@/comp/Input";
 
+import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
-import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
 import UserSplitCat from "./UserSplitCat";
@@ -19,11 +19,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const SplitUser = (props: Props) => {
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-
-  const appUser = allUsers.data?.[0];
+  const { appUser } = getAppUser();
   const tx = useTxStore((state) => state.txOnModal);
   const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
   const setUnsavedSplitArray = useTxStore(

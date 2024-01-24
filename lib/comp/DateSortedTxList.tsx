@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React from "react";
 
+import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { FullTx } from "@/util/types";
 
@@ -12,11 +13,7 @@ interface Props {
 }
 
 const DateSortedTxList = (props: Props) => {
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-
-  const appUser = allUsers.data?.[0];
+  const { appUser } = getAppUser();
 
   const txArray = trpc.tx.getAll.useQuery(
     { id: appUser ? appUser.id : "" },

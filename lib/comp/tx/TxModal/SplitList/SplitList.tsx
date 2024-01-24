@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { ActionBtn, Button, SecondaryBtn } from "@/comp/Button";
 import { H3 } from "@/comp/Heading";
 
+import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { calcSplitAmount } from "@/util/split";
 import { trpc } from "@/util/trpc";
@@ -21,11 +22,7 @@ const SplitList = (props: Props) => {
   const upsertManyCat = trpc.cat.upsertMany.useMutation();
   const queryClient = trpc.useUtils();
 
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-
-  const appUser = allUsers.data?.[0];
+  const { appUser } = getAppUser();
   const tx = useTxStore((state) => state.txOnModal);
   const refreshDBData = useTxStore((state) => state.refreshDBData);
   const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);

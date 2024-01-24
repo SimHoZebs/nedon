@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { ActionBtn } from "@/comp/Button";
 import SettleModal from "@/comp/analysis/SettleModal";
 
+import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 
@@ -11,11 +12,7 @@ const Splits = () => {
   const [showModal, setShowModal] = useState(false);
   const [oweUser, setOweUser] = useState<{ id: string; amount: number }>();
 
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-
-  const appUser = allUsers.data?.[0];
+  const { appUser } = getAppUser();
 
   const associatedTxArray = trpc.tx.getAllAssociated.useQuery(
     { id: appUser ? appUser.id : "" },

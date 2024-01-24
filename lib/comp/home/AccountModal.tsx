@@ -3,6 +3,7 @@ import React, { useMemo } from "react";
 
 import Modal from "@/comp/Modal";
 
+import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime } from "@/util/tx";
 
@@ -16,10 +17,7 @@ interface Props {
 }
 
 const AccountModal = (props: Props) => {
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-  const appUser = allUsers.data?.[0];
+  const { appUser } = getAppUser();
 
   const txArray = trpc.tx.getAll.useQuery(
     { id: appUser ? appUser.id : "" },
@@ -37,7 +35,7 @@ const AccountModal = (props: Props) => {
   return (
     <Modal setShowModal={props.setShowModal}>
       <div className="flex h-full w-full flex-col items-end justify-between p-3">
-        <CloseBtn setShowModal={props.setShowModal} />
+        <CloseBtn onClose={() => props.setShowModal(false)} />
 
         <div className="flex h-full w-full flex-col items-end justify-between overflow-hidden lg:flex-row lg:items-start">
           <div className="flex w-full flex-row justify-between lg:flex-col lg:justify-normal">

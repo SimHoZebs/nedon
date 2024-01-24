@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 
 import { ActionBtn } from "../Button";
@@ -10,16 +11,11 @@ interface Props {
   oweUser: { id: string; amount: number } | undefined;
 }
 const SettleModal = (props: Props) => {
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-
-  const appUser = allUsers.data?.[0];
+  const { appUser } = getAppUser();
 
   const [settleAmount, setSettleAmount] = useState(0);
   const [appUserGiving, setAppUserGiving] = useState(true);
 
-  const createTxManually = trpc.tx.createManually.useMutation();
   const associatedTxArray = trpc.tx.getAllAssociated.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },

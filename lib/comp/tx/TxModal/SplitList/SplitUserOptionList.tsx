@@ -3,16 +3,13 @@ import React from "react";
 import { Button } from "@/comp/Button";
 
 import { mergeCatArray } from "@/util/cat";
+import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
 const SplitUserOptionList = () => {
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-
-  const appUser = allUsers.data?.[0];
+  const { appUser } = getAppUser();
   const appGroup = trpc.group.get.useQuery(
     { id: appUser?.groupArray?.[0].id || "" },
     { staleTime: Infinity, enabled: !!appUser },

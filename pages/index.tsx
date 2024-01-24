@@ -6,17 +6,14 @@ import { H1 } from "@/comp/Heading";
 import AccountCard from "@/comp/home/AccountCard";
 import AccountModal from "@/comp/home/AccountModal";
 
+import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 
 const User: NextPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [clickedAccount, setClickedAccount] = useState<AccountBase>();
 
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-
-  const appUser = allUsers.data?.[0];
+  const { appUser } = getAppUser();
 
   const auth = trpc.auth.useQuery(
     { id: appUser ? appUser.id : "" },

@@ -2,16 +2,13 @@ import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { usePlaidLink } from "react-plaid-link";
 
+import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 
 import { ActionBtn } from "./Button";
 
 const LinkBtn = () => {
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-
-  const appUser = allUsers.data?.[0];
+  const { appUser } = getAppUser();
   const setAccessToken = trpc.setAccessToken.useMutation();
   const linkToken = trpc.createLinkToken.useQuery(undefined, {
     staleTime: 360000,

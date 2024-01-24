@@ -5,6 +5,7 @@ import { Button } from "@/comp/Button";
 import { H1 } from "@/comp/Heading";
 import CreateUserBtn from "@/comp/user/CreateuserBtn";
 
+import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 
 const Home: NextPage = () => {
@@ -13,11 +14,7 @@ const Home: NextPage = () => {
   const deleteGroup = trpc.group.delete.useMutation();
   const queryClient = trpc.useUtils();
 
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-
-  const appUser = allUsers.data?.[0];
+  const { appUser, allUsers } = getAppUser();
   const appGroup = trpc.group.get.useQuery(
     { id: appUser?.groupArray?.[0]?.id || "" },
     { staleTime: Infinity, enabled: !!appUser },

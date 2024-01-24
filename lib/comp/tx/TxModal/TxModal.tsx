@@ -6,6 +6,7 @@ import { ActionBtn, CloseBtn } from "@/comp/Button";
 import { H1 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
 
+import getAppUser from "@/util/getAppUser";
 import { calcSplitAmount } from "@/util/split";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
@@ -20,10 +21,7 @@ interface Props {
 const TxModal = (props: Props) => {
   const tx = useTxStore((state) => state.txOnModal);
   const deleteTx = trpc.tx.delete.useMutation();
-  const allUsers = trpc.user.getAll.useQuery(undefined, {
-    staleTime: Infinity,
-  });
-  const appUser = allUsers.data?.[0];
+  const { appUser } = getAppUser();
   const auth = trpc.auth.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
