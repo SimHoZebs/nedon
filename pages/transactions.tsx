@@ -159,6 +159,7 @@ const Page: NextPage = () => {
             <Calculator
               value={unCalcSplitAmountArray[editingSplitUserIndex]}
               setValue={(value: string) => {
+
                 const copy = [...unCalcSplitAmountArray];
                 copy[editingSplitUserIndex] = value;
 

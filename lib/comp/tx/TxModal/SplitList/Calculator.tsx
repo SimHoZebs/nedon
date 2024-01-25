@@ -17,6 +17,9 @@ const Calculator = (props: Props) => {
       case "del":
         props.setValue(props.value.slice(0, -1));
         break;
+      case "=":
+        props.setValue(eval(props.value));
+        break;
       default:
         props.setValue(props.value + key);
         break;
