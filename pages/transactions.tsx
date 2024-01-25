@@ -32,12 +32,11 @@ const Page: NextPage = () => {
   const editingSplitUserIndex = useTxStore(
     (state) => state.editingSplitUserIndex,
   );
-  const unCalcSplitAmountArray = useTxStore(
-    (state) => state.unCalcSplitAmountArray,
+  const splitAmountArray = useTxStore((state) => state.splitAmountDisplayArray);
+  const setSplitAmountArray = useTxStore(
+    (state) => state.setSplitAmountDisplayArray,
   );
-  const setUnCalcSplitAmountArray = useTxStore(
-    (state) => state.setUnCalcSplitAmountArray,
-  );
+  const setIsEditing = useTxStore((state) => state.setIsEditingSplit);
 
   const [showModal, setShowModal] = useState(false);
   const [scopedTxArray, setScopedTxArray] = useState<FullTx[]>([]);
@@ -124,8 +123,6 @@ const Page: NextPage = () => {
       })
       .reduce((total, split) => calcSplitAmount(split) + total, 0);
 
-    console.log("here");
-
     let remainder = txAmount - modifiedSplitAmountTotal;
     unmodifiedSplitArray.forEach((split, index) => {
       if (index === unmodifiedSplitArray.length - 1) {
@@ -153,14 +150,26 @@ const Page: NextPage = () => {
     <section className="flex w-full justify-center">
       {showModal && (
         <div className="absolute left-0 top-0 flex h-full w-full flex-col">
-          <TxModal setShowModal={setShowModal} />
+          <TxModal
+            setShowModal={setShowModal}
+            onSplitAmountChange={(index, amount) => {
+              changeSplitAmount(index, parseFloat(amount));
+            }}
+          />
 
           {isEditingSplit && editingSplitUserIndex !== undefined && (
             <Calculator
-              value={unCalcSplitAmountArray[editingSplitUserIndex]}
+              value={splitAmountArray[editingSplitUserIndex]}
               setValue={(value: string) => {
+                setIsEditing(true);
+                if (splitAmountArray.length > 1) {
+                  setModifiedSplitIndexArray([
+                    ...modifiedSplitIndexArray,
+                    editingSplitUserIndex,
+                  ]);
+                }
 
-                const copy = [...unCalcSplitAmountArray];
+                const copy = [...splitAmountArray];
                 copy[editingSplitUserIndex] = value;
 
                 //removes anything after arithmetic
@@ -168,10 +177,9 @@ const Page: NextPage = () => {
                 //if the change was purely numeric, balance the split
                 if (onlyNumber === value) {
                   console.log("onlyNumber", onlyNumber);
-
                   changeSplitAmount(editingSplitUserIndex, parseFloat(value));
                 } else {
-                  setUnCalcSplitAmountArray(copy);
+                  setSplitAmountArray(copy);
                 }
               }}
             />

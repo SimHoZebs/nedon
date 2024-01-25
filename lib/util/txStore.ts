@@ -22,8 +22,8 @@ interface Store {
   isEditingSplit: boolean;
   setIsEditingSplit: (isManaging: boolean) => void;
 
-  unCalcSplitAmountArray: string[];
-  setUnCalcSplitAmountArray: (splitArray: string[]) => void;
+  splitAmountDisplayArray: string[];
+  setSplitAmountDisplayArray: (splitAmountDisplayArray: string[]) => void;
 }
 
 export const useTxStore = create<Store>()(
@@ -79,8 +79,10 @@ export const useTxStore = create<Store>()(
     setIsEditingSplit: (isEditing: boolean) =>
       set({ isEditingSplit: isEditing }),
 
-    unCalcSplitAmountArray: [],
-    setUnCalcSplitAmountArray: (splitArray: string[]) =>
-      set({ unCalcSplitAmountArray: splitArray }),
+    //sum of category amount
+    //string instead of number to temporarily store arithmetic
+    splitAmountDisplayArray: [],
+    setSplitAmountDisplayArray: (splitAmountDisplayArray: string[]) =>
+      set({ splitAmountDisplayArray: splitAmountDisplayArray }),
   })),
 );

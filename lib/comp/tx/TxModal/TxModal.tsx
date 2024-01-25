@@ -16,6 +16,7 @@ import SplitList from "./SplitList/SplitList";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+  onSplitAmountChange: (index: number, splitAmount: string) => void;
 }
 
 const TxModal = (props: Props) => {
@@ -32,8 +33,8 @@ const TxModal = (props: Props) => {
   const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
-  const setUnCalcSplitAmountArray = useTxStore(
-    (state) => state.setUnCalcSplitAmountArray,
+  const setSplitAmountDisplayArray = useTxStore(
+    (state) => state.setSplitAmountDisplayArray,
   );
   const resetTx = useTxStore((state) => state.resetTx);
 
@@ -50,10 +51,10 @@ const TxModal = (props: Props) => {
   }, [setUnsavedSplitArray, tx]);
 
   useEffect(() => {
-    setUnCalcSplitAmountArray(
+    setSplitAmountDisplayArray(
       unsavedSplitArray.map((split) => calcSplitAmount(split).toString()),
     );
-  }, [setUnCalcSplitAmountArray, unsavedSplitArray]);
+  }, [setSplitAmountDisplayArray, unsavedSplitArray]);
 
   return (
     <>
@@ -114,7 +115,11 @@ const TxModal = (props: Props) => {
 
             <div className="flex flex-col justify-between gap-y-3 md:flex-row ">
               <div>
-                <SplitList>
+                <SplitList
+                  onAmountChange={(index, splitAmount) => {
+                    props.onSplitAmountChange(index, splitAmount);
+                  }}
+                >
                   <H1 className="px-3">${amount * -1}</H1>
                 </SplitList>
               </div>

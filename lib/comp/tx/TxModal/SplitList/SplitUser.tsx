@@ -16,6 +16,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   splitAmount: string;
   modifiedSplitIndexArray: number[];
   setModifiedSplitIndexArray: React.Dispatch<React.SetStateAction<number[]>>;
+  onAmountChange: (splitAmount: string) => void;
 }
 
 const SplitUser = (props: Props) => {
@@ -31,9 +32,11 @@ const SplitUser = (props: Props) => {
   );
   const isEditing = useTxStore((state) => state.isEditingSplit);
   const setIsEditing = useTxStore((state) => state.setIsEditingSplit);
-  const setUnCalcSplitAmountArray = useTxStore(
-    (state) => state.setUnCalcSplitAmountArray,
+  const amountDisplayArray = useTxStore(
+    (state) => state.splitAmountDisplayArray,
   );
+  const amountDisplay = amountDisplayArray[props.index];
+  const amount = parseFloat(amountDisplay);
 
   const split = unsavedSplitArray[props.index];
   const txAmount = tx ? tx.amount : 0;
@@ -100,7 +103,7 @@ const SplitUser = (props: Props) => {
             </div>
 
             <div className="flex items-center text-xl">
-              {/* <Input
+              <Input
                 className="sm:w-20"
                 title="ratio"
                 id="ratio"
@@ -109,14 +112,14 @@ const SplitUser = (props: Props) => {
                 max={100}
                 //0.01 does the same thing 0.01 $ steps
                 step={1}
-                value={parseMoney((props.splitAmount / txAmount) * 100)}
-                readOnly={screenType === "mobile"}
+                value={parseMoney((amount / txAmount) * 100)}
                 onFocus={onFocus}
                 onChange={(e) => {
-                  props.setIsManaging(true);
-                  const prevPercentage = parseMoney(
-                    (props.splitAmount / txAmount) * 100,
-                  );
+                  props.setModifiedSplitIndexArray((prev) => [
+                    ...prev,
+                    props.index,
+                  ]);
+                  const prevPercentage = parseMoney((amount / txAmount) * 100);
                   let updatedPercentage = Math.min(
                     parseFloat(e.target.value),
                     100,
@@ -126,7 +129,7 @@ const SplitUser = (props: Props) => {
                     (updatedPercentage / 100) * txAmount,
                   );
 
-                  if (props.splitAmount === updatedSplitAmount) {
+                  if (amount === updatedSplitAmount) {
                     if (prevPercentage < updatedPercentage) {
                       updatedSplitAmount = parseMoney(
                         updatedSplitAmount + 0.01,
@@ -138,9 +141,9 @@ const SplitUser = (props: Props) => {
                     }
                   }
 
-                  changeAmount(updatedSplitAmount);
+                  props.onAmountChange(updatedSplitAmount.toString());
                 }}
-              /> */}
+              />
               <label htmlFor="ratio">%</label>
             </div>
           </div>

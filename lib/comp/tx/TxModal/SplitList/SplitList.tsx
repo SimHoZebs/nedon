@@ -13,7 +13,9 @@ import { SplitClientSide, isSplitInDB } from "@/util/types";
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
 
-interface Props extends React.HTMLAttributes<HTMLDivElement> {}
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
+  onAmountChange: (index: number, splitAmount: string) => void;
+}
 
 const SplitList = (props: Props) => {
   const createTx = trpc.tx.create.useMutation();
@@ -29,8 +31,8 @@ const SplitList = (props: Props) => {
   const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
-  const unCalcSplitAmountArray = useTxStore(
-    (state) => state.unCalcSplitAmountArray,
+  const amountDisplayArray = useTxStore(
+    (state) => state.splitAmountDisplayArray,
   );
 
   const isEditing = useTxStore((state) => state.isEditingSplit);
@@ -173,7 +175,11 @@ const SplitList = (props: Props) => {
                 className="flex w-full items-center gap-x-2 sm:gap-x-3"
               >
                 <SplitUser
-                  splitAmount={unCalcSplitAmountArray[i]}
+                  onAmountChange={(updatedAmount) => {
+                    setIsEditing(true);
+                    props.onAmountChange(i, updatedAmount);
+                  }}
+                  splitAmount={amountDisplayArray[i]}
                   modifiedSplitIndexArray={modifiedSplitIndexArray}
                   setModifiedSplitIndexArray={setModifiedSplitIndexArray}
                   index={i}
