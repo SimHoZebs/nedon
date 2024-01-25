@@ -22,7 +22,7 @@ const SettleModal = (props: Props) => {
   );
 
   return appUser && props.oweUser ? (
-    <Modal setShowModal={props.setShowModal}>
+    <Modal close={() => props.setShowModal(false)}>
       <p>{props.oweUser.id}</p>
       <p>{props.oweUser.amount}</p>
       <div className="flex flex-col justify-center">

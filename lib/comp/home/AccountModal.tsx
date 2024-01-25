@@ -33,7 +33,7 @@ const AccountModal = (props: Props) => {
   }, [props.clickedAccount?.account_id, txArray.data]);
 
   return (
-    <Modal setShowModal={props.setShowModal}>
+    <Modal close={() => props.setShowModal(false)}>
       <div className="flex h-full w-full flex-col items-end justify-between p-3">
         <CloseBtn onClose={() => props.setShowModal(false)} />
 
