@@ -1,7 +1,7 @@
 import React from "react";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
-  setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+  close: () => void;
 }
 
 const Modal = (props: Props) => {
@@ -9,8 +9,8 @@ const Modal = (props: Props) => {
     <div
       className="z-10 flex h-full w-full items-center overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
       onMouseDown={(e) => {
-        props.setShowModal(false);
         e.stopPropagation();
+        props.close();
       }}
     >
       <div

@@ -15,7 +15,7 @@ import Cat from "./Cat/Cat";
 import SplitList from "./SplitList/SplitList";
 
 interface Props {
-  setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   onSplitAmountChange: (index: number, splitAmount: string) => void;
 }
 
@@ -59,10 +59,21 @@ const TxModal = (props: Props) => {
     );
   }, [setSplitAmountDisplayArray, unsavedSplitArray]);
 
+  const onClose = () => {
+    setUnsavedSplitArray([]);
+    setSplitAmountDisplayArray([]);
+    setFocusedSplitIndex(undefined);
+  };
+
   return (
     <>
       {tx && (
-        <Modal setShowModal={props.setShowModal}>
+        <Modal
+          close={() => {
+            onClose();
+            props.onClose();
+          }}
+        >
           <div className="flex flex-col justify-between gap-y-2">
             <section className="flex w-full flex-col items-start justify-between gap-3 gap-y-2 px-3 pt-3 lg:flex-row">
               <div className="flex w-full flex-col gap-y-1 lg:w-fit">
@@ -84,8 +95,8 @@ const TxModal = (props: Props) => {
                   <CloseBtn
                     isForMobile
                     onClose={() => {
-                      props.setShowModal(false);
-                      setFocusedSplitIndex(undefined);
+                      onClose();
+                      props.onClose;
                     }}
                   />
                 </div>
@@ -106,7 +117,8 @@ const TxModal = (props: Props) => {
               <div className="flex flex-col items-start  text-sm font-light text-zinc-400 lg:items-end">
                 <CloseBtn
                   onClose={() => {
-                    props.setShowModal(false);
+                    onClose();
+                    props.onClose();
                   }}
                 />
                 <p>Created at {tx.datetime || "1970-01-23 12:34:56"}</p>
