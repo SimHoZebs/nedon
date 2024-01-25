@@ -28,21 +28,23 @@ const Page: NextPage = () => {
   const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
-  const isEditingSplit = useTxStore((state) => state.isEditingSplit);
-  const editingSplitUserIndex = useTxStore(
-    (state) => state.editingSplitUserIndex,
-  );
   const splitAmountArray = useTxStore((state) => state.splitAmountDisplayArray);
   const setSplitAmountArray = useTxStore(
     (state) => state.setSplitAmountDisplayArray,
   );
-  const setIsEditing = useTxStore((state) => state.setIsEditingSplit);
+  const editedSplitIndexArray = useTxStore(
+    (state) => state.editedSplitIndexArray,
+  );
+  const setEditingSplitIndexArray = useTxStore(
+    (state) => state.setEditedSplitIndexArray,
+  );
+  const focusedSplitIndex = useTxStore((state) => state.focusedSplitIndex);
+  const setFocusedSplitIndex = useTxStore(
+    (state) => state.setFocusedSplitIndex,
+  );
 
   const [showModal, setShowModal] = useState(false);
   const [scopedTxArray, setScopedTxArray] = useState<FullTx[]>([]);
-  const [modifiedSplitIndexArray, setModifiedSplitIndexArray] = useState<
-    number[]
-  >([]);
   const { date, setDate, rangeFormat, setRangeFormat } =
     useDateRange(undefined);
 
@@ -111,9 +113,8 @@ const Page: NextPage = () => {
     const modifiedSplitAmountTotal = updatedSplitArray
       .filter((split, i) => {
         if (
-          modifiedSplitIndexArray.find(
-            (modifiedIndex) => modifiedIndex === i,
-          ) !== undefined ||
+          editedSplitIndexArray.find((modifiedIndex) => modifiedIndex === i) !==
+            undefined ||
           i === index
         ) {
           return split;
@@ -143,7 +144,6 @@ const Page: NextPage = () => {
     const yeet = updatedSplitArray.map((split) =>
       calcSplitAmount(split).toString(),
     );
-    console.log("yeet", yeet);
   };
 
   return (
@@ -157,27 +157,19 @@ const Page: NextPage = () => {
             }}
           />
 
-          {isEditingSplit && editingSplitUserIndex !== undefined && (
+          {focusedSplitIndex !== undefined && (
             <Calculator
-              value={splitAmountArray[editingSplitUserIndex]}
+              value={splitAmountArray[focusedSplitIndex]}
               setValue={(value: string) => {
-                setIsEditing(true);
-                if (splitAmountArray.length > 1) {
-                  setModifiedSplitIndexArray([
-                    ...modifiedSplitIndexArray,
-                    editingSplitUserIndex,
-                  ]);
-                }
-
                 const copy = [...splitAmountArray];
-                copy[editingSplitUserIndex] = value;
+                copy[focusedSplitIndex] = value;
 
                 //removes anything after arithmetic
                 const onlyNumber = parseFloat(value).toString();
                 //if the change was purely numeric, balance the split
                 if (onlyNumber === value) {
                   console.log("onlyNumber", onlyNumber);
-                  changeSplitAmount(editingSplitUserIndex, parseFloat(value));
+                  changeSplitAmount(focusedSplitIndex, parseFloat(value));
                 } else {
                   setSplitAmountArray(copy);
                 }

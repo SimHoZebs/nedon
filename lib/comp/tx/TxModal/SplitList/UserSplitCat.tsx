@@ -15,7 +15,6 @@ const UserSplitCat = (props: Props) => {
   const setUnsavedSplitArray = useTxStore(
     (store) => store.setUnsavedSplitArray,
   );
-  const setIsEditing = useTxStore((store) => store.setIsEditingSplit);
 
   const cat = unsavedSplitArray[props.splitIndex].catArray[props.catIndex];
 
@@ -39,7 +38,6 @@ const UserSplitCat = (props: Props) => {
             value={cat.amount}
             step={0.01}
             onChange={(e) => {
-              setIsEditing(true);
               const unsavedSplitArrayClone = structuredClone(unsavedSplitArray);
 
               unsavedSplitArrayClone[props.splitIndex].catArray[

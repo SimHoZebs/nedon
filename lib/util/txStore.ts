@@ -6,7 +6,7 @@ import { FullTx, SplitClientSide, TxInDB } from "./types";
 
 interface Store {
   txOnModal: FullTx | undefined;
-  setTxOnModal: (tx: FullTx | undefined) => void;
+  setTxOnModal: (tx?: FullTx) => void;
 
   //Function to refresh client data with database data after it processed client's update.
   //This is only for data that has been SAVED.
@@ -16,11 +16,11 @@ interface Store {
   unsavedSplitArray: SplitClientSide[];
   setUnsavedSplitArray: (splitArray: SplitClientSide[]) => void;
 
-  editingSplitUserIndex: number | undefined;
-  setEditingSplitUserIndex: (index: number | undefined) => void;
+  focusedSplitIndex: number | undefined;
+  setFocusedSplitIndex: (index: number | undefined) => void;
 
-  isEditingSplit: boolean;
-  setIsEditingSplit: (isManaging: boolean) => void;
+  editedSplitIndexArray: number[];
+  setEditedSplitIndexArray: (input: number[] | ((prev: number[]) => number[])) => void;
 
   splitAmountDisplayArray: string[];
   setSplitAmountDisplayArray: (splitAmountDisplayArray: string[]) => void;
@@ -71,13 +71,19 @@ export const useTxStore = create<Store>()(
     setUnsavedSplitArray: (splitArray: SplitClientSide[]) =>
       set({ unsavedSplitArray: splitArray }),
 
-    editingSplitUserIndex: undefined,
-    setEditingSplitUserIndex: (index: number | undefined) =>
-      set({ editingSplitUserIndex: index }),
+    editedSplitIndexArray: [],
+    setEditedSplitIndexArray: (input: number[] | ((prev: number[]) => number[])) => {
+      set((store) => {
+        if (typeof input === "function") {
+          return { editedSplitIndexArray: input(store.editedSplitIndexArray) };
+        } else {
+          return { editedSplitIndexArray: input };
+        }
+      });
+    },
 
-    isEditingSplit: false,
-    setIsEditingSplit: (isEditing: boolean) =>
-      set({ isEditingSplit: isEditing }),
+    focusedSplitIndex: undefined,
+    setFocusedSplitIndex: (index: number | undefined) => set({ focusedSplitIndex: index }),
 
     //sum of category amount
     //string instead of number to temporarily store arithmetic

@@ -14,8 +14,8 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 
   //splitAmount could be inferred from unsavedSplitArray[props.index] instead, but that would repeat calculation done in SplitList
   splitAmount: string;
-  modifiedSplitIndexArray: number[];
-  setModifiedSplitIndexArray: React.Dispatch<React.SetStateAction<number[]>>;
+  editedIndexArray: number[];
+  setEditedIndexArray: React.Dispatch<React.SetStateAction<number[]>>;
   onAmountChange: (splitAmount: string) => void;
 }
 
@@ -27,21 +27,18 @@ const SplitUser = (props: Props) => {
     (state) => state.setUnsavedSplitArray,
   );
   const [showDetail, setShowDetail] = useState(false);
-  const setEditingSplitUserIndex = useTxStore(
-    (state) => state.setEditingSplitUserIndex,
-  );
-  const isEditing = useTxStore((state) => state.isEditingSplit);
-  const setIsEditing = useTxStore((state) => state.setIsEditingSplit);
   const amountDisplayArray = useTxStore(
     (state) => state.splitAmountDisplayArray,
   );
+  const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
+  const setFocusedIndex = useTxStore((state) => state.setFocusedSplitIndex);
   const amountDisplay = amountDisplayArray[props.index];
   const amount = parseFloat(amountDisplay);
 
   const split = unsavedSplitArray[props.index];
   const txAmount = tx ? tx.amount : 0;
   const isModified =
-    props.modifiedSplitIndexArray.find(
+    props.editedIndexArray.find(
       (modifiedIndex) => modifiedIndex === props.index,
     ) !== undefined;
 
@@ -61,14 +58,13 @@ const SplitUser = (props: Props) => {
   };
 
   const onFocus = (e: React.FocusEvent<HTMLDivElement, Element>) => {
-    setIsEditing(true);
-    setEditingSplitUserIndex(props.index);
+    setFocusedIndex(props.index);
   };
 
   return (
     <div className={`flex w-full flex-col gap-y-1 rounded-lg lg:w-fit `}>
       <div className="flex w-full items-center justify-start gap-x-2 ">
-        {split.userId === appUser?.id || !isEditing ? (
+        {split.userId === appUser?.id || focusedIndex !== undefined ? (
           <div className="aspect-square w-5"></div>
         ) : (
           <button
@@ -87,10 +83,9 @@ const SplitUser = (props: Props) => {
               <label htmlFor="amount">$</label>
               <Input
                 className={twMerge(
-                  "w-48 ",
+                  "w-full ",
                   isModified ? "outline outline-2 outline-zinc-700" : "",
                 )}
-                readOnly={isEditing}
                 id="amount"
                 type="text"
                 min={0}
@@ -98,13 +93,32 @@ const SplitUser = (props: Props) => {
                 onFocus={onFocus}
                 value={props.splitAmount || 0}
                 step={0.01}
+                onChange={(e) => {
+                  const numOnly = parseFloat(e.target.value).toString();
+                  if (numOnly === e.target.value) {
+                    if (!isModified) {
+                      const updatedArray = structuredClone(
+                        props.editedIndexArray,
+                      );
+                      updatedArray.push(props.index);
+                      props.setEditedIndexArray(updatedArray);
+                    }
+                    const newValue = Math.min(
+                      parseFloat(e.target.value),
+                      txAmount,
+                    );
+
+                    props.onAmountChange(newValue.toString());
+                  } else {
+                  }
+                }}
                 //no onChange handler; it's handled externally, and the input is readOnly when isManaging.
               />
             </div>
 
             <div className="flex items-center text-xl">
               <Input
-                className="sm:w-20"
+                className="sm:w-20 lg:w-20"
                 title="ratio"
                 id="ratio"
                 type="number"
@@ -115,10 +129,7 @@ const SplitUser = (props: Props) => {
                 value={parseMoney((amount / txAmount) * 100)}
                 onFocus={onFocus}
                 onChange={(e) => {
-                  props.setModifiedSplitIndexArray((prev) => [
-                    ...prev,
-                    props.index,
-                  ]);
+                  props.setEditedIndexArray((prev) => [...prev, props.index]);
                   const prevPercentage = parseMoney((amount / txAmount) * 100);
                   let updatedPercentage = Math.min(
                     parseFloat(e.target.value),

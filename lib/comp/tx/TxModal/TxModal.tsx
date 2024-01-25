@@ -37,6 +37,9 @@ const TxModal = (props: Props) => {
     (state) => state.setSplitAmountDisplayArray,
   );
   const resetTx = useTxStore((state) => state.resetTx);
+  const setFocusedSplitIndex = useTxStore(
+    (state) => state.setFocusedSplitIndex,
+  );
 
   const amount = tx ? tx.amount : 0;
 
@@ -82,6 +85,7 @@ const TxModal = (props: Props) => {
                     isForMobile
                     onClose={() => {
                       props.setShowModal(false);
+                      setFocusedSplitIndex(undefined);
                     }}
                   />
                 </div>
