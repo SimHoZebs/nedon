@@ -1,4 +1,4 @@
-import { NextRouter } from "next/router";
+import type { NextRouter } from "next/router";
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -96,7 +96,7 @@ export const NavBtn = (props: NavBtnProps) => {
           } ${props.icon}`}
         />
       )}
-      <p className="hidden sm:block">{props.children}</p>
+      <p className="hidden items-center sm:flex">{props.children}</p>
     </Button>
   );
 };

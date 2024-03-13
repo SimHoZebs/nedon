@@ -1,11 +1,11 @@
-import { Cat } from "@prisma/client";
-import React from "react";
+import type { Cat } from "@prisma/client";
+import type React from "react";
 
 import { getCatStyle } from "@/util/cat";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import { MergedCat, isCatInSplitInDB } from "@/util/types";
+import { type MergedCat, isCatInSplitInDB } from "@/util/types";
 
 type Props = {
   mergedCat: MergedCat;
@@ -129,7 +129,7 @@ const CatChip = (props: Props) => {
                     return;
                   }
 
-                  const newValue = parseFloat(e.target.value) || 0;
+                  const newValue = Number.parseFloat(e.target.value) || 0;
 
                   const changeAmount = parseMoney(
                     newValue - props.mergedCat.amount,

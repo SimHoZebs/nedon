@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 import Input from "@/comp/Input";
@@ -33,7 +34,7 @@ const SplitUser = (props: Props) => {
   const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
   const setFocusedIndex = useTxStore((state) => state.setFocusedSplitIndex);
   const amountDisplay = amountDisplayArray[props.index];
-  const amount = parseFloat(amountDisplay);
+  const amount = Number.parseFloat(amountDisplay);
 
   const split = unsavedSplitArray[props.index];
   const txAmount = tx ? tx.amount : 0;
@@ -94,7 +95,7 @@ const SplitUser = (props: Props) => {
                 value={props.splitAmount || 0}
                 step={0.01}
                 onChange={(e) => {
-                  const numOnly = parseFloat(e.target.value).toString();
+                  const numOnly = Number.parseFloat(e.target.value).toString();
                   if (numOnly === e.target.value) {
                     if (!isModified) {
                       const updatedArray = structuredClone(
@@ -104,7 +105,7 @@ const SplitUser = (props: Props) => {
                       props.setEditedIndexArray(updatedArray);
                     }
                     const newValue = Math.min(
-                      parseFloat(e.target.value),
+                      Number.parseFloat(e.target.value),
                       txAmount,
                     );
 
@@ -131,8 +132,8 @@ const SplitUser = (props: Props) => {
                 onChange={(e) => {
                   props.setEditedIndexArray((prev) => [...prev, props.index]);
                   const prevPercentage = parseMoney((amount / txAmount) * 100);
-                  let updatedPercentage = Math.min(
-                    parseFloat(e.target.value),
+                  const updatedPercentage = Math.min(
+                    Number.parseFloat(e.target.value),
                     100,
                   );
 

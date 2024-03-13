@@ -1,4 +1,9 @@
-import React, { ForwardedRef, forwardRef, useEffect, useState } from "react";
+import React, {
+  type ForwardedRef,
+  forwardRef,
+  useEffect,
+  useState,
+} from "react";
 
 import { emptyCat } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
@@ -6,7 +11,7 @@ import getAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import { MergedCat, SplitInDB, TreedCat } from "@/util/types";
+import type { MergedCat, SplitInDB, TreedCat } from "@/util/types";
 
 interface Props {
   unsavedMergedCatArray: MergedCat[];
@@ -22,7 +27,7 @@ const CatPicker = forwardRef(
     const upsertManySplit = trpc.split.upsertMany.useMutation();
     const createTx = trpc.tx.create.useMutation();
     const catOptionArray = trpc.getCatOptionArray.useQuery(undefined, {
-      staleTime: Infinity,
+      staleTime: Number.POSITIVE_INFINITY,
     });
     const queryClient = trpc.useUtils();
 

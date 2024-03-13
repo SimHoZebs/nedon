@@ -1,8 +1,8 @@
-import { Category as PlaidCat } from "plaid";
+import type { Category as PlaidCat } from "plaid";
 
 import catStyleArray from "./catStyle";
 import parseMoney from "./parseMoney";
-import {
+import type {
   CatClientSide,
   FullTx,
   MergedCat,
@@ -163,7 +163,7 @@ export const subCatTotal = (
   txType: "received" | "spending",
 ): number => {
   const spending = parentCat.subCatArray.reduce((total, subCat) => {
-    let amount = txType === "received" ? subCat.received : subCat.spending;
+    const amount = txType === "received" ? subCat.received : subCat.spending;
     return total + amount + subCatTotal(subCat, txType);
   }, 0);
 
@@ -175,7 +175,7 @@ export const calcCatTypeTotal = (
   txType: "received" | "spending",
 ): number => {
   const spending = catArray.reduce((total, cat) => {
-    let amount = txType === "received" ? cat.received : cat.spending;
+    const amount = txType === "received" ? cat.received : cat.spending;
     return total + amount + subCatTotal(cat, txType);
   }, 0);
 

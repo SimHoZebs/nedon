@@ -1,4 +1,4 @@
-import { Cat } from "@prisma/client";
+import type { Cat } from "@prisma/client";
 import { CatOptionalDefaultsSchema, CatSchema } from "prisma/generated/zod";
 import { z } from "zod";
 

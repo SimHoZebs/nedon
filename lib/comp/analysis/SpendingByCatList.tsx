@@ -1,6 +1,6 @@
 import { getCatStyle, subCatTotal } from "@/util/cat";
 import parseMoney from "@/util/parseMoney";
-import { TreedCatWithTx } from "@/util/types";
+import type { TreedCatWithTx } from "@/util/types";
 
 import { H3, H4 } from "../Heading";
 

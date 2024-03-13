@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
@@ -50,7 +51,7 @@ const SettleModal = (props: Props) => {
           type="number"
           step={0.01}
           value={settleAmount}
-          onChange={(e) => setSettleAmount(parseFloat(e.target.value))}
+          onChange={(e) => setSettleAmount(Number.parseFloat(e.target.value))}
         />
       </div>
 

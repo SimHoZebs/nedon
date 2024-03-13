@@ -3,7 +3,7 @@ import React from "react";
 import parseMoney from "@/util/parseMoney";
 import { calcSplitAmount } from "@/util/split";
 import { useTxStore } from "@/util/txStore";
-import { SplitClientSide } from "@/util/types";
+import type { SplitClientSide } from "@/util/types";
 
 import Calculator from "./TxModal/SplitList/Calculator";
 import TxModal from "./TxModal/TxModal";
@@ -43,7 +43,7 @@ const TxModalAndCalculator = (props: Props) => {
       if (i === split.catArray.length - 1) {
         cat.amount = parseMoney(catAmount + amountToDistribute);
       } else {
-        let share = oldAmount
+        const share = oldAmount
           ? parseMoney((catAmount / oldAmount) * diff)
           : parseMoney(diff / split.catArray.length);
 
@@ -66,7 +66,7 @@ const TxModalAndCalculator = (props: Props) => {
       newAmount,
     );
 
-    let unmodifiedSplitArray: SplitClientSide[] = [];
+    const unmodifiedSplitArray: SplitClientSide[] = [];
     const modifiedSplitAmountTotal = updatedSplitArray
       .filter((split, i) => {
         if (
@@ -110,7 +110,7 @@ const TxModalAndCalculator = (props: Props) => {
       <TxModal
         onClose={props.onClose}
         onSplitAmountChange={(index, amount) => {
-          changeSplitAmount(index, parseFloat(amount));
+          changeSplitAmount(index, Number.parseFloat(amount));
         }}
       />
 
@@ -122,10 +122,10 @@ const TxModalAndCalculator = (props: Props) => {
             copy[focusedSplitIndex] = value;
 
             //removes anything after arithmetic
-            const onlyNumber = parseFloat(value).toString();
+            const onlyNumber = Number.parseFloat(value).toString();
             //if the change was purely numeric, balance the split
             if (onlyNumber === value) {
-              changeSplitAmount(focusedSplitIndex, parseFloat(value));
+              changeSplitAmount(focusedSplitIndex, Number.parseFloat(value));
             } else {
               setSpiltAmountDisplayArray(copy);
             }

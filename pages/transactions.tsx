@@ -1,4 +1,4 @@
-import { NextPage } from "next";
+import type { NextPage } from "next";
 import React, { useEffect, useMemo, useState } from "react";
 
 import DateRangePicker from "@/comp/DateRangePicker";
@@ -8,7 +8,7 @@ import TxModalAndCalculator from "@/comp/tx/TxModalAndCalculator";
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { filterTxByDate, organizeTxByTime } from "@/util/tx";
-import { FullTx } from "@/util/types";
+import type { FullTx } from "@/util/types";
 import useDateRange from "@/util/useDateRange";
 
 const Page: NextPage = () => {

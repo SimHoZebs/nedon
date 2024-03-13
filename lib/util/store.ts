@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
-import { GroupClientSide, UserClientSide } from "./types";
+import type { GroupClientSide, UserClientSide } from "./types";
 
 export const useLocalStoreDelay = <T, F>(
   store: (callback: (state: T) => unknown) => unknown,

@@ -42,7 +42,7 @@ const UserSplitCat = (props: Props) => {
 
               unsavedSplitArrayClone[props.splitIndex].catArray[
                 props.catIndex
-              ].amount = parseFloat(e.currentTarget.value);
+              ].amount = Number.parseFloat(e.currentTarget.value);
 
               setUnsavedSplitArray(unsavedSplitArrayClone);
             }}

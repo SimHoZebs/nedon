@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import { date, z } from "zod";
 
 import { Button } from "./Button";

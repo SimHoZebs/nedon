@@ -1,6 +1,6 @@
-import { Group, User } from "@prisma/client";
+import type { Group, User } from "@prisma/client";
 
-import { GroupClientSide, UserClientSide } from "./types";
+import type { GroupClientSide, UserClientSide } from "./types";
 
 export const emptyUser: UserClientSide = {
   id: "",

@@ -9,7 +9,7 @@ import { calcCatTypeTotal } from "@/util/cat";
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { filterTxByDate, organizeTxByCat } from "@/util/tx";
-import { FullTx } from "@/util/types";
+import type { FullTx } from "@/util/types";
 import useDateRange from "@/util/useDateRange";
 
 const Page = () => {

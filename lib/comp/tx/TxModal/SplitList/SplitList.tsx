@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 
 import { ActionBtn, Button, SecondaryBtn } from "@/comp/Button";
 import { H3 } from "@/comp/Heading";
@@ -46,7 +47,7 @@ const SplitList = (props: Props) => {
 
   const txAmount = tx?.amount || 0;
 
-  let updatedSplitAmount = parseMoney(
+  const updatedSplitAmount = parseMoney(
     unsavedSplitArray.reduce(
       (amount, split) => amount + calcSplitAmount(split),
       0,

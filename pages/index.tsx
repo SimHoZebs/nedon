@@ -1,5 +1,5 @@
-import { NextPage } from "next";
-import { AccountBase, AuthGetResponse } from "plaid";
+import type { NextPage } from "next";
+import type { AccountBase, AuthGetResponse } from "plaid";
 import React, { useRef, useState } from "react";
 
 import { H1 } from "@/comp/Heading";

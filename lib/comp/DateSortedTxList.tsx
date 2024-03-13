@@ -1,8 +1,8 @@
-import React from "react";
+import type React from "react";
 
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
-import { FullTx } from "@/util/types";
+import type { FullTx } from "@/util/types";
 
 import { H2, H3 } from "./Heading";
 import TxCard from "./tx/TxCard";

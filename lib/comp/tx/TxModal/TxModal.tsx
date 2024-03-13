@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { AuthGetResponse } from "plaid";
+import type { AuthGetResponse } from "plaid";
 import React, { useEffect } from "react";
 
 import { ActionBtn, CloseBtn } from "@/comp/Button";

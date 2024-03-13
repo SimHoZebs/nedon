@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import db from "@/util/db";
-import { SplitClientSideModel, SplitInDB } from "@/util/types";
+import { SplitClientSideModel, type SplitInDB } from "@/util/types";
 
 import { procedure, router } from "../trpc";
 

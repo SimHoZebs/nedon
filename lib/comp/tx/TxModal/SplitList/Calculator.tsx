@@ -26,7 +26,7 @@ const Calculator = (props: Props) => {
       case "del":
         props.setValue(props.value.slice(0, -1));
         break;
-      case "=":
+      case "=": {
         let evaluation: string;
         try {
           evaluation = eval(props.value);
@@ -34,10 +34,11 @@ const Calculator = (props: Props) => {
             evaluation = parseMoney(evaluation).toString();
           }
         } catch (e) {
-          evaluation = parseFloat(props.value).toString();
+          evaluation = Number.parseFloat(props.value).toString();
         }
         props.setValue(evaluation);
         break;
+      }
       default:
         props.setValue(props.value + key);
         break;
@@ -51,17 +52,17 @@ const Calculator = (props: Props) => {
           <div key={row.toString()} className="grid h-full w-full grid-cols-4 ">
             {row.map((btn) => (
               <button
-                className={
-                  "flex items-center justify-center hover:cursor-pointer " +
-                  (btn === "del" ? " text-pink-400 " : "")
-                }
+                className={`flex items-center justify-center hover:cursor-pointer ${
+                  btn === "del" ? " text-pink-400 " : ""
+                }`}
+                type="button"
                 key={btn}
                 onClick={() => {
                   onClick(btn);
                 }}
               >
                 {calcButtonIcons[btn] ? (
-                  <span className={calcButtonIcons[btn] + " h-4 w-4"} />
+                  <span className={`${calcButtonIcons[btn]} h-4 w-4`} />
                 ) : (
                   btn
                 )}

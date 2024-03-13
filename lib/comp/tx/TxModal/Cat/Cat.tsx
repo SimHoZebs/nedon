@@ -38,7 +38,7 @@ const Cat = () => {
     y: number;
   }>(offScreen);
 
-  let updatedSplitAmount = parseMoney(
+  const updatedSplitAmount = parseMoney(
     unsavedSplitArray.reduce(
       (amount, split) => amount + calcSplitAmount(split),
       0,

@@ -1,5 +1,5 @@
 import parseMoney from "./parseMoney";
-import { SplitClientSide } from "./types";
+import type { SplitClientSide } from "./types";
 
 export const calcSplitAmount = (split: SplitClientSide) => {
   return split.catArray.reduce(

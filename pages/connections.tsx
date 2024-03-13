@@ -30,13 +30,13 @@ const Splits = () => {
     }
     const oweGroup: { [userId: string]: number } = {};
 
-    associatedTxArray.data.forEach((tx) => {
+    for (const tx of associatedTxArray.data) {
       if (!appUser) {
         console.error("appUser not found");
         return;
       }
 
-      tx.splitArray.forEach((split) => {
+      for (const split of tx.splitArray) {
         const splitAmount = split.catArray.reduce(
           (total, cat) => total + cat.amount,
           0,
@@ -46,19 +46,19 @@ const Splits = () => {
           if (split.userId === appUser.id) return;
 
           //amount others owe appUser
-          oweGroup[split.userId]
-            ? (oweGroup[split.userId] += splitAmount)
-            : (oweGroup[split.userId] = splitAmount);
+          oweGroup[split.userId] = oweGroup[split.userId]
+            ? oweGroup[split.userId] + splitAmount
+            : splitAmount;
         } else {
           if (split.userId === appUser.id) {
             //amount appUser owe others subtracted from total owe
-            oweGroup[tx.ownerId]
-              ? (oweGroup[tx.ownerId] -= splitAmount)
-              : (oweGroup[tx.ownerId] = -splitAmount);
+            oweGroup[tx.ownerId] = oweGroup[tx.ownerId]
+              ? oweGroup[tx.ownerId] - splitAmount
+              : -splitAmount;
           }
         }
-      });
-    });
+      }
+    }
 
     return oweGroup;
   }, [appUser, associatedTxArray.data, associatedTxArray.status]);
@@ -80,12 +80,12 @@ const Splits = () => {
 
       <div className="flex flex-col items-start">
         {calcOweGroup &&
-          Object.keys(calcOweGroup).map((userId, index) => (
-            <div key={index} className="flex items-center gap-x-2">
+          Object.keys(calcOweGroup).map((userId) => (
+            <div key={userId} className="flex items-center gap-x-2">
               <div className="flex items-center gap-x-3 rounded-lg bg-zinc-800 px-3 py-2">
                 <div className="flex flex-col items-center gap-1">
                   <div className="flex rounded-full border border-zinc-700 p-1">
-                    <span className="icon-[mdi--account] h-6 w-6"></span>
+                    <span className="icon-[mdi--account] h-6 w-6" />
                   </div>
                   <div className="text-xs text-zinc-400">
                     {userId.slice(0, 8)}

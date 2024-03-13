@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import { twMerge } from "tailwind-merge";
 
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => {

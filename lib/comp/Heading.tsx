@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 export const H1 = (props: React.HTMLAttributes<HTMLHeadingElement>) => {
   const { children, className, ...rest } = props;

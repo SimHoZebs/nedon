@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 import { resetFullTx } from "./tx";
-import { FullTx, SplitClientSide, TxInDB } from "./types";
+import type { FullTx, SplitClientSide, TxInDB } from "./types";
 
 interface Store {
   txOnModal: FullTx | undefined;
@@ -20,7 +20,9 @@ interface Store {
   setFocusedSplitIndex: (index: number | undefined) => void;
 
   editedSplitIndexArray: number[];
-  setEditedSplitIndexArray: (input: number[] | ((prev: number[]) => number[])) => void;
+  setEditedSplitIndexArray: (
+    input: number[] | ((prev: number[]) => number[]),
+  ) => void;
 
   splitAmountDisplayArray: string[];
   setSplitAmountDisplayArray: (splitAmountDisplayArray: string[]) => void;
@@ -72,7 +74,9 @@ export const useTxStore = create<Store>()(
       set({ unsavedSplitArray: splitArray }),
 
     editedSplitIndexArray: [],
-    setEditedSplitIndexArray: (input: number[] | ((prev: number[]) => number[])) => {
+    setEditedSplitIndexArray: (
+      input: number[] | ((prev: number[]) => number[]),
+    ) => {
       set((store) => {
         if (typeof input === "function") {
           return { editedSplitIndexArray: input(store.editedSplitIndexArray) };
@@ -83,7 +87,8 @@ export const useTxStore = create<Store>()(
     },
 
     focusedSplitIndex: undefined,
-    setFocusedSplitIndex: (index: number | undefined) => set({ focusedSplitIndex: index }),
+    setFocusedSplitIndex: (index: number | undefined) =>
+      set({ focusedSplitIndex: index }),
 
     //sum of category amount
     //string instead of number to temporarily store arithmetic

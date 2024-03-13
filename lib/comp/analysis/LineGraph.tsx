@@ -4,11 +4,11 @@ import {
   LineChart,
   ResponsiveContainer,
   Tooltip,
-  TooltipProps,
+  type TooltipProps,
   XAxis,
   YAxis,
 } from "recharts";
-import {
+import type {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
@@ -16,7 +16,7 @@ import {
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { filterTxByDate, organizeTxByTime } from "@/util/tx";
-import { FullTx } from "@/util/types";
+import type { FullTx } from "@/util/types";
 
 interface Props {
   spendingTotal: number;
@@ -49,7 +49,7 @@ const LineGraph = (props: Props) => {
       date: day[0]?.date.slice(8),
       amount: day.reduce((acc, curr) => acc + curr.amount, 0),
     }))
-    .sort((a, b) => parseInt(a.date) - parseInt(b.date));
+    .sort((a, b) => Number.parseInt(a.date) - Number.parseInt(b.date));
 
   return (
     <div className="h-64 w-full rounded-lg bg-zinc-800 pr-4 pt-2 text-xs">

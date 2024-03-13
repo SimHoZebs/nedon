@@ -1,7 +1,7 @@
 import React from "react";
 
 import { getCatStyle, subCatTotal } from "@/util/cat";
-import { TreedCatWithTx } from "@/util/types";
+import type { TreedCatWithTx } from "@/util/types";
 
 interface Props {
   organizedTxByCatArray: TreedCatWithTx[];

@@ -1,11 +1,11 @@
 import Image from "next/image";
-import React from "react";
+import type React from "react";
 
 import { getCatStyle } from "@/util/cat";
 import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { useTxStore } from "@/util/txStore";
-import { FullTx } from "@/util/types";
+import type { FullTx } from "@/util/types";
 
 interface Props {
   tx: FullTx;

@@ -17,7 +17,7 @@ const Home: NextPage = () => {
   const { appUser, allUsers } = getAppUser();
   const appGroup = trpc.group.get.useQuery(
     { id: appUser?.groupArray?.[0]?.id || "" },
-    { staleTime: Infinity, enabled: !!appUser },
+    { staleTime: Number.POSITIVE_INFINITY, enabled: !!appUser },
   );
 
   const addUserToGroup = trpc.group.addUser.useMutation();

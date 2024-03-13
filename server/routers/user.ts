@@ -1,9 +1,9 @@
-import { Group, User } from "@prisma/client";
+import type { Group, User } from "@prisma/client";
 import { UserOptionalDefaultsSchema, UserSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 import db from "@/util/db";
-import { UserClientSide, UserClientSideSchema } from "@/util/types";
+import { type UserClientSide, UserClientSideSchema } from "@/util/types";
 import { stripUserSecrets } from "@/util/user";
 
 import { procedure, router } from "../trpc";

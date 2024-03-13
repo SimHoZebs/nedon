@@ -1,11 +1,14 @@
-import { RemovedTransaction, TransactionsSyncRequest } from "plaid";
+import type {
+  RemovedTransaction,
+  Transaction,
+  TransactionsSyncRequest,
+} from "plaid";
 import { SplitOptionalDefaultsSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 import db from "@/util/db";
 import { convertToFullTx } from "@/util/tx";
-import { FullTx, SplitClientSideModel } from "@/util/types";
-import { Transaction } from "plaid";
+import { type FullTx, SplitClientSideModel } from "@/util/types";
 
 import { procedure, router } from "../trpc";
 import { client } from "../util";

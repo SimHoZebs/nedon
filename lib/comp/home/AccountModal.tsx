@@ -1,5 +1,6 @@
-import { AccountBase } from "plaid";
-import React, { useMemo } from "react";
+import type { AccountBase } from "plaid";
+import type React from "react";
+import { useMemo } from "react";
 
 import Modal from "@/comp/Modal";
 
