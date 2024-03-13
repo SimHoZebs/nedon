@@ -1,8 +1,9 @@
 import { Group, User } from "@prisma/client";
+import { UserOptionalDefaultsSchema, UserSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 import db from "@/util/db";
-import { UserClientSide } from "@/util/types";
+import { UserClientSide, UserClientSideSchema } from "@/util/types";
 import { stripUserSecrets } from "@/util/user";
 
 import { procedure, router } from "../trpc";
@@ -44,16 +45,31 @@ const userRouter = router({
     return clientSideUserArray.filter((user) => !!user) as UserClientSide[];
   }),
 
-  create: procedure.input(z.undefined()).mutation(async () => {
-    const user = await db.user.create({
-      data: {},
-      include: {
-        groupArray: true,
+  update: procedure.input(UserClientSideSchema).mutation(async ({ input }) => {
+    const user = await db.user.update({
+      where: {
+        id: input.id,
+      },
+      data: {
+        name: input.name,
       },
     });
 
     return stripUserSecrets(user);
   }),
+
+  create: procedure
+    .input(z.optional(UserSchema.partial()))
+    .mutation(async () => {
+      const user = await db.user.create({
+        data: {},
+        include: {
+          groupArray: true,
+        },
+      });
+
+      return stripUserSecrets(user);
+    }),
 
   delete: procedure.input(z.string()).mutation(async ({ input }) => {
     const user = await db.user.delete({

@@ -1,6 +1,7 @@
 import { Open_Sans } from "next/font/google";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import type React from "react";
+import { useEffect } from "react";
 
 import getAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
@@ -19,6 +20,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   const setScreenType = useStore((state) => state.setScreenType);
   const createUser = trpc.user.create.useMutation();
+  const updateUser = trpc.user.update.useMutation();
   const createGroup = trpc.group.create.useMutation();
   const sandboxPublicToken = trpc.sandBoxAccess.useQuery(
     { instituteID: undefined },
@@ -32,6 +34,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   useEffect(() => {
     const createUserWithPlaid = async () => {
       const user = await createUser.mutateAsync();
+      await updateUser.mutateAsync({ ...user, name: user.id.slice(0, 8) });
       await createGroup.mutateAsync({ id: user.id });
 
       if (createGroup.error) console.error(createGroup.error);
@@ -67,6 +70,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
     queryClient.user.getAll,
     sandboxPublicToken,
     setAccessToken,
+    updateUser,
   ]);
 
   useEffect(() => {
@@ -152,15 +156,10 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
           </NavBtn>
         </div>
 
-        <div className="flex gap-x-2 px-2 sm:w-full">
-          <div className="flex rounded-full border-2 border-zinc-300 bg-zinc-800 p-1 sm:p-2">
-            <span className="icon-[mdi--account] h-6 w-6 hover:text-zinc-100" />
-          </div>
-
-          <p className="hidden items-center sm:flex">
-            {appUser && appUser.id.slice(0, 8)}
-          </p>
-        </div>
+        <NavBtn router={router} route="/profile">
+          <span className="icon-[mdi--account] mr-4 h-6 w-6" />
+          {appUser ? appUser.name : ""}
+        </NavBtn>
       </nav>
     </div>
   );

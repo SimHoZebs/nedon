@@ -6,6 +6,7 @@ import { Button } from "../Button";
 
 const CreateUserBtn = () => {
   const createUser = trpc.user.create.useMutation();
+  const updateUser = trpc.user.update.useMutation();
   const createGroup = trpc.group.create.useMutation();
   const queryClient = trpc.useUtils();
 
@@ -23,6 +24,7 @@ const CreateUserBtn = () => {
         setLoading(true);
         e.stopPropagation();
         const user = await createUser.mutateAsync();
+        await updateUser.mutateAsync({ ...user, name: user.id.slice(0, 8) });
         await createGroup.mutateAsync({ id: user.id });
         if (createGroup.error) console.error(createGroup.error);
 

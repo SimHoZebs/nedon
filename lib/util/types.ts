@@ -10,11 +10,15 @@ import {
   TxOptionalDefaults,
 } from "prisma/generated/zod";
 import { z } from "zod";
+import { UserSchema } from "prisma/generated/zod";
 
 export type UserClientSide = Omit<User, "ACCESS_TOKEN"> & {
   hasAccessToken: boolean;
   groupArray?: Group[]; //user loaded from groups
 };
+export const UserClientSideSchema = UserSchema.extend({
+  ACCESS_TOKEN: z.string().optional(),
+});
 
 export type GroupClientSide = Group & {
   userArray?: UserClientSide[];
