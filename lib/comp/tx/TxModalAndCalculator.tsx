@@ -58,12 +58,12 @@ const TxModalAndCalculator = (props: Props) => {
   const changeSplitAmount = (index: number, newAmount: number) => {
     const updatedSplitArray = structuredClone(unsavedSplitArray);
 
-    newAmount = Math.max(Math.min(newAmount, txAmount), 0);
+    const newAmountFloored = Math.max(Math.min(newAmount, txAmount), 0);
 
     updateSplitCatAmount(
       updatedSplitArray[index],
       calcSplitAmount(unsavedSplitArray[index]),
-      newAmount,
+      newAmountFloored,
     );
 
     const unmodifiedSplitArray: SplitClientSide[] = [];
@@ -75,9 +75,8 @@ const TxModalAndCalculator = (props: Props) => {
           i === index
         ) {
           return split;
-        } else {
-          unmodifiedSplitArray.push(split);
         }
+        unmodifiedSplitArray.push(split);
       })
       .reduce((total, split) => calcSplitAmount(split) + total, 0);
 

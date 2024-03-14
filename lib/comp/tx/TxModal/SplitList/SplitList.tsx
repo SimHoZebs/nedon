@@ -64,13 +64,13 @@ const SplitList = (props: Props) => {
     }
 
     //delete splits that are not in unsavedSplitArray
-    tx.splitArray.forEach(async (split) => {
+    for (const split of tx.splitArray) {
       if (
         split.id &&
         !unsavedSplitArray.find((unsavedSplit) => unsavedSplit.id === split.id)
       )
         await deleteSplit.mutateAsync({ splitId: split.id });
-    });
+    }
 
     //if tx doesn't exist, create one
     if (!tx.id) {
@@ -88,15 +88,14 @@ const SplitList = (props: Props) => {
         unsavedSplitArray.map(async (split) => {
           if (!isSplitInDB(split)) {
             return await createSplit.mutateAsync({
-              //id boolean was checked in if statement
+              //biome-ignore lint: id boolean was checked in if statement
               txId: tx.id!,
               split,
             });
-          } else {
-            return await upsertManyCat.mutateAsync({
-              catArray: split.catArray,
-            });
           }
+          return await upsertManyCat.mutateAsync({
+            catArray: split.catArray,
+          });
         }),
       );
 
@@ -177,7 +176,7 @@ const SplitList = (props: Props) => {
           <div className="flex flex-col gap-y-1 px-3 md:w-fit">
             {unsavedSplitArray.map((split, i) => (
               <div
-                key={i}
+                key={split.id}
                 className="flex w-full items-center gap-x-2 sm:gap-x-3"
               >
                 <SplitUser

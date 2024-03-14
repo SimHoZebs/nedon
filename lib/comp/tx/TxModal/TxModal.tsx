@@ -79,7 +79,7 @@ const TxModal = (props: Props) => {
               <div className="flex w-full flex-col gap-y-1 lg:w-fit">
                 <div className="flex w-full items-start justify-between">
                   <div className="flex items-center gap-x-2">
-                    {tx.counterparties && tx.counterparties[0]?.logo_url && (
+                    {tx.counterparties?.[0]?.logo_url && (
                       <Image
                         className="rounded-lg"
                         src={tx.counterparties[0].logo_url}

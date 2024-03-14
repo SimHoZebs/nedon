@@ -46,14 +46,13 @@ export const useTxStore = create<Store>()(
               splitArray: dbData,
             },
           };
-        } else {
-          return {
-            txOnModal: {
-              ...clone,
-              ...dbData,
-            },
-          };
         }
+        return {
+          txOnModal: {
+            ...clone,
+            ...dbData,
+          },
+        };
       });
     },
 
@@ -80,9 +79,8 @@ export const useTxStore = create<Store>()(
       set((store) => {
         if (typeof input === "function") {
           return { editedSplitIndexArray: input(store.editedSplitIndexArray) };
-        } else {
-          return { editedSplitIndexArray: input };
         }
+        return { editedSplitIndexArray: input };
       });
     },
 
