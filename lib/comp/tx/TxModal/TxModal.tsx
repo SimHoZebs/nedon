@@ -36,10 +36,9 @@ const TxModal = (props: Props) => {
   const setSplitAmountDisplayArray = useTxStore(
     (state) => state.setSplitAmountDisplayArray,
   );
-  const resetTx = useTxStore((state) => state.resetTx);
-  const setFocusedSplitIndex = useTxStore(
-    (state) => state.setFocusedSplitIndex,
-  );
+  const resetTx = useTxStore((s) => s.resetTx);
+  const setFocusedSplitIndex = useTxStore((s) => s.setFocusedSplitIndex);
+  const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
 
   const amount = tx ? tx.amount : 0;
 
@@ -63,6 +62,7 @@ const TxModal = (props: Props) => {
     setUnsavedSplitArray([]);
     setSplitAmountDisplayArray([]);
     setFocusedSplitIndex(undefined);
+    setIsEditingSplit(false);
   };
 
   return (

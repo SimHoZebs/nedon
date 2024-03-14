@@ -16,6 +16,9 @@ interface Store {
   unsavedSplitArray: SplitClientSide[];
   setUnsavedSplitArray: (splitArray: SplitClientSide[]) => void;
 
+  isEditingSplit: boolean;
+  setIsEditingSplit: (isEditingSplit: boolean) => void;
+
   focusedSplitIndex: number | undefined;
   setFocusedSplitIndex: (index: number | undefined) => void;
 
@@ -83,6 +86,10 @@ export const useTxStore = create<Store>()(
         return { editedSplitIndexArray: input };
       });
     },
+
+    isEditingSplit: false,
+    setIsEditingSplit: (isEditingSplit: boolean) =>
+      set({ isEditingSplit: isEditingSplit }),
 
     focusedSplitIndex: undefined,
     setFocusedSplitIndex: (index: number | undefined) =>

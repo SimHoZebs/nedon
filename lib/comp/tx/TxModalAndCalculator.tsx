@@ -13,19 +13,14 @@ interface Props {
 }
 
 const TxModalAndCalculator = (props: Props) => {
-  const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
-  const setUnsavedSplitArray = useTxStore(
-    (state) => state.setUnsavedSplitArray,
-  );
-  const splitAmountDisplayArray = useTxStore(
-    (state) => state.splitAmountDisplayArray,
-  );
+  const unsavedSplitArray = useTxStore((s) => s.unsavedSplitArray);
+  const setUnsavedSplitArray = useTxStore((s) => s.setUnsavedSplitArray);
+  const splitAmountDisplayArray = useTxStore((s) => s.splitAmountDisplayArray);
   const setSpiltAmountDisplayArray = useTxStore(
-    (state) => state.setSplitAmountDisplayArray,
+    (s) => s.setSplitAmountDisplayArray,
   );
-  const editedSplitIndexArray = useTxStore(
-    (state) => state.editedSplitIndexArray,
-  );
+  const isEditingSplit = useTxStore((s) => s.isEditingSplit);
+  const editedSplitIndexArray = useTxStore((s) => s.editedSplitIndexArray);
   const focusedSplitIndex = useTxStore((state) => state.focusedSplitIndex);
   const tx = useTxStore((state) => state.txOnModal);
   const txAmount = tx?.amount || 0;
@@ -113,7 +108,7 @@ const TxModalAndCalculator = (props: Props) => {
         }}
       />
 
-      {focusedSplitIndex !== undefined && (
+      {isEditingSplit && focusedSplitIndex !== undefined && (
         <Calculator
           value={splitAmountDisplayArray[focusedSplitIndex]}
           setValue={(value: string) => {

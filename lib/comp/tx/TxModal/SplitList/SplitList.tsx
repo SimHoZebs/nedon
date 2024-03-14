@@ -26,6 +26,8 @@ const SplitList = (props: Props) => {
   const queryClient = trpc.useUtils();
 
   const { appUser } = getAppUser();
+  const isEditingSplit = useTxStore((state) => state.isEditingSplit);
+  const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
   const tx = useTxStore((state) => state.txOnModal);
   const refreshDBData = useTxStore((state) => state.refreshDBData);
   const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
@@ -102,6 +104,7 @@ const SplitList = (props: Props) => {
       refreshDBData(dbUpdatedSplitArray);
     }
 
+    setIsEditingSplit(false);
     setEditedIndexArray([]);
     queryClient.tx.invalidate();
   };
@@ -122,7 +125,7 @@ const SplitList = (props: Props) => {
         <div className="flex flex-col gap-y-1">
           <div className="flex w-full gap-x-2 px-3">
             <H3>Split</H3>
-            {focusedIndex !== undefined ? (
+            {isEditingSplit ? (
               <div className="flex gap-x-2">
                 <ActionBtn disabled={isWrongSplit} onClickAsync={saveChanges}>
                   Save changes
@@ -132,6 +135,7 @@ const SplitList = (props: Props) => {
                   variant="negative"
                   onClick={() => {
                     setEditedIndexArray([]);
+                    setIsEditingSplit(false);
                     setFocusedSplitIndex(undefined);
                     if (!tx) {
                       console.error("Can't reset splitArray. tx is undefined");
@@ -150,7 +154,7 @@ const SplitList = (props: Props) => {
             ) : (
               <Button
                 className="flex gap-x-2 rounded-lg bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
-                onClick={() => setFocusedSplitIndex(0)}
+                onClick={() => setIsEditingSplit(true)}
               >
                 <span className="icon-[mdi--edit]" />
                 Manage
