@@ -27,7 +27,7 @@ const TxCard = (props: Props) => {
         setTxOnModal(props.tx);
       }}
     >
-      <section className={`flex w-full justify-between gap-x-4 truncate`}>
+      <section className="flex w-full justify-between gap-x-3 truncate">
         <div className="flex-start flex h-full justify-center gap-x-2 truncate">
           <p className="truncate text-base font-semibold sm:text-lg">
             {props.tx.name}
@@ -56,15 +56,14 @@ const TxCard = (props: Props) => {
             e.currentTarget.scrollLeft += e.deltaY * 0.5;
           }}
         >
-          {props.tx.splitArray[0].catArray.map((cat, index) => (
+          {props.tx.splitArray[0].catArray.map((cat) => (
             <div
-              key={index}
+              key={cat.id}
               className={`flex min-w-max gap-x-1 rounded-full p-2 text-zinc-800 ${
                 getCatStyle(cat.nameArray).bgColor
               }`}
             >
-              {props.tx.counterparties &&
-              props.tx.counterparties[0]?.logo_url ? (
+              {props.tx.counterparties?.[0]?.logo_url ? (
                 <Image
                   className="rounded-full"
                   src={props.tx.counterparties[0].logo_url}
@@ -73,7 +72,7 @@ const TxCard = (props: Props) => {
                   height={16}
                 />
               ) : (
-                <span className={getCatStyle(cat.nameArray).icon + " w-4"} />
+                <span className={`${getCatStyle(cat.nameArray).icon} w-4`} />
               )}
               <p className="text-xs">{cat.nameArray.at(-1)}</p>
             </div>

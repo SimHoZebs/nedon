@@ -30,12 +30,12 @@ const DateSortedTxList = (props: Props) => {
           <li
             key={Math.random() * (i + 1)}
             className="h-20 w-full animate-pulse rounded-lg bg-zinc-800"
-          ></li>
+          />
         ))}
     </ol>
   ) : (
     <ol className="no-scrollbar flex w-full max-w-sm flex-col items-center gap-y-2  overflow-y-scroll px-1 lg:max-w-md">
-      {props.sortedTxArray.map((year, i) =>
+      {props.sortedTxArray.map((year) =>
         year.map((month, j) => (
           <li key={Math.random() * (j + 1)} className="w-full flex-col gap-y-1">
             <ol className="flex flex-col gap-y-1">
@@ -52,7 +52,7 @@ const DateSortedTxList = (props: Props) => {
                       </div>
                     ) : (
                       day.map(
-                        (tx, l) =>
+                        (tx) =>
                           tx && (
                             <TxCard
                               setShowModal={props.setShowModal}
