@@ -100,7 +100,7 @@ const TxModalAndCalculator = (props: Props) => {
   };
 
   return (
-    <div className="absolute left-0 top-0 flex h-full w-full flex-col">
+    <div className="pointer-events-none absolute left-0 top-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
       <TxModal
         onClose={props.onClose}
         onSplitAmountChange={(index, amount) => {

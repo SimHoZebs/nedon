@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import type React from "react";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
@@ -6,22 +7,27 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 
 const Modal = (props: Props) => {
   return (
-    <div
-      className="z-10 flex h-full w-full items-center overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
+    <motion.div
+      className="pointer-events-auto z-10 flex h-full w-full flex-col gap-y-2 overflow-y-auto rounded-xl bg-zinc-800 shadow-lg shadow-zinc-900 outline outline-1 outline-zinc-700 lg:h-4/5 lg:w-4/5"
       onMouseDown={(e) => {
         e.stopPropagation();
-        props.close();
+      }}
+      initial={{ opacity: 1, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.5 }}
+      transition={{
+        duration: 0.2,
+        ease: "linear",
+        scale: {
+          type: "spring",
+          damping: 25,
+          stiffness: 250,
+          restDelta: 0.01,
+        },
       }}
     >
-      <div
-        className="flex h-full w-full flex-col gap-y-2 overflow-y-auto rounded-xl bg-zinc-800 shadow-lg shadow-zinc-900 outline outline-1 outline-zinc-700 lg:h-4/5 lg:w-4/5"
-        onMouseDown={(e) => {
-          e.stopPropagation();
-        }}
-      >
-        {props.children}
-      </div>
-    </div>
+      {props.children}
+    </motion.div>
   );
 };
 

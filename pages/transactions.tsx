@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import type { NextPage } from "next";
 import React, { useEffect, useMemo, useState } from "react";
 
@@ -50,8 +51,23 @@ const Page: NextPage = () => {
   return (
     <section className="flex w-full justify-center">
       {showModal && (
-        <TxModalAndCalculator onClose={() => setShowModal(false)} />
+        <motion.div
+          className="absolute left-0 top-0 z-10 h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            setShowModal(false);
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        />
       )}
+
+      <AnimatePresence>
+        {showModal && (
+          <TxModalAndCalculator onClose={() => setShowModal(false)} />
+        )}
+      </AnimatePresence>
 
       <div className="flex w-full max-w-sm flex-col items-center gap-y-2 lg:max-w-md">
         <DateRangePicker
