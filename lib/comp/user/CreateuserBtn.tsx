@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { trpc } from "@/util/trpc";
 
-import { Button } from "../Button";
+import { ActionBtn, Button } from "../Button";
 
 const CreateUserBtn = () => {
   const createUser = trpc.user.create.useMutation();
@@ -18,8 +18,7 @@ const CreateUserBtn = () => {
   const [loading, setLoading] = useState(false);
 
   return (
-    <Button
-      className="flex w-full items-center justify-center gap-x-2 rounded-none rounded-b-md text-xl font-semibold hover:bg-zinc-800 hover:text-zinc-200"
+    <ActionBtn
       onClickAsync={async (e) => {
         setLoading(true);
         e.stopPropagation();
@@ -50,7 +49,7 @@ const CreateUserBtn = () => {
         </div>
       )}
       create user
-    </Button>
+    </ActionBtn>
   );
 };
 
