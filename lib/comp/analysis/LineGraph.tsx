@@ -14,6 +14,7 @@ import type {
 } from "recharts/types/component/DefaultTooltipContent";
 
 import getAppUser from "@/util/getAppUser";
+import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { filterTxByDate, organizeTxByTime } from "@/util/tx";
 import type { FullTx } from "@/util/types";
@@ -41,23 +42,16 @@ const LineGraph = (props: Props) => {
 
   date.setDate(date.getDate() - 1);
 
-  const thisMonthTimeOrganizedTxArray =
-    organizeTxByTime(thisMonthTxArray)[0][0];
+  const thisMonthTimeSortedTxArray = organizeTxByTime(thisMonthTxArray)[0][0];
 
-  const yeet = thisMonthTimeOrganizedTxArray
-    .map((day) => ({
-      date: day[0]?.date.slice(8),
-      amount: day.reduce((acc, curr) => acc + curr.amount, 0),
-    }))
-    .sort((a, b) => Number.parseInt(a.date) - Number.parseInt(b.date));
+  const dailyTxSumArray = generateDailyTxSumArray(thisMonthTimeSortedTxArray);
 
   return (
     <div className="h-64 w-full rounded-lg bg-zinc-800 pr-4 pt-2 text-xs">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={yeet}>
+        <LineChart data={dailyTxSumArray}>
           <XAxis dataKey="date" />
           <YAxis dataKey="amount" domain={[0, "dataMax"]} />
-          {/* <Tooltip content={(e) => <CustomToolTip toolTipProps={e} />} /> */}
           <Tooltip />
           <Line
             strokeWidth={3}
@@ -69,6 +63,26 @@ const LineGraph = (props: Props) => {
       </ResponsiveContainer>
     </div>
   );
+};
+
+// txArray is an array of FullTx sorted by latest date
+const generateDailyTxSumArray = (txArray: FullTx[][]) => {
+  let amountSum = 0;
+  const txLen = txArray.length;
+
+  const result: { date: string; amount: number }[] = [];
+
+  for (let i = txLen - 1; i >= 0; i--) {
+    const day = txArray[i];
+    amountSum += day.reduce((acc, curr) => acc + curr.amount, 0);
+    result[txLen - i - 1] = {
+      date: day[0]?.date.slice(8),
+      amount: parseMoney(amountSum),
+    };
+  }
+
+  result.sort((a, b) => Number.parseInt(a.date) - Number.parseInt(b.date));
+  return result;
 };
 
 export default LineGraph;
