@@ -111,7 +111,7 @@ const Cat = () => {
         <div className="relative flex w-full flex-wrap items-center gap-2 ">
           {unsavedMergedCatArray.map((cat, index) => (
             <CatChip
-              key={index}
+              key={cat.id}
               index={index}
               isManaging={isManaging}
               setIsManaging={setIsManaging}

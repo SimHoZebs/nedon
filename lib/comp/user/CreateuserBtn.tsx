@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { trpc } from "@/util/trpc";
 
-import { ActionBtn, Button } from "../Button";
+import { ActionBtn } from "../Button";
 
 const CreateUserBtn = () => {
   const createUser = trpc.user.create.useMutation();

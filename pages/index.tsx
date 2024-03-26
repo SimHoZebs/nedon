@@ -21,7 +21,7 @@ const User: NextPage = () => {
   );
 
   const loading = useRef(
-    <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700"></div>,
+    <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700" />,
   );
 
   return (
@@ -38,10 +38,10 @@ const User: NextPage = () => {
         {auth.fetchStatus === "idle" && auth.status !== "pending" ? (
           auth.data ? (
             (auth.data as unknown as AuthGetResponse).accounts.map(
-              (account, index) =>
+              (account) =>
                 account.balances.available && (
                   <AccountCard
-                    key={index}
+                    key={account.account_id}
                     onClick={() => {
                       setClickedAccount(account);
                       setShowModal(true);
@@ -59,7 +59,8 @@ const User: NextPage = () => {
             </div>
           )
         ) : (
-          Array.from({ length: 3 }).map((val, index) => (
+          Array.from({ length: 3 }).map((_, index) => (
+            //biome-ignore lint: it's just a loading spinner
             <AccountCard key={index} disabled={true}>
               {loading.current}
               {loading.current}
