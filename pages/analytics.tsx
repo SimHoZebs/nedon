@@ -87,12 +87,7 @@ const Page = () => {
           />
 
           {date && (
-            <LineGraph
-              txType={txType}
-              spendingTotal={spendingTotal}
-              date={date}
-              rangeFormat={rangeFormat}
-            />
+            <LineGraph txType={txType} date={date} rangeFormat={rangeFormat} />
           )}
 
           <AnalysisBar

@@ -20,7 +20,6 @@ import { filterTxByDate, organizeTxByTime } from "@/util/tx";
 import type { FullTx, TxType } from "@/util/types";
 
 interface Props {
-  spendingTotal: number;
   date: Date;
   rangeFormat: "date" | "month" | "year" | "all";
   txType: TxType;
@@ -43,11 +42,12 @@ const LineGraph = (props: Props) => {
 
   date.setDate(date.getDate() - 1);
 
-  const thisMonthTimeSortedTxArray = organizeTxByTime(thisMonthTxArray)[0][0];
+  const timeSortedThisMonthTxArray = organizeTxByTime(thisMonthTxArray)[0][0];
 
   const dailyTxSumArray = generateDailyTxSumArray(
-    thisMonthTimeSortedTxArray,
+    timeSortedThisMonthTxArray,
     props.txType,
+    date.getDate(),
   );
 
   return (
@@ -69,42 +69,49 @@ const LineGraph = (props: Props) => {
   );
 };
 
-// txArray is an array of FullTx sorted by latest date
+// txArray is a sorted array of FullTx of a single month, starting with latest date
 const generateDailyTxSumArray = (
   txArray: FullTx[][],
   txType: "Spending" | "Earning" | "Transfers",
+  dateLen: number,
 ) => {
+  const result: { date: number; amount: number }[] = [];
   let amountSum = 0;
-  const txLen = txArray.length;
+  let txIndex = txArray.length - 1;
 
-  const result: { date: string; amount: number }[] = [];
+  // Loop through the days of the month and generate empty sums for days with
+  // no transactions and sums for days with transactions
+  for (let i = 0; i < dateLen; i++) {
+    //exhausted existing transactions, just add empty sums
+    if (txIndex < 0) {
+      const lastDate = new Date(txArray[0][0]?.date);
+      lastDate.setDate(i - 1);
 
-  for (let i = txLen - 1; i >= 0; i--) {
-    const day = txArray[i];
-    amountSum += day.reduce((acc, curr) => {
-      switch (txType) {
-        case "Spending":
-          if (curr.amount > 0) {
-            return acc + curr.amount;
-          }
-          return acc;
-        case "Earning":
-          if (curr.amount < 0) {
-            return acc - curr.amount;
-          }
-          return acc;
-        default:
-          return acc;
-      }
-    }, 0);
+      //...unless the last date is the present
+      if (lastDate.getTime() - Date.now() > 0) break;
+    }
+    //if the date is the same as this transaction's date
+    else if (Number.parseInt(txArray[txIndex][0]?.date.slice(8)) === i) {
+      amountSum += txArray[txIndex].reduce((acc, curr) => {
+        switch (txType) {
+          case "Spending":
+            return curr.amount > 0 ? acc + curr.amount : acc;
+          case "Earning":
+            return curr.amount < 0 ? acc - curr.amount : acc;
+          default:
+            return acc;
+        }
+      }, 0);
+      txIndex--;
+    }
 
-    result[txLen - i - 1] = {
-      date: day[0]?.date.slice(8),
+    result.push({
+      date: i,
       amount: parseMoney(amountSum),
-    };
+    });
   }
 
-  result.sort((a, b) => Number.parseInt(a.date) - Number.parseInt(b.date));
+  result.sort((a, b) => a.date - b.date);
   return result;
 };
 
