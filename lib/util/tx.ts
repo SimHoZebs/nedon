@@ -54,13 +54,13 @@ export const convertToFullTx = (
 export const organizeTxByCat = (txArray: FullTx[]) => {
   const catArray: TreedCatWithTx[] = [];
 
-  txArray.forEach((tx) => {
+  for (const tx of txArray) {
     const txCopy = structuredClone(tx);
     const mergedCatArray = mergeCatArray(txCopy.splitArray);
-    mergedCatArray.forEach((cat) => {
+    for (const cat of mergedCatArray) {
       fillArrayByCat(catArray, txCopy, cat);
-    });
-  });
+    }
+  }
 
   return catArray;
 };
@@ -78,7 +78,7 @@ export const organizeTxByTime = (txArray: FullTx[]) => {
   let monthIndex = -1;
   let dateIndex = -1;
 
-  txSortedByTimeArray.forEach((tx, i) => {
+  for (const tx of txSortedByTimeArray) {
     const date = new Date(tx.date);
     if (!lastDate) {
       yearIndex++;
@@ -106,7 +106,7 @@ export const organizeTxByTime = (txArray: FullTx[]) => {
     txOrganizedByTimeArray[yearIndex][monthIndex][dateIndex].push(tx);
 
     lastDate = date;
-  });
+  }
 
   return txOrganizedByTimeArray;
 };

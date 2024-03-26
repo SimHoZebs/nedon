@@ -1,7 +1,5 @@
 const catStyleArray: {
-  [key: string]:
-    | { icon: string; bgColor: string; textColor: string }
-    | undefined;
+  [key: string]: { icon: string; bgColor: string; textColor: string };
 } = {
   Travel: {
     icon: "icon-[mdi--car-outline]",

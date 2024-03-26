@@ -11,19 +11,14 @@ interface Props {
 const AnalysisBar = (props: Props) => {
   return (
     <div className="flex h-5 w-full gap-x-1 overflow-hidden rounded-lg bg-zinc-900">
-      {props.organizedTxByCatArray.map((cat, i) => (
+      {props.organizedTxByCatArray.map((cat) => (
         <div
-          key={i}
-          className={"h-full " + getCatStyle([cat.name]).bgColor}
+          key={cat.name}
+          className={`+  h-full ${getCatStyle([cat.name]).bgColor}`}
           style={{
-            width:
-              (
-                ((cat.spending + subCatTotal(cat, "spending")) /
-                  props.spendingTotal) *
-                100
-              ).toString() + "%",
+            width: `${(((cat.spending + subCatTotal(cat, "spending")) / props.spendingTotal) * 100).toString()}%`,
           }}
-        ></div>
+        />
       ))}
     </div>
   );

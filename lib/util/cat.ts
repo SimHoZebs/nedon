@@ -30,14 +30,14 @@ export const emptyCat = ({
 
 export const getCatStyle = (nameArray: string[]) => {
   const style = catStyleArray[nameArray.slice(-1)[0]];
-  return style ? style : catStyleArray["Unknown"]!;
+  return style ? style : catStyleArray.Unknown;
 };
 
 export const mergeCatArray = (splitArray: SplitClientSide[]) => {
   const mergedCatArray: MergedCat[] = [];
 
-  splitArray.forEach((split) => {
-    split.catArray.forEach(({ nameArray, amount, ...rest }) => {
+  for (const split of splitArray) {
+    for (const { nameArray, amount, ...rest } of split.catArray) {
       const storedCat = mergedCatArray.find(
         ({ nameArray: storedNameArray }) =>
           storedNameArray.at(-1) === nameArray.at(-1),
@@ -48,8 +48,9 @@ export const mergeCatArray = (splitArray: SplitClientSide[]) => {
       } else {
         mergedCatArray.push(structuredClone({ nameArray, amount, ...rest }));
       }
-    });
-  });
+    }
+  }
+
   return mergedCatArray;
 };
 
@@ -58,9 +59,9 @@ export const convertPlaidCatsToHierarchicalArray = (
 ) => {
   const resultArray: TreedCat[] = [];
 
-  plaidCatArray.forEach((cat) => {
+  for (const cat of plaidCatArray) {
     fillCatInHierarchy(resultArray, { ...cat });
-  });
+  }
   return resultArray;
 };
 
@@ -146,14 +147,13 @@ export const fillCatInHierarchy = (
 
   if (nextHierarchicalArray.length === 0) {
     return resultArray;
-  } else {
-    plaidCat.hierarchy = nextHierarchicalArray;
-
-    resultArray[index].subCatArray = fillCatInHierarchy(
-      resultArray[index].subCatArray,
-      plaidCat,
-    );
   }
+  plaidCat.hierarchy = nextHierarchicalArray;
+
+  resultArray[index].subCatArray = fillCatInHierarchy(
+    resultArray[index].subCatArray,
+    plaidCat,
+  );
 
   return resultArray;
 };

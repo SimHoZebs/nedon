@@ -18,6 +18,7 @@ export const Button = (props: ButtonProps) => {
 
   return (
     <button
+      type="button"
       {...rest}
       className={twMerge(
         `flex items-center justify-center gap-x-1 p-2 text-sm transition-all active:scale-95 disabled:bg-zinc-400 ${className} ${
@@ -41,7 +42,7 @@ export const Button = (props: ButtonProps) => {
           className={`icon-[mdi--loading] absolute h-4 w-4 animate-spin ${
             originalTextColor || "text-zinc-400"
           }`}
-        ></span>
+        />
       )}
       {children}
     </button>
@@ -129,14 +130,12 @@ interface CloseBtnProps {
 export const CloseBtn = (props: CloseBtnProps) => {
   return (
     <button
+      type="button"
       aria-label="Close"
-      className={
-        "m-1 rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400 " +
-        (props.isForMobile ? "flex lg:hidden" : "hidden lg:flex")
-      }
+      className={`m-1 rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400 ${props.isForMobile ? "flex lg:hidden" : "hidden lg:flex"}`}
       onClick={props.onClose}
     >
-      <span className="icon-[iconamoon--close-fill] h-6 w-6 rounded-full text-zinc-400 hover:text-pink-400"></span>
+      <span className="icon-[iconamoon--close-fill] h-6 w-6 rounded-full text-zinc-400 hover:text-pink-400" />
     </button>
   );
 };
