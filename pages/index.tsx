@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import type { NextPage } from "next";
 import type { AccountBase, AuthGetResponse } from "plaid";
 import React, { useRef, useState } from "react";
@@ -27,12 +28,28 @@ const User: NextPage = () => {
   return (
     <section className="flex h-full w-full flex-col items-center gap-y-3">
       <H1>All Accounts</H1>
-      {showModal && clickedAccount && (
-        <AccountModal
-          setShowModal={setShowModal}
-          clickedAccount={clickedAccount}
+
+      {showModal && (
+        <motion.div
+          className="absolute left-0 top-0 z-10 h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            setShowModal(false);
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
         />
       )}
+
+      <AnimatePresence>
+        {showModal && clickedAccount && (
+          <AccountModal
+            setShowModal={setShowModal}
+            clickedAccount={clickedAccount}
+          />
+        )}
+      </AnimatePresence>
 
       <div className="flex w-full max-w-md flex-col gap-y-3">
         {auth.fetchStatus === "idle" && auth.status !== "pending" ? (
