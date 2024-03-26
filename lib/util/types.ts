@@ -85,3 +85,5 @@ export type TxInDB = Tx & {
 export function isPlaidTx(plaidTx: unknown): plaidTx is FullTx {
   return (plaidTx as FullTx).id !== undefined;
 }
+
+export type TxType = "Spending" | "Earning" | "Transfers";
