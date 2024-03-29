@@ -35,6 +35,7 @@ const SplitUser = (props: Props) => {
   const setFocusedIndex = useTxStore((state) => state.setFocusedSplitIndex);
   const amountDisplay = amountDisplayArray[props.index];
   const amount = Number.parseFloat(amountDisplay);
+  const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
 
   const split = unsavedSplitArray[props.index];
   const txAmount = tx ? tx.amount : 0;
@@ -60,6 +61,7 @@ const SplitUser = (props: Props) => {
 
   const onFocus = (e: React.FocusEvent<HTMLDivElement, Element>) => {
     setFocusedIndex(props.index);
+    setIsEditingSplit(true);
   };
 
   return (

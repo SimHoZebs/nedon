@@ -20,6 +20,7 @@ const SplitUserOptionList = () => {
   const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
+  const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
 
   return (
     <div className="no-scrollbar flex h-fit w-full flex-col gap-y-2 overflow-y-scroll">
@@ -43,6 +44,7 @@ const SplitUserOptionList = () => {
                     <span className="2 icon-[mdi--account] h-8 w-8 bg-zinc-400 hover:bg-zinc-100" />
                   </div>
                   <div>{user.id.slice(0, 8)}</div>
+                  <div>{user.name}</div>
                   <Button
                     className="bg-zinc-800 text-indigo-300"
                     onClick={() => {
@@ -84,6 +86,7 @@ const SplitUserOptionList = () => {
                       });
 
                       setUnsavedSplitArray(updatedSplitArray);
+                      setIsEditingSplit(true);
                     }}
                   >
                     Split
