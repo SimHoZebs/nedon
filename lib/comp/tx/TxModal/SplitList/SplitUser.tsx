@@ -23,14 +23,10 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 const SplitUser = (props: Props) => {
   const { appUser } = getAppUser();
   const tx = useTxStore((state) => state.txOnModal);
-  const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
-  const setUnsavedSplitArray = useTxStore(
-    (state) => state.setUnsavedSplitArray,
-  );
+  const unsavedSplitArray = useTxStore((s) => s.unsavedSplitArray);
+  const setUnsavedSplitArray = useTxStore((s) => s.setUnsavedSplitArray);
   const [showDetail, setShowDetail] = useState(false);
-  const amountDisplayArray = useTxStore(
-    (state) => state.splitAmountDisplayArray,
-  );
+  const amountDisplayArray = useTxStore((s) => s.splitAmountDisplayArray);
   const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
   const setFocusedIndex = useTxStore((state) => state.setFocusedSplitIndex);
   const amountDisplay = amountDisplayArray[props.index];
@@ -48,29 +44,30 @@ const SplitUser = (props: Props) => {
     const updatedSplitArray = structuredClone(unsavedSplitArray);
     const splicedSplit = updatedSplitArray.splice(props.index, 1);
 
-    updatedSplitArray.forEach((split) => {
+    for (const split of updatedSplitArray) {
       split.catArray.forEach((cat, i) => {
         cat.amount += parseMoney(
           splicedSplit[0].catArray[i].amount / updatedSplitArray.length,
         );
       });
-    });
+    }
 
     setUnsavedSplitArray(updatedSplitArray);
   };
 
-  const onFocus = (e: React.FocusEvent<HTMLDivElement, Element>) => {
+  const onFocus = () => {
     setFocusedIndex(props.index);
     setIsEditingSplit(true);
   };
 
   return (
-    <div className={`flex w-full flex-col gap-y-1 rounded-lg lg:w-fit `}>
+    <div className="flex w-full flex-col gap-y-1 rounded-lg lg:w-fit ">
       <div className="flex w-full items-center justify-start gap-x-2 ">
         {split.userId === appUser?.id || focusedIndex !== undefined ? (
-          <div className="aspect-square w-5"></div>
+          <div className="aspect-square w-5" />
         ) : (
           <button
+            type="button"
             title="Remove user from split"
             className="group flex w-5"
             onClick={() => removeUser()}
@@ -169,6 +166,7 @@ const SplitUser = (props: Props) => {
       </div>
 
       <button
+        type="button"
         className={`group mb-5 flex w-full flex-col items-center justify-center overflow-hidden rounded-b-lg bg-zinc-700 ${
           showDetail || "h-1 hover:m-0 hover:h-fit"
         }`}
@@ -177,7 +175,11 @@ const SplitUser = (props: Props) => {
         {showDetail && (
           <div className="flex w-full items-center justify-evenly border-x-2 border-t-2 border-zinc-700 bg-zinc-800">
             {split.catArray.map((cat, i) => (
-              <UserSplitCat splitIndex={props.index} catIndex={i} key={i} />
+              <UserSplitCat
+                splitIndex={props.index}
+                catIndex={i}
+                key={cat.id}
+              />
             ))}
           </div>
         )}

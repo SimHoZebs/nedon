@@ -105,8 +105,8 @@ const CatPicker = forwardRef(
       const dbUpdatedSplitArray = await Promise.all(
         updatedSplitArray.map(async (updatedSplit) => {
           if (updatedSplit.id === null) {
-            //tx.id boolean was checked before
             const newSplit = await createSplit.mutateAsync({
+              //biome-ignore lint: tx.id boolean was checked before
               txId: tx.id!,
               split: updatedSplit,
             });
@@ -116,7 +116,8 @@ const CatPicker = forwardRef(
 
           const updatedSplitClone = structuredClone(updatedSplit);
           const newCat = await createCat.mutateAsync({
-            splitId: updatedSplit.id!, // never null because of the if check
+            //biome-ignore lint: never null because of the if check. Typescript isn't smart enough to know that.
+            splitId: updatedSplit.id!,
             amount: 0,
             nameArray: nameArray,
           });
@@ -135,6 +136,7 @@ const CatPicker = forwardRef(
 
       if (!tx.id) {
         const txDBData = await createTx.mutateAsync({
+          //biome-ignore lint: appUser is checked before
           userId: appUser!.id,
           txId: tx.transaction_id,
           splitArray: unsavedSplitArray.map((split) => ({
@@ -228,6 +230,7 @@ const CatPicker = forwardRef(
         className={
           "absolute left-0 flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900 sm:w-96 "
         }
+        onKeyDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
         style={
           screenType === "desktop"
@@ -239,6 +242,7 @@ const CatPicker = forwardRef(
           <div className="flex w-fit items-center">
             {unsavedNameArray.length > 0 && (
               <button
+                type="button"
                 aria-label="back"
                 className="flex"
                 onClick={() => {
@@ -256,6 +260,7 @@ const CatPicker = forwardRef(
 
           <div className="flex gap-x-2 ">
             <button
+              type="button"
               className="text-indigo-300 hover:text-indigo-400"
               onClick={async () => {
                 if (editingMergedCat.id === null) {
@@ -268,6 +273,7 @@ const CatPicker = forwardRef(
               save
             </button>
             <button
+              type="button"
               className="text-pink-400 hover:text-pink-500"
               onClick={(e) => {
                 e.stopPropagation();
@@ -288,8 +294,9 @@ const CatPicker = forwardRef(
         <hr className="w-full border-zinc-700" />
 
         <div className="grid w-full auto-cols-fr grid-cols-3 overflow-x-hidden overflow-y-scroll bg-zinc-800 pb-1 pl-2 text-xs ">
-          {currentOptionArray.map((cat, i) => (
+          {currentOptionArray.map((cat) => (
             <button
+              type="button"
               onClick={async () => {
                 if (cat.subCatArray.length === 0) {
                   await applyChangesToCat(cat);
@@ -310,7 +317,7 @@ const CatPicker = forwardRef(
                   setCurrentNameArray((prev) => [...prev, cat.name]);
                 }
               }}
-              key={i}
+              key={cat.name}
               className={
                 "group my-1 mr-2 flex aspect-square flex-col items-center  justify-center gap-y-1  hyphens-auto rounded-lg border border-zinc-400 text-center hover:bg-zinc-700 hover:text-zinc-200"
               }
@@ -326,8 +333,7 @@ const CatPicker = forwardRef(
               />
               <p>{cat.name}</p>
               <p className="text-zinc-500 group-hover:text-zinc-400">
-                {cat.subCatArray.length > 0 &&
-                  cat.subCatArray.length + " subcategories"}
+                {`${cat.subCatArray.length > 0 && cat.subCatArray.length} subcategories`}
               </p>
             </button>
           ))}

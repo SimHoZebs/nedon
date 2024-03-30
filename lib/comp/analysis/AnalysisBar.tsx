@@ -10,7 +10,7 @@ interface Props {
 
 const AnalysisBar = (props: Props) => {
   return (
-    <div className="flex h-5 w-full gap-x-1 overflow-hidden rounded-lg bg-zinc-900">
+    <div className="flex h-5 w-full gap-x-[3px] overflow-hidden rounded-lg bg-zinc-900">
       {props.organizedTxByCatArray.map((cat) => (
         <div
           key={cat.name}

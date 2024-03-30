@@ -30,16 +30,12 @@ const SettleModal = (props: Props) => {
         <div className="flex justify-center gap-x-3">
           {appUser?.id.slice(0, 8)}
           <button
+            type="button"
             className="flex flex-col"
             onClick={() => setAppUserGiving((prev) => !prev)}
           >
             <span
-              className={
-                "icon-[mingcute--arrow-up-line] h-9 w-9 rounded-full hover:bg-zinc-800 " +
-                appUserGiving
-                  ? "rotate-90"
-                  : "-rotate-90"
-              }
+              className={`icon-[mingcute--arrow-up-line] h-9 w-9 rounded-full hover:bg-zinc-800 ${appUserGiving ? "rotate-90" : "-rotate-90"}`}
             />
             <p className="text-sm">gives</p>
           </button>
