@@ -11,7 +11,9 @@ type Props = {
   mergedCat: MergedCat;
   index: number;
   findAndSetPickerPosition: (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    e:
+      | React.MouseEvent<HTMLDivElement, MouseEvent>
+      | React.KeyboardEvent<HTMLDivElement>,
   ) => void;
   isMultiCat: boolean;
   isEditing: boolean;
@@ -35,6 +37,9 @@ const CatChip = (props: Props) => {
         className={`group flex items-center gap-x-1 rounded-lg p-2 text-xs text-zinc-400 hover:cursor-pointer hover:bg-zinc-700 hover:text-zinc-300 sm:text-sm ${
           props.isEditing && "animate-pulse bg-zinc-700"
         } `}
+        onKeyDown={(e) => {
+          props.findAndSetPickerPosition(e);
+        }}
         onClick={(e) => props.findAndSetPickerPosition(e)}
       >
         <span
@@ -59,6 +64,7 @@ const CatChip = (props: Props) => {
               //not using unsavedSplitArray as this should only appear when there is more than one SAVED cat.
               tx && tx.splitArray[0].catArray.length > 1 && (
                 <button
+                  type="button"
                   aria-label="Close"
                   className="h-4 w-4"
                   onClick={async (e) => {
@@ -78,17 +84,16 @@ const CatChip = (props: Props) => {
                           props.mergedCat.nameArray.join()
                         ) {
                           return cat;
-                        } else {
-                          if (!isCatInSplitInDB(cat)) {
-                            console.error(
-                              "Can't add this cat to toDeleteArray. It does not have id. cat:",
-                              cat,
-                            );
-                            return;
-                          }
-
-                          catToDeleteArray.push(cat);
                         }
+                        if (!isCatInSplitInDB(cat)) {
+                          console.error(
+                            "Can't add this cat to toDeleteArray. It does not have id. cat:",
+                            cat,
+                          );
+                          return;
+                        }
+
+                        catToDeleteArray.push(cat);
                       });
 
                       return {
@@ -112,7 +117,10 @@ const CatChip = (props: Props) => {
           </div>
 
           {props.isMultiCat && (
-            <p onClick={(e) => e.stopPropagation()}>
+            <p
+              onKeyDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+            >
               ${" "}
               <input
                 className="w-14 bg-zinc-800 group-hover:bg-zinc-700 "

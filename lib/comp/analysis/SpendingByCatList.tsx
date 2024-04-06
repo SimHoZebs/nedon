@@ -11,8 +11,8 @@ interface Props {
 const SpendingByCatList = (props: Props) => {
   return (
     <>
-      {props.hierarchicalCatArray.map((cat, i) => (
-        <div key={i} className="flex flex-col p-3">
+      {props.hierarchicalCatArray.map((cat) => (
+        <div key={cat.name} className="flex flex-col p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center justify-center gap-x-2">
               <span
@@ -24,10 +24,10 @@ const SpendingByCatList = (props: Props) => {
                 <H3>{cat.name}</H3>
 
                 <p className="text-sm text-zinc-400">
-                  {parseMoney(
+                  {`${parseMoney(
                     ((cat.spending + subCatTotal(cat, "spending")) / 1000) *
                       100,
-                  ).toString() + "%"}
+                  ).toString()}%`}
                 </p>
               </div>
             </div>

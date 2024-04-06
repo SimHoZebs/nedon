@@ -8,10 +8,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "plaid-merchant-logos.plaid.com",
         port: "",
-        pathname: "/**"
-      }
-    ]
-  }
-}
+        pathname: "/**",
+      },
+    ],
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

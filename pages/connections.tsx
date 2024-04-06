@@ -94,7 +94,9 @@ const Connections = () => {
             {calcOweGroup?.[user.id] && (
               <div className="flex flex-col items-start gap-2">
                 <p>
-                  {`${calcOweGroup[user.id] < 0 ? "You" : "They"} owe: $${Math.abs(parseMoney(calcOweGroup[user.id]))}`}
+                  {`${
+                    calcOweGroup[user.id] < 0 ? "You" : "They"
+                  } owe: $${Math.abs(parseMoney(calcOweGroup[user.id]))}`}
                 </p>
 
                 <ActionBtn

@@ -35,7 +35,9 @@ const SettleModal = (props: Props) => {
             onClick={() => setAppUserGiving((prev) => !prev)}
           >
             <span
-              className={`icon-[mingcute--arrow-up-line] h-9 w-9 rounded-full hover:bg-zinc-800 ${appUserGiving ? "rotate-90" : "-rotate-90"}`}
+              className={`icon-[mingcute--arrow-up-line] h-9 w-9 rounded-full hover:bg-zinc-800 ${
+                appUserGiving ? "rotate-90" : "-rotate-90"
+              }`}
             />
             <p className="text-sm">gives</p>
           </button>

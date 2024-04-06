@@ -333,7 +333,9 @@ const CatPicker = forwardRef(
               />
               <p>{cat.name}</p>
               <p className="text-zinc-500 group-hover:text-zinc-400">
-                {`${cat.subCatArray.length > 0 && cat.subCatArray.length} subcategories`}
+                {`${
+                  cat.subCatArray.length > 0 && cat.subCatArray.length
+                } subcategories`}
               </p>
             </button>
           ))}

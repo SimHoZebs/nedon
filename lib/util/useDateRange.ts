@@ -12,7 +12,7 @@ const useDateRange = (initialDate: Date | undefined) => {
       setDate(initialDate);
       return;
     }
-  }, [date, initialDate]);
+  }, [initialDate]);
 
   return {
     date,

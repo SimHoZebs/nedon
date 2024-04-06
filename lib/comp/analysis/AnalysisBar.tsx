@@ -16,7 +16,11 @@ const AnalysisBar = (props: Props) => {
           key={cat.name}
           className={`+  h-full ${getCatStyle([cat.name]).bgColor}`}
           style={{
-            width: `${(((cat.spending + subCatTotal(cat, "spending")) / props.spendingTotal) * 100).toString()}%`,
+            width: `${(
+              ((cat.spending + subCatTotal(cat, "spending")) /
+                props.spendingTotal) *
+              100
+            ).toString()}%`,
           }}
         />
       ))}
