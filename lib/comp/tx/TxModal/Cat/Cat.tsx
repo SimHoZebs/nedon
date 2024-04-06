@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react";
 
 import { ActionBtn, Button } from "@/comp/Button";
-import { H3 } from "@/comp/Heading";
 
 import { emptyCat, mergeCatArray } from "@/util/cat";
 import parseMoney from "@/util/parseMoney";
@@ -194,6 +193,7 @@ const Cat = () => {
             position={pickerPosition}
             closePicker={() => {
               setEditingMergedCatIndex(undefined);
+              setIsManaging(false);
               setPickerPosition(offScreen);
             }}
           />
