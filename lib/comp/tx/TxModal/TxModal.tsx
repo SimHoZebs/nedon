@@ -127,7 +127,7 @@ const TxModal = (props: Props) => {
             </div>
           </section>
 
-          <div className="flex flex-col justify-between gap-y-3 md:flex-row ">
+          <div className="flex flex-col justify-between gap-y-3 px-3 md:flex-row">
             <div>
               <SplitList
                 onAmountChange={(index, splitAmount) => {
