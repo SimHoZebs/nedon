@@ -2,7 +2,7 @@ import type React from "react";
 import { date, z } from "zod";
 
 import { Button } from "./Button";
-import { H1 } from "./Heading";
+import { H1, H2, H3 } from "./Heading";
 
 interface Props {
   date: Date;
@@ -43,27 +43,27 @@ const DateRangePicker = (props: Props) => {
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex self-start">
       {props.date && (
-        <div className="flex items-center">
+        <div className="flex items-center ">
           <Button
             onClick={() => {
               handleRangeChange(-1);
             }}
           >
-            <span className="icon-[tabler--chevron-left] h-8 w-8" />
+            <span className="icon-[tabler--chevron-left] h-6 w-6" />
           </Button>
-          <H1>{props.date.getMonth() + 1}</H1>
+          <H2>{props.date.getMonth() + 1}</H2>
           <Button
             onClick={() => {
               handleRangeChange(1);
             }}
           >
-            <span className="icon-[tabler--chevron-right] h-8 w-8" />
+            <span className="icon-[tabler--chevron-right] h-6 w-6" />
           </Button>
         </div>
       )}
-
+      {/*
       <select
         title="scope"
         className="bg-zinc-800"
@@ -86,6 +86,7 @@ const DateRangePicker = (props: Props) => {
         <option value="year">year</option>
         <option value="all">all</option>
       </select>
+      */}
     </div>
   );
 };

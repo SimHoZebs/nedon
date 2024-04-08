@@ -16,8 +16,8 @@ import type {
 import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
-import { filterTxByDate, organizeTxByTime } from "@/util/tx";
-import type { FullTx, TxType } from "@/util/types";
+import { type TxType, filterTxByDate, organizeTxByTime } from "@/util/tx";
+import type { FullTx } from "@/util/types";
 
 interface Props {
   date: Date;
@@ -72,7 +72,7 @@ const LineGraph = (props: Props) => {
 // txArray is a sorted array of FullTx of a single month, starting with latest date
 const generateDailyTxSumArray = (
   txArray: FullTx[][],
-  txType: "Spending" | "Earning" | "Transfers",
+  txType: TxType,
   dateLen: number,
 ) => {
   const result: { date: number; amount: number }[] = [];
@@ -94,9 +94,9 @@ const generateDailyTxSumArray = (
     else if (Number.parseInt(txArray[txIndex][0]?.date.slice(8)) === i) {
       amountSum += txArray[txIndex].reduce((acc, curr) => {
         switch (txType) {
-          case "Spending":
+          case "spending":
             return curr.amount > 0 ? acc + curr.amount : acc;
-          case "Earning":
+          case "received":
             return curr.amount < 0 ? acc - curr.amount : acc;
           default:
             return acc;

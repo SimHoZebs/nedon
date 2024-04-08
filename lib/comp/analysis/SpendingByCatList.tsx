@@ -2,17 +2,34 @@ import { getCatStyle, subCatTotal } from "@/util/cat";
 import parseMoney from "@/util/parseMoney";
 import type { TreedCatWithTx } from "@/util/types";
 
-import { H3, H4 } from "../Heading";
+import type { TxType } from "@/util/tx";
+import { H3 } from "../Heading";
 
 interface Props {
   hierarchicalCatArray: TreedCatWithTx[];
+  txType: TxType;
 }
 
 const SpendingByCatList = (props: Props) => {
+  const sortCatAmount = (catArray: TreedCatWithTx[]) => {
+    return catArray.sort((b, a) => {
+      const aTotal =
+        subCatTotal(a, props.txType) +
+        (props.txType === "spending" ? a.spending : a.received);
+      const bTotal =
+        subCatTotal(b, props.txType) +
+        (props.txType === "spending" ? b.spending : b.received);
+      return aTotal - bTotal;
+    });
+  };
+
   return (
     <>
-      {props.hierarchicalCatArray.map((cat) => (
-        <div key={cat.name} className="flex flex-col p-3">
+      {sortCatAmount(props.hierarchicalCatArray).map((cat) => (
+        <div
+          key={cat.name}
+          className="flex flex-col p-3 bg-zinc-800 rounded-md hover:bg-zinc-700 cursor-pointer"
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center justify-center gap-x-2">
               <span
@@ -33,22 +50,24 @@ const SpendingByCatList = (props: Props) => {
             </div>
 
             <div>
-              <H4>Spent</H4>
-              <p>${cat.spending + subCatTotal(cat, "spending")}</p>
-            </div>
-
-            <div>
-              <H4>Received</H4>
-              <p>${-1 * (cat.received + subCatTotal(cat, "received"))}</p>
+              <H3>
+                $
+                {Math.abs(
+                  subCatTotal(cat, props.txType) +
+                    (props.txType === "spending" ? cat.spending : cat.received),
+                )}
+              </H3>
             </div>
           </div>
 
-          {cat.subCatArray.length > 0 && (
+          {/*
+            add as a toggle feature later
+            cat.subCatArray.length > 0 && (
             <details className="flex flex-col gap-y-2">
               <summary>Sub categories</summary>
               <SpendingByCatList hierarchicalCatArray={cat.subCatArray} />
             </details>
-          )}
+          )*/}
         </div>
       ))}
     </>

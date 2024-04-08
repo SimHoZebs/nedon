@@ -7,11 +7,16 @@ import AnalysisBar from "@/comp/analysis/AnalysisBar";
 import LineGraph from "@/comp/analysis/LineGraph";
 import SpendingByCatList from "@/comp/analysis/SpendingByCatList";
 
-import { calcCatTypeTotal } from "@/util/cat";
+import { calcCatTypeTotal, subCatTotal } from "@/util/cat";
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
-import { filterTxByDate, organizeTxByCat } from "@/util/tx";
-import type { FullTx, TxType } from "@/util/types";
+import {
+  filterTxByDate,
+  organizeTxByCat,
+  txTypeArray as txTypes,
+} from "@/util/tx";
+import type { TxType } from "@/util/tx";
+import type { FullTx } from "@/util/types";
 import useDateRange from "@/util/useDateRange";
 
 const Page = () => {
@@ -22,11 +27,9 @@ const Page = () => {
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );
-  const [txType, setTxType] = useState<TxType>("Spending");
+  const [txType, setTxType] = useState<TxType>("spending");
 
-  const txTypeArray: React.MutableRefObject<
-    ["Spending", "Earning", "Transfers"]
-  > = useRef(["Spending", "Earning", "Transfers"]);
+  const txTypeArray: React.MutableRefObject<typeof txTypes> = useRef(txTypes);
 
   const { date, setDate, rangeFormat, setRangeFormat } =
     useDateRange(undefined);
@@ -52,22 +55,33 @@ const Page = () => {
     setScopedTxArray(filteredArray);
   }, [date, rangeFormat, txArray.data, txArray.status]);
 
-  const organizedTxByCatArray = useMemo(
-    () => organizeTxByCat(scopedTxArray),
-    [scopedTxArray],
-  );
+  const sortedTxArray = useMemo(() => {
+    const organizedTxByCatArray = organizeTxByCat(scopedTxArray);
 
-  const spendingTotal = calcCatTypeTotal(organizedTxByCatArray, "spending");
+    return organizedTxByCatArray.sort((a, b) => {
+      const aTotal = Math.abs(
+        subCatTotal(a, txType) +
+          (txType === "spending" ? a.spending : a.received),
+      );
+      const bTotal = Math.abs(
+        subCatTotal(b, txType) +
+          (txType === "spending" ? b.spending : b.received),
+      );
+      return aTotal - bTotal;
+    });
+  }, [scopedTxArray, txType]);
+
+  const spendingTotal = calcCatTypeTotal(sortedTxArray, "spending");
 
   return appUser ? (
     <section className="flex flex-col items-center gap-y-4">
       <div className="w-full max-w-lg">
         <div className="flex w-full flex-col items-center gap-y-2">
-          <div className="flex gap-x-4 rounded-md bg-zinc-800 p-2">
+          <div className="flex rounded-md bg-zinc-800 p-2">
             {txTypeArray.current.map((type) => (
               <Button
                 key={type}
-                className={`px-4 text-base ${
+                className={`px-3 text-sm ${
                   txType === type
                     ? "bg-indigo-200 bg-opacity-20 text-indigo-200"
                     : ""
@@ -91,14 +105,15 @@ const Page = () => {
           )}
 
           <AnalysisBar
-            organizedTxByCatArray={organizedTxByCatArray}
+            organizedTxByCatArray={sortedTxArray.reverse()}
             spendingTotal={spendingTotal}
           />
 
-          <p>Total spending: $ {spendingTotal}</p>
-
           <div className="flex w-full flex-col gap-y-2">
-            <SpendingByCatList hierarchicalCatArray={organizedTxByCatArray} />
+            <SpendingByCatList
+              hierarchicalCatArray={sortedTxArray}
+              txType={txType}
+            />
           </div>
         </div>
       </div>

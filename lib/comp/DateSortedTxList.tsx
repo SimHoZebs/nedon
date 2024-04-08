@@ -37,7 +37,10 @@ const DateSortedTxList = (props: Props) => {
     <ol className="no-scrollbar flex w-full max-w-sm flex-col items-center gap-y-2  overflow-y-scroll px-1 lg:max-w-md">
       {props.sortedTxArray.map((year) =>
         year.map((month, j) => (
-          <li key={Math.random() * (j + 1)} className="w-full flex-col gap-y-1">
+          <li
+            key={Math.random() * (j + 1)}
+            className="w-full flex-col gap-y-1 pb-1"
+          >
             <ol className="flex flex-col gap-y-1">
               {month.map((day, k) => (
                 <li

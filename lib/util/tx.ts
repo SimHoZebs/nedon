@@ -128,3 +128,11 @@ export const filterTxByDate = (
     return isMatch;
   });
 };
+
+export const txTypeArray: ["spending", "received", "transfers"] = [
+  "spending",
+  "received",
+  "transfers",
+];
+
+export type TxType = (typeof txTypeArray)[number];

@@ -2,6 +2,7 @@ import type { Category as PlaidCat } from "plaid";
 
 import catStyleArray from "./catStyle";
 import parseMoney from "./parseMoney";
+import type { TxType } from "./tx";
 import type {
   CatClientSide,
   FullTx,
@@ -160,7 +161,7 @@ export const fillCatInHierarchy = (
 
 export const subCatTotal = (
   parentCat: TreedCatWithTx,
-  txType: "received" | "spending",
+  txType: TxType,
 ): number => {
   const spending = parentCat.subCatArray.reduce((total, subCat) => {
     const amount = txType === "received" ? subCat.received : subCat.spending;
@@ -172,7 +173,7 @@ export const subCatTotal = (
 
 export const calcCatTypeTotal = (
   catArray: TreedCatWithTx[],
-  txType: "received" | "spending",
+  txType: TxType,
 ): number => {
   const spending = catArray.reduce((total, cat) => {
     const amount = txType === "received" ? cat.received : cat.spending;
