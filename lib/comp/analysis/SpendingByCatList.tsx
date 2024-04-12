@@ -8,6 +8,7 @@ import { H3 } from "../Heading";
 interface Props {
   hierarchicalCatArray: TreedCatWithTx[];
   txType: TxType;
+  showModal: (cat: TreedCatWithTx) => void;
 }
 
 const SpendingByCatList = (props: Props) => {
@@ -29,6 +30,8 @@ const SpendingByCatList = (props: Props) => {
         <div
           key={cat.name}
           className="flex flex-col p-3 bg-zinc-800 rounded-md hover:bg-zinc-700 cursor-pointer"
+          onKeyDown={() => props.showModal(cat)}
+          onClick={() => props.showModal(cat)}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center justify-center gap-x-2">

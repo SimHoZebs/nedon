@@ -1,13 +1,17 @@
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Button } from "@/comp/Button";
+import { Button, CloseBtn } from "@/comp/Button";
 import DateRangePicker from "@/comp/DateRangePicker";
 import AnalysisBar from "@/comp/analysis/AnalysisBar";
 import LineGraph from "@/comp/analysis/LineGraph";
-import SpendingByCatList from "@/comp/analysis/SpendingByCatList";
 
+import { H2 } from "@/comp/Heading";
+import Modal from "@/comp/Modal";
+import CatModal from "@/comp/analysis/CatModal";
+import SpendingByCatList from "@/comp/analysis/SpendingByCatList";
 import { calcCatTypeTotal, subCatTotal } from "@/util/cat";
+import catStyleArray from "@/util/catStyle";
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import {
@@ -16,8 +20,9 @@ import {
   txTypeArray as txTypes,
 } from "@/util/tx";
 import type { TxType } from "@/util/tx";
-import type { FullTx } from "@/util/types";
+import type { FullTx, TreedCatWithTx } from "@/util/types";
 import useDateRange from "@/util/useDateRange";
+import { AnimatePresence, motion } from "framer-motion";
 
 const Page = () => {
   const { appUser } = getAppUser();
@@ -28,6 +33,8 @@ const Page = () => {
     { staleTime: 3600000, enabled: !!appUser },
   );
   const [txType, setTxType] = useState<TxType>("spending");
+  const [showModal, setShowModal] = useState(false);
+  const [modalData, setModalData] = useState<TreedCatWithTx>();
 
   const txTypeArray: React.MutableRefObject<typeof txTypes> = useRef(txTypes);
 
@@ -75,6 +82,27 @@ const Page = () => {
 
   return appUser ? (
     <section className="flex flex-col items-center gap-y-4">
+      {showModal && (
+        <motion.div
+          className="absolute left-0 top-0 z-10 h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            setShowModal(false);
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        />
+      )}
+
+      <AnimatePresence>
+        {showModal && modalData && (
+          <div className="pointer-events-none absolute left-0 top-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
+            <CatModal setShowModal={setShowModal} modalData={modalData} />
+          </div>
+        )}
+      </AnimatePresence>
+
       <div className="w-full max-w-lg">
         <div className="flex w-full flex-col items-center gap-y-2">
           <div className="flex rounded-md bg-zinc-800 p-2">
@@ -113,6 +141,10 @@ const Page = () => {
             <SpendingByCatList
               hierarchicalCatArray={sortedTxArray}
               txType={txType}
+              showModal={(cat) => {
+                setShowModal(true);
+                setModalData(cat);
+              }}
             />
           </div>
         </div>

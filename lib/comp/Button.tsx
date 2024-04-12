@@ -125,6 +125,7 @@ export const SecondaryBtn = (props: SecondaryBtnProps) => {
 interface CloseBtnProps {
   onClose: () => void;
   isForMobile?: boolean;
+  isForDesktop?: boolean;
 }
 
 export const CloseBtn = (props: CloseBtnProps) => {
@@ -132,8 +133,9 @@ export const CloseBtn = (props: CloseBtnProps) => {
     <button
       type="button"
       aria-label="Close"
-      className={`m-1 rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400 ${
-        props.isForMobile ? "flex lg:hidden" : "hidden lg:flex"
+      className={`m-1 rounded-full outline flex outline-1 outline-zinc-400 hover:outline-pink-400 ${
+        props.isForMobile && "lg:hidden"
+      } ${props.isForDesktop && "hidden"}
       }`}
       onClick={props.onClose}
     >
