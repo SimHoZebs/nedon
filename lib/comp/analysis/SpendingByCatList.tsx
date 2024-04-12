@@ -1,8 +1,8 @@
 import { getCatStyle, subCatTotal } from "@/util/cat";
 import parseMoney from "@/util/parseMoney";
+import type { TxType } from "@/util/tx";
 import type { TreedCatWithTx } from "@/util/types";
 
-import type { TxType } from "@/util/tx";
 import { H3 } from "../Heading";
 
 interface Props {
@@ -29,7 +29,7 @@ const SpendingByCatList = (props: Props) => {
       {sortCatAmount(props.hierarchicalCatArray).map((cat) => (
         <div
           key={cat.name}
-          className="flex flex-col p-3 bg-zinc-800 rounded-md hover:bg-zinc-700 cursor-pointer"
+          className="flex cursor-pointer flex-col rounded-md bg-zinc-800 p-3 hover:bg-zinc-700"
           onKeyDown={() => props.showModal(cat)}
           onClick={() => props.showModal(cat)}
         >

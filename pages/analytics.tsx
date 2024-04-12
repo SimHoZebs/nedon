@@ -1,15 +1,16 @@
+import { AnimatePresence, motion } from "framer-motion";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button, CloseBtn } from "@/comp/Button";
 import DateRangePicker from "@/comp/DateRangePicker";
-import AnalysisBar from "@/comp/analysis/AnalysisBar";
-import LineGraph from "@/comp/analysis/LineGraph";
-
 import { H2 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
+import AnalysisBar from "@/comp/analysis/AnalysisBar";
 import CatModal from "@/comp/analysis/CatModal";
+import LineGraph from "@/comp/analysis/LineGraph";
 import SpendingByCatList from "@/comp/analysis/SpendingByCatList";
+
 import { calcCatTypeTotal, subCatTotal } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
 import getAppUser from "@/util/getAppUser";
@@ -22,7 +23,6 @@ import {
 import type { TxType } from "@/util/tx";
 import type { FullTx, TreedCatWithTx } from "@/util/types";
 import useDateRange from "@/util/useDateRange";
-import { AnimatePresence, motion } from "framer-motion";
 
 const Page = () => {
   const { appUser } = getAppUser();

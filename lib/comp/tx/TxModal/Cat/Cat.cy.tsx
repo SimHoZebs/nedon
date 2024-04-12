@@ -1,5 +1,7 @@
-import { trpc } from "@/util/trpc";
 import React from "react";
+
+import { trpc } from "@/util/trpc";
+
 import "../../../../../styles/globals.css";
 import Cat from "./Cat";
 

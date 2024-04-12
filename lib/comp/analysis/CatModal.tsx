@@ -1,5 +1,6 @@
 import catStyleArray from "@/util/catStyle";
 import type { TreedCatWithTx } from "@/util/types";
+
 import { CloseBtn } from "../Button";
 import { H2 } from "../Heading";
 import Input from "../Input";
@@ -13,7 +14,7 @@ interface Props {
 const CatModal = (props: Props) => {
   return (
     <Modal>
-      <div className="flex flex-col gap-y-2 items-start p-1">
+      <div className="flex flex-col items-start gap-y-2 p-1">
         <div className="flex w-full justify-end">
           <CloseBtn
             onClose={() => {
@@ -32,7 +33,7 @@ const CatModal = (props: Props) => {
 
         <div>
           <p>Budget</p>
-          <Input className="border border-zinc-700 rounded-md" type="number" />
+          <Input className="rounded-md border border-zinc-700" type="number" />
         </div>
 
         {props.modalData.subCatArray.length > 0 && (
