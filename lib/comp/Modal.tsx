@@ -1,9 +1,7 @@
 import { motion } from "framer-motion";
 import type React from "react";
 
-interface Props extends React.HTMLAttributes<HTMLDivElement> {
-  close: () => void;
-}
+interface Props extends React.HTMLAttributes<HTMLDivElement> {}
 
 const Modal = (props: Props) => {
   return (
@@ -16,7 +14,7 @@ const Modal = (props: Props) => {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.5 }}
       transition={{
-        duration: 0.2,
+        duration: 0.1,
         ease: "linear",
         scale: {
           type: "spring",

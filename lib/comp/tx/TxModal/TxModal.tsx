@@ -67,12 +67,7 @@ const TxModal = (props: Props) => {
 
   return (
     tx && (
-      <Modal
-        close={() => {
-          onClose();
-          props.onClose();
-        }}
-      >
+      <Modal>
         <div className="flex flex-col justify-between gap-y-2">
           <section className="flex w-full flex-col items-start justify-between gap-3 gap-y-2 px-3 pt-3 lg:flex-row">
             <div className="flex w-full flex-col gap-y-1 lg:w-fit">
@@ -115,6 +110,7 @@ const TxModal = (props: Props) => {
 
             <div className="flex flex-col items-start  text-sm font-light text-zinc-400 lg:items-end">
               <CloseBtn
+                isForDesktop
                 onClose={() => {
                   onClose();
                   props.onClose();
