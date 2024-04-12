@@ -6,5 +6,13 @@ export default defineConfig({
       // implement node event listeners here
     },
   },
+
   watchForFileChanges: false,
+
+  component: {
+    devServer: {
+      framework: "next",
+      bundler: "webpack",
+    },
+  },
 });
