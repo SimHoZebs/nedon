@@ -41,6 +41,8 @@ model User {
 
   myGroup    Group[] @relation("mygroup") //groups I own
   groupArray Group[] //array of groups this user is included in
+
+  CatSettings CatSettings[]
 }
 
 model Tx {
@@ -50,6 +52,7 @@ model Tx {
   splitArray Split[]
 }
 
+//This is for Splits
 model Cat {
   id        String   @id @default(uuid())
   nameArray String[]
@@ -69,4 +72,17 @@ model Split {
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CatSettings {
+  id     String @id @default(uuid())
+  name   String
+  budget Float
+
+  parent   CatSettings?  @relation("SubCategory", fields: [parentId], references: [id])
+  parentId String?
+  children CatSettings[] @relation("SubCategory")
+
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String?
 }
