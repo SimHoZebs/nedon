@@ -18,8 +18,10 @@ export const emptyCat = ({
   amount = 0,
 }: {
   nameArray?: string[];
+  name?: string;
   splitId: string | undefined;
   amount: number;
+  budget?: number;
 }): CatClientSide => {
   return {
     id: undefined,
@@ -83,6 +85,7 @@ export const fillArrayByCat = (
     name: firstCatName,
     received: 0,
     spending: 0,
+    budget: cat.amount || 0,
     txArray: [],
     subCatArray: [],
   };

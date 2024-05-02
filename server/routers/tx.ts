@@ -40,11 +40,7 @@ const txRouter = router({
   getAll: procedure
     .input(z.object({ id: z.string(), cursor: z.string().optional() }))
     .query(async ({ input }) => {
-      const user = await db.user.findFirst({
-        where: {
-          id: input.id,
-        },
-      });
+      const user = await db.user.findFirst({ where: { id: input.id } });
       if (!user || !user.ACCESS_TOKEN) return null;
 
       // New tx updates since "cursor"
@@ -148,6 +144,8 @@ const txRouter = router({
               catArray: {
                 create: split.catArray.map((cat) => ({
                   nameArray: cat.nameArray,
+                  name: cat.name,
+                  budget: cat.budget,
                   amount: cat.amount,
                 })),
               },

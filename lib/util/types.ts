@@ -31,6 +31,7 @@ export type TreedCat = {
 
 export type TreedCatWithTx = {
   name: string;
+  budget: number;
   spending: number;
   received: number;
   txArray: FullTx[];
