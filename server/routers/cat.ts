@@ -1,5 +1,12 @@
 import type { Cat } from "@prisma/client";
-import { CatOptionalDefaultsSchema, CatSchema } from "prisma/generated/zod";
+
+import {
+  CatOptionalDefaultsSchema,
+  CatSchema,
+  CatSettingsOptionalDefaultsSchema,
+  CatSettingsOptionalDefaultsWithRelationsSchema,
+  CatSettingsWithRelationsSchema,
+} from "prisma/generated/zod";
 import { z } from "zod";
 
 import db from "@/util/db";
@@ -66,6 +73,24 @@ const catRouter = router({
       });
 
       return deletedCatArray;
+    }),
+
+  getAllSettings: procedure.input(z.string()).query(async ({ input }) => {
+    return await db.catSettings.findMany({
+      where: { userId: input },
+    });
+  }),
+
+  upsertSettings: procedure
+    .input(CatSettingsOptionalDefaultsSchema)
+    .mutation(async ({ input }) => {
+      const upsertedSettings = await db.catSettings.upsert({
+        where: { id: input.id },
+        update: input,
+        create: input,
+      });
+
+      return upsertedSettings;
     }),
 });
 

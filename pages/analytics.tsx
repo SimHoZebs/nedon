@@ -2,17 +2,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Button, CloseBtn } from "@/comp/Button";
+import { Button } from "@/comp/Button";
 import DateRangePicker from "@/comp/DateRangePicker";
-import { H2 } from "@/comp/Heading";
-import Modal from "@/comp/Modal";
 import AnalysisBar from "@/comp/analysis/AnalysisBar";
 import CatModal from "@/comp/analysis/CatModal";
 import LineGraph from "@/comp/analysis/LineGraph";
 import SpendingByCatList from "@/comp/analysis/SpendingByCatList";
 
 import { calcCatTypeTotal, subCatTotal } from "@/util/cat";
-import catStyleArray from "@/util/catStyle";
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import {
@@ -23,6 +20,7 @@ import {
 import type { TxType } from "@/util/tx";
 import type { FullTx, TreedCatWithTx } from "@/util/types";
 import useDateRange from "@/util/useDateRange";
+import { CatSettings, CatSettingsWithRelations } from "prisma/generated/zod";
 
 const Page = () => {
   const { appUser } = getAppUser();
@@ -32,9 +30,16 @@ const Page = () => {
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );
+  const catAllSettings = trpc.cat.getAllSettings.useQuery(appUser?.id || "", {
+    enabled: !!appUser,
+  });
+
   const [txType, setTxType] = useState<TxType>("spending");
   const [showModal, setShowModal] = useState(false);
-  const [modalData, setModalData] = useState<TreedCatWithTx>();
+  const [modalData, setModalData] = useState<{
+    settings?: CatSettings;
+    data: TreedCatWithTx;
+  }>();
 
   const txTypeArray: React.MutableRefObject<typeof txTypes> = useRef(txTypes);
 
@@ -142,8 +147,13 @@ const Page = () => {
               hierarchicalCatArray={sortedTxArray}
               txType={txType}
               showModal={(cat) => {
+                if (!catAllSettings.data) return;
                 setShowModal(true);
-                setModalData(cat);
+                const selectedSettings = catAllSettings.data.find(
+                  (catSettings) => catSettings.name === cat.name,
+                );
+
+                setModalData({ settings: selectedSettings, data: cat });
               }}
             />
           </div>
