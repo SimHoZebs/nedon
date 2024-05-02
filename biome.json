@@ -19,6 +19,6 @@
     "indentStyle": "space"
   },
   "files": {
-    "ignore": ["prisma/generated/*"]
+    "ignore": ["prisma/generated/*", "*.yaml"]
   }
 }

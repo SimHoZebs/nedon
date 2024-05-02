@@ -144,8 +144,6 @@ const txRouter = router({
               catArray: {
                 create: split.catArray.map((cat) => ({
                   nameArray: cat.nameArray,
-                  name: cat.name,
-                  budget: cat.budget,
                   amount: cat.amount,
                 })),
               },

@@ -1,5 +1,4 @@
 import type { Cat } from "@prisma/client";
-
 import {
   CatOptionalDefaultsSchema,
   CatSchema,

@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
+import type { CatSettings } from "prisma/generated/zod";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -20,7 +21,6 @@ import {
 import type { TxType } from "@/util/tx";
 import type { FullTx, TreedCatWithTx } from "@/util/types";
 import useDateRange from "@/util/useDateRange";
-import { CatSettings, CatSettingsWithRelations } from "prisma/generated/zod";
 
 const Page = () => {
   const { appUser } = getAppUser();

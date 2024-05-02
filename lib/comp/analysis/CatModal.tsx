@@ -1,18 +1,20 @@
-import catStyleArray from "@/util/catStyle";
-import { trpc } from "@/util/trpc";
-import type { TreedCatWithTx } from "@/util/types";
 import type {
   CatSettings,
   CatSettingsOptionalDefaults,
   CatSettingsOptionalDefaultsWithRelations,
 } from "prisma/generated/zod";
 import { useEffect, useState } from "react";
+
+import catStyleArray from "@/util/catStyle";
+import getAppUser from "@/util/getAppUser";
+import parseMoney from "@/util/parseMoney";
+import { trpc } from "@/util/trpc";
+import type { TreedCatWithTx } from "@/util/types";
+
 import { Button, CloseBtn } from "../Button";
 import { H2 } from "../Heading";
 import Input from "../Input";
 import Modal from "../Modal";
-import parseMoney from "@/util/parseMoney";
-import getAppUser from "@/util/getAppUser";
 
 interface Props {
   setShowModal: (show: boolean) => void;

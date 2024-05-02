@@ -18,8 +18,6 @@ export const resetFullTx = (fullTx: FullTx): FullTx => ({
           id: undefined,
           splitId: undefined,
           nameArray: fullTx.category || [],
-          name: "",
-          budget: 0,
           amount: fullTx.amount,
         },
       ],
