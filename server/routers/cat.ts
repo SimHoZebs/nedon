@@ -84,7 +84,7 @@ const catRouter = router({
     .input(CatSettingsOptionalDefaultsSchema)
     .mutation(async ({ input }) => {
       const upsertedSettings = await db.catSettings.upsert({
-        where: { id: input.id },
+        where: { id: input.id || "" },
         update: input,
         create: input,
       });
