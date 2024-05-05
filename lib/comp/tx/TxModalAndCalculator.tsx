@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { motion } from "framer-motion";
 
 import parseMoney from "@/util/parseMoney";
 import { calcSplitAmount } from "@/util/split";
@@ -7,6 +8,7 @@ import type { SplitClientSide } from "@/util/types";
 
 import Calculator from "./TxModal/SplitList/Calculator";
 import TxModal from "./TxModal/TxModal";
+import { useStore } from "@/util/store";
 
 interface Props {
   onClose: () => void;
@@ -24,6 +26,8 @@ const TxModalAndCalculator = (props: Props) => {
   const focusedSplitIndex = useTxStore((state) => state.focusedSplitIndex);
   const tx = useTxStore((state) => state.txOnModal);
   const txAmount = tx?.amount || 0;
+  const [isCalcHidden, setIsCalcHidden] = React.useState(false);
+  const screenType = useStore((s) => s.screenType);
 
   const updateSplitCatAmount = (
     split: SplitClientSide,
@@ -99,6 +103,12 @@ const TxModalAndCalculator = (props: Props) => {
     setSpiltAmountDisplayArray(updatedSplitAmountDisplayArray);
   };
 
+  useEffect(() => {
+    if (focusedSplitIndex !== undefined) {
+      setIsCalcHidden(false);
+    }
+  }, [focusedSplitIndex]);
+
   return (
     <div className="pointer-events-none absolute left-0 top-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
       <TxModal
@@ -109,22 +119,46 @@ const TxModalAndCalculator = (props: Props) => {
       />
 
       {isEditingSplit && focusedSplitIndex !== undefined && (
-        <Calculator
-          value={splitAmountDisplayArray[focusedSplitIndex]}
-          setValue={(value: string) => {
-            const copy = [...splitAmountDisplayArray];
-            copy[focusedSplitIndex] = value;
+        <motion.div
+          className="flex pointer-events-auto flex-col w-full lg:w-3/12 lg:absolute lg:justify-center z-20"
+          drag={screenType === "desktop"}
+          dragMomentum={false}
+        >
+          <button
+            className="bg-zinc-800 z-20 w-full border-zinc-700 border shadow-md border-b-0 rounded-md rounded-b-none"
+            type="button"
+            onClick={() => setIsCalcHidden(!isCalcHidden)}
+          >
+            hide
+          </button>
 
-            //removes anything after arithmetic
-            const onlyNumber = Number.parseFloat(value).toString();
-            //if the change was purely numeric, balance the split
-            if (onlyNumber === value) {
-              changeSplitAmount(focusedSplitIndex, Number.parseFloat(value));
-            } else {
-              setSpiltAmountDisplayArray(copy);
-            }
-          }}
-        />
+          <motion.div
+            className={"flex w-full lg:max-w-max"}
+            initial={{ height: 0 }}
+            animate={{ height: isCalcHidden ? 0 : "" }}
+            exit={{ height: 0 }}
+          >
+            <Calculator
+              value={splitAmountDisplayArray[focusedSplitIndex]}
+              setValue={(value: string) => {
+                const copy = [...splitAmountDisplayArray];
+                copy[focusedSplitIndex] = value;
+
+                //removes anything after arithmetic
+                const onlyNumber = Number.parseFloat(value).toString();
+                //if the change was purely numeric, balance the split
+                if (onlyNumber === value) {
+                  changeSplitAmount(
+                    focusedSplitIndex,
+                    Number.parseFloat(value),
+                  );
+                } else {
+                  setSpiltAmountDisplayArray(copy);
+                }
+              }}
+            />
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );
