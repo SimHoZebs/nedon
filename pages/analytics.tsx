@@ -8,7 +8,6 @@ import DateRangePicker from "@/comp/DateRangePicker";
 import AnalysisBar from "@/comp/analysis/AnalysisBar";
 import CatModal from "@/comp/analysis/CatModal";
 import LineGraph from "@/comp/analysis/LineGraph";
-import SpendingByCatList from "@/comp/analysis/SpendingByCatList";
 
 import { calcCatTypeTotal, subCatTotal } from "@/util/cat";
 import getAppUser from "@/util/getAppUser";
@@ -21,6 +20,7 @@ import {
 import type { TxType } from "@/util/tx";
 import type { FullTx, TreedCatWithTx } from "@/util/types";
 import useDateRange from "@/util/useDateRange";
+import CatCard from "@/comp/analysis/CatCard";
 
 const Page = () => {
   const { appUser } = getAppUser();
@@ -67,7 +67,7 @@ const Page = () => {
     setScopedTxArray(filteredArray);
   }, [date, rangeFormat, txArray.data, txArray.status]);
 
-  const sortedTxArray = useMemo(() => {
+  const treedCatWithTxArray = useMemo(() => {
     const organizedTxByCatArray = organizeTxByCat(scopedTxArray);
 
     return organizedTxByCatArray.sort((a, b) => {
@@ -83,7 +83,19 @@ const Page = () => {
     });
   }, [scopedTxArray, txType]);
 
-  const spendingTotal = calcCatTypeTotal(sortedTxArray, "spending");
+  const spendingTotal = calcCatTypeTotal(treedCatWithTxArray, "spending");
+
+  const sortCatAmount = (catArray: TreedCatWithTx[]) => {
+    return catArray.sort((b, a) => {
+      const aTotal =
+        subCatTotal(a, txType) +
+        (txType === "spending" ? a.spending : a.received);
+      const bTotal =
+        subCatTotal(b, txType) +
+        (txType === "spending" ? b.spending : b.received);
+      return aTotal - bTotal;
+    });
+  };
 
   return appUser ? (
     <section className="flex flex-col items-center gap-y-4">
@@ -138,24 +150,33 @@ const Page = () => {
           )}
 
           <AnalysisBar
-            organizedTxByCatArray={sortedTxArray.reverse()}
+            organizedTxByCatArray={treedCatWithTxArray.reverse()}
             spendingTotal={spendingTotal}
           />
 
           <div className="flex w-full flex-col gap-y-2">
-            <SpendingByCatList
-              hierarchicalCatArray={sortedTxArray}
-              txType={txType}
-              showModal={(cat) => {
-                if (!catAllSettings.data) return;
-                setShowModal(true);
-                const selectedSettings = catAllSettings.data.find(
+            {sortCatAmount(treedCatWithTxArray).map((cat) => (
+              <CatCard
+                key={cat.name}
+                cat={cat}
+                txType={txType}
+                catSettings={catAllSettings.data?.find(
                   (catSettings) => catSettings.name === cat.name,
-                );
+                )}
+                showModal={() => {
+                  if (!catAllSettings.data) return;
+                  const selectedSettings = catAllSettings.data.find(
+                    (catSettings) => catSettings.name === cat.name,
+                  );
 
-                setModalData({ settings: selectedSettings, data: cat });
-              }}
-            />
+                  setModalData({
+                    settings: selectedSettings,
+                    data: cat,
+                  });
+                  setShowModal(true);
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
