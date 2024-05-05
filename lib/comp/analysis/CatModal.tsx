@@ -1,7 +1,6 @@
 import type {
   CatSettings,
   CatSettingsOptionalDefaults,
-  CatSettingsOptionalDefaultsWithRelations,
 } from "prisma/generated/zod";
 import { useEffect, useState } from "react";
 
@@ -12,9 +11,10 @@ import { trpc } from "@/util/trpc";
 import type { TreedCatWithTx } from "@/util/types";
 
 import { Button, CloseBtn } from "../Button";
-import { H2 } from "../Heading";
+import { H1, H2 } from "../Heading";
 import Input from "../Input";
 import Modal from "../Modal";
+import { subCatTotal } from "@/util/cat";
 
 interface Props {
   setShowModal: (show: boolean) => void;
@@ -37,10 +37,16 @@ const CatModal = (props: Props) => {
   }, [settings]);
 
   const upsertSettings = trpc.cat.upsertSettings.useMutation();
+  const queryClient = trpc.useUtils();
+
+  const subCatTotalAmount = Math.abs(
+    subCatTotal(props.modalData.data, "spending") +
+      props.modalData.data.spending,
+  );
 
   return (
     <Modal>
-      <div className="flex flex-col items-start gap-y-2 p-1">
+      <div className="flex flex-col items-start gap-y-2 py-2 px-4">
         <div className="flex w-full justify-end">
           <CloseBtn
             onClose={() => {
@@ -48,14 +54,29 @@ const CatModal = (props: Props) => {
             }}
           />
         </div>
-        <div className="flex gap-x-3">
+
+        <header className="flex gap-x-3">
           <span
-            className={`h-8 w-8 ${catStyleArray[data.name].icon} ${
+            className={`h-9 w-9 ${catStyleArray[data.name].icon} ${
               catStyleArray[data.name].textColor
             }`}
           />
-          <H2>{data.name}</H2>
+          <H1>{data.name}</H1>
+        </header>
+        <div className="flex flex-col w-full items-end">
+          <H2>$ {data.spending + subCatTotal(data, "spending")} Spent</H2>
+          <p>
+            {props.modalData.settings && (
+              <p className="text-sm text-zinc-400">
+                {parseMoney(
+                  (subCatTotalAmount / props.modalData.settings.budget) * 100,
+                )}
+                % of ${props.modalData.settings.budget}
+              </p>
+            )}
+          </p>
         </div>
+
         <div>
           <p>Budget</p>
           <Input
@@ -82,8 +103,8 @@ const CatModal = (props: Props) => {
                     userId: appUser.id,
                   };
 
-              const upsertedSettings =
-                await upsertSettings.mutateAsync(updatedSettings);
+              await upsertSettings.mutateAsync(updatedSettings);
+              await queryClient.cat.invalidate();
             }}
           >
             change budget

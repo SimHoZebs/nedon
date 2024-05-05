@@ -17,6 +17,7 @@ const CatCard = (props: Props) => {
     subCatTotal(props.cat, props.txType) +
       (props.txType === "spending" ? props.cat.spending : props.cat.received),
   );
+  console.log("subCatTotalAmount", subCatTotalAmount);
 
   return (
     <div
@@ -54,8 +55,8 @@ const CatCard = (props: Props) => {
           </div>
           {props.catSettings && (
             <p className="text-sm text-zinc-400">
-              {parseMoney(subCatTotalAmount / props.catSettings.budget)}% of
-              budget
+              {parseMoney((subCatTotalAmount / props.catSettings.budget) * 100)}
+              % of ${props.catSettings.budget}
             </p>
           )}
         </div>
