@@ -36,8 +36,8 @@ model User {
   TRANSFER_ID  String? // The transfer_id is only relevant for Transfer ACH product.
   PAYMENT_ID   String? // The payment_id is only relevant for the UK/EU Payment Initiation product.
 
-  txArray    Tx[]
-  splitArray Split[] //a user can be part of a tx split they do not own
+  ownedTxArray Tx[] //transactions I own
+  splitTxArray Split[] @relation("splitUserArray") //transactions I am included in
 
   myGroup    Group[] @relation("mygroup") //groups I own
   groupArray Group[] //array of groups this user is included in
@@ -46,32 +46,35 @@ model User {
 }
 
 model Tx {
-  id         String  @id @default(cuid()) //tx_id UUID for Plaid txs, CUID for manually created txs
-  ownerId    String
-  owner      User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  id      String @id @default(cuid())
+  plaidId String //plaid tx_id
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
   splitArray Split[]
 }
 
-//This is for Splits
-model Cat {
-  id        String   @id @default(uuid())
-  nameArray String[]
-  amount    Float
-
-  Split   Split  @relation(fields: [splitId], references: [id], onDelete: Cascade)
-  splitId String
-}
-
 model Split {
-  id String @id @default(uuid())
+  id      String @id @default(uuid())
+  plaidId String //plaid tx_id
+
+  ownerId String
+  owner   User   @relation("splitUserArray", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  catArray newCat[]
 
   txId String
   tx   Tx     @relation(fields: [txId], references: [id], onDelete: Cascade)
+}
 
-  catArray Cat[]
+model newCat {
+  id     String @id @default(uuid())
+  name   String
+  amount Float
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  splitId String
+  split   Split  @relation(fields: [splitId], references: [id], onDelete: Cascade)
 }
 
 model CatSettings {
