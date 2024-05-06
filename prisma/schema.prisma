@@ -59,8 +59,8 @@ model Split {
   id      String @id @default(uuid())
   plaidId String //plaid tx_id
 
-  ownerId String
-  owner   User   @relation("splitUserArray", fields: [ownerId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation("splitUserArray", fields: [userId], references: [id], onDelete: Cascade)
 
   catArray newCat[]
 
