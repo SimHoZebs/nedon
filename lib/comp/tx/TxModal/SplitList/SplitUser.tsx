@@ -28,10 +28,8 @@ const SplitUser = (props: Props) => {
   const [showDetail, setShowDetail] = useState(false);
   const amountDisplayArray = useTxStore((s) => s.splitAmountDisplayArray);
   const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
-  const setFocusedIndex = useTxStore((state) => state.setFocusedSplitIndex);
   const amountDisplay = amountDisplayArray[props.index];
   const amount = Number.parseFloat(amountDisplay);
-  const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
 
   const split = unsavedSplitArray[props.index];
   const txAmount = tx ? tx.amount : 0;
@@ -53,11 +51,6 @@ const SplitUser = (props: Props) => {
     }
 
     setUnsavedSplitArray(updatedSplitArray);
-  };
-
-  const onFocus = () => {
-    setFocusedIndex(props.index);
-    setIsEditingSplit(true);
   };
 
   return (
@@ -90,11 +83,14 @@ const SplitUser = (props: Props) => {
                 type="text"
                 min={0}
                 max={txAmount}
-                onFocus={onFocus}
+                onFocus={props.onFocus}
                 value={props.splitAmount || 0}
                 step={0.01}
                 onChange={(e) => {
+                  //value can have arithmetic operators. Differentiate between
+                  //number input and calculation input.
                   const numOnly = Number.parseFloat(e.target.value).toString();
+
                   if (numOnly === e.target.value) {
                     if (!isModified) {
                       const updatedArray = structuredClone(
@@ -109,7 +105,6 @@ const SplitUser = (props: Props) => {
                     );
 
                     props.onAmountChange(newValue.toString());
-                  } else {
                   }
                 }}
                 //no onChange handler; it's handled externally, and the input is readOnly when isManaging.
@@ -127,7 +122,7 @@ const SplitUser = (props: Props) => {
                 //0.01 does the same thing 0.01 $ steps
                 step={1}
                 value={parseMoney((amount / txAmount) * 100)}
-                onFocus={onFocus}
+                onFocus={props.onFocus}
                 onChange={(e) => {
                   props.setEditedIndexArray((prev) => [...prev, props.index]);
                   const prevPercentage = parseMoney((amount / txAmount) * 100);

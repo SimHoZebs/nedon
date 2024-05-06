@@ -44,6 +44,7 @@ const SplitList = (props: Props) => {
   const setSplitAmountDisplayArray = useTxStore(
     (state) => state.setSplitAmountDisplayArray,
   );
+  const setFocusedIndex = useTxStore((state) => state.setFocusedSplitIndex);
 
   const [editedIndexArray, setEditedIndexArray] = useState<number[]>([]);
 
@@ -169,12 +170,10 @@ const SplitList = (props: Props) => {
                 : "text-transparent"
             }`}
           >
-            {`Current split total is $${updatedSplitAmount.toFixed(
-              2,
-            )}; ${parseMoney(Math.abs(txAmount - updatedSplitAmount)).toFixed(
-              2,
-            )} ${updatedSplitAmount > txAmount ? "greater " : "less "}
-          than needed`}
+            {`Current split total is $${updatedSplitAmount}; ${parseMoney(
+              Math.abs(txAmount - updatedSplitAmount),
+            )} ${updatedSplitAmount > txAmount ? "over " : "under "}
+          the total`}
           </p>
 
           <div className="flex flex-col gap-y-1 px-3 md:w-fit">
@@ -190,6 +189,10 @@ const SplitList = (props: Props) => {
                   }}
                   splitAmount={amountDisplayArray[i]}
                   editedIndexArray={editedIndexArray}
+                  onFocus={() => {
+                    setFocusedIndex(i);
+                    setIsEditingSplit(true);
+                  }}
                   setEditedIndexArray={setEditedIndexArray}
                   index={i}
                 >
