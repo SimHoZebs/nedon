@@ -20,7 +20,7 @@ export const TxScalarFieldEnumSchema = z.enum(['id','plaidId','ownerId']);
 
 export const SplitScalarFieldEnumSchema = z.enum(['id','plaidId','userId','txId']);
 
-export const NewCatScalarFieldEnumSchema = z.enum(['id','name','amount','splitId']);
+export const CatScalarFieldEnumSchema = z.enum(['id','nameArray','amount','splitId']);
 
 export const CatSettingsScalarFieldEnumSchema = z.enum(['id','name','budget','parentId','userId']);
 
@@ -229,7 +229,7 @@ export type SplitOptionalDefaults = z.infer<typeof SplitOptionalDefaultsSchema>
 
 export type SplitRelations = {
   user: UserWithRelations;
-  catArray: newCatWithRelations[];
+  catArray: CatWithRelations[];
   tx: TxWithRelations;
 };
 
@@ -237,7 +237,7 @@ export type SplitWithRelations = z.infer<typeof SplitSchema> & SplitRelations
 
 export const SplitWithRelationsSchema: z.ZodType<SplitWithRelations> = SplitSchema.merge(z.object({
   user: z.lazy(() => UserWithRelationsSchema),
-  catArray: z.lazy(() => newCatWithRelationsSchema).array(),
+  catArray: z.lazy(() => CatWithRelationsSchema).array(),
   tx: z.lazy(() => TxWithRelationsSchema),
 }))
 
@@ -246,7 +246,7 @@ export const SplitWithRelationsSchema: z.ZodType<SplitWithRelations> = SplitSche
 
 export type SplitOptionalDefaultsRelations = {
   user: UserOptionalDefaultsWithRelations;
-  catArray: newCatOptionalDefaultsWithRelations[];
+  catArray: CatOptionalDefaultsWithRelations[];
   tx: TxOptionalDefaultsWithRelations;
 };
 
@@ -254,55 +254,55 @@ export type SplitOptionalDefaultsWithRelations = z.infer<typeof SplitOptionalDef
 
 export const SplitOptionalDefaultsWithRelationsSchema: z.ZodType<SplitOptionalDefaultsWithRelations> = SplitOptionalDefaultsSchema.merge(z.object({
   user: z.lazy(() => UserOptionalDefaultsWithRelationsSchema),
-  catArray: z.lazy(() => newCatOptionalDefaultsWithRelationsSchema).array(),
+  catArray: z.lazy(() => CatOptionalDefaultsWithRelationsSchema).array(),
   tx: z.lazy(() => TxOptionalDefaultsWithRelationsSchema),
 }))
 
 /////////////////////////////////////////
-// NEW CAT SCHEMA
+// CAT SCHEMA
 /////////////////////////////////////////
 
-export const newCatSchema = z.object({
+export const CatSchema = z.object({
   id: z.string().uuid(),
-  name: z.string(),
+  nameArray: z.string().array(),
   amount: z.number(),
   splitId: z.string(),
 })
 
-export type newCat = z.infer<typeof newCatSchema>
+export type Cat = z.infer<typeof CatSchema>
 
-// NEW CAT OPTIONAL DEFAULTS SCHEMA
+// CAT OPTIONAL DEFAULTS SCHEMA
 //------------------------------------------------------
 
-export const newCatOptionalDefaultsSchema = newCatSchema.merge(z.object({
+export const CatOptionalDefaultsSchema = CatSchema.merge(z.object({
   id: z.string().uuid().optional(),
 }))
 
-export type newCatOptionalDefaults = z.infer<typeof newCatOptionalDefaultsSchema>
+export type CatOptionalDefaults = z.infer<typeof CatOptionalDefaultsSchema>
 
-// NEW CAT RELATION SCHEMA
+// CAT RELATION SCHEMA
 //------------------------------------------------------
 
-export type newCatRelations = {
+export type CatRelations = {
   split: SplitWithRelations;
 };
 
-export type newCatWithRelations = z.infer<typeof newCatSchema> & newCatRelations
+export type CatWithRelations = z.infer<typeof CatSchema> & CatRelations
 
-export const newCatWithRelationsSchema: z.ZodType<newCatWithRelations> = newCatSchema.merge(z.object({
+export const CatWithRelationsSchema: z.ZodType<CatWithRelations> = CatSchema.merge(z.object({
   split: z.lazy(() => SplitWithRelationsSchema),
 }))
 
-// NEW CAT OPTIONAL DEFAULTS RELATION SCHEMA
+// CAT OPTIONAL DEFAULTS RELATION SCHEMA
 //------------------------------------------------------
 
-export type newCatOptionalDefaultsRelations = {
+export type CatOptionalDefaultsRelations = {
   split: SplitOptionalDefaultsWithRelations;
 };
 
-export type newCatOptionalDefaultsWithRelations = z.infer<typeof newCatOptionalDefaultsSchema> & newCatOptionalDefaultsRelations
+export type CatOptionalDefaultsWithRelations = z.infer<typeof CatOptionalDefaultsSchema> & CatOptionalDefaultsRelations
 
-export const newCatOptionalDefaultsWithRelationsSchema: z.ZodType<newCatOptionalDefaultsWithRelations> = newCatOptionalDefaultsSchema.merge(z.object({
+export const CatOptionalDefaultsWithRelationsSchema: z.ZodType<CatOptionalDefaultsWithRelations> = CatOptionalDefaultsSchema.merge(z.object({
   split: z.lazy(() => SplitOptionalDefaultsWithRelationsSchema),
 }))
 

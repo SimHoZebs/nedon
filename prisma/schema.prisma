@@ -62,16 +62,16 @@ model Split {
   userId String
   user   User   @relation("splitUserArray", fields: [userId], references: [id], onDelete: Cascade)
 
-  catArray newCat[]
+  catArray Cat[]
 
   txId String
   tx   Tx     @relation(fields: [txId], references: [id], onDelete: Cascade)
 }
 
-model newCat {
-  id     String @id @default(uuid())
-  name   String
-  amount Float
+model Cat {
+  id        String   @id @default(uuid())
+  nameArray String[]
+  amount    Float
 
   splitId String
   split   Split  @relation(fields: [splitId], references: [id], onDelete: Cascade)

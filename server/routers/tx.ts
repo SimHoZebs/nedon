@@ -3,18 +3,20 @@ import type {
   Transaction,
   TransactionsSyncRequest,
 } from "plaid";
-import { SplitOptionalDefaultsSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 import db from "@/util/db";
 import { convertToFullTx } from "@/util/tx";
-import { type FullTx, SplitClientSideModel } from "@/util/types";
+import {
+  type FullTxClientSide,
+  type TxInDB,
+  FullTxClientSideSchema,
+} from "@/util/types";
 
 import { procedure, router } from "../trpc";
 import { client } from "../util";
+import { SplitSchema } from "prisma/generated/zod";
 
-// Retrieve Txs for an Item
-// https://plaid.com/docs/#txs
 const txRouter = router({
   getWithoutPlaid: procedure
     .input(z.object({ userId: z.string(), txId: z.string() }))
@@ -73,7 +75,7 @@ const txRouter = router({
         cursor = data.next_cursor;
       }
 
-      const txArray = await db.tx.findMany({
+      const txArray: TxInDB[] = await db.tx.findMany({
         where: {
           ownerId: user.id,
         },
@@ -86,9 +88,9 @@ const txRouter = router({
         },
       });
 
-      const full: FullTx[] = added.map((plaidTx) => {
+      const full: FullTxClientSide[] = added.map((plaidTx) => {
         const matchingTx = txArray.find(
-          (tx) => tx.id === plaidTx.transaction_id,
+          (tx) => tx.plaidId === plaidTx.transaction_id,
         );
 
         return convertToFullTx(user.id, plaidTx, matchingTx);
@@ -109,6 +111,7 @@ const txRouter = router({
               userId: input.id,
             },
           },
+          ownerId: input.id,
         },
 
         include: {
@@ -122,16 +125,11 @@ const txRouter = router({
     }),
 
   create: procedure
-    .input(
-      z.object({
-        userId: z.string(),
-        txId: z.string(),
-        splitArray: z.array(SplitClientSideModel),
-      }),
-    )
+    .input(FullTxClientSideSchema)
     .mutation(async ({ input }) => {
       const data = {
-        ownerId: input.userId,
+        plaidId: input.plaidId,
+        ownerId: input.ownerId,
         id: input.txId,
       };
 
@@ -141,9 +139,10 @@ const txRouter = router({
           splitArray: {
             create: input.splitArray.map((split) => ({
               userId: split.userId,
+              plaidId: split.plaidId,
               catArray: {
                 create: split.catArray.map((cat) => ({
-                  nameArray: cat.nameArray,
+                  name: cat.name,
                   amount: cat.amount,
                 })),
               },
@@ -167,7 +166,7 @@ const txRouter = router({
     .input(
       z.object({
         userId: z.string(),
-        splitArray: z.array(SplitOptionalDefaultsSchema),
+        splitArray: z.array(SplitSchema),
       }),
     )
     .mutation(async ({ input }) => {
