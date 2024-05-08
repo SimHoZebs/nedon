@@ -3,7 +3,7 @@ import type React from "react";
 import { getCatStyle } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import { isCatArrayInDB, type CatClientSide } from "@/util/types";
+import { type CatClientSide, isCatArrayInDB } from "@/util/types";
 
 type Props = {
   cat: CatClientSide;

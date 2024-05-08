@@ -316,7 +316,7 @@ export const CatSettingsSchema = z.object({
   name: z.string(),
   budget: z.number(),
   parentId: z.string().nullable(),
-  userId: z.string().nullable(),
+  userId: z.string(),
 })
 
 export type CatSettings = z.infer<typeof CatSettingsSchema>
@@ -336,7 +336,7 @@ export type CatSettingsOptionalDefaults = z.infer<typeof CatSettingsOptionalDefa
 export type CatSettingsRelations = {
   parent?: CatSettingsWithRelations | null;
   children: CatSettingsWithRelations[];
-  User?: UserWithRelations | null;
+  User: UserWithRelations;
 };
 
 export type CatSettingsWithRelations = z.infer<typeof CatSettingsSchema> & CatSettingsRelations
@@ -344,7 +344,7 @@ export type CatSettingsWithRelations = z.infer<typeof CatSettingsSchema> & CatSe
 export const CatSettingsWithRelationsSchema: z.ZodType<CatSettingsWithRelations> = CatSettingsSchema.merge(z.object({
   parent: z.lazy(() => CatSettingsWithRelationsSchema).nullable(),
   children: z.lazy(() => CatSettingsWithRelationsSchema).array(),
-  User: z.lazy(() => UserWithRelationsSchema).nullable(),
+  User: z.lazy(() => UserWithRelationsSchema),
 }))
 
 // CAT SETTINGS OPTIONAL DEFAULTS RELATION SCHEMA
@@ -353,7 +353,7 @@ export const CatSettingsWithRelationsSchema: z.ZodType<CatSettingsWithRelations>
 export type CatSettingsOptionalDefaultsRelations = {
   parent?: CatSettingsOptionalDefaultsWithRelations | null;
   children: CatSettingsOptionalDefaultsWithRelations[];
-  User?: UserOptionalDefaultsWithRelations | null;
+  User: UserOptionalDefaultsWithRelations;
 };
 
 export type CatSettingsOptionalDefaultsWithRelations = z.infer<typeof CatSettingsOptionalDefaultsSchema> & CatSettingsOptionalDefaultsRelations
@@ -361,5 +361,5 @@ export type CatSettingsOptionalDefaultsWithRelations = z.infer<typeof CatSetting
 export const CatSettingsOptionalDefaultsWithRelationsSchema: z.ZodType<CatSettingsOptionalDefaultsWithRelations> = CatSettingsOptionalDefaultsSchema.merge(z.object({
   parent: z.lazy(() => CatSettingsOptionalDefaultsWithRelationsSchema).nullable(),
   children: z.lazy(() => CatSettingsOptionalDefaultsWithRelationsSchema).array(),
-  User: z.lazy(() => UserOptionalDefaultsWithRelationsSchema).nullable(),
+  User: z.lazy(() => UserOptionalDefaultsWithRelationsSchema),
 }))

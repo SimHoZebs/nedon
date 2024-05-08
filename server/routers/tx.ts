@@ -3,20 +3,20 @@ import type {
   Transaction,
   TransactionsSyncRequest,
 } from "plaid";
+import { TxSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 import db from "@/util/db";
 import { convertToFullTx } from "@/util/tx";
 import {
   type FullTxClientSide,
-  type TxInDB,
-  TxClientSideSchema,
   FullTxSchema,
+  TxClientSideSchema,
+  type TxInDB,
 } from "@/util/types";
 
 import { procedure, router } from "../trpc";
 import { client } from "../util";
-import { TxSchema } from "prisma/generated/zod";
 
 const txRouter = router({
   getWithoutPlaid: procedure

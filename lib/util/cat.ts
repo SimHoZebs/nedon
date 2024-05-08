@@ -4,8 +4,8 @@ import catStyleArray from "./catStyle";
 import parseMoney from "./parseMoney";
 import type { TxType } from "./tx";
 import type {
-  FullTxClientSide,
   CatClientSide,
+  FullTxClientSide,
   TreedCat,
   TreedCatWithTx,
 } from "./types";

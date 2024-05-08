@@ -1,4 +1,5 @@
 import type { Transaction } from "plaid";
+
 import type { SplitClientSide } from "./types";
 
 export const createNewSplit = (

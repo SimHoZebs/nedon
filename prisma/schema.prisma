@@ -49,12 +49,18 @@ model Tx {
   id      String @id @default(cuid())
   plaidId String //plaid tx_id
 
+  originTxId String?
+  //the original transaction this tx was split from. null if this is the original tx
+  originTx   Tx?     @relation("originTx", fields: [originTxId], references: [id])
+
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  catArray Cat[]
+  userTotal Float //can be less than tx.amount, but is target total of catArray.amount
+  catArray  Cat[]
 
-  splitArray Split[]
+  splitArray   Split[]
+  splitTxArray Tx[]    @relation("originTx")
 }
 
 model Split {

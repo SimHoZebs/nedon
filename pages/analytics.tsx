@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/comp/Button";
 import DateRangePicker from "@/comp/DateRangePicker";
 import AnalysisBar from "@/comp/analysis/AnalysisBar";
+import CatCard from "@/comp/analysis/CatCard";
 import CatModal from "@/comp/analysis/CatModal";
 import LineGraph from "@/comp/analysis/LineGraph";
 
@@ -20,7 +21,6 @@ import {
 import type { TxType } from "@/util/tx";
 import type { FullTxClientSide, TreedCatWithTx } from "@/util/types";
 import useDateRange from "@/util/useDateRange";
-import CatCard from "@/comp/analysis/CatCard";
 
 const Page = () => {
   const { appUser } = getAppUser();

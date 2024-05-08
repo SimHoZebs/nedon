@@ -4,6 +4,7 @@ import type {
 } from "prisma/generated/zod";
 import { useEffect, useState } from "react";
 
+import { subCatTotal } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
 import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
@@ -14,7 +15,6 @@ import { Button, CloseBtn } from "../Button";
 import { H1, H2 } from "../Heading";
 import Input from "../Input";
 import Modal from "../Modal";
-import { subCatTotal } from "@/util/cat";
 
 interface Props {
   setShowModal: (show: boolean) => void;
@@ -46,7 +46,7 @@ const CatModal = (props: Props) => {
 
   return (
     <Modal>
-      <div className="flex flex-col items-start gap-y-2 py-2 px-4">
+      <div className="flex flex-col items-start gap-y-2 px-4 py-2">
         <div className="flex w-full justify-end">
           <CloseBtn
             onClose={() => {
@@ -63,7 +63,7 @@ const CatModal = (props: Props) => {
           />
           <H1>{data.name}</H1>
         </header>
-        <div className="flex flex-col w-full items-end">
+        <div className="flex w-full flex-col items-end">
           <H2>$ {data.spending + subCatTotal(data, "spending")} Spent</H2>
           <p>
             {props.modalData.settings && (

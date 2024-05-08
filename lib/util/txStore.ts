@@ -1,15 +1,15 @@
+import type { Cat, Split } from "@prisma/client";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 import { resetFullTx } from "./tx";
 import {
-  isSplitArrayInDB,
   type CatClientSide,
   type FullTxClientSide,
   type SplitClientSide,
   type TxInDB,
+  isSplitArrayInDB,
 } from "./types";
-import type { Cat, Split } from "@prisma/client";
 
 /**
  * Tx depends on three forms of data:

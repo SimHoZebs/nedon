@@ -40,7 +40,7 @@ const Profile = () => {
           >
             Save
           </ActionBtn>
-          <pre>{JSON.stringify(appUser, null, 2)}</pre>;
+          <pre>{JSON.stringify(appUser, null, 2)}</pre>
         </section>
       </main>
     )

@@ -7,9 +7,9 @@ import {
 import { z } from "zod";
 
 import db from "@/util/db";
+import { CatClientSideSchema } from "@/util/types";
 
 import { procedure, router } from "../trpc";
-import { CatClientSideSchema } from "@/util/types";
 
 const catRouter = router({
   create: procedure

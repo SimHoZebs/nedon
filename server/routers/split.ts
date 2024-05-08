@@ -1,9 +1,9 @@
+import { type Split, SplitOptionalDefaultsSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 import db from "@/util/db";
 
 import { procedure, router } from "../trpc";
-import { type Split, SplitOptionalDefaultsSchema } from "prisma/generated/zod";
 
 const splitRouter = router({
   create: procedure

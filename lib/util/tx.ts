@@ -1,8 +1,8 @@
 import type { Transaction } from "plaid";
 
 import { emptyCat, fillArrayByCat } from "./cat";
-import type { FullTxClientSide, TreedCatWithTx, TxInDB } from "./types";
 import { createNewSplit } from "./split";
+import type { FullTxClientSide, TreedCatWithTx, TxInDB } from "./types";
 
 export const resetFullTx = (fullTx: FullTxClientSide): FullTxClientSide => ({
   ...fullTx,

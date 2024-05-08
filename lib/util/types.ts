@@ -1,13 +1,13 @@
 import type { Group, User } from "@prisma/client";
+import type { Cat, Split, Tx } from "@prisma/client";
 import type { Transaction } from "plaid";
 import {
-  TxOptionalDefaultsSchema,
-  SplitOptionalDefaultsSchema,
-  UserSchema,
   CatOptionalDefaultsSchema,
   CatSchema,
+  SplitOptionalDefaultsSchema,
+  TxOptionalDefaultsSchema,
+  UserSchema,
 } from "prisma/generated/zod";
-import type { Tx, Split, Cat } from "@prisma/client";
 import { z } from "zod";
 
 export type UserClientSide = Omit<User, "ACCESS_TOKEN"> & {

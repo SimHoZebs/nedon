@@ -55,7 +55,7 @@ export const groupRouter = router({
         },
       });
 
-      return group ? true : false;
+      return !!group;
     }),
 
   addUser: procedure

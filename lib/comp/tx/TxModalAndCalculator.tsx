@@ -1,13 +1,13 @@
-import React, { useEffect } from "react";
 import { motion } from "framer-motion";
+import React, { useEffect } from "react";
 
 import parseMoney from "@/util/parseMoney";
+import { useStore } from "@/util/store";
 import { useTxStore } from "@/util/txStore";
+import type { SplitClientSide } from "@/util/types";
 
 import Calculator from "./TxModal/SplitList/Calculator";
 import TxModal from "./TxModal/TxModal";
-import { useStore } from "@/util/store";
-import type { SplitClientSide } from "@/util/types";
 
 interface Props {
   onClose: () => void;
@@ -102,12 +102,12 @@ const TxModalAndCalculator = (props: Props) => {
 
       {isEditingSplit && focusedSplitIndex !== undefined && (
         <motion.div
-          className="flex pointer-events-auto flex-col w-full lg:w-3/12 lg:absolute lg:justify-center z-20"
+          className="pointer-events-auto z-20 flex w-full flex-col lg:absolute lg:w-3/12 lg:justify-center"
           drag={screenType === "desktop"}
           dragMomentum={false}
         >
           <button
-            className="bg-zinc-800 z-20 w-full border-zinc-700 border shadow-md border-b-0 rounded-md rounded-b-none"
+            className="z-20 w-full rounded-md rounded-b-none border border-b-0 border-zinc-700 bg-zinc-800 shadow-md"
             type="button"
             onClick={() => setIsCalcHidden(!isCalcHidden)}
           >
