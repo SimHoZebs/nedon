@@ -7,45 +7,36 @@ import React, {
 
 import { emptyCat } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
-import getAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import type { MergedCat, SplitInDB, TreedCat } from "@/util/types";
+import type { CatClientSide, TreedCat } from "@/util/types";
 
 interface Props {
-  unsavedMergedCatArray: MergedCat[];
-  editingMergedCatIndex: number;
+  appUserCatArray: CatClientSide[];
+  editingCatIndex: number;
   closePicker: () => void;
   position: { x: number; y: number };
 }
 
 const CatPicker = forwardRef(
   (props: Props, ref: ForwardedRef<HTMLDivElement>) => {
-    const createCat = trpc.cat.create.useMutation();
-    const createSplit = trpc.split.create.useMutation();
-    const upsertManySplit = trpc.split.upsertMany.useMutation();
-    const createTx = trpc.tx.create.useMutation();
+    const upsertCatArray = trpc.cat.upsertMany.useMutation();
     const catOptionArray = trpc.getCatOptionArray.useQuery(undefined, {
       staleTime: Number.POSITIVE_INFINITY,
     });
     const queryClient = trpc.useUtils();
+    const unsavedCatArray = useTxStore((state) => state.unsavedCatArray);
 
-    const { appUser } = getAppUser();
     const tx = useTxStore((state) => state.txOnModal);
-    const refreshDBData = useTxStore((state) => state.refreshDBData);
-    const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
-    const setUnsavedSplitArray = useTxStore(
-      (state) => state.setUnsavedSplitArray,
-    );
+    const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);
     const screenType = useStore((state) => state.screenType);
     const [unsavedNameArray, setCurrentNameArray] = useState<string[]>([]);
     const [currentOptionArray, setCurrentOptionArray] = useState<TreedCat[]>(
       [],
     );
 
-    const editingMergedCat =
-      props.unsavedMergedCatArray[props.editingMergedCatIndex];
+    const editingCat = props.appUserCatArray[props.editingCatIndex];
 
     const resetPicker = () => {
       setCurrentNameArray([]);
@@ -59,140 +50,21 @@ const CatPicker = forwardRef(
       setCurrentOptionArray(catOptionArray.data);
     };
 
-    const createCatForManySplit = async (nameArray: string[]) => {
-      if (!appUser || !tx) {
-        console.error("appUser or txOnModal or tx is undefined.");
-        return;
-      }
-
-      if (!tx.id) {
-        if (props.editingMergedCatIndex === undefined) {
-          console.error("editingMergedCatIndex is undefined.");
-          return;
-        }
-
-        const split = structuredClone(unsavedSplitArray[0]);
-        split.catArray[props.editingMergedCatIndex] = emptyCat({
-          nameArray,
-          splitId: split.id,
-          amount: 0,
-        });
-
-        const txDBData = await createTx.mutateAsync({
-          userId: appUser.id,
-          txId: tx.transaction_id,
-          splitArray: [split],
-        });
-
-        refreshDBData(txDBData);
-
-        return;
-      }
-
-      const updatedSplitArray = unsavedSplitArray.map((unsavedSplit) => {
-        const split = structuredClone(unsavedSplit);
-        split.catArray[split.catArray.length - 1] = emptyCat({
-          nameArray,
-          splitId: split.id,
-          amount: 0,
-        });
-
-        return split;
-      });
-
-      refreshDBData(updatedSplitArray);
-
-      const dbUpdatedSplitArray = await Promise.all(
-        updatedSplitArray.map(async (updatedSplit) => {
-          if (updatedSplit.id === null) {
-            const newSplit = await createSplit.mutateAsync({
-              //biome-ignore lint: tx.id boolean was checked before
-              txId: tx.id!,
-              split: updatedSplit,
-            });
-
-            return newSplit;
-          }
-
-          const updatedSplitClone = structuredClone(updatedSplit);
-          const newCat = await createCat.mutateAsync({
-            //biome-ignore lint: never null because of the if check. Typescript isn't smart enough to know that.
-            splitId: updatedSplit.id!,
-            amount: 0,
-            nameArray: nameArray,
-          });
-
-          updatedSplitClone.catArray[updatedSplit.catArray.length - 1] = newCat;
-
-          return updatedSplitClone as SplitInDB;
-        }),
-      );
-
-      refreshDBData(dbUpdatedSplitArray);
-    };
-
-    const updateManyCatNameArray = async (updatedNameArray: string[]) => {
-      if (!tx) return console.error("tx is undefined.");
-
-      if (!tx.id) {
-        const txDBData = await createTx.mutateAsync({
-          //biome-ignore lint: appUser is checked before
-          userId: appUser!.id,
-          txId: tx.transaction_id,
-          splitArray: unsavedSplitArray.map((split) => ({
-            ...split,
-            catArray: split.catArray.map((cat) => ({
-              ...cat,
-              nameArray: updatedNameArray,
-            })),
-          })),
-        });
-
-        refreshDBData(txDBData);
-        return;
-      }
-
-      if (props.editingMergedCatIndex === undefined) {
-        console.error("editingMergedCatIndex is undefined.");
-        return;
-      }
-
-      const updatedSplitArray = unsavedSplitArray.map((unsavedSplit) => {
-        const updatedSplit = structuredClone(unsavedSplit);
-
-        updatedSplit.catArray[props.editingMergedCatIndex].nameArray =
-          updatedNameArray;
-
-        return updatedSplit;
-      });
-
-      refreshDBData(updatedSplitArray);
-      const dbUpdatedTx = await upsertManySplit.mutateAsync({
-        txId: tx.id,
-        splitArray: updatedSplitArray,
-      });
-      refreshDBData(dbUpdatedTx);
-    };
-
     /**
-     *
      * @param clickedTreedCat  if the cat is assigned by click instead of the "save" button.
      */
     const applyChangesToCat = async (clickedTreedCat?: TreedCat) => {
-      const updatedMergedCat = structuredClone(editingMergedCat);
-      const updatedNameArray = structuredClone(unsavedNameArray);
-
+      const tmpCatArray = structuredClone(unsavedCatArray);
+      const tmpNameArray = structuredClone(unsavedNameArray);
       if (clickedTreedCat) {
-        updatedNameArray.push(clickedTreedCat.name);
+        tmpNameArray.push(clickedTreedCat.name);
       }
-      updatedMergedCat.nameArray = updatedNameArray;
 
-      //The only diff between categories inDB and not inDB
-      if (editingMergedCat.nameArray.length === 0) {
-        await createCatForManySplit(updatedMergedCat.nameArray);
-      } else {
-        await updateManyCatNameArray(updatedMergedCat.nameArray);
-      }
+      tmpCatArray.push(emptyCat({ nameArray: unsavedNameArray, amount: 0 }));
+      const upsertedCatArray = await upsertCatArray.mutateAsync({
+        catArray: tmpCatArray,
+      });
+      refreshTxModalData(upsertedCatArray);
 
       queryClient.tx.invalidate();
     };
@@ -212,17 +84,13 @@ const CatPicker = forwardRef(
 
       const filteredOptionArray = catOptionArray.data.filter(
         (option) =>
-          !props.unsavedMergedCatArray.find(
+          !props.appUserCatArray.find(
             (unsavedCat) => unsavedCat.nameArray.at(-1) === option.name,
           ),
       );
 
       setCurrentOptionArray(filteredOptionArray);
-    }, [
-      catOptionArray.data,
-      catOptionArray.status,
-      props.unsavedMergedCatArray,
-    ]);
+    }, [catOptionArray.data, catOptionArray.status, props.appUserCatArray]);
 
     return catOptionArray.data ? (
       <div
@@ -263,7 +131,7 @@ const CatPicker = forwardRef(
               type="button"
               className="text-indigo-300 hover:text-indigo-400"
               onClick={async () => {
-                if (editingMergedCat.id === null) {
+                if (editingCat.id === null) {
                   await applyChangesToCat();
                   resetPicker();
                   props.closePicker();
@@ -281,7 +149,6 @@ const CatPicker = forwardRef(
                   return console.error(
                     "Can't reset unsavedSplitArray. tx is undefined.",
                   );
-                setUnsavedSplitArray(tx.splitArray);
                 resetPicker();
                 props.closePicker();
               }}
@@ -307,7 +174,7 @@ const CatPicker = forwardRef(
 
                   const filteredOptionArray = updatedOptionArray.filter(
                     (option) =>
-                      !props.unsavedMergedCatArray.find(
+                      !props.appUserCatArray.find(
                         (unsavedCat) =>
                           unsavedCat.nameArray.at(-1) === option.name,
                       ),

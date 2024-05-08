@@ -16,11 +16,11 @@ export const GroupScalarFieldEnumSchema = z.enum(['id','ownerId']);
 
 export const UserScalarFieldEnumSchema = z.enum(['id','name','ACCESS_TOKEN','PUBLIC_TOKEN','ITEM_ID','TRANSFER_ID','PAYMENT_ID']);
 
-export const TxScalarFieldEnumSchema = z.enum(['id','plaidId','ownerId']);
+export const TxScalarFieldEnumSchema = z.enum(['id','plaidId','userId']);
 
-export const SplitScalarFieldEnumSchema = z.enum(['id','plaidId','userId','txId']);
+export const SplitScalarFieldEnumSchema = z.enum(['id','userId','amount','txId']);
 
-export const CatScalarFieldEnumSchema = z.enum(['id','nameArray','amount','splitId']);
+export const CatScalarFieldEnumSchema = z.enum(['id','name','nameArray','amount','txId']);
 
 export const CatSettingsScalarFieldEnumSchema = z.enum(['id','name','budget','parentId','userId']);
 
@@ -158,7 +158,7 @@ export const UserOptionalDefaultsWithRelationsSchema: z.ZodType<UserOptionalDefa
 export const TxSchema = z.object({
   id: z.string().cuid(),
   plaidId: z.string(),
-  ownerId: z.string(),
+  userId: z.string(),
 })
 
 export type Tx = z.infer<typeof TxSchema>
@@ -176,14 +176,16 @@ export type TxOptionalDefaults = z.infer<typeof TxOptionalDefaultsSchema>
 //------------------------------------------------------
 
 export type TxRelations = {
-  owner: UserWithRelations;
+  user: UserWithRelations;
+  catArray: CatWithRelations[];
   splitArray: SplitWithRelations[];
 };
 
 export type TxWithRelations = z.infer<typeof TxSchema> & TxRelations
 
 export const TxWithRelationsSchema: z.ZodType<TxWithRelations> = TxSchema.merge(z.object({
-  owner: z.lazy(() => UserWithRelationsSchema),
+  user: z.lazy(() => UserWithRelationsSchema),
+  catArray: z.lazy(() => CatWithRelationsSchema).array(),
   splitArray: z.lazy(() => SplitWithRelationsSchema).array(),
 }))
 
@@ -191,14 +193,16 @@ export const TxWithRelationsSchema: z.ZodType<TxWithRelations> = TxSchema.merge(
 //------------------------------------------------------
 
 export type TxOptionalDefaultsRelations = {
-  owner: UserOptionalDefaultsWithRelations;
+  user: UserOptionalDefaultsWithRelations;
+  catArray: CatOptionalDefaultsWithRelations[];
   splitArray: SplitOptionalDefaultsWithRelations[];
 };
 
 export type TxOptionalDefaultsWithRelations = z.infer<typeof TxOptionalDefaultsSchema> & TxOptionalDefaultsRelations
 
 export const TxOptionalDefaultsWithRelationsSchema: z.ZodType<TxOptionalDefaultsWithRelations> = TxOptionalDefaultsSchema.merge(z.object({
-  owner: z.lazy(() => UserOptionalDefaultsWithRelationsSchema),
+  user: z.lazy(() => UserOptionalDefaultsWithRelationsSchema),
+  catArray: z.lazy(() => CatOptionalDefaultsWithRelationsSchema).array(),
   splitArray: z.lazy(() => SplitOptionalDefaultsWithRelationsSchema).array(),
 }))
 
@@ -208,8 +212,8 @@ export const TxOptionalDefaultsWithRelationsSchema: z.ZodType<TxOptionalDefaults
 
 export const SplitSchema = z.object({
   id: z.string().uuid(),
-  plaidId: z.string(),
   userId: z.string(),
+  amount: z.number(),
   txId: z.string(),
 })
 
@@ -229,7 +233,6 @@ export type SplitOptionalDefaults = z.infer<typeof SplitOptionalDefaultsSchema>
 
 export type SplitRelations = {
   user: UserWithRelations;
-  catArray: CatWithRelations[];
   tx: TxWithRelations;
 };
 
@@ -237,7 +240,6 @@ export type SplitWithRelations = z.infer<typeof SplitSchema> & SplitRelations
 
 export const SplitWithRelationsSchema: z.ZodType<SplitWithRelations> = SplitSchema.merge(z.object({
   user: z.lazy(() => UserWithRelationsSchema),
-  catArray: z.lazy(() => CatWithRelationsSchema).array(),
   tx: z.lazy(() => TxWithRelationsSchema),
 }))
 
@@ -246,7 +248,6 @@ export const SplitWithRelationsSchema: z.ZodType<SplitWithRelations> = SplitSche
 
 export type SplitOptionalDefaultsRelations = {
   user: UserOptionalDefaultsWithRelations;
-  catArray: CatOptionalDefaultsWithRelations[];
   tx: TxOptionalDefaultsWithRelations;
 };
 
@@ -254,7 +255,6 @@ export type SplitOptionalDefaultsWithRelations = z.infer<typeof SplitOptionalDef
 
 export const SplitOptionalDefaultsWithRelationsSchema: z.ZodType<SplitOptionalDefaultsWithRelations> = SplitOptionalDefaultsSchema.merge(z.object({
   user: z.lazy(() => UserOptionalDefaultsWithRelationsSchema),
-  catArray: z.lazy(() => CatOptionalDefaultsWithRelationsSchema).array(),
   tx: z.lazy(() => TxOptionalDefaultsWithRelationsSchema),
 }))
 
@@ -264,9 +264,10 @@ export const SplitOptionalDefaultsWithRelationsSchema: z.ZodType<SplitOptionalDe
 
 export const CatSchema = z.object({
   id: z.string().uuid(),
+  name: z.string(),
   nameArray: z.string().array(),
   amount: z.number(),
-  splitId: z.string(),
+  txId: z.string(),
 })
 
 export type Cat = z.infer<typeof CatSchema>
@@ -284,26 +285,26 @@ export type CatOptionalDefaults = z.infer<typeof CatOptionalDefaultsSchema>
 //------------------------------------------------------
 
 export type CatRelations = {
-  split: SplitWithRelations;
+  tx: TxWithRelations;
 };
 
 export type CatWithRelations = z.infer<typeof CatSchema> & CatRelations
 
 export const CatWithRelationsSchema: z.ZodType<CatWithRelations> = CatSchema.merge(z.object({
-  split: z.lazy(() => SplitWithRelationsSchema),
+  tx: z.lazy(() => TxWithRelationsSchema),
 }))
 
 // CAT OPTIONAL DEFAULTS RELATION SCHEMA
 //------------------------------------------------------
 
 export type CatOptionalDefaultsRelations = {
-  split: SplitOptionalDefaultsWithRelations;
+  tx: TxOptionalDefaultsWithRelations;
 };
 
 export type CatOptionalDefaultsWithRelations = z.infer<typeof CatOptionalDefaultsSchema> & CatOptionalDefaultsRelations
 
 export const CatOptionalDefaultsWithRelationsSchema: z.ZodType<CatOptionalDefaultsWithRelations> = CatOptionalDefaultsSchema.merge(z.object({
-  split: z.lazy(() => SplitOptionalDefaultsWithRelationsSchema),
+  tx: z.lazy(() => TxOptionalDefaultsWithRelationsSchema),
 }))
 
 /////////////////////////////////////////

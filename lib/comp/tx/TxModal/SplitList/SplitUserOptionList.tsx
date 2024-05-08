@@ -2,11 +2,11 @@ import React from "react";
 
 import { Button } from "@/comp/Button";
 
-import { mergeCatArray } from "@/util/cat";
 import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
+import type { SplitClientSide } from "@/util/types";
 
 const SplitUserOptionList = () => {
   const { appUser } = getAppUser();
@@ -20,7 +20,10 @@ const SplitUserOptionList = () => {
   const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
+  const unsavedCatArray = useTxStore((state) => state.unsavedCatArray);
+  const setUnsavedCatArray = useTxStore((state) => state.setUnsavedCatArray);
   const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
+  const txOnModal = useTxStore((state) => state.txOnModal);
 
   return (
     <div className="no-scrollbar flex h-fit w-full flex-col gap-y-2 overflow-y-scroll">
@@ -56,39 +59,45 @@ const SplitUserOptionList = () => {
                         return;
                       }
 
-                      const mergedCatArray = mergeCatArray(unsavedSplitArray);
-
-                      const updatedSplitArray = structuredClone(
-                        unsavedSplitArray,
-                      ).map((split) => ({
-                        ...split,
-                        catArray: split.catArray.map((cat, i) => ({
-                          ...cat,
+                      //evenly reduce amount from all splits to assign to new
+                      //split
+                      const updatedSplitArray: SplitClientSide[] =
+                        structuredClone(unsavedSplitArray).map((split, i) => ({
+                          ...split,
+                          //1 for new split, 1 for tx.user
                           amount: parseMoney(
-                            //categories are expected to be ordered identically
-                            mergedCatArray[i].amount /
-                              (unsavedSplitArray.length + 1),
+                            unsavedCatArray[i].amount /
+                              (unsavedSplitArray.length + 2),
                           ),
-                        })),
+                        }));
+
+                      //reduce for tx.user as well
+                      const updatedCatArray = structuredClone(
+                        unsavedCatArray,
+                      ).map((cat, i) => ({
+                        ...cat,
+                        amount: parseMoney(
+                          unsavedCatArray[i].amount /
+                            (unsavedSplitArray.length + 2),
+                        ),
                       }));
 
-                      const appUserCatArray = updatedSplitArray.find(
-                        (split) => split.userId === appUser.id,
-                      )?.catArray;
-
-                      if (!appUserCatArray) {
-                        console.error("appUser has no cat array");
+                      if (!txOnModal) {
+                        console.error("no txOnModal");
                         return;
                       }
 
+                      //add new split
                       updatedSplitArray.push({
                         id: undefined,
                         txId: undefined,
+                        amount:
+                          txOnModal?.amount / (unsavedSplitArray.length + 2),
                         userId: user.id,
-                        catArray: structuredClone(appUserCatArray),
                       });
 
                       setUnsavedSplitArray(updatedSplitArray);
+                      setUnsavedCatArray(updatedCatArray);
                       setIsEditingSplit(true);
                     }}
                   >

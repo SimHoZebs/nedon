@@ -18,15 +18,15 @@ import {
   txTypeArray as txTypes,
 } from "@/util/tx";
 import type { TxType } from "@/util/tx";
-import type { FullTx, TreedCatWithTx } from "@/util/types";
+import type { FullTxClientSide, TreedCatWithTx } from "@/util/types";
 import useDateRange from "@/util/useDateRange";
 import CatCard from "@/comp/analysis/CatCard";
 
 const Page = () => {
   const { appUser } = getAppUser();
-  const [scopedTxArray, setScopedTxArray] = useState<FullTx[]>([]);
+  const [scopedTxArray, setScopedTxArray] = useState<FullTxClientSide[]>([]);
 
-  const txArray = trpc.tx.getAll.useQuery<FullTx[]>(
+  const txArray = trpc.tx.getAll.useQuery<FullTxClientSide[]>(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );

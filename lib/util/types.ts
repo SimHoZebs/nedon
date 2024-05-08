@@ -1,15 +1,13 @@
 import type { Group, User } from "@prisma/client";
-import type { Tx } from "@prisma/client";
 import type { Transaction } from "plaid";
 import {
-  type CatOptionalDefaults,
+  TxOptionalDefaultsSchema,
+  SplitOptionalDefaultsSchema,
+  UserSchema,
   CatOptionalDefaultsSchema,
   CatSchema,
-  SplitOptionalDefaultsSchema,
-  SplitSchema,
-  type TxOptionalDefaults,
 } from "prisma/generated/zod";
-import { UserSchema } from "prisma/generated/zod";
+import type { Tx, Split, Cat } from "@prisma/client";
 import { z } from "zod";
 
 export type UserClientSide = Omit<User, "ACCESS_TOKEN"> & {
@@ -34,55 +32,61 @@ export type TreedCatWithTx = {
   budget: number;
   spending: number;
   received: number;
-  txArray: FullTx[];
+  txArray: FullTxClientSide[];
   subCatArray: TreedCatWithTx[];
 };
 
-export type MergedCat = Omit<CatOptionalDefaults, "splitId">;
-
-export type CatClientSide = z.infer<typeof CatClientSideSchema>;
-export const CatClientSideSchema = CatOptionalDefaultsSchema.extend({
-  splitId: z.string().optional(),
-});
-
-export function isCatInSplitInDB(
-  cat: CatClientSide,
-): cat is z.infer<typeof CatSchema> {
-  return !!cat.splitId;
-}
-
-export function isSplitInDB(split: SplitClientSide): split is SplitInDB {
-  return !!split.id;
-}
-export type SplitInDB = z.infer<typeof SplitInDBSchema>;
-export const SplitInDBSchema = SplitSchema.extend({
-  catArray: z.array(CatSchema),
-});
-
-export type SplitClientSide = z.infer<typeof SplitClientSideModel>;
-export const SplitClientSideModel = SplitOptionalDefaultsSchema.extend({
-  txId: z.string().optional(),
-  catArray: z.array(CatClientSideSchema),
-});
-
-export function isFullTxInDB(tx: FullTx): tx is FullTxInDB {
+export function isFullTxInDB(tx: FullTxClientSide): tx is FullTx {
   return !!tx.id;
 }
-export type FullTxInDB = Tx &
-  Transaction & {
-    id: string;
-    splitArray: SplitClientSide[];
-  };
 
-export type FullTx = TxOptionalDefaults &
-  Transaction & {
-    splitArray: SplitClientSide[];
-  };
+export type TxInDB = Tx & { splitArray: Split[]; catArray: Cat[] };
 
-export type TxInDB = Tx & {
-  splitArray: SplitInDB[];
+//CAT
+export const CatClientSideSchema = CatOptionalDefaultsSchema.extend({
+  txId: z.string().optional(),
+});
+export type CatClientSide = z.infer<typeof CatClientSideSchema>;
+
+export const isCatInDB = (cat: CatClientSide): cat is Cat => {
+  return cat.id !== undefined;
 };
 
-export function isPlaidTx(plaidTx: unknown): plaidTx is FullTx {
-  return (plaidTx as FullTx).id !== undefined;
+export const isCatArrayInDB = (obj: unknown): obj is Cat[] => {
+  if (!Array.isArray(obj)) return false;
+  return obj.every(isCatInDB);
+};
+
+//SPLIT
+
+export const SplitClientSideSchema = SplitOptionalDefaultsSchema.extend({
+  txId: z.string().optional(),
+});
+export type SplitClientSide = z.infer<typeof SplitClientSideSchema>;
+
+export const isSplitInDB = (split: SplitClientSide): split is Split => {
+  return split.id !== undefined;
+};
+export const isSplitArrayInDB = (obj: unknown): obj is Split[] => {
+  if (!Array.isArray(obj)) return false;
+  return obj.every(isSplitInDB);
+};
+
+export const TxClientSideSchema = TxOptionalDefaultsSchema.extend({
+  txId: z.string().optional(),
+  catArray: z.array(CatClientSideSchema),
+  splitArray: z.array(SplitClientSideSchema),
+});
+export type TxClientSide = z.infer<typeof TxClientSideSchema>;
+
+export type FullTxClientSide = Transaction & TxClientSide;
+
+export const FullTxSchema = TxOptionalDefaultsSchema.extend({
+  catArray: z.array(CatSchema),
+  splitArray: z.array(SplitOptionalDefaultsSchema),
+});
+export type FullTx = z.infer<typeof FullTxSchema> & Transaction;
+
+export function isPlaidTx(plaidTx: unknown): plaidTx is FullTxClientSide {
+  return (plaidTx as FullTxClientSide).id !== undefined;
 }

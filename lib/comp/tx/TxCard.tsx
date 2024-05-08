@@ -2,22 +2,20 @@ import Image from "next/image";
 import type React from "react";
 
 import { getCatStyle } from "@/util/cat";
-import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { useTxStore } from "@/util/txStore";
-import type { FullTx } from "@/util/types";
+import type { FullTxClientSide } from "@/util/types";
 
 interface Props {
-  tx: FullTx;
+  tx: FullTxClientSide;
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const TxCard = (props: Props) => {
-  const { appUser } = getAppUser();
   const setTxOnModal = useTxStore((state) => state.setTxOnModal);
 
-  const splitAmount = props.tx.splitArray
-    .find((split) => split.userId === appUser?.id)
-    ?.catArray.reduce((total, cat) => parseMoney(total + cat.amount), 0);
+  const splitAmount = parseMoney(
+    props.tx.catArray.reduce((total, cat) => total + cat.amount, 0),
+  );
 
   return (
     <section
@@ -60,7 +58,7 @@ const TxCard = (props: Props) => {
             e.currentTarget.scrollLeft += e.deltaY * 0.5;
           }}
         >
-          {props.tx.splitArray[0].catArray.map((cat) => (
+          {props.tx.catArray.map((cat) => (
             <div
               key={cat.id}
               className={`flex min-w-max gap-x-1 rounded-full p-2 text-zinc-800 ${

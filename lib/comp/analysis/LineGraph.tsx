@@ -17,7 +17,7 @@ import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { type TxType, filterTxByDate, organizeTxByTime } from "@/util/tx";
-import type { FullTx } from "@/util/types";
+import type { FullTxClientSide } from "@/util/types";
 
 interface Props {
   date: Date;
@@ -27,7 +27,7 @@ interface Props {
 
 const LineGraph = (props: Props) => {
   const { appUser } = getAppUser();
-  const txArray = trpc.tx.getAll.useQuery<FullTx[]>(
+  const txArray = trpc.tx.getAll.useQuery<FullTxClientSide[]>(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );
@@ -71,7 +71,7 @@ const LineGraph = (props: Props) => {
 
 // txArray is a sorted array of FullTx of a single month, starting with latest date
 const generateDailyTxSumArray = (
-  txArray: FullTx[][],
+  txArray: FullTxClientSide[][],
   txType: TxType,
   dateLen: number,
 ) => {

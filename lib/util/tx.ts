@@ -1,63 +1,37 @@
-import type { Tx } from "@prisma/client";
 import type { Transaction } from "plaid";
 
-import { fillArrayByCat, mergeCatArray } from "./cat";
-import { emptyCat } from "./cat";
-import type { FullTx, SplitClientSide, TreedCatWithTx } from "./types";
+import { emptyCat, fillArrayByCat } from "./cat";
+import type { FullTxClientSide, TreedCatWithTx, TxInDB } from "./types";
+import { createNewSplit } from "./split";
 
-export const resetFullTx = (fullTx: FullTx): FullTx => ({
+export const resetFullTx = (fullTx: FullTxClientSide): FullTxClientSide => ({
   ...fullTx,
   id: undefined,
-  splitArray: [
-    {
-      id: undefined,
-      userId: fullTx.ownerId,
-      txId: undefined,
-      catArray: [
-        {
-          id: undefined,
-          splitId: undefined,
-          nameArray: fullTx.category || [],
-          amount: fullTx.amount,
-        },
-      ],
-    },
-  ],
 });
 
 export const convertToFullTx = (
   userId: string,
-  tx: Transaction,
-  txInDB?: Tx & { splitArray: SplitClientSide[] },
-): FullTx => {
+  plaidTx: Transaction,
+  txInDB?: TxInDB,
+): FullTxClientSide => {
   return {
-    ...tx,
-    id: txInDB?.id || undefined,
-    ownerId: userId,
-    splitArray: txInDB?.splitArray || [
-      {
-        id: undefined,
-        userId,
-        txId: undefined,
-        catArray: [
-          emptyCat({
-            nameArray: tx.category || [],
-            splitId: undefined,
-            amount: tx.amount,
-          }),
-        ],
-      },
-    ],
+    ...plaidTx,
+    id: undefined,
+    txId: undefined,
+    plaidId: txInDB?.plaidId || plaidTx.transaction_id,
+    userId: userId,
+    catArray: [emptyCat(plaidTx.category)],
+    splitArray: txInDB?.splitArray || [createNewSplit(userId, plaidTx)],
   };
 };
 
-export const organizeTxByCat = (txArray: FullTx[]) => {
+export const organizeTxByCat = (txArray: FullTxClientSide[]) => {
   const catArray: TreedCatWithTx[] = [];
 
   for (const tx of txArray) {
     const txCopy = structuredClone(tx);
-    const mergedCatArray = mergeCatArray(txCopy.splitArray);
-    for (const cat of mergedCatArray) {
+
+    for (const cat of txCopy.catArray) {
       fillArrayByCat(catArray, txCopy, cat);
     }
   }
@@ -65,13 +39,13 @@ export const organizeTxByCat = (txArray: FullTx[]) => {
   return catArray;
 };
 
-export const organizeTxByTime = (txArray: FullTx[]) => {
+export const organizeTxByTime = (txArray: FullTxClientSide[]) => {
   const txSortedByTimeArray = txArray.sort(
     (a, b) =>
       new Date(b.datetime ? b.datetime : b.date).getTime() -
       new Date(a.datetime ? a.datetime : a.date).getTime(),
   );
-  const txOrganizedByTimeArray: FullTx[][][][] = [[[[]]]];
+  const txOrganizedByTimeArray: FullTxClientSide[][][][] = [[[[]]]];
 
   let lastDate: Date | undefined = undefined;
   let yearIndex = -1;
@@ -112,7 +86,7 @@ export const organizeTxByTime = (txArray: FullTx[]) => {
 };
 
 export const filterTxByDate = (
-  txArray: FullTx[],
+  txArray: FullTxClientSide[],
   date: Date,
   rangeFormat: "year" | "month" | "date",
 ) => {

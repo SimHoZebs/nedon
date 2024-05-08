@@ -2,13 +2,12 @@ import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 
 import parseMoney from "@/util/parseMoney";
-import { calcSplitAmount } from "@/util/split";
 import { useTxStore } from "@/util/txStore";
-import type { SplitClientSide } from "@/util/types";
 
 import Calculator from "./TxModal/SplitList/Calculator";
 import TxModal from "./TxModal/TxModal";
 import { useStore } from "@/util/store";
+import type { SplitClientSide } from "@/util/types";
 
 interface Props {
   onClose: () => void;
@@ -23,35 +22,13 @@ const TxModalAndCalculator = (props: Props) => {
   );
   const isEditingSplit = useTxStore((s) => s.isEditingSplit);
   const editedSplitIndexArray = useTxStore((s) => s.editedSplitIndexArray);
+  const hasEditedCatArray = useTxStore((s) => s.hasEditedCatArray);
+  const unsavedCatArray = useTxStore((s) => s.unsavedCatArray);
   const focusedSplitIndex = useTxStore((state) => state.focusedSplitIndex);
   const tx = useTxStore((state) => state.txOnModal);
   const txAmount = tx?.amount || 0;
   const [isCalcHidden, setIsCalcHidden] = React.useState(false);
   const screenType = useStore((s) => s.screenType);
-
-  const updateSplitCatAmount = (
-    split: SplitClientSide,
-    oldAmount: number,
-    newAmount: number,
-  ) => {
-    const diff = parseMoney(newAmount - oldAmount);
-    let amountToDistribute = diff;
-    split.catArray.forEach((cat, i) => {
-      const catAmount = cat.amount || 0;
-
-      if (i === split.catArray.length - 1) {
-        cat.amount = parseMoney(catAmount + amountToDistribute);
-      } else {
-        const share = oldAmount
-          ? parseMoney((catAmount / oldAmount) * diff)
-          : parseMoney(diff / split.catArray.length);
-
-        cat.amount = parseMoney(catAmount + share);
-
-        amountToDistribute = parseMoney(amountToDistribute - share);
-      }
-    });
-  };
 
   //Changes a user's split amount and balances
   const changeSplitAmount = (index: number, newAmount: number) => {
@@ -59,45 +36,50 @@ const TxModalAndCalculator = (props: Props) => {
 
     const newAmountFloored = Math.max(Math.min(newAmount, txAmount), 0);
 
-    updateSplitCatAmount(
-      updatedSplitArray[index],
-      calcSplitAmount(unsavedSplitArray[index]),
-      newAmountFloored,
-    );
+    updatedSplitArray[index].amount = newAmountFloored;
 
-    const unmodifiedSplitArray: SplitClientSide[] = [];
-    const modifiedSplitAmountTotal = updatedSplitArray
-      .filter((split, i) => {
-        if (
-          editedSplitIndexArray.find((modifiedIndex) => modifiedIndex === i) !==
-            undefined ||
-          i === index
-        ) {
-          return split;
-        }
-        unmodifiedSplitArray.push(split);
-      })
-      .reduce((total, split) => calcSplitAmount(split) + total, 0);
+    const uneditedSplitArray: SplitClientSide[] = [];
 
-    let remainder = txAmount - modifiedSplitAmountTotal;
-    unmodifiedSplitArray.forEach((split, index) => {
-      if (index === unmodifiedSplitArray.length - 1) {
-        updateSplitCatAmount(split, calcSplitAmount(split), remainder);
+    // Calculate the total amount of the splits that hasn't been edited
+    let editedSplitAmountTotal = 0;
+    const len = updatedSplitArray.length;
+    for (let i = 0; i < len; i++) {
+      const split = updatedSplitArray[i];
+      //if was edited and isn't a split being changed
+      if (
+        editedSplitIndexArray.find((editedIndex) => editedIndex === i) !==
+          undefined ||
+        i === index
+      ) {
+        editedSplitAmountTotal += split.amount;
       } else {
-        updateSplitCatAmount(
-          split,
-          calcSplitAmount(split),
-          parseMoney(remainder / unmodifiedSplitArray.length),
-        );
+        uneditedSplitArray.push(split);
+      }
+    }
+
+    // include tx.user's if needed
+    if (hasEditedCatArray) {
+      editedSplitAmountTotal += unsavedCatArray.reduce(
+        (acc, cat) => acc + cat.amount,
+        0,
+      );
+    }
+
+    let remainder = txAmount - editedSplitAmountTotal;
+    uneditedSplitArray.forEach((split, index) => {
+      if (index === uneditedSplitArray.length - 1) {
+        split.amount += remainder;
+      } else {
+        split.amount += parseMoney(remainder / uneditedSplitArray.length);
         remainder = parseMoney(
-          remainder - remainder / unmodifiedSplitArray.length,
+          remainder - remainder / uneditedSplitArray.length,
         );
       }
     });
 
     setUnsavedSplitArray(updatedSplitArray);
     const updatedSplitAmountDisplayArray = updatedSplitArray.map((split) =>
-      calcSplitAmount(split).toString(),
+      split.amount.toString(),
     );
 
     setSpiltAmountDisplayArray(updatedSplitAmountDisplayArray);

@@ -9,7 +9,7 @@ import TxModalAndCalculator from "@/comp/tx/TxModalAndCalculator";
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { filterTxByDate, organizeTxByTime } from "@/util/tx";
-import type { FullTx } from "@/util/types";
+import type { FullTxClientSide } from "@/util/types";
 import useDateRange from "@/util/useDateRange";
 
 const Page: NextPage = () => {
@@ -21,7 +21,7 @@ const Page: NextPage = () => {
   );
 
   const [showModal, setShowModal] = useState(false);
-  const [scopedTxArray, setScopedTxArray] = useState<FullTx[]>([]);
+  const [scopedTxArray, setScopedTxArray] = useState<FullTxClientSide[]>([]);
   const { date, setDate, rangeFormat, setRangeFormat } =
     useDateRange(undefined);
 

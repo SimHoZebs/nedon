@@ -1,35 +1,24 @@
 import { z } from "zod";
 
 import db from "@/util/db";
-import { SplitClientSideModel, type SplitInDB } from "@/util/types";
 
 import { procedure, router } from "../trpc";
+import { type Split, SplitOptionalDefaultsSchema } from "prisma/generated/zod";
 
 const splitRouter = router({
   create: procedure
     .input(
       z.object({
         txId: z.string(),
-        split: SplitClientSideModel,
+        split: SplitOptionalDefaultsSchema,
       }),
     )
     .mutation(async ({ input }) => {
-      const { id, catArray, ...rest } = input.split;
+      const { id, ...rest } = input.split;
       return await db.split.create({
         data: {
           ...rest,
           txId: input.txId,
-          catArray: {
-            createMany: {
-              data: catArray.map((cat) => ({
-                nameArray: cat.nameArray,
-                amount: cat.amount,
-              })),
-            },
-          },
-        },
-        include: {
-          catArray: true,
         },
       });
     }),
@@ -38,93 +27,53 @@ const splitRouter = router({
     .input(
       z.object({
         txId: z.string(),
-        split: SplitClientSideModel,
+        split: SplitOptionalDefaultsSchema,
       }),
     )
     .mutation(async ({ input }) => {
-      const { id, catArray, ...rest } = input.split;
+      const { id, ...rest } = input.split;
 
+      //TODO isn't this an upsert?
       const updatedTxArray = id
         ? await db.split.update({
             where: {
               id,
             },
-            data: {
-              catArray: {
-                updateMany: catArray.map((cat) => ({
-                  where: {
-                    splitId: id,
-                  },
-                  data: {
-                    nameArray: cat.nameArray,
-                    amount: cat.amount,
-                  },
-                })),
-              },
-            },
-            include: {
-              catArray: true,
-            },
+            data: { ...rest },
           })
         : await db.split.create({
             data: { ...rest, txId: input.txId },
-            include: {
-              catArray: true,
-            },
           });
 
       return updatedTxArray;
     }),
 
   upsertMany: procedure
-    .input(
-      z.object({
-        txId: z.string(),
-        splitArray: z.array(SplitClientSideModel),
-      }),
-    )
+    .input(z.array(SplitOptionalDefaultsSchema))
     .mutation(async ({ input }) => {
-      const splitToUpdateArray = input.splitArray.filter(
-        (split) => split.id,
-      ) as SplitInDB[];
-      const splitToCreateArray = input.splitArray.filter((split) => !split.id);
+      const splitToUpdateArray = input.filter((split) => split.id) as Split[];
+      const splitToCreateArray = input.filter((split) => !split.id);
 
       const updatedTx = await db.tx.update({
         where: {
-          id: input.txId,
+          id: input[0].txId,
         },
         data: {
           splitArray: {
-            create: splitToCreateArray.map(({ id, txId, ...split }) => ({
-              ...split,
-              catArray: {
-                create: split.catArray.map(({ id, ...cat }) => ({
-                  ...cat,
-                })),
-              },
-            })),
+            createMany: {
+              data: splitToCreateArray.map(({ id, txId, ...split }) => ({
+                ...split,
+              })),
+            },
 
-            update: splitToUpdateArray.map(({ id: splitId, catArray }) => ({
+            update: splitToUpdateArray.map(({ id: splitId, ...split }) => ({
               where: { id: splitId },
-              data: {
-                catArray: {
-                  update: catArray.map(({ id, splitId, ...cat }) => ({
-                    where: { id },
-                    data: {
-                      ...cat,
-                    },
-                  })),
-                },
-              },
+              data: split,
             })),
           },
         },
         include: {
-          splitArray: {
-            include: {
-              catArray: true,
-            },
-          },
+          splitArray: true,
         },
       });
 

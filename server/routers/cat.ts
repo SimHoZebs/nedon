@@ -3,14 +3,13 @@ import {
   CatOptionalDefaultsSchema,
   CatSchema,
   CatSettingsOptionalDefaultsSchema,
-  CatSettingsOptionalDefaultsWithRelationsSchema,
-  CatSettingsWithRelationsSchema,
 } from "prisma/generated/zod";
 import { z } from "zod";
 
 import db from "@/util/db";
 
 import { procedure, router } from "../trpc";
+import { CatClientSideSchema } from "@/util/types";
 
 const catRouter = router({
   create: procedure
@@ -24,23 +23,21 @@ const catRouter = router({
   upsertMany: procedure
     .input(
       z.object({
-        catArray: z.array(CatOptionalDefaultsSchema),
+        catArray: z.array(CatClientSideSchema),
       }),
     )
     .mutation(async ({ input }) => {
       const catToUpdateArray = input.catArray.filter((cat) => cat.id) as Cat[];
       const catToCreateArray = input.catArray.filter((cat) => !cat.id);
 
-      const upsertedSplit = await db.split.update({
-        where: {
-          id: input.catArray[0].splitId,
-        },
+      const upsertedTx = await db.tx.update({
+        where: { id: input.catArray[0].txId },
         data: {
           catArray: {
-            updateMany: catToUpdateArray.map(({ id, splitId, ...rest }) => ({
-              where: { id },
-              data: rest,
-            })),
+            updateMany: {
+              where: { txId: input.catArray[0].txId },
+              data: catToUpdateArray.map(({ id, txId, ...rest }) => rest),
+            },
 
             createMany: {
               data: catToCreateArray.map(({ id, ...cat }) => ({
@@ -50,12 +47,18 @@ const catRouter = router({
             },
           },
         },
-        include: {
-          catArray: true,
-        },
+        include: { catArray: true },
       });
 
-      return upsertedSplit;
+      return upsertedTx.catArray;
+    }),
+
+  delete: procedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      return await db.cat.delete({
+        where: { id: input.id },
+      });
     }),
 
   deleteMany: procedure

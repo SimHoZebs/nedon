@@ -49,20 +49,21 @@ model Tx {
   id      String @id @default(cuid())
   plaidId String //plaid tx_id
 
-  ownerId String
-  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  catArray Cat[]
 
   splitArray Split[]
 }
 
 model Split {
-  id      String @id @default(uuid())
-  plaidId String //plaid tx_id
+  id String @id @default(uuid())
 
   userId String
   user   User   @relation("splitUserArray", fields: [userId], references: [id], onDelete: Cascade)
 
-  catArray Cat[]
+  amount Float
 
   txId String
   tx   Tx     @relation(fields: [txId], references: [id], onDelete: Cascade)
@@ -70,11 +71,12 @@ model Split {
 
 model Cat {
   id        String   @id @default(uuid())
+  name      String
   nameArray String[]
   amount    Float
 
-  splitId String
-  split   Split  @relation(fields: [splitId], references: [id], onDelete: Cascade)
+  tx   Tx     @relation(fields: [txId], references: [id])
+  txId String
 }
 
 model CatSettings {
@@ -86,6 +88,6 @@ model CatSettings {
   parentId String?
   children CatSettings[] @relation("SubCategory")
 
-  User   User?   @relation(fields: [userId], references: [id])
-  userId String?
+  User   User   @relation(fields: [userId], references: [id])
+  userId String
 }

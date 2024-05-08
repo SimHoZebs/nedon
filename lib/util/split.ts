@@ -1,9 +1,13 @@
-import parseMoney from "./parseMoney";
+import type { Transaction } from "plaid";
 import type { SplitClientSide } from "./types";
 
-export const calcSplitAmount = (split: SplitClientSide) => {
-  return split.catArray.reduce(
-    (total, cat) => parseMoney(total + cat.amount),
-    0,
-  );
+export const createNewSplit = (
+  userId: string,
+  plaidTx: Transaction,
+): SplitClientSide => {
+  return {
+    userId: userId,
+    txId: undefined,
+    amount: plaidTx.amount,
+  };
 };

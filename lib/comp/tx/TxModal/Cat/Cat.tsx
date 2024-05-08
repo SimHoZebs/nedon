@@ -2,12 +2,10 @@ import React, { useRef, useState } from "react";
 
 import { ActionBtn, Button } from "@/comp/Button";
 
-import { emptyCat, mergeCatArray } from "@/util/cat";
-import parseMoney from "@/util/parseMoney";
-import { calcSplitAmount } from "@/util/split";
+import { emptyCat } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import { isSplitInDB } from "@/util/types";
+import type { CatClientSide } from "@/util/types";
 
 import CatChip from "./CatChip";
 import CatPicker from "./CatPicker";
@@ -15,19 +13,16 @@ import CatPicker from "./CatPicker";
 const offScreen = { x: -800, y: -800 };
 
 const Cat = () => {
-  const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
-  const setUnsavedSplitArray = useTxStore(
-    (state) => state.setUnsavedSplitArray,
-  );
+  const setUnsavedCatArray = useTxStore((state) => state.setUnsavedCatArray);
   const tx = useTxStore((state) => state.txOnModal);
-  const refreshDBData = useTxStore((state) => state.refreshDBData);
+  const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);
   const catPickerRef = useRef<HTMLDivElement>(null);
   const upsertManyCat = trpc.cat.upsertMany.useMutation();
 
-  const unsavedMergedCatArray = mergeCatArray(unsavedSplitArray);
+  const unsavedCatArray = useTxStore((state) => state.unsavedCatArray);
 
   //Indicator for if (undefined) and which (number) cat is being edited. 'if' is needed for CatChip.tsx to highlight the editing cat.
-  const [editingMergedCatIndex, setEditingMergedCatIndex] = useState<number>();
+  const [editingCatIndex, setEditingMergedCatIndex] = useState<number>();
   const [isManaging, setIsManaging] = useState(false);
   const queryClient = trpc.useUtils();
 
@@ -37,36 +32,21 @@ const Cat = () => {
     y: number;
   }>(offScreen);
 
-  const updatedSplitAmount = parseMoney(
-    unsavedSplitArray.reduce(
-      (amount, split) => amount + calcSplitAmount(split),
-      0,
-    ),
-  );
-
-  const txAmount = tx?.amount || 0;
-
-  const isWrongSplit =
-    updatedSplitAmount !== txAmount && unsavedSplitArray.length > 0;
-
   return (
     <div className="flex gap-y-1">
       <div className="flex flex-col gap-y-1">
         <div className="relative flex w-full flex-wrap items-center gap-2 ">
-          {unsavedMergedCatArray.map((cat, index) => (
+          {unsavedCatArray?.map((cat, index) => (
             <CatChip
               key={cat.id}
               index={index}
               isManaging={isManaging}
               setIsManaging={setIsManaging}
-              isMultiCat={unsavedMergedCatArray.length > 1}
-              isEditing={editingMergedCatIndex === index}
-              mergedCat={
-                editingMergedCatIndex === index
-                  ? unsavedMergedCatArray[index]
-                  : cat
-              }
-              findAndSetPickerPosition={(e) => {
+              isMultiCat={unsavedCatArray.length > 1}
+              isEditTarget={editingCatIndex === index}
+              cat={editingCatIndex === index ? unsavedCatArray[index] : cat}
+              onCatChipClick={(e) => {
+                //find and set picker position
                 setEditingMergedCatIndex(index);
 
                 //pickerOffset is sometimes undefined if it's outside
@@ -92,30 +72,17 @@ const Cat = () => {
             onClickAsync={async (e) => {
               setIsManaging(true);
 
-              const mergedCatArrayClone = structuredClone(
-                unsavedMergedCatArray,
-              );
+              //create a copy
+              const tmpCatArray: CatClientSide[] =
+                structuredClone(unsavedCatArray);
 
-              mergedCatArrayClone.push(
-                emptyCat({ amount: 0, splitId: undefined }),
-              );
+              //add a new cat
+              tmpCatArray.push(emptyCat({ amount: 0, txId: tx?.id }));
 
-              const newCat = emptyCat({
-                amount: 0,
-                splitId: undefined,
-              });
-
-              const updatedSplitArray = structuredClone(unsavedSplitArray).map(
-                (split) => {
-                  split.catArray.push(newCat);
-                  return split;
-                },
-              );
-
-              setUnsavedSplitArray(updatedSplitArray);
+              setUnsavedCatArray(tmpCatArray);
 
               //The index is referenced from the clone instead of the react state as they are identical and the react state wouldn't have updated yet (See: batch state update)
-              setEditingMergedCatIndex(mergedCatArrayClone.length - 1);
+              setEditingMergedCatIndex(tmpCatArray.length - 1);
 
               //pickerOffset is sometimes undefined if it's outside
               const pickerOffsets =
@@ -144,23 +111,14 @@ const Cat = () => {
         {isManaging && (
           <div className="flex gap-x-2">
             <ActionBtn
-              disabled={isWrongSplit}
+              aria-label="Confirm adding category"
+              //disabled={isWrongTotal}
               onClickAsync={async () => {
-                const splitArrayClone = structuredClone(unsavedSplitArray);
-                const targetSplit = splitArrayClone[0];
-
-                if (!isSplitInDB(targetSplit)) {
-                  console.error();
-                  return;
-                }
-
-                const updatedSplit = await upsertManyCat.mutateAsync({
-                  catArray: targetSplit.catArray,
+                const updatedCatArray = await upsertManyCat.mutateAsync({
+                  catArray: unsavedCatArray,
                 });
 
-                splitArrayClone[0] = updatedSplit;
-
-                refreshDBData(splitArrayClone);
+                refreshTxModalData(updatedCatArray);
                 setIsManaging(false);
                 queryClient.tx.invalidate();
               }}
@@ -176,7 +134,7 @@ const Cat = () => {
                   console.error("Can't reset splitArray. tx is undefined");
                   return;
                 }
-                setUnsavedSplitArray(tx.splitArray);
+                setUnsavedCatArray(tx.catArray);
               }}
             >
               <span className="icon-[iconamoon--close-fill]" />
@@ -187,9 +145,9 @@ const Cat = () => {
         {tx && (
           <CatPicker
             ref={catPickerRef}
-            unsavedMergedCatArray={unsavedMergedCatArray}
+            appUserCatArray={unsavedCatArray || []}
             //Fallback to 0 for initial boundingClient size.
-            editingMergedCatIndex={editingMergedCatIndex || 0}
+            editingCatIndex={editingCatIndex || 0}
             position={pickerPosition}
             closePicker={() => {
               setEditingMergedCatIndex(undefined);

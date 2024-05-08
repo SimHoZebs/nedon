@@ -1,14 +1,10 @@
 import type React from "react";
-import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 import Input from "@/comp/Input";
 
-import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { useTxStore } from "@/util/txStore";
-
-import UserSplitCat from "./UserSplitCat";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   index: number;
@@ -21,15 +17,15 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const SplitUser = (props: Props) => {
-  const { appUser } = getAppUser();
   const tx = useTxStore((state) => state.txOnModal);
   const unsavedSplitArray = useTxStore((s) => s.unsavedSplitArray);
   const setUnsavedSplitArray = useTxStore((s) => s.setUnsavedSplitArray);
-  const [showDetail, setShowDetail] = useState(false);
   const amountDisplayArray = useTxStore((s) => s.splitAmountDisplayArray);
   const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
   const amountDisplay = amountDisplayArray[props.index];
   const amount = Number.parseFloat(amountDisplay);
+  const unsavedCatArray = useTxStore((s) => s.unsavedCatArray);
+  const setUnsavedCatArray = useTxStore((s) => s.setUnsavedCatArray);
 
   const split = unsavedSplitArray[props.index];
   const txAmount = tx ? tx.amount : 0;
@@ -39,24 +35,31 @@ const SplitUser = (props: Props) => {
     ) !== undefined;
 
   const removeUser = () => {
+    const updatedCatArray = structuredClone(unsavedCatArray);
     const updatedSplitArray = structuredClone(unsavedSplitArray);
-    const splicedSplit = updatedSplitArray.splice(props.index, 1);
 
-    for (const split of updatedSplitArray) {
-      split.catArray.forEach((cat, i) => {
-        cat.amount += parseMoney(
-          splicedSplit[0].catArray[i].amount / updatedSplitArray.length,
-        );
-      });
+    //remove split from unsavedSplitArray
+    updatedSplitArray.splice(props.index, 1);
+    setUnsavedSplitArray(updatedSplitArray);
+
+    //add split amount back to unassigned category
+    const unassignedCat = updatedCatArray.findIndex(
+      (cat) => cat.name === "Unassigned",
+    );
+
+    if (unassignedCat === -1) {
+      console.log("Unassigned category not found in catArray", updatedCatArray);
+      return;
     }
 
-    setUnsavedSplitArray(updatedSplitArray);
+    updatedCatArray[unassignedCat].amount += amount;
+    setUnsavedCatArray(updatedCatArray);
   };
 
   return (
     <div className="flex w-full flex-col gap-y-1 rounded-lg lg:w-fit ">
       <div className="flex w-full items-center justify-start gap-x-2 ">
-        {split.userId === appUser?.id || focusedIndex !== undefined ? (
+        {focusedIndex !== undefined ? (
           <div className="aspect-square w-5" />
         ) : (
           <button
@@ -159,29 +162,6 @@ const SplitUser = (props: Props) => {
           </p>
         </div>
       </div>
-
-      <button
-        type="button"
-        className={`group mb-5 flex w-full flex-col items-center justify-center overflow-hidden rounded-b-lg bg-zinc-700 ${
-          showDetail || "h-1 hover:m-0 hover:h-fit"
-        }`}
-        onClick={() => setShowDetail(!showDetail)}
-      >
-        {showDetail && (
-          <div className="flex w-full items-center justify-evenly border-x-2 border-t-2 border-zinc-700 bg-zinc-800">
-            {split.catArray.map((cat, i) => (
-              <UserSplitCat
-                splitIndex={props.index}
-                catIndex={i}
-                key={cat.id}
-              />
-            ))}
-          </div>
-        )}
-        <div className="m-1 flex h-fit w-full justify-center bg-zinc-700">
-          <span className="icon-[formkit--open] h-4 w-4" />
-        </div>
-      </button>
     </div>
   );
 };

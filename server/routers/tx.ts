@@ -10,12 +10,13 @@ import { convertToFullTx } from "@/util/tx";
 import {
   type FullTxClientSide,
   type TxInDB,
-  FullTxClientSideSchema,
+  TxClientSideSchema,
+  FullTxSchema,
 } from "@/util/types";
 
 import { procedure, router } from "../trpc";
 import { client } from "../util";
-import { SplitSchema } from "prisma/generated/zod";
+import { TxSchema } from "prisma/generated/zod";
 
 const txRouter = router({
   getWithoutPlaid: procedure
@@ -26,11 +27,8 @@ const txRouter = router({
           id: input.txId,
         },
         include: {
-          splitArray: {
-            include: {
-              catArray: true,
-            },
-          },
+          catArray: true,
+          splitArray: true,
         },
       });
 
@@ -77,14 +75,11 @@ const txRouter = router({
 
       const txArray: TxInDB[] = await db.tx.findMany({
         where: {
-          ownerId: user.id,
+          userId: user.id,
         },
         include: {
-          splitArray: {
-            include: {
-              catArray: true,
-            },
-          },
+          catArray: true,
+          splitArray: true,
         },
       });
 
@@ -111,68 +106,87 @@ const txRouter = router({
               userId: input.id,
             },
           },
-          ownerId: input.id,
+          userId: input.id,
         },
 
         include: {
-          splitArray: {
-            include: {
-              catArray: true,
-            },
-          },
+          catArray: true,
+          splitArray: true,
         },
       });
     }),
 
-  create: procedure
-    .input(FullTxClientSideSchema)
-    .mutation(async ({ input }) => {
-      const data = {
+  create: procedure.input(TxClientSideSchema).mutation(async ({ input }) => {
+    const data = {
+      plaidId: input.plaidId,
+      userId: input.userId,
+      id: input.txId,
+    };
+
+    const tx = await db.tx.create({
+      data: {
+        ...data,
+        catArray: {
+          create: input.catArray.map((cat) => ({
+            name: cat.name,
+            nameArray: cat.nameArray,
+            amount: cat.amount,
+          })),
+        },
+        splitArray: {
+          create: input.splitArray.map((split) => ({
+            userId: split.userId,
+            amount: split.amount,
+          })),
+        },
+      },
+      include: {
+        catArray: true,
+        splitArray: true,
+      },
+    });
+
+    return tx;
+  }),
+
+  update: procedure.input(FullTxSchema).mutation(async ({ input }) => {
+    const tx = await db.tx.update({
+      where: {
+        id: input.id,
+      },
+      data: {
         plaidId: input.plaidId,
-        ownerId: input.ownerId,
-        id: input.txId,
-      };
-
-      const tx = await db.tx.create({
-        data: {
-          ...data,
-          splitArray: {
-            create: input.splitArray.map((split) => ({
-              userId: split.userId,
-              plaidId: split.plaidId,
-              catArray: {
-                create: split.catArray.map((cat) => ({
-                  name: cat.name,
-                  amount: cat.amount,
-                })),
-              },
-            })),
-          },
+        catArray: {
+          create: input.catArray.map((cat) => ({
+            name: cat.name,
+            nameArray: cat.nameArray,
+            amount: cat.amount,
+          })),
         },
-        include: {
-          splitArray: {
-            include: {
-              catArray: true,
-            },
-          },
+        splitArray: {
+          create: input.splitArray.map((split) => ({
+            userId: split.userId,
+            amount: split.amount,
+          })),
         },
-      });
+      },
+      include: {
+        catArray: true,
+        splitArray: true,
+      },
+    });
 
-      return tx;
-    }),
+    return tx;
+  }),
 
   //createMeta could've been modified instead but this avoids accidentally missing txId for Plaid txs.
   createManually: procedure
-    .input(
-      z.object({
-        userId: z.string(),
-        splitArray: z.array(SplitSchema),
-      }),
-    )
+    .input(TxClientSideSchema)
     .mutation(async ({ input }) => {
       const tx = await db.tx.create({
         data: {
-          owner: {
+          plaidId: input.plaidId,
+          user: {
             connect: {
               id: input.userId,
             },
@@ -203,7 +217,7 @@ const txRouter = router({
     .mutation(async ({ input }) => {
       await db.tx.deleteMany({
         where: {
-          ownerId: input.id,
+          userId: input.id,
         },
       });
     }),

@@ -4,29 +4,26 @@ import catStyleArray from "./catStyle";
 import parseMoney from "./parseMoney";
 import type { TxType } from "./tx";
 import type {
+  FullTxClientSide,
   CatClientSide,
-  FullTx,
-  MergedCat,
-  SplitClientSide,
   TreedCat,
   TreedCatWithTx,
 } from "./types";
 
 export const emptyCat = ({
+  txId,
   nameArray,
-  splitId,
   amount = 0,
 }: {
+  txId?: string;
   nameArray?: string[];
-  name?: string;
-  splitId: string | undefined;
   amount: number;
-  budget?: number;
 }): CatClientSide => {
   return {
     id: undefined,
+    txId: txId,
+    name: nameArray?.slice(-1)[0] || "Unknown",
     nameArray: nameArray || [],
-    splitId: splitId,
     amount: amount,
   };
 };
@@ -34,27 +31,6 @@ export const emptyCat = ({
 export const getCatStyle = (nameArray: string[]) => {
   const style = catStyleArray[nameArray.slice(-1)[0]];
   return style ? style : catStyleArray.Unknown;
-};
-
-export const mergeCatArray = (splitArray: SplitClientSide[]) => {
-  const mergedCatArray: MergedCat[] = [];
-
-  for (const split of splitArray) {
-    for (const { nameArray, amount, ...rest } of split.catArray) {
-      const storedCat = mergedCatArray.find(
-        ({ nameArray: storedNameArray }) =>
-          storedNameArray.at(-1) === nameArray.at(-1),
-      );
-
-      if (storedCat) {
-        storedCat.amount += amount;
-      } else {
-        mergedCatArray.push(structuredClone({ nameArray, amount, ...rest }));
-      }
-    }
-  }
-
-  return mergedCatArray;
 };
 
 export const convertPlaidCatsToHierarchicalArray = (
@@ -70,12 +46,12 @@ export const convertPlaidCatsToHierarchicalArray = (
 
 export const fillArrayByCat = (
   resultArray: TreedCatWithTx[],
-  tx: FullTx,
-  cat: MergedCat,
+  tx: FullTxClientSide,
+  cat: CatClientSide,
 ): TreedCatWithTx[] => {
   const nameArray = cat.nameArray;
 
-  if (!nameArray.length) return resultArray;
+  if (!nameArray || !nameArray.length) return resultArray;
 
   const firstCatName = nameArray[0];
 

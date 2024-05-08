@@ -2,17 +2,42 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 import { resetFullTx } from "./tx";
-import type { FullTx, SplitClientSide, TxInDB } from "./types";
+import {
+  isSplitArrayInDB,
+  type CatClientSide,
+  type FullTxClientSide,
+  type SplitClientSide,
+  type TxInDB,
+} from "./types";
+import type { Cat, Split } from "@prisma/client";
 
+/**
+ * Tx depends on three forms of data:
+ * 1. Data in the database
+ * 2. Data on the client side synced with the database
+ * 3. Data on the client side that isn't synced with the database due to
+ * temporary modifications
+ *
+ * */
 interface Store {
-  txOnModal: FullTx | undefined;
-  setTxOnModal: (tx?: FullTx) => void;
+  txOnModal: FullTxClientSide | undefined;
+  setTxOnModal: (tx?: FullTxClientSide) => void;
 
-  //Function to refresh client data with database data after it processed client's update.
-  //This is only for data that has been SAVED.
-  refreshDBData: (tx: TxInDB | SplitClientSide[]) => void;
+  /**
+   * Only use this function when new data is expected from the database.
+   * Refreshes client data with database data after it processed client's update.
+   */
+  refreshTxModalData: (tx: TxInDB | Split[] | Cat[]) => void;
   resetTx: () => void;
 
+  //catArray
+  hasEditedCatArray: boolean;
+  setHasEditedCatArray: (hasEditedCatArray: boolean) => void;
+
+  unsavedCatArray: CatClientSide[];
+  setUnsavedCatArray: (catArray: CatClientSide[]) => void;
+
+  //splitArray
   unsavedSplitArray: SplitClientSide[];
   setUnsavedSplitArray: (splitArray: SplitClientSide[]) => void;
 
@@ -34,15 +59,16 @@ interface Store {
 export const useTxStore = create<Store>()(
   devtools((set) => ({
     txOnModal: undefined,
-    setTxOnModal: (transasction: FullTx | undefined) =>
+    setTxOnModal: (transasction: FullTxClientSide | undefined) =>
       set({ txOnModal: transasction }),
 
-    refreshDBData: (dbData: TxInDB | SplitClientSide[]) => {
+    refreshTxModalData: (dbData: TxInDB | Split[] | Cat[]) => {
       set((store) => {
         if (!store.txOnModal) return store;
 
         const clone = structuredClone(store.txOnModal);
-        if (Array.isArray(dbData)) {
+        //is Split[]
+        if (isSplitArrayInDB(dbData)) {
           return {
             txOnModal: {
               ...clone,
@@ -50,6 +76,16 @@ export const useTxStore = create<Store>()(
             },
           };
         }
+        //is Cat[]
+        if (Array.isArray(dbData)) {
+          return {
+            txOnModal: {
+              ...clone,
+              catArray: dbData,
+            },
+          };
+        }
+        //is TxInDB
         return {
           txOnModal: {
             ...clone,
@@ -70,6 +106,14 @@ export const useTxStore = create<Store>()(
           unsavedSplitArray: tx.splitArray,
         };
       }),
+
+    hasEditedCatArray: false,
+    setHasEditedCatArray: (hasEditedCatArray: boolean) =>
+      set({ hasEditedCatArray: hasEditedCatArray }),
+
+    unsavedCatArray: [],
+    setUnsavedCatArray: (catArray: CatClientSide[]) =>
+      set({ unsavedCatArray: catArray }),
 
     unsavedSplitArray: [],
     setUnsavedSplitArray: (splitArray: SplitClientSide[]) =>

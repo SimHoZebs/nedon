@@ -2,13 +2,13 @@ import type React from "react";
 
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
-import type { FullTx } from "@/util/types";
+import type { FullTxClientSide } from "@/util/types";
 
 import { H2, H3 } from "./Heading";
 import TxCard from "./tx/TxCard";
 
 interface Props {
-  sortedTxArray: FullTx[][][][];
+  sortedTxArray: FullTxClientSide[][][][];
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 

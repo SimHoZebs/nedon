@@ -6,10 +6,9 @@ import { H3 } from "@/comp/Heading";
 
 import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
-import { calcSplitAmount } from "@/util/split";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import { isSplitInDB } from "@/util/types";
+import { type TxInDB, isFullTxInDB } from "@/util/types";
 
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
@@ -20,16 +19,15 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 
 const SplitList = (props: Props) => {
   const createTx = trpc.tx.create.useMutation();
+  const updateTx = trpc.tx.update.useMutation();
   const deleteSplit = trpc.split.delete.useMutation();
-  const createSplit = trpc.split.create.useMutation();
-  const upsertManyCat = trpc.cat.upsertMany.useMutation();
   const queryClient = trpc.useUtils();
 
   const { appUser } = getAppUser();
   const isEditingSplit = useTxStore((state) => state.isEditingSplit);
   const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
   const tx = useTxStore((state) => state.txOnModal);
-  const refreshDBData = useTxStore((state) => state.refreshDBData);
+  const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);
   const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
   const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
@@ -51,16 +49,13 @@ const SplitList = (props: Props) => {
   const txAmount = tx?.amount || 0;
 
   const updatedSplitAmount = parseMoney(
-    unsavedSplitArray.reduce(
-      (amount, split) => amount + calcSplitAmount(split),
-      0,
-    ),
+    unsavedSplitArray.reduce((amount, split) => amount + split.amount, 0),
   );
 
   const isWrongSplit =
     updatedSplitAmount !== txAmount && unsavedSplitArray.length > 0;
 
-  const saveChanges = async () => {
+  const syncSplit = async () => {
     if (!appUser || !tx) {
       console.error("appUser or tx is undefined. appuser:", appUser, "tx:", tx);
       return;
@@ -76,38 +71,28 @@ const SplitList = (props: Props) => {
     }
 
     //if tx doesn't exist, create one
-    if (!tx.id) {
-      const txDBData = await createTx.mutateAsync({
+    let txDBData: TxInDB;
+    if (!isFullTxInDB(tx)) {
+      txDBData = await createTx.mutateAsync({
         userId: appUser.id,
-        txId: tx.transaction_id,
+        plaidId: tx.plaidId,
+        catArray: tx.catArray,
         splitArray: unsavedSplitArray,
       });
-
-      refreshDBData(txDBData);
     }
     //otherwise, update the tx
     else {
-      const dbUpdatedSplitArray = await Promise.all(
-        unsavedSplitArray.map(async (split) => {
-          if (!isSplitInDB(split)) {
-            return await createSplit.mutateAsync({
-              //biome-ignore lint: id boolean was checked in if statement
-              txId: tx.id!,
-              split,
-            });
-          }
-          return await upsertManyCat.mutateAsync({
-            catArray: split.catArray,
-          });
-        }),
-      );
-
-      refreshDBData(dbUpdatedSplitArray);
+      txDBData = await updateTx.mutateAsync(tx);
     }
 
+    refreshTxModalData(txDBData);
+    queryClient.tx.invalidate();
+  };
+
+  const resetEditingSplit = () => {
     setIsEditingSplit(false);
     setEditedIndexArray([]);
-    queryClient.tx.invalidate();
+    setFocusedSplitIndex(undefined);
   };
 
   return (
@@ -128,23 +113,27 @@ const SplitList = (props: Props) => {
             <H3>Split</H3>
             {isEditingSplit ? (
               <div className="flex gap-x-2">
-                <ActionBtn disabled={isWrongSplit} onClickAsync={saveChanges}>
+                <ActionBtn
+                  disabled={isWrongSplit}
+                  onClickAsync={async () => {
+                    await syncSplit();
+                    resetEditingSplit();
+                  }}
+                >
                   Save changes
                 </ActionBtn>
 
                 <ActionBtn
                   variant="negative"
                   onClick={() => {
-                    setEditedIndexArray([]);
-                    setIsEditingSplit(false);
-                    setFocusedSplitIndex(undefined);
+                    resetEditingSplit();
                     if (!tx) {
                       console.error("Can't reset splitArray. tx is undefined");
                       return;
                     }
                     setUnsavedSplitArray(tx.splitArray);
                     const splitAmountArray = tx.splitArray.map((split) =>
-                      calcSplitAmount(split).toString(),
+                      split.amount.toString(),
                     );
                     setSplitAmountDisplayArray(splitAmountArray);
                   }}

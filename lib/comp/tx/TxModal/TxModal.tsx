@@ -7,7 +7,6 @@ import { H1 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
 
 import getAppUser from "@/util/getAppUser";
-import { calcSplitAmount } from "@/util/split";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
@@ -54,7 +53,7 @@ const TxModal = (props: Props) => {
 
   useEffect(() => {
     setSplitAmountDisplayArray(
-      unsavedSplitArray.map((split) => calcSplitAmount(split).toString()),
+      unsavedSplitArray.map((split) => split.amount.toString()),
     );
   }, [setSplitAmountDisplayArray, unsavedSplitArray]);
 
