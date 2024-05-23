@@ -35,7 +35,8 @@ const SplitList = (props: Props) => {
   const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
-  const amountDisplayArray = useTxStore(
+  const setUnsavedCatArray = useTxStore((state) => state.setUnsavedCatArray);
+  const splitAmountDisplayArray = useTxStore(
     (state) => state.splitAmountDisplayArray,
   );
   const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
@@ -120,6 +121,7 @@ const SplitList = (props: Props) => {
         <div className="flex flex-col gap-y-1">
           <div className="flex w-full gap-x-2 px-3">
             <H3>Split</H3>
+
             {isEditingSplit ? (
               <div className="flex gap-x-2">
                 <ActionBtn
@@ -141,6 +143,7 @@ const SplitList = (props: Props) => {
                       return;
                     }
                     setUnsavedSplitArray(tx.splitArray);
+                    setUnsavedCatArray(tx.catArray);
                     const splitAmountArray = tx.splitArray.map((split) =>
                       split.amount.toString(),
                     );
@@ -185,7 +188,7 @@ const SplitList = (props: Props) => {
                     setEditedIndexArray((prev) => [...prev, i]);
                     props.onAmountChange(i, updatedAmount);
                   }}
-                  splitAmount={amountDisplayArray[i]}
+                  splitAmount={splitAmountDisplayArray[i]}
                   editedIndexArray={editedIndexArray}
                   onFocus={() => {
                     setFocusedIndex(i);

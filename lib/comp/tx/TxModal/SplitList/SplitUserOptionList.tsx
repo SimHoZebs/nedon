@@ -92,8 +92,9 @@ const SplitUserOptionList = () => {
                         id: undefined,
                         txId: null,
                         originTxId: undefined,
-                        amount:
+                        amount: parseMoney(
                           txOnModal?.amount / (unsavedSplitArray.length + 2),
+                        ),
                         userId: user.id,
                       });
 
