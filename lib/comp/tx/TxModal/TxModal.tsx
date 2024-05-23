@@ -32,6 +32,7 @@ const TxModal = (props: Props) => {
   const setUnsavedSplitArray = useTxStore(
     (state) => state.setUnsavedSplitArray,
   );
+  const setUnsavedCatArray = useTxStore((state) => state.setUnsavedCatArray);
   const setSplitAmountDisplayArray = useTxStore(
     (state) => state.setSplitAmountDisplayArray,
   );
@@ -44,12 +45,19 @@ const TxModal = (props: Props) => {
   useEffect(() => {
     console.debug("txModal dependencies updated");
     if (!tx) {
-      console.error("Unable to set unsavedSplitArray. tx is undefined");
+      console.error(
+        "Nedon couldn't load transaction data into the modal to display. This prevents splits and categories from showing on your screen.",
+      );
+      console.error(
+        "TECHNICAL: Unable to set unsavedSplitArray and unsavedCatArray. tx is",
+        tx,
+      );
       return;
     }
 
     setUnsavedSplitArray(tx.splitArray);
-  }, [setUnsavedSplitArray, tx]);
+    setUnsavedCatArray(tx.catArray);
+  }, [setUnsavedSplitArray, setUnsavedCatArray, tx]);
 
   useEffect(() => {
     setSplitAmountDisplayArray(
