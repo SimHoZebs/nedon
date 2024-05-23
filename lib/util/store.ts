@@ -47,6 +47,7 @@ export const useLocalStore = create<LocalStore>()(
 
       { name: "local-storage" },
     ),
+    { name: "local-storage" },
   ),
 );
 
@@ -68,22 +69,26 @@ interface Store {
 }
 
 export const useStore = create<Store>()(
-  devtools((set) => ({
-    linkToken: "", // Don't set to null or error message will show up briefly when site loads
-    setLinkToken: (linkToken: string | null) => set({ linkToken }),
+  devtools(
+    (set) => ({
+      linkToken: "", // Don't set to null or error message will show up briefly when site loads
+      setLinkToken: (linkToken: string | null) => set({ linkToken }),
 
-    appUser: undefined,
-    setAppUser: (appUser: UserClientSide | undefined) => set({ appUser }),
+      appUser: undefined,
+      setAppUser: (appUser: UserClientSide | undefined) => set({ appUser }),
 
-    appGroup: undefined,
-    setAppGroup: (appGroup: GroupClientSide | undefined) => set({ appGroup }),
+      appGroup: undefined,
+      setAppGroup: (appGroup: GroupClientSide | undefined) => set({ appGroup }),
 
-    screenType: "desktop",
-    setScreenType: (screenType: "mobile" | "tablet" | "desktop") =>
-      set({ screenType }),
+      screenType: "desktop",
+      setScreenType: (screenType: "mobile" | "tablet" | "desktop") =>
+        set({ screenType }),
 
-    verticalCatPicker: false,
-    setVerticalCatPicker: (verticalCatPicker: boolean) =>
-      set({ verticalCatPicker }),
-  })),
+      verticalCatPicker: false,
+      setVerticalCatPicker: (verticalCatPicker: boolean) =>
+        set({ verticalCatPicker }),
+    }),
+
+    { name: "global-store" },
+  ),
 );

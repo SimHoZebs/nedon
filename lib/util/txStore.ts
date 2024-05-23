@@ -57,92 +57,97 @@ interface Store {
 }
 
 export const useTxStore = create<Store>()(
-  devtools((set) => ({
-    txOnModal: undefined,
-    setTxOnModal: (transasction: FullTxClientSide | undefined) =>
-      set({ txOnModal: transasction }),
+  devtools(
+    (set) => ({
+      txOnModal: undefined,
+      setTxOnModal: (transasction: FullTxClientSide | undefined) =>
+        set({ txOnModal: transasction }),
 
-    refreshTxModalData: (dbData: TxInDB | Split[] | Cat[]) => {
-      set((store) => {
-        if (!store.txOnModal) return store;
+      refreshTxModalData: (dbData: TxInDB | Split[] | Cat[]) => {
+        set((store) => {
+          if (!store.txOnModal) return store;
 
-        const clone = structuredClone(store.txOnModal);
-        //is Split[]
-        if (isSplitArrayInDB(dbData)) {
+          const clone = structuredClone(store.txOnModal);
+          //is Split[]
+          if (isSplitArrayInDB(dbData)) {
+            return {
+              txOnModal: {
+                ...clone,
+                splitArray: dbData,
+              },
+            };
+          }
+          //is Cat[]
+          if (Array.isArray(dbData)) {
+            return {
+              txOnModal: {
+                ...clone,
+                catArray: dbData,
+              },
+            };
+          }
+          //is TxInDB
           return {
             txOnModal: {
               ...clone,
-              splitArray: dbData,
+              ...dbData,
             },
           };
-        }
-        //is Cat[]
-        if (Array.isArray(dbData)) {
+        });
+      },
+
+      resetTx: () =>
+        set((store) => {
+          if (!store.txOnModal) return store;
+
+          const tx = resetFullTx(store.txOnModal);
+
           return {
-            txOnModal: {
-              ...clone,
-              catArray: dbData,
-            },
+            txOnModal: tx,
+            unsavedSplitArray: tx.splitArray,
           };
-        }
-        //is TxInDB
-        return {
-          txOnModal: {
-            ...clone,
-            ...dbData,
-          },
-        };
-      });
-    },
+        }),
 
-    resetTx: () =>
-      set((store) => {
-        if (!store.txOnModal) return store;
+      hasEditedCatArray: false,
+      setHasEditedCatArray: (hasEditedCatArray: boolean) =>
+        set({ hasEditedCatArray: hasEditedCatArray }),
 
-        const tx = resetFullTx(store.txOnModal);
+      unsavedCatArray: [],
+      setUnsavedCatArray: (catArray: CatClientSide[]) =>
+        set({ unsavedCatArray: catArray }),
 
-        return {
-          txOnModal: tx,
-          unsavedSplitArray: tx.splitArray,
-        };
-      }),
+      unsavedSplitArray: [],
+      setUnsavedSplitArray: (splitArray: SplitClientSide[]) =>
+        set({ unsavedSplitArray: splitArray }),
 
-    hasEditedCatArray: false,
-    setHasEditedCatArray: (hasEditedCatArray: boolean) =>
-      set({ hasEditedCatArray: hasEditedCatArray }),
+      editedSplitIndexArray: [],
+      setEditedSplitIndexArray: (
+        input: number[] | ((prev: number[]) => number[]),
+      ) => {
+        set((store) => {
+          if (typeof input === "function") {
+            return {
+              editedSplitIndexArray: input(store.editedSplitIndexArray),
+            };
+          }
+          return { editedSplitIndexArray: input };
+        });
+      },
 
-    unsavedCatArray: [],
-    setUnsavedCatArray: (catArray: CatClientSide[]) =>
-      set({ unsavedCatArray: catArray }),
+      isEditingSplit: false,
+      setIsEditingSplit: (isEditingSplit: boolean) =>
+        set({ isEditingSplit: isEditingSplit }),
 
-    unsavedSplitArray: [],
-    setUnsavedSplitArray: (splitArray: SplitClientSide[]) =>
-      set({ unsavedSplitArray: splitArray }),
+      focusedSplitIndex: undefined,
+      setFocusedSplitIndex: (index: number | undefined) =>
+        set({ focusedSplitIndex: index }),
 
-    editedSplitIndexArray: [],
-    setEditedSplitIndexArray: (
-      input: number[] | ((prev: number[]) => number[]),
-    ) => {
-      set((store) => {
-        if (typeof input === "function") {
-          return { editedSplitIndexArray: input(store.editedSplitIndexArray) };
-        }
-        return { editedSplitIndexArray: input };
-      });
-    },
-
-    isEditingSplit: false,
-    setIsEditingSplit: (isEditingSplit: boolean) =>
-      set({ isEditingSplit: isEditingSplit }),
-
-    focusedSplitIndex: undefined,
-    setFocusedSplitIndex: (index: number | undefined) =>
-      set({ focusedSplitIndex: index }),
-
-    //sum of category amount
-    //string instead of number to temporarily store arithmetic
-    splitAmountDisplayArray: [],
-    setSplitAmountDisplayArray: (splitAmountDisplayArray: string[]) =>
-      set({ splitAmountDisplayArray: splitAmountDisplayArray }),
-  })),
+      //sum of category amount
+      //string instead of number to temporarily store arithmetic
+      splitAmountDisplayArray: [],
+      setSplitAmountDisplayArray: (splitAmountDisplayArray: string[]) =>
+        set({ splitAmountDisplayArray: splitAmountDisplayArray }),
+    }),
+    { name: "txStore" },
+  ),
 );
