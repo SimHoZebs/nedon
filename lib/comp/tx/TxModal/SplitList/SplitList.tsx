@@ -101,12 +101,14 @@ const SplitList = (props: Props) => {
     <div className="flex w-full flex-col gap-y-3">
       <div className="flex items-center gap-x-3">
         {props.children}
-        {unsavedSplitArray.length === 1 && focusedIndex === undefined && (
-          <SecondaryBtn onClick={() => setFocusedSplitIndex(0)}>
-            <span className="icon-[lucide--split] m-1 h-4 w-4" />
-            Split
-          </SecondaryBtn>
-        )}
+        {appUser?.groupArray &&
+          appUser.groupArray.length > 1 &&
+          focusedIndex === undefined && (
+            <SecondaryBtn onClick={() => setFocusedSplitIndex(0)}>
+              <span className="icon-[lucide--split] m-1 h-4 w-4" />
+              Split
+            </SecondaryBtn>
+          )}
       </div>
 
       {(unsavedSplitArray.length > 1 || focusedIndex !== undefined) && (
