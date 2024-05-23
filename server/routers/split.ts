@@ -56,7 +56,7 @@ const splitRouter = router({
 
       const updatedTx = await db.tx.update({
         where: {
-          id: input[0].txId,
+          id: input[0].txId || undefined,
         },
         data: {
           splitArray: {

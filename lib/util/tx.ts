@@ -17,10 +17,13 @@ export const convertToFullTx = (
   return {
     ...plaidTx,
     id: undefined,
-    txId: undefined,
+    userTotal: txInDB?.userTotal || 0,
+    originTxId: txInDB?.originTxId || null,
     plaidId: txInDB?.plaidId || plaidTx.transaction_id,
     userId: userId,
-    catArray: [emptyCat(plaidTx.category)],
+    catArray: txInDB?.catArray || [
+      emptyCat({ nameArray: plaidTx.category || [], amount: plaidTx.amount }),
+    ],
     splitArray: txInDB?.splitArray || [createNewSplit(userId, plaidTx)],
   };
 };

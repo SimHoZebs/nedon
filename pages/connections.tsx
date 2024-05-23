@@ -7,6 +7,9 @@ import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 
+/**
+ * Page to show all of user's connections and the amount owed by either party.
+ * */
 const Connections = () => {
   const [showModal, setShowModal] = useState(false);
   const [oweUser, setOweUser] = useState<{ id: string; amount: number }>();
@@ -29,6 +32,8 @@ const Connections = () => {
   );
   const queryClient = trpc.useUtils();
 
+  const calcOweAmount = (userId: string) => {};
+
   const calcOweGroup = useMemo(() => {
     if (!associatedTxArray.data) {
       associatedTxArray.status === "pending"
@@ -47,10 +52,7 @@ const Connections = () => {
 
     for (const tx of associatedTxArray.data) {
       for (const split of tx.splitArray) {
-        const splitAmount = split.catArray.reduce(
-          (total, cat) => total + cat.amount,
-          0,
-        );
+        const splitAmount = split.amount;
 
         if (tx.ownerId === appUser.id) {
           if (split.userId === appUser.id) continue;

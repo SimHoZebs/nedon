@@ -20,7 +20,7 @@ datasource db {
 }
 
 model Group {
-  id String @id @default(uuid())
+  id String @id @default(cuid())
 
   ownerId    String
   groupOwner User   @relation("mygroup", fields: [ownerId], references: [id], onDelete: Cascade)
@@ -28,7 +28,7 @@ model Group {
 }
 
 model User {
-  id           String  @id @default(uuid())
+  id           String  @id @default(cuid())
   name         String  @default("")
   ACCESS_TOKEN String?
   PUBLIC_TOKEN String?
@@ -37,46 +37,62 @@ model User {
   PAYMENT_ID   String? // The payment_id is only relevant for the UK/EU Payment Initiation product.
 
   ownedTxArray Tx[] //transactions I own
-  splitTxArray Split[] @relation("splitUserArray") //transactions I am included in
+  splitTxArray Split[] @relation("splitUserArray") //Splits I am included in
 
+  //Why is this not just a many-to-many relationship?
   myGroup    Group[] @relation("mygroup") //groups I own
   groupArray Group[] //array of groups this user is included in
 
   CatSettings CatSettings[]
 }
 
+//Created when a transaction is saved to the database from category modification
+//or split.
+//Also created when a user accepts a split from another user.
 model Tx {
   id      String @id @default(cuid())
-  plaidId String //plaid tx_id
-
-  originTxId String?
-  //the original transaction this tx was split from. null if this is the original tx
-  originTx   Tx?     @relation("originTx", fields: [originTxId], references: [id])
+  plaidId String //plaid tranasction_id
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  userTotal Float //can be less than tx.amount, but is target total of catArray.amount
+  //For tracking splits. Can be less than tx.amount, but is target total of catArray.amount
+  userTotal Float
   catArray  Cat[]
 
-  splitArray   Split[]
-  splitTxArray Tx[]    @relation("originTx")
+  splitTxArray Tx[] @relation("originTx") //transactions that were split from this tx
+
+  //If this tx was created from a split, this is the split id
+  refSplit Split? @relation("refSplit")
+
+  //the original transaction this tx was split from. null if this is the original tx
+  originTxId String?
+  originTx   Tx?     @relation("originTx", fields: [originTxId], references: [id], onDelete: Cascade)
+
+  splitArray Split[] //Splits that were created from this tx
 }
 
+//Created for Bob when Alice splits their transaction with Bob.
+//Bob can accept this split to create a new tx with the same amount as the split.
 model Split {
-  id String @id @default(uuid())
+  id String @id @default(cuid())
 
   userId String
   user   User   @relation("splitUserArray", fields: [userId], references: [id], onDelete: Cascade)
 
   amount Float
 
-  txId String
-  tx   Tx     @relation(fields: [txId], references: [id], onDelete: Cascade)
+  //transaction associated with this split
+  txId String? @unique
+  tx   Tx?     @relation("refSplit", fields: [txId], references: [id], onDelete: Cascade)
+
+  //transaction this split comes from
+  originTxId String
+  originTx   Tx     @relation(fields: [originTxId], references: [id], onDelete: Cascade)
 }
 
 model Cat {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   name      String
   nameArray String[]
   amount    Float
@@ -86,7 +102,7 @@ model Cat {
 }
 
 model CatSettings {
-  id     String @id @default(uuid())
+  id     String @id @default(cuid())
   name   String
   budget Float
 

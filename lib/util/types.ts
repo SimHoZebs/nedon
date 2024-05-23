@@ -36,10 +36,6 @@ export type TreedCatWithTx = {
   subCatArray: TreedCatWithTx[];
 };
 
-export function isFullTxInDB(tx: FullTxClientSide): tx is FullTx {
-  return !!tx.id;
-}
-
 export type TxInDB = Tx & { splitArray: Split[]; catArray: Cat[] };
 
 //CAT
@@ -60,7 +56,7 @@ export const isCatArrayInDB = (obj: unknown): obj is Cat[] => {
 //SPLIT
 
 export const SplitClientSideSchema = SplitOptionalDefaultsSchema.extend({
-  txId: z.string().optional(),
+  originTxId: z.string().optional(),
 });
 export type SplitClientSide = z.infer<typeof SplitClientSideSchema>;
 
@@ -73,7 +69,6 @@ export const isSplitArrayInDB = (obj: unknown): obj is Split[] => {
 };
 
 export const TxClientSideSchema = TxOptionalDefaultsSchema.extend({
-  txId: z.string().optional(),
   catArray: z.array(CatClientSideSchema),
   splitArray: z.array(SplitClientSideSchema),
 });
@@ -86,6 +81,10 @@ export const FullTxSchema = TxOptionalDefaultsSchema.extend({
   splitArray: z.array(SplitOptionalDefaultsSchema),
 });
 export type FullTx = z.infer<typeof FullTxSchema> & Transaction;
+
+export function isFullTxInDB(tx: FullTxClientSide): tx is FullTx {
+  return !!tx.id;
+}
 
 export function isPlaidTx(plaidTx: unknown): plaidTx is FullTxClientSide {
   return (plaidTx as FullTxClientSide).id !== undefined;

@@ -8,7 +8,7 @@ export const createNewSplit = (
 ): SplitClientSide => {
   return {
     userId: userId,
-    txId: undefined,
+    txId: null,
     amount: plaidTx.amount,
   };
 };

@@ -90,7 +90,8 @@ const SplitUserOptionList = () => {
                       //add new split
                       updatedSplitArray.push({
                         id: undefined,
-                        txId: undefined,
+                        txId: null,
+                        originTxId: undefined,
                         amount:
                           txOnModal?.amount / (unsavedSplitArray.length + 2),
                         userId: user.id,

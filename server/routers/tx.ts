@@ -3,7 +3,6 @@ import type {
   Transaction,
   TransactionsSyncRequest,
 } from "plaid";
-import { TxSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 import db from "@/util/db";
@@ -120,7 +119,7 @@ const txRouter = router({
     const data = {
       plaidId: input.plaidId,
       userId: input.userId,
-      id: input.txId,
+      userTotal: input.userTotal,
     };
 
     const tx = await db.tx.create({
@@ -186,6 +185,7 @@ const txRouter = router({
       const tx = await db.tx.create({
         data: {
           plaidId: input.plaidId,
+          userTotal: input.userTotal,
           user: {
             connect: {
               id: input.userId,

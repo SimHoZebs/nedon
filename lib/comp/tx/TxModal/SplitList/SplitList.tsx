@@ -76,6 +76,8 @@ const SplitList = (props: Props) => {
       txDBData = await createTx.mutateAsync({
         userId: appUser.id,
         plaidId: tx.plaidId,
+        userTotal: tx.amount,
+        originTxId: null,
         catArray: tx.catArray,
         splitArray: unsavedSplitArray,
       });
