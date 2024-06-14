@@ -21,6 +21,7 @@ interface Props {
 
 const CatPicker = forwardRef(
   (props: Props, ref: ForwardedRef<HTMLDivElement>) => {
+    const createTx = trpc.tx.create.useMutation();
     const upsertCatArray = trpc.cat.upsertMany.useMutation();
     const catOptionArray = trpc.getCatOptionArray.useQuery(undefined, {
       staleTime: Number.POSITIVE_INFINITY,
@@ -54,17 +55,37 @@ const CatPicker = forwardRef(
      * @param clickedTreedCat  if the cat is assigned by click instead of the "save" button.
      */
     const applyChangesToCat = async (clickedTreedCat?: TreedCat) => {
+      if (!tx) {
+        console.error("Can't apply changes to cat. tx is undefined.");
+        return;
+      }
+
       const tmpCatArray = structuredClone(unsavedCatArray);
       const tmpNameArray = structuredClone(unsavedNameArray);
+      const tmpTx = structuredClone(tx);
       if (clickedTreedCat) {
         tmpNameArray.push(clickedTreedCat.name);
       }
 
-      tmpCatArray.push(emptyCat({ nameArray: unsavedNameArray, amount: 0 }));
-      const upsertedCatArray = await upsertCatArray.mutateAsync({
-        catArray: tmpCatArray,
+      //The last element is the temporary category this update is for.
+      tmpCatArray[tmpCatArray.length - 1] = emptyCat({
+        nameArray: tmpNameArray,
+        amount: 0,
       });
-      refreshTxModalData(upsertedCatArray);
+
+      tmpTx.catArray = tmpCatArray;
+
+      if (!tmpTx.id) {
+        console.log("tx.id is undefined. Creating a new tx.", tmpTx);
+        const newTx = await createTx.mutateAsync(tmpTx);
+        refreshTxModalData(newTx);
+      } else {
+        const upsertedCatArray = await upsertCatArray.mutateAsync({
+          txId: tmpTx.id,
+          catArray: tmpCatArray,
+        });
+        refreshTxModalData(upsertedCatArray);
+      }
 
       queryClient.tx.invalidate();
     };
@@ -163,6 +184,7 @@ const CatPicker = forwardRef(
         <div className="grid w-full auto-cols-fr grid-cols-3 overflow-x-hidden overflow-y-scroll bg-zinc-800 pb-1 pl-2 text-xs ">
           {currentOptionArray.map((cat) => (
             <button
+              className="group my-1 mr-2 flex aspect-square flex-col items-center  justify-center gap-y-1  hyphens-auto rounded-lg border border-zinc-400 text-center hover:bg-zinc-700 hover:text-zinc-200"
               type="button"
               onClick={async () => {
                 if (cat.subCatArray.length === 0) {
@@ -185,9 +207,6 @@ const CatPicker = forwardRef(
                 }
               }}
               key={cat.name}
-              className={
-                "group my-1 mr-2 flex aspect-square flex-col items-center  justify-center gap-y-1  hyphens-auto rounded-lg border border-zinc-400 text-center hover:bg-zinc-700 hover:text-zinc-200"
-              }
             >
               <span
                 className={`h-6 w-6 ${

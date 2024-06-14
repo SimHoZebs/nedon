@@ -114,8 +114,14 @@ const Cat = () => {
               aria-label="Confirm adding category"
               //disabled={isWrongTotal}
               onClickAsync={async () => {
+                if (!tx || tx.id === undefined) {
+                  console.error("Can't upsert catArray. tx is undefined");
+                  return;
+                }
+
                 const updatedCatArray = await upsertManyCat.mutateAsync({
                   catArray: unsavedCatArray,
+                  txId: tx.id,
                 });
 
                 refreshTxModalData(updatedCatArray);

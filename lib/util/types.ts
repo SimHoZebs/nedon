@@ -77,6 +77,7 @@ export type TxClientSide = z.infer<typeof TxClientSideSchema>;
 export type FullTxClientSide = Transaction & TxClientSide;
 
 export const FullTxSchema = TxOptionalDefaultsSchema.extend({
+  id: z.string(),
   catArray: z.array(CatSchema),
   splitArray: z.array(SplitOptionalDefaultsSchema),
 });

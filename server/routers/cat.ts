@@ -23,6 +23,7 @@ const catRouter = router({
   upsertMany: procedure
     .input(
       z.object({
+        txId: z.string(),
         catArray: z.array(CatClientSideSchema),
       }),
     )
@@ -31,17 +32,20 @@ const catRouter = router({
       const catToCreateArray = input.catArray.filter((cat) => !cat.id);
 
       const upsertedTx = await db.tx.update({
-        where: { id: input.catArray[0].txId },
+        where: { id: input.txId },
         data: {
           catArray: {
-            updateMany: {
-              where: { txId: input.catArray[0].txId },
-              data: catToUpdateArray.map(({ id, txId, ...rest }) => rest),
-            },
+            updateMany:
+              catToUpdateArray.length > 0
+                ? catToUpdateArray.map(({ txId, ...rest }) => ({
+                    where: { id: rest.id },
+                    data: rest,
+                  }))
+                : undefined,
 
             createMany: {
-              data: catToCreateArray.map(({ id, ...cat }) => ({
-                ...cat,
+              data: catToCreateArray.map(({ id, txId, ...rest }) => ({
+                ...rest,
                 id: undefined,
               })),
             },
