@@ -44,13 +44,10 @@ const CatChip = (props: Props) => {
           } ${
             getCatStyle(props.cat.nameArray)?.icon ||
             "icon-[mdi--shape-plus-outline]"
-          }
-`}
+          } `}
         />
 
-        <div
-          className={"group flex h-full flex-col items-start text-zinc-300 "}
-        >
+        <div className={"group flex h-full flex-col items-start text-zinc-300"}>
           <div className="flex w-full justify-between gap-x-2">
             <p className={props.isEditTarget ? "animate-pulse" : ""}>
               {props.cat.nameArray.at(-1)}
@@ -72,17 +69,17 @@ const CatChip = (props: Props) => {
                       return;
                     }
                     const tmpCatArray = structuredClone(unsavedCatArray);
-                    const updatedCatArray = tmpCatArray.splice(props.index, 1);
+                    tmpCatArray.splice(props.index, 1);
 
-                    if (!isCatArrayInDB(updatedCatArray)) {
+                    if (!isCatArrayInDB(tmpCatArray)) {
                       console.error(
                         "Unable to delete cat; One or more cat in array are ClientSide.",
-                        updatedCatArray,
+                        tmpCatArray,
                       );
                       return;
                     }
 
-                    refreshDBData(updatedCatArray);
+                    refreshDBData(tmpCatArray);
                     await deleteCat.mutateAsync({
                       id: props.cat.id,
                     });
@@ -102,7 +99,7 @@ const CatChip = (props: Props) => {
             >
               ${" "}
               <input
-                className="w-14 bg-zinc-800 group-hover:bg-zinc-700 "
+                className="w-14 bg-zinc-800 group-hover:bg-zinc-700"
                 type="number"
                 min={0}
                 step={0.01}
