@@ -16,7 +16,7 @@ export const convertToFullTx = (
 ): FullTxClientSide => {
   return {
     ...plaidTx,
-    id: undefined,
+    id: txInDB?.id,
     userTotal: txInDB?.userTotal || 0,
     originTxId: txInDB?.originTxId || null,
     plaidId: txInDB?.plaidId || plaidTx.transaction_id,
