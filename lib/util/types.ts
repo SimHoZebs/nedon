@@ -5,6 +5,7 @@ import {
   CatOptionalDefaultsSchema,
   CatSchema,
   SplitOptionalDefaultsSchema,
+  SplitSchema,
   TxOptionalDefaultsSchema,
   UserSchema,
 } from "prisma/generated/zod";
@@ -61,11 +62,16 @@ export const SplitClientSideSchema = SplitOptionalDefaultsSchema.extend({
 export type SplitClientSide = z.infer<typeof SplitClientSideSchema>;
 
 export const isSplitInDB = (split: SplitClientSide): split is Split => {
-  return split.id !== undefined;
+  return split.userId !== undefined;
 };
 export const isSplitArrayInDB = (obj: unknown): obj is Split[] => {
   if (!Array.isArray(obj)) return false;
-  return obj.every(isSplitInDB);
+  try {
+    obj.every((item) => SplitSchema.parse(item));
+    return true;
+  } catch (e) {
+    return false;
+  }
 };
 
 export const TxClientSideSchema = TxOptionalDefaultsSchema.extend({
