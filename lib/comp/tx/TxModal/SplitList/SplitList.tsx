@@ -101,8 +101,6 @@ const SplitList = (props: Props) => {
     setFocusedSplitIndex(undefined);
   };
 
-  console.log("groupArray", appGroup.data?.userArray);
-
   return (
     <div className="flex w-full flex-col gap-y-3">
       <div className="flex items-center gap-x-3">

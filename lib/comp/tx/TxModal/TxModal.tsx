@@ -36,6 +36,7 @@ const TxModal = (props: Props) => {
   const setSplitAmountDisplayArray = useTxStore(
     (state) => state.setSplitAmountDisplayArray,
   );
+  const refreshTxModalData = useTxStore((s) => s.refreshTxModalData);
   const resetTx = useTxStore((s) => s.resetTx);
   const setFocusedSplitIndex = useTxStore((s) => s.setFocusedSplitIndex);
   const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
@@ -154,7 +155,7 @@ const TxModal = (props: Props) => {
                   resetTx();
                   await deleteTx.mutateAsync({ id: tx.id });
 
-                  queryClient.tx.invalidate();
+                  await queryClient.tx.invalidate();
                 }}
               >
                 Reset transaction data

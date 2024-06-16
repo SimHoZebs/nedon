@@ -6,6 +6,13 @@ import type { FullTxClientSide, TreedCatWithTx, TxInDB } from "./types";
 
 export const resetFullTx = (fullTx: FullTxClientSide): FullTxClientSide => ({
   ...fullTx,
+  splitArray: [createNewSplit(fullTx.userId, fullTx)],
+  catArray: [
+    emptyCat({
+      nameArray: fullTx.category || [],
+      amount: fullTx.amount,
+    }),
+  ],
   id: undefined,
 });
 
