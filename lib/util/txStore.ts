@@ -28,6 +28,8 @@ interface Store {
    * Refreshes client data with database data after it processed client's update.
    */
   refreshTxModalData: (tx: TxInDB | Split[] | Cat[]) => void;
+
+  //only to reset tx to a state without a txInDB
   resetTx: () => void;
 
   //catArray

@@ -67,8 +67,10 @@ const TxModalAndCalculator = (props: Props) => {
 
     let remainder = txAmount - editedSplitAmountTotal;
     uneditedSplitArray.forEach((split, index) => {
-      if (index === uneditedSplitArray.length - 1) {
-        split.amount += remainder;
+      if (uneditedSplitArray.length === 1) {
+        split.amount = parseMoney(remainder);
+      } else if (index === uneditedSplitArray.length - 1) {
+        split.amount += parseMoney(remainder);
       } else {
         split.amount += parseMoney(remainder / uneditedSplitArray.length);
         remainder = parseMoney(

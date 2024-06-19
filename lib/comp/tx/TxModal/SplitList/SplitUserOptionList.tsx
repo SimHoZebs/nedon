@@ -64,10 +64,10 @@ const SplitUserOptionList = () => {
                       const updatedSplitArray: SplitClientSide[] =
                         structuredClone(unsavedSplitArray).map((split, i) => ({
                           ...split,
-                          //1 for new split, 1 for tx.user
+                          //1 for new split
                           amount: parseMoney(
                             unsavedCatArray[i].amount /
-                              (unsavedSplitArray.length + 2),
+                              (unsavedSplitArray.length + 1),
                           ),
                         }));
 
@@ -78,7 +78,7 @@ const SplitUserOptionList = () => {
                         ...cat,
                         amount: parseMoney(
                           unsavedCatArray[i].amount /
-                            (unsavedSplitArray.length + 2),
+                            (unsavedSplitArray.length + 1),
                         ),
                       }));
 
@@ -93,7 +93,7 @@ const SplitUserOptionList = () => {
                         txId: null,
                         originTxId: undefined,
                         amount: parseMoney(
-                          txOnModal?.amount / (unsavedSplitArray.length + 2),
+                          txOnModal?.amount / (unsavedSplitArray.length + 1),
                         ),
                         userId: user.id,
                       });
