@@ -19,35 +19,20 @@ export const useLocalStoreDelay = <T, F>(
 };
 
 interface LocalStore {
-  userIdArray: string[];
-  setUserIdArray: (userIdArray: string[]) => void;
-  addUserId: (userId: string) => void;
-  deleteUserId: (userId: string) => void;
+  userId: string | null;
+  setUserId: (userId: string | null) => void;
 }
 
 export const useLocalStore = create<LocalStore>()(
   devtools(
     persist(
-      (set, get) => ({
-        userIdArray: [],
-
-        setUserIdArray: (userIdArray: string[]) => set({ userIdArray }),
-
-        addUserId: (userId: string) =>
-          set((prev) => {
-            if (!prev.userIdArray) return { userIdArray: [userId] };
-            return { userIdArray: [...get().userIdArray, userId] };
-          }),
-
-        deleteUserId: (userId: string) =>
-          set((prev) => ({
-            userIdArray: prev.userIdArray.filter((id) => id !== userId),
-          })),
+      (set) => ({
+        userId: null,
+        setUserId: (userId: string | null) => set({ userId }),
       }),
 
       { name: "local-storage" },
     ),
-    { name: "local-storage" },
   ),
 );
 

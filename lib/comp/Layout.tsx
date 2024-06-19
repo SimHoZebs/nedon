@@ -4,7 +4,7 @@ import type React from "react";
 import { useEffect } from "react";
 
 import getAppUser from "@/util/getAppUser";
-import { useStore } from "@/util/store";
+import { useLocalStore, useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 
 import { NavBtn } from "./Button";
@@ -18,6 +18,7 @@ const customFont = Open_Sans({
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
 
+  const setUserId = useLocalStore((state) => state.setUserId);
   const setScreenType = useStore((state) => state.setScreenType);
   const createUser = trpc.user.create.useMutation();
   const updateUser = trpc.user.update.useMutation();
@@ -34,6 +35,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   useEffect(() => {
     const createUserWithPlaid = async () => {
       const user = await createUser.mutateAsync();
+      setUserId(user.id);
       await updateUser.mutateAsync({ ...user, name: user.id.slice(0, 8) });
       await createGroup.mutateAsync({ id: user.id });
 
@@ -63,6 +65,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       createUserWithPlaid();
     }
   }, [
+    setUserId,
     allUsers.isFetching,
     appUser,
     createGroup,
