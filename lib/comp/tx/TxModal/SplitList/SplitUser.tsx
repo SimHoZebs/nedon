@@ -12,7 +12,6 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   //splitAmount could be inferred from unsavedSplitArray[props.index] instead, but that would repeat calculation done in SplitList
   splitAmount: string;
   editedIndexArray: number[];
-  setEditedIndexArray: React.Dispatch<React.SetStateAction<number[]>>;
   onAmountChange: (splitAmount: string) => void;
 }
 
@@ -26,6 +25,7 @@ const SplitUser = (props: Props) => {
   const amount = Number.parseFloat(amountDisplay);
   const unsavedCatArray = useTxStore((s) => s.unsavedCatArray);
   const setUnsavedCatArray = useTxStore((s) => s.setUnsavedCatArray);
+  const setEditedIndexArray = useTxStore((s) => s.setEditedSplitIndexArray);
 
   const split = unsavedSplitArray[props.index];
   const txAmount = tx ? tx.amount : 0;
@@ -57,8 +57,8 @@ const SplitUser = (props: Props) => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-y-1 rounded-lg lg:w-fit ">
-      <div className="flex w-full items-center justify-start gap-x-2 ">
+    <div className="flex w-full flex-col gap-y-1 rounded-lg lg:w-fit">
+      <div className="flex w-full items-center justify-start gap-x-2">
         {focusedIndex !== undefined ? (
           <div className="aspect-square w-5" />
         ) : (
@@ -79,7 +79,7 @@ const SplitUser = (props: Props) => {
               <label htmlFor="amount">$</label>
               <Input
                 className={twMerge(
-                  "w-full ",
+                  "w-full",
                   isModified ? "outline outline-2 outline-zinc-700" : "",
                 )}
                 id="amount"
@@ -100,7 +100,7 @@ const SplitUser = (props: Props) => {
                         props.editedIndexArray,
                       );
                       updatedArray.push(props.index);
-                      props.setEditedIndexArray(updatedArray);
+                      setEditedIndexArray(updatedArray);
                     }
                     const newValue = Math.min(
                       Number.parseFloat(e.target.value),
@@ -127,7 +127,7 @@ const SplitUser = (props: Props) => {
                 value={parseMoney((amount / txAmount) * 100)}
                 onFocus={props.onFocus}
                 onChange={(e) => {
-                  props.setEditedIndexArray((prev) => [...prev, props.index]);
+                  setEditedIndexArray((prev) => [...prev, props.index]);
                   const prevPercentage = parseMoney((amount / txAmount) * 100);
                   const updatedPercentage = Math.min(
                     Number.parseFloat(e.target.value),

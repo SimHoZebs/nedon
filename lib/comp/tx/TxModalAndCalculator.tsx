@@ -70,12 +70,10 @@ const TxModalAndCalculator = (props: Props) => {
       if (uneditedSplitArray.length === 1) {
         split.amount = parseMoney(remainder);
       } else if (index === uneditedSplitArray.length - 1) {
-        split.amount += parseMoney(remainder);
+        split.amount = parseMoney(remainder);
       } else {
-        split.amount += parseMoney(remainder / uneditedSplitArray.length);
-        remainder = parseMoney(
-          remainder - remainder / uneditedSplitArray.length,
-        );
+        split.amount = parseMoney(remainder / uneditedSplitArray.length);
+        remainder = parseMoney(remainder - split.amount);
       }
     });
 

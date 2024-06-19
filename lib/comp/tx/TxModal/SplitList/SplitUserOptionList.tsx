@@ -78,7 +78,7 @@ const SplitUserOptionList = () => {
                       //reduce for tx.user as well
                       const updatedCatArray = structuredClone(
                         unsavedCatArray,
-                      ).map((cat, i) => ({
+                      ).map((cat) => ({
                         ...cat,
                         amount: parseMoney(
                           txOnModal.amount / (unsavedSplitArray.length + 1),

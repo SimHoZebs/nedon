@@ -47,8 +47,12 @@ const SplitList = (props: Props) => {
     (state) => state.setSplitAmountDisplayArray,
   );
   const setFocusedIndex = useTxStore((state) => state.setFocusedSplitIndex);
-
-  const [editedIndexArray, setEditedIndexArray] = useState<number[]>([]);
+  const editedSplitIndexArray = useTxStore(
+    (state) => state.editedSplitIndexArray,
+  );
+  const setEditedSplitIndexArray = useTxStore(
+    (state) => state.setEditedSplitIndexArray,
+  );
 
   const txAmount = tx?.amount || 0;
 
@@ -97,7 +101,7 @@ const SplitList = (props: Props) => {
 
   const resetEditingSplit = () => {
     setIsEditingSplit(false);
-    setEditedIndexArray([]);
+    setEditedSplitIndexArray([]);
     setFocusedSplitIndex(undefined);
   };
 
@@ -183,16 +187,15 @@ const SplitList = (props: Props) => {
               >
                 <SplitUser
                   onAmountChange={(updatedAmount) => {
-                    setEditedIndexArray((prev) => [...prev, i]);
+                    setEditedSplitIndexArray((prev) => [...prev, i]);
                     props.onAmountChange(i, updatedAmount);
                   }}
                   splitAmount={splitAmountDisplayArray[i]}
-                  editedIndexArray={editedIndexArray}
+                  editedIndexArray={editedSplitIndexArray}
                   onFocus={() => {
                     setFocusedIndex(i);
                     setIsEditingSplit(true);
                   }}
-                  setEditedIndexArray={setEditedIndexArray}
                   index={i}
                 >
                   <div className="flex items-center gap-x-2 rounded-full border-2 border-zinc-400">

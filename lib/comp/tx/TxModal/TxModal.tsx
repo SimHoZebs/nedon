@@ -36,7 +36,6 @@ const TxModal = (props: Props) => {
   const setSplitAmountDisplayArray = useTxStore(
     (state) => state.setSplitAmountDisplayArray,
   );
-  const refreshTxModalData = useTxStore((s) => s.refreshTxModalData);
   const resetTx = useTxStore((s) => s.resetTx);
   const setFocusedSplitIndex = useTxStore((s) => s.setFocusedSplitIndex);
   const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
@@ -116,7 +115,7 @@ const TxModal = (props: Props) => {
               </p>
             </div>
 
-            <div className="flex flex-col items-start  text-sm font-light text-zinc-400 lg:items-end">
+            <div className="flex flex-col items-start text-sm font-light text-zinc-400 lg:items-end">
               <CloseBtn
                 isForDesktop
                 onClose={() => {
