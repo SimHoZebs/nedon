@@ -62,44 +62,44 @@ const Settings = () => {
               <p>Name: {user.name}</p>
               <p>id: {user.id}</p>
             </div>
-            {
-              <Button
-                className={`after:h-full after:w-px after:bg-zinc-500 ${
-                  appGroup.data?.userArray?.find(
-                    (groupUser) => groupUser.id === user.id,
-                  )
-                    ? "text-pink-400"
-                    : "text-indigo-400"
-                }`}
-                onClickAsync={async (e) => {
-                  e.stopPropagation();
-                  if (!appGroup.data) return;
 
-                  appGroup.data.userArray?.find(
-                    (groupUser) => groupUser.id === user.id,
-                  )
-                    ? await removeUserFromGroup.mutateAsync({
-                        groupId: appGroup.data.id,
-                        userId: user.id,
-                      })
-                    : await addUserToGroup.mutateAsync({
-                        userId: user.id,
-                        groupId: appGroup.data.id,
-                      });
-
-                  await queryClient.user.getAll.invalidate();
-                  await queryClient.group.get.invalidate();
-                }}
-              >
-                {appGroup.data?.userArray?.find(
+            <Button
+              className={`after:h-full after:w-px after:bg-zinc-500 ${
+                appGroup.data?.userArray?.find(
                   (groupUser) => groupUser.id === user.id,
-                ) ? (
-                  <span className="icon-[mdi--user-remove-outline] h-5 w-5" />
-                ) : (
-                  <span className="icon-[mdi--user-add-outline] h-5 w-5" />
-                )}
-              </Button>
-            }
+                )
+                  ? "text-pink-400"
+                  : "text-indigo-400"
+              }`}
+              onClickAsync={async (e) => {
+                e.stopPropagation();
+                if (!appGroup.data) return;
+
+                appGroup.data.userArray?.find(
+                  (groupUser) => groupUser.id === user.id,
+                )
+                  ? await removeUserFromGroup.mutateAsync({
+                      groupId: appGroup.data.id,
+                      userId: user.id,
+                    })
+                  : await addUserToGroup.mutateAsync({
+                      userId: user.id,
+                      groupId: appGroup.data.id,
+                    });
+
+                await queryClient.user.getAll.invalidate();
+                await queryClient.group.get.invalidate();
+              }}
+            >
+              {appGroup.data?.userArray?.find(
+                (groupUser) => groupUser.id === user.id,
+              ) ? (
+                <span className="icon-[mdi--user-remove-outline] h-5 w-5" />
+              ) : (
+                <span className="icon-[mdi--user-add-outline] h-5 w-5" />
+              )}
+            </Button>
+
 
             <Button
               title="Delete user"

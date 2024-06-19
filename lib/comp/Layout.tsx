@@ -110,13 +110,12 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   return (
     <div
-      className={`flex h-[100dvh] w-[100dvw] flex-col bg-zinc-900 text-sm font-medium text-zinc-300 sm:flex-row sm:text-base
-      ${customFont.variable} font-sans`}
+      className={`flex h-[100dvh] w-[100dvw] flex-col bg-zinc-900 text-sm font-medium text-zinc-300 sm:flex-row sm:text-base ${customFont.variable} font-sans`}
     >
       <main className="no-scrollbar h-full w-full overflow-auto px-5 py-3">
         {props.children}
       </main>
-      <nav className="flex h-20 w-full gap-y-2 bg-zinc-800 p-2 px-5 sm:h-full sm:w-56 sm:flex-col sm:justify-between sm:px-2 ">
+      <nav className="flex h-20 w-full gap-y-2 bg-zinc-800 p-2 px-5 sm:h-full sm:w-56 sm:flex-col sm:justify-between sm:px-2">
         <div className="flex w-full items-center justify-center gap-3 sm:flex-col">
           <NavBtn
             router={router}
