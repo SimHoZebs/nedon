@@ -59,15 +59,19 @@ const SplitUserOptionList = () => {
                         return;
                       }
 
+                      if (!txOnModal) {
+                        console.error("no txOnModal");
+                        return;
+                      }
+
                       //evenly reduce amount from all splits to assign to new
                       //split
                       const updatedSplitArray: SplitClientSide[] =
-                        structuredClone(unsavedSplitArray).map((split, i) => ({
+                        structuredClone(unsavedSplitArray).map((split) => ({
                           ...split,
                           //1 for new split
                           amount: parseMoney(
-                            unsavedCatArray[i].amount /
-                              (unsavedSplitArray.length + 1),
+                            txOnModal.amount / (unsavedSplitArray.length + 1),
                           ),
                         }));
 
@@ -77,15 +81,9 @@ const SplitUserOptionList = () => {
                       ).map((cat, i) => ({
                         ...cat,
                         amount: parseMoney(
-                          unsavedCatArray[i].amount /
-                            (unsavedSplitArray.length + 1),
+                          txOnModal.amount / (unsavedSplitArray.length + 1),
                         ),
                       }));
-
-                      if (!txOnModal) {
-                        console.error("no txOnModal");
-                        return;
-                      }
 
                       //add new split
                       updatedSplitArray.push({
@@ -93,7 +91,7 @@ const SplitUserOptionList = () => {
                         txId: null,
                         originTxId: undefined,
                         amount: parseMoney(
-                          txOnModal?.amount / (unsavedSplitArray.length + 1),
+                          txOnModal.amount / (unsavedSplitArray.length + 1),
                         ),
                         userId: user.id,
                       });
