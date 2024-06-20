@@ -22,7 +22,6 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const setScreenType = useStore((state) => state.setScreenType);
   const createUser = trpc.user.create.useMutation();
   const updateUser = trpc.user.update.useMutation();
-  const createGroup = trpc.group.create.useMutation();
   const sandboxPublicToken = trpc.sandBoxAccess.useQuery(
     { instituteID: undefined },
     { staleTime: 360000, enabled: false },
@@ -37,9 +36,6 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       const user = await createUser.mutateAsync();
       setUserId(user.id);
       await updateUser.mutateAsync({ ...user, name: user.id.slice(0, 8) });
-      await createGroup.mutateAsync({ id: user.id });
-
-      if (createGroup.error) console.error(createGroup.error);
 
       const publicToken = await sandboxPublicToken.refetch();
       if (!publicToken.data) throw new Error("no public token");
@@ -56,8 +52,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       !appUser &&
       !allUsers.isFetching &&
       !sandboxPublicToken.isFetching &&
-      createUser.isIdle &&
-      createGroup.isIdle
+      createUser.isIdle
     ) {
       console.log(
         "There are no users in db and none are being created at the moment; creating one...",
@@ -68,7 +63,6 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
     setUserId,
     allUsers.isFetching,
     appUser,
-    createGroup,
     createUser,
     queryClient.user.getAll,
     sandboxPublicToken,

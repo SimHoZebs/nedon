@@ -7,7 +7,6 @@ import { ActionBtn } from "../Button";
 const CreateUserBtn = () => {
   const createUser = trpc.user.create.useMutation();
   const updateUser = trpc.user.update.useMutation();
-  const createGroup = trpc.group.create.useMutation();
   const queryClient = trpc.useUtils();
 
   const sandboxPublicToken = trpc.sandBoxAccess.useQuery(
@@ -24,8 +23,6 @@ const CreateUserBtn = () => {
         e.stopPropagation();
         const user = await createUser.mutateAsync();
         await updateUser.mutateAsync({ ...user, name: user.id.slice(0, 8) });
-        await createGroup.mutateAsync({ id: user.id });
-        if (createGroup.error) console.error(createGroup.error);
 
         const publicToken = await sandboxPublicToken.refetch();
         if (!publicToken.data) throw new Error("no public token");

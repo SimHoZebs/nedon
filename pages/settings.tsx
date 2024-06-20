@@ -6,7 +6,7 @@ import { H2 } from "@/comp/Heading";
 import CreateUserBtn from "@/comp/user/CreateuserBtn";
 
 import getAppUser from "@/util/getAppUser";
-import { useStore } from "@/util/store";
+import { useLocalStore, useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 
 const Settings = () => {
@@ -15,18 +15,13 @@ const Settings = () => {
   const setVerticalCatPicker = useStore((state) => state.setVerticalCatPicker);
 
   const { appUser } = getAppUser();
-  const appGroup = trpc.group.get.useQuery(
-    { id: appUser?.groupArray?.[0].id || "" },
-    { staleTime: Number.POSITIVE_INFINITY, enabled: !!appUser },
-  );
-
   const { allUsers } = getAppUser();
   const deleteAll = trpc.user.deleteAll.useMutation();
   const deleteUser = trpc.user.delete.useMutation();
-  const deleteGroup = trpc.group.delete.useMutation();
-  const addUserToGroup = trpc.group.addUser.useMutation();
-  const removeUserFromGroup = trpc.group.removeUser.useMutation();
+  const addConnection = trpc.user.addConnection.useMutation();
+  const removeConnection = trpc.user.removeConnection.useMutation();
   const queryClient = trpc.useUtils();
+  const setUserId = useLocalStore((state) => state.setUserId);
 
   return (
     <section className="flex h-full w-full flex-col items-start gap-y-3">
@@ -65,34 +60,33 @@ const Settings = () => {
 
             <Button
               className={`after:h-full after:w-px after:bg-zinc-500 ${
-                appGroup.data?.userArray?.find(
-                  (groupUser) => groupUser.id === user.id,
+                appUser?.myConnectionArray?.find(
+                  (connection) => connection.id === user.id,
                 )
                   ? "text-pink-400"
                   : "text-indigo-400"
               }`}
               onClickAsync={async (e) => {
                 e.stopPropagation();
-                if (!appGroup.data) return;
+                if (!appUser) return;
 
-                appGroup.data.userArray?.find(
-                  (groupUser) => groupUser.id === user.id,
+                appUser.myConnectionArray?.find(
+                  (connection) => connection.id === user.id,
                 )
-                  ? await removeUserFromGroup.mutateAsync({
-                      groupId: appGroup.data.id,
-                      userId: user.id,
+                  ? await removeConnection.mutateAsync({
+                      userId: appUser.id,
+                      connectionId: user.id,
                     })
-                  : await addUserToGroup.mutateAsync({
-                      userId: user.id,
-                      groupId: appGroup.data.id,
+                  : await addConnection.mutateAsync({
+                      userId: appUser.id,
+                      connectionId: user.id,
                     });
 
-                await queryClient.user.getAll.invalidate();
-                await queryClient.group.get.invalidate();
+                await queryClient.user.invalidate();
               }}
             >
-              {appGroup.data?.userArray?.find(
-                (groupUser) => groupUser.id === user.id,
+              {appUser?.myConnectionArray?.find(
+                (connection) => connection.id === user.id,
               ) ? (
                 <span className="icon-[mdi--user-remove-outline] h-5 w-5" />
               ) : (
@@ -100,18 +94,23 @@ const Settings = () => {
               )}
             </Button>
 
+            {user.id !== appUser?.id && (
+              <Button
+                onClick={async () => {
+                  setUserId(user.id);
+                  queryClient.user.getAll.invalidate();
+                  queryClient.user.get.invalidate(user.id);
+                }}
+              >
+                Log in as this user
+              </Button>
+            )}
 
             <Button
               title="Delete user"
               className="text-pink-400 hover:text-pink-500"
               onClickAsync={async (e) => {
                 e.stopPropagation();
-                if (user.groupArray && user.groupArray.length > 0) {
-                  await deleteGroup.mutateAsync({
-                    id: user.groupArray[0].id,
-                  });
-                }
-
                 await deleteUser.mutateAsync(user.id);
                 queryClient.user.getAll.invalidate();
               }}
@@ -124,7 +123,9 @@ const Settings = () => {
         <ActionBtn
           variant="negative"
           onClickAsync={async () => {
-            deleteAll.mutateAsync();
+            await deleteAll.mutateAsync();
+            queryClient.user.getAll.invalidate();
+            await queryClient.user.invalidate();
           }}
         >
           <span className="icon-[mdi--delete-outline] h-5 w-5" />

@@ -16,16 +16,7 @@ const Connections = () => {
 
   const { appUser } = getAppUser();
 
-  const appGroup = trpc.group.get.useQuery(
-    { id: appUser?.groupArray?.[0].id || "" },
-    { staleTime: Number.POSITIVE_INFINITY, enabled: !!appUser },
-  );
-
-  const connectionsArray = appGroup.data?.userArray?.filter(
-    (user) => user.id !== appUser?.id,
-  );
-
-  const removeUserFromGroup = trpc.group.removeUser.useMutation();
+  const removeConnection = trpc.user.removeConnection.useMutation();
   const associatedTxArray = trpc.tx.getAllAssociated.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
@@ -81,15 +72,15 @@ const Connections = () => {
         <SettleModal oweUser={oweUser} setShowModal={setShowModal} />
       )}
 
-      <div className="flex max-w-xl flex-col  gap-4">
-        {connectionsArray?.map((user) => (
+      <div className="flex max-w-xl flex-col gap-4">
+        {appUser?.myConnectionArray?.map((user) => (
           <div
             className="flex h-fit w-full items-center justify-between gap-x-4 gap-y-1 rounded-xl bg-zinc-800 px-3 py-2 text-start outline outline-1 outline-zinc-700"
             key={user.id}
           >
             <div className="flex flex-col items-center justify-center">
               <div className="flex rounded-full border p-2">
-                <span className="icon-[mdi--account] h-8 w-8 " />
+                <span className="icon-[mdi--account] h-8 w-8" />
               </div>
               <p>{user.name}</p>
             </div>
@@ -119,16 +110,15 @@ const Connections = () => {
             <Button
               className="text-pink-400 after:h-full after:w-px after:bg-zinc-500"
               onClickAsync={async (e) => {
-                if (!appGroup.data) return;
+                if (!appUser.myConnectionArray) return;
                 e.stopPropagation();
 
-                await removeUserFromGroup.mutateAsync({
-                  groupId: appGroup.data.id,
-                  userId: user.id,
+                await removeConnection.mutateAsync({
+                  userId: appUser.id,
+                  connectionId: user.id,
                 });
 
                 await queryClient.user.getAll.invalidate();
-                await queryClient.group.get.invalidate();
               }}
             >
               <span className="icon-[mdi--user-remove-outline] h-5 w-5" />

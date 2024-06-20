@@ -24,9 +24,6 @@ const SplitList = (props: Props) => {
   const queryClient = trpc.useUtils();
 
   const { appUser } = getAppUser();
-  const appGroup = trpc.group.get.useQuery({
-    id: appUser?.groupArray?.[0].id || "",
-  });
   const isEditingSplit = useTxStore((state) => state.isEditingSplit);
   const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
   const tx = useTxStore((state) => state.txOnModal);
@@ -109,8 +106,8 @@ const SplitList = (props: Props) => {
     <div className="flex w-full flex-col gap-y-3">
       <div className="flex items-center gap-x-3">
         {props.children}
-        {appGroup.data?.userArray &&
-          appGroup.data.userArray.length > 1 &&
+        {appUser?.myConnectionArray &&
+          appUser.myConnectionArray.length > 0 &&
           focusedIndex === undefined && (
             <SecondaryBtn onClick={() => setFocusedSplitIndex(0)}>
               <span className="icon-[lucide--split] m-1 h-4 w-4" />

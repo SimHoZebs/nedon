@@ -49,7 +49,7 @@ const setAccessToken = async ({
       id,
     },
     include: {
-      groupArray: true,
+      myConnectionArray: true,
     },
     data: { ...userUpdateData },
   });
@@ -59,7 +59,6 @@ const setAccessToken = async ({
 
 export const appRouter = router({
   user: userRouter,
-  group: groupRouter,
   tx: txRouter,
   cat: catRouter,
   split: splitRouter,

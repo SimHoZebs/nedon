@@ -13,7 +13,7 @@ import { z } from "zod";
 
 export type UserClientSide = Omit<User, "ACCESS_TOKEN"> & {
   hasAccessToken: boolean;
-  groupArray?: Group[]; //user loaded from groups
+  myConnectionArray?: User[]; //user loaded from connections
 };
 export const UserClientSideSchema = UserSchema.extend({
   ACCESS_TOKEN: z.string().optional(),

@@ -1,5 +1,5 @@
-import type { Group, User } from "@prisma/client";
-import { UserOptionalDefaultsSchema, UserSchema } from "prisma/generated/zod";
+import type { User } from "@prisma/client";
+import { UserSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 import db from "@/util/db";
@@ -16,7 +16,7 @@ const userRouter = router({
         id: input,
       },
       include: {
-        groupArray: true,
+        myConnectionArray: true,
       },
     });
 
@@ -29,12 +29,12 @@ const userRouter = router({
   }),
 
   getAll: procedure.input(z.undefined()).query(async () => {
-    let userArray: ((User & { groupArray: Group[] }) | null)[] = [];
+    let userArray: ((User & { myConnectionArray: User[] }) | null)[] = [];
 
     //developers get to see all accounts
     userArray = await db.user.findMany({
       include: {
-        groupArray: true,
+        myConnectionArray: true,
       },
     });
 
@@ -86,5 +86,69 @@ const userRouter = router({
 
     return user.count;
   }),
+
+  addConnection: procedure
+    .input(z.object({ userId: z.string(), connectionId: z.string() }))
+    .mutation(async ({ input }) => {
+      const user = await db.user.update({
+        where: {
+          id: input.userId,
+        },
+        data: {
+          myConnectionArray: {
+            connect: {
+              id: input.connectionId,
+            },
+          },
+        },
+      });
+
+      await db.user.update({
+        where: {
+          id: input.connectionId,
+        },
+        data: {
+          myConnectionArray: {
+            connect: {
+              id: input.userId,
+            },
+          },
+        },
+      });
+
+      return user;
+    }),
+
+  removeConnection: procedure
+    .input(z.object({ userId: z.string(), connectionId: z.string() }))
+    .mutation(async ({ input }) => {
+      const user = await db.user.update({
+        where: {
+          id: input.userId,
+        },
+        data: {
+          myConnectionArray: {
+            disconnect: {
+              id: input.connectionId,
+            },
+          },
+        },
+      });
+
+      await db.user.update({
+        where: {
+          id: input.connectionId,
+        },
+        data: {
+          myConnectionArray: {
+            disconnect: {
+              id: input.userId,
+            },
+          },
+        },
+      });
+
+      return user;
+    }),
 });
 export default userRouter;

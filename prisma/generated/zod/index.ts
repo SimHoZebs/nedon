@@ -117,6 +117,8 @@ export type UserRelations = {
   splitTxArray: SplitWithRelations[];
   myGroup: GroupWithRelations[];
   groupArray: GroupWithRelations[];
+  myConnectionArray: UserWithRelations[];
+  connectedWithArray: UserWithRelations[];
   CatSettings: CatSettingsWithRelations[];
 };
 
@@ -127,6 +129,8 @@ export const UserWithRelationsSchema: z.ZodType<UserWithRelations> = UserSchema.
   splitTxArray: z.lazy(() => SplitWithRelationsSchema).array(),
   myGroup: z.lazy(() => GroupWithRelationsSchema).array(),
   groupArray: z.lazy(() => GroupWithRelationsSchema).array(),
+  myConnectionArray: z.lazy(() => UserWithRelationsSchema).array(),
+  connectedWithArray: z.lazy(() => UserWithRelationsSchema).array(),
   CatSettings: z.lazy(() => CatSettingsWithRelationsSchema).array(),
 }))
 
@@ -138,6 +142,8 @@ export type UserOptionalDefaultsRelations = {
   splitTxArray: SplitOptionalDefaultsWithRelations[];
   myGroup: GroupOptionalDefaultsWithRelations[];
   groupArray: GroupOptionalDefaultsWithRelations[];
+  myConnectionArray: UserOptionalDefaultsWithRelations[];
+  connectedWithArray: UserOptionalDefaultsWithRelations[];
   CatSettings: CatSettingsOptionalDefaultsWithRelations[];
 };
 
@@ -148,6 +154,8 @@ export const UserOptionalDefaultsWithRelationsSchema: z.ZodType<UserOptionalDefa
   splitTxArray: z.lazy(() => SplitOptionalDefaultsWithRelationsSchema).array(),
   myGroup: z.lazy(() => GroupOptionalDefaultsWithRelationsSchema).array(),
   groupArray: z.lazy(() => GroupOptionalDefaultsWithRelationsSchema).array(),
+  myConnectionArray: z.lazy(() => UserOptionalDefaultsWithRelationsSchema).array(),
+  connectedWithArray: z.lazy(() => UserOptionalDefaultsWithRelationsSchema).array(),
   CatSettings: z.lazy(() => CatSettingsOptionalDefaultsWithRelationsSchema).array(),
 }))
 

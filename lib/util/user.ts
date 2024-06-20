@@ -12,13 +12,14 @@ export const emptyUser: UserClientSide = {
   TRANSFER_ID: null,
   // The payment_id is only relevant for the UK/EU Payment Initiation product.
   PAYMENT_ID: null,
-  groupArray: [{ id: "", ownerId: "" }],
 };
 
 export function stripUserSecrets({
   ACCESS_TOKEN,
   ...rest
-}: User & { groupArray?: Group[] }): UserClientSide {
+}: User & {
+  myConnectionArray?: User[];
+}): UserClientSide {
   return { ...rest, hasAccessToken: !!ACCESS_TOKEN };
 }
 

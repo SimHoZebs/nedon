@@ -43,6 +43,9 @@ model User {
   myGroup    Group[] @relation("mygroup") //groups I own
   groupArray Group[] //array of groups this user is included in
 
+  myConnectionArray  User[] @relation("connection") //users I connected to
+  connectedWithArray User[] @relation("connection") //users that connected to me
+
   CatSettings CatSettings[]
 }
 
