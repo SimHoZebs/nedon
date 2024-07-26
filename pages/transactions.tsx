@@ -52,7 +52,7 @@ const Page: NextPage = () => {
     <section className="flex w-full justify-center">
       {showModal && (
         <motion.div
-          className="absolute left-0 top-0 z-10 h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
+          className="absolute left-0 top-0 z-[11] h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
           onMouseDown={(e) => {
             e.stopPropagation();
             setShowModal(false);

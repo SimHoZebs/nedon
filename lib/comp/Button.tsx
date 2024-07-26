@@ -81,7 +81,7 @@ interface NavBtnProps extends ButtonProps {
 export const NavBtn = (props: NavBtnProps) => {
   return (
     <Button
-      className={`group justify-center gap-x-2 rounded-lg hover:bg-indigo-200 hover:bg-opacity-5 hover:text-indigo-200 sm:w-full sm:justify-start ${
+      className={`group justify-center gap-x-2 p-3 hover:bg-indigo-200 hover:bg-opacity-5 hover:text-indigo-200 sm:w-full sm:justify-start ${
         props.router.pathname === props.route
           ? "bg-indigo-200 bg-opacity-20 text-indigo-200"
           : "text-zinc-300"
@@ -135,8 +135,7 @@ export const CloseBtn = (props: CloseBtnProps) => {
       aria-label="Close"
       className={`m-1 flex rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400 ${
         props.isForMobile && "lg:hidden"
-      } ${props.isForDesktop && "hidden"}
-      }`}
+      } ${props.isForDesktop && "hidden"} }`}
       onClick={props.onClose}
     >
       <span className="icon-[iconamoon--close-fill] h-6 w-6 rounded-full text-zinc-400 hover:text-pink-400" />

@@ -1,4 +1,4 @@
-import { Open_Sans } from "next/font/google";
+import { Hanken_Grotesk, Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/router";
 import type React from "react";
 import { useEffect } from "react";
@@ -9,10 +9,10 @@ import { trpc } from "@/util/trpc";
 
 import { NavBtn } from "./Button";
 
-const customFont = Open_Sans({
-  weight: "variable",
+const customFont = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-custom",
+  weight: "variable",
 });
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
@@ -109,8 +109,8 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       <main className="no-scrollbar h-full w-full overflow-auto px-5 py-3">
         {props.children}
       </main>
-      <nav className="flex h-20 w-full gap-y-2 bg-zinc-800 p-2 px-5 sm:h-full sm:w-56 sm:flex-col sm:justify-between sm:px-2">
-        <div className="flex w-full items-center justify-center gap-3 sm:flex-col">
+      <nav className="flex h-20 w-full gap-y-2 border-l border-zinc-400 bg-zinc-900 p-5 sm:h-full sm:w-56 sm:flex-col sm:justify-between sm:px-0">
+        <div className="flex w-full items-center justify-center sm:flex-col">
           <NavBtn
             router={router}
             route="/"

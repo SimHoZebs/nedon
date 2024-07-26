@@ -3,7 +3,7 @@ import type { NextPage } from "next";
 import type { AccountBase, AuthGetResponse } from "plaid";
 import React, { useRef, useState } from "react";
 
-import { H1 } from "@/comp/Heading";
+import { H1, H2 } from "@/comp/Heading";
 import AccountCard from "@/comp/home/AccountCard";
 import AccountModal from "@/comp/home/AccountModal";
 
@@ -27,11 +27,11 @@ const User: NextPage = () => {
 
   return (
     <section className="flex h-full w-full flex-col items-center gap-y-3">
-      <H1>All Accounts</H1>
+      <H2>All Accounts</H2>
 
       {showModal && (
         <motion.div
-          className="absolute left-0 top-0 z-10 h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
+          className="absolute left-0 top-0 z-[11] h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
           onMouseDown={(e) => {
             e.stopPropagation();
             setShowModal(false);
