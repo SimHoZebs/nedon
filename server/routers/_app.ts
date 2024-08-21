@@ -19,6 +19,7 @@ import { groupRouter } from "./group";
 import splitRouter from "./split";
 import txRouter from "./tx";
 import userRouter from "./user";
+import aiRouter from "./ai";
 
 const setAccessToken = async ({
   publicToken,
@@ -62,6 +63,7 @@ export const appRouter = router({
   tx: txRouter,
   cat: catRouter,
   split: splitRouter,
+  ai: aiRouter,
 
   sandBoxAccess: procedure
     .input(z.object({ instituteID: z.string().nullish() }))
