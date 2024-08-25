@@ -28,6 +28,11 @@ const txRouter = router({
         include: {
           catArray: true,
           splitArray: true,
+          receipt: {
+            include: {
+              items: true,
+            },
+          },
         },
       });
 
@@ -79,6 +84,11 @@ const txRouter = router({
         include: {
           catArray: true,
           splitArray: true,
+          receipt: {
+            include: {
+              items: true,
+            },
+          },
         },
       });
 
@@ -111,6 +121,11 @@ const txRouter = router({
         include: {
           catArray: true,
           splitArray: true,
+          receipt: {
+            include: {
+              items: true,
+            },
+          },
         },
       });
     }),
@@ -142,6 +157,11 @@ const txRouter = router({
       include: {
         catArray: true,
         splitArray: true,
+        receipt: {
+          include: {
+            items: true,
+          },
+        },
       },
     });
 
@@ -172,6 +192,11 @@ const txRouter = router({
       include: {
         catArray: true,
         splitArray: true,
+        receipt: {
+          include: {
+            items: true,
+          },
+        },
       },
     });
 

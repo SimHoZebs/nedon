@@ -73,6 +73,8 @@ model Tx {
   originTx   Tx?     @relation("originTx", fields: [originTxId], references: [id], onDelete: Cascade)
 
   splitArray Split[] //Splits that were created from this tx
+
+  receipt Receipt?
 }
 
 //Created for Bob when Alice splits their transaction with Bob.
@@ -115,4 +117,32 @@ model CatSettings {
 
   User   User   @relation(fields: [userId], references: [id])
   userId String
+}
+
+model Receipt {
+  id             String        @id @default(cuid())
+  is_receipt     Boolean
+  transaction_id String
+  date           String
+  merchant       String
+  currency       String
+  tax            Float
+  tip            Float
+  total          Float
+  grand_total    Float
+  items          ReceiptItem[]
+  payment_method String
+
+  tx   Tx     @relation(fields: [txId], references: [id])
+  txId String @unique
+}
+
+model ReceiptItem {
+  id          String  @id @default(cuid())
+  name        String
+  description String
+  quantity    Int
+  unit_price  Float
+  receipt     Receipt @relation(fields: [receiptId], references: [id])
+  receiptId   String
 }

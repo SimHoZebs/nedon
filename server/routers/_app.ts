@@ -15,11 +15,10 @@ import { stripUserSecrets } from "@/util/user";
 import { procedure, router } from "../trpc";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS, client } from "../util";
 import catRouter from "./cat";
-import { groupRouter } from "./group";
 import splitRouter from "./split";
 import txRouter from "./tx";
 import userRouter from "./user";
-import aiRouter from "./ai";
+import receiptRouter from "./receipt";
 
 const setAccessToken = async ({
   publicToken,
@@ -63,11 +62,11 @@ export const appRouter = router({
   tx: txRouter,
   cat: catRouter,
   split: splitRouter,
-  ai: aiRouter,
+  receipt: receiptRouter,
 
   sandBoxAccess: procedure
     .input(z.object({ instituteID: z.string().nullish() }))
-    .query(async ({ input }) => {
+    .query(async () => {
       const response = await client.sandboxPublicTokenCreate({
         // institution_id: input.instituteID,
         institution_id: "ins_1",

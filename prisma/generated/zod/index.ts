@@ -24,6 +24,10 @@ export const CatScalarFieldEnumSchema = z.enum(['id','name','nameArray','amount'
 
 export const CatSettingsScalarFieldEnumSchema = z.enum(['id','name','budget','parentId','userId']);
 
+export const ReceiptScalarFieldEnumSchema = z.enum(['id','is_receipt','transaction_id','date','merchant','currency','tax','tip','total','grand_total','payment_method','txId']);
+
+export const ReceiptItemScalarFieldEnumSchema = z.enum(['id','name','description','quantity','unit_price','receiptId']);
+
 export const SortOrderSchema = z.enum(['asc','desc']);
 
 export const QueryModeSchema = z.enum(['default','insensitive']);
@@ -192,6 +196,7 @@ export type TxRelations = {
   refSplit?: SplitWithRelations | null;
   originTx?: TxWithRelations | null;
   splitArray: SplitWithRelations[];
+  receipt?: ReceiptWithRelations | null;
 };
 
 export type TxWithRelations = z.infer<typeof TxSchema> & TxRelations
@@ -203,6 +208,7 @@ export const TxWithRelationsSchema: z.ZodType<TxWithRelations> = TxSchema.merge(
   refSplit: z.lazy(() => SplitWithRelationsSchema).nullable(),
   originTx: z.lazy(() => TxWithRelationsSchema).nullable(),
   splitArray: z.lazy(() => SplitWithRelationsSchema).array(),
+  receipt: z.lazy(() => ReceiptWithRelationsSchema).nullable(),
 }))
 
 // TX OPTIONAL DEFAULTS RELATION SCHEMA
@@ -215,6 +221,7 @@ export type TxOptionalDefaultsRelations = {
   refSplit?: SplitOptionalDefaultsWithRelations | null;
   originTx?: TxOptionalDefaultsWithRelations | null;
   splitArray: SplitOptionalDefaultsWithRelations[];
+  receipt?: ReceiptOptionalDefaultsWithRelations | null;
 };
 
 export type TxOptionalDefaultsWithRelations = z.infer<typeof TxOptionalDefaultsSchema> & TxOptionalDefaultsRelations
@@ -226,6 +233,7 @@ export const TxOptionalDefaultsWithRelationsSchema: z.ZodType<TxOptionalDefaults
   refSplit: z.lazy(() => SplitOptionalDefaultsWithRelationsSchema).nullable(),
   originTx: z.lazy(() => TxOptionalDefaultsWithRelationsSchema).nullable(),
   splitArray: z.lazy(() => SplitOptionalDefaultsWithRelationsSchema).array(),
+  receipt: z.lazy(() => ReceiptOptionalDefaultsWithRelationsSchema).nullable(),
 }))
 
 /////////////////////////////////////////
@@ -389,4 +397,114 @@ export const CatSettingsOptionalDefaultsWithRelationsSchema: z.ZodType<CatSettin
   parent: z.lazy(() => CatSettingsOptionalDefaultsWithRelationsSchema).nullable(),
   children: z.lazy(() => CatSettingsOptionalDefaultsWithRelationsSchema).array(),
   User: z.lazy(() => UserOptionalDefaultsWithRelationsSchema),
+}))
+
+/////////////////////////////////////////
+// RECEIPT SCHEMA
+/////////////////////////////////////////
+
+export const ReceiptSchema = z.object({
+  id: z.string().cuid(),
+  is_receipt: z.boolean(),
+  transaction_id: z.string(),
+  date: z.string(),
+  merchant: z.string(),
+  currency: z.string(),
+  tax: z.number(),
+  tip: z.number(),
+  total: z.number(),
+  grand_total: z.number(),
+  payment_method: z.string(),
+  txId: z.string(),
+})
+
+export type Receipt = z.infer<typeof ReceiptSchema>
+
+// RECEIPT OPTIONAL DEFAULTS SCHEMA
+//------------------------------------------------------
+
+export const ReceiptOptionalDefaultsSchema = ReceiptSchema.merge(z.object({
+  id: z.string().cuid().optional(),
+}))
+
+export type ReceiptOptionalDefaults = z.infer<typeof ReceiptOptionalDefaultsSchema>
+
+// RECEIPT RELATION SCHEMA
+//------------------------------------------------------
+
+export type ReceiptRelations = {
+  items: ReceiptItemWithRelations[];
+  tx: TxWithRelations;
+};
+
+export type ReceiptWithRelations = z.infer<typeof ReceiptSchema> & ReceiptRelations
+
+export const ReceiptWithRelationsSchema: z.ZodType<ReceiptWithRelations> = ReceiptSchema.merge(z.object({
+  items: z.lazy(() => ReceiptItemWithRelationsSchema).array(),
+  tx: z.lazy(() => TxWithRelationsSchema),
+}))
+
+// RECEIPT OPTIONAL DEFAULTS RELATION SCHEMA
+//------------------------------------------------------
+
+export type ReceiptOptionalDefaultsRelations = {
+  items: ReceiptItemOptionalDefaultsWithRelations[];
+  tx: TxOptionalDefaultsWithRelations;
+};
+
+export type ReceiptOptionalDefaultsWithRelations = z.infer<typeof ReceiptOptionalDefaultsSchema> & ReceiptOptionalDefaultsRelations
+
+export const ReceiptOptionalDefaultsWithRelationsSchema: z.ZodType<ReceiptOptionalDefaultsWithRelations> = ReceiptOptionalDefaultsSchema.merge(z.object({
+  items: z.lazy(() => ReceiptItemOptionalDefaultsWithRelationsSchema).array(),
+  tx: z.lazy(() => TxOptionalDefaultsWithRelationsSchema),
+}))
+
+/////////////////////////////////////////
+// RECEIPT ITEM SCHEMA
+/////////////////////////////////////////
+
+export const ReceiptItemSchema = z.object({
+  id: z.string().cuid(),
+  name: z.string(),
+  description: z.string(),
+  quantity: z.number().int(),
+  unit_price: z.number(),
+  receiptId: z.string(),
+})
+
+export type ReceiptItem = z.infer<typeof ReceiptItemSchema>
+
+// RECEIPT ITEM OPTIONAL DEFAULTS SCHEMA
+//------------------------------------------------------
+
+export const ReceiptItemOptionalDefaultsSchema = ReceiptItemSchema.merge(z.object({
+  id: z.string().cuid().optional(),
+}))
+
+export type ReceiptItemOptionalDefaults = z.infer<typeof ReceiptItemOptionalDefaultsSchema>
+
+// RECEIPT ITEM RELATION SCHEMA
+//------------------------------------------------------
+
+export type ReceiptItemRelations = {
+  receipt: ReceiptWithRelations;
+};
+
+export type ReceiptItemWithRelations = z.infer<typeof ReceiptItemSchema> & ReceiptItemRelations
+
+export const ReceiptItemWithRelationsSchema: z.ZodType<ReceiptItemWithRelations> = ReceiptItemSchema.merge(z.object({
+  receipt: z.lazy(() => ReceiptWithRelationsSchema),
+}))
+
+// RECEIPT ITEM OPTIONAL DEFAULTS RELATION SCHEMA
+//------------------------------------------------------
+
+export type ReceiptItemOptionalDefaultsRelations = {
+  receipt: ReceiptOptionalDefaultsWithRelations;
+};
+
+export type ReceiptItemOptionalDefaultsWithRelations = z.infer<typeof ReceiptItemOptionalDefaultsSchema> & ReceiptItemOptionalDefaultsRelations
+
+export const ReceiptItemOptionalDefaultsWithRelationsSchema: z.ZodType<ReceiptItemOptionalDefaultsWithRelations> = ReceiptItemOptionalDefaultsSchema.merge(z.object({
+  receipt: z.lazy(() => ReceiptOptionalDefaultsWithRelationsSchema),
 }))

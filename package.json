@@ -16,6 +16,7 @@
   "dependencies": {
     "@google-cloud/vision": "^4.3.2",
     "@prisma/client": "^5.18.0",
+    "@supabase/supabase-js": "^2.45.1",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tanstack/react-query": "^5.51.23",
     "@trpc/client": "11.0.0-next-beta.228",

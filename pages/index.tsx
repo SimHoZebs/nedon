@@ -13,7 +13,6 @@ import { trpc } from "@/util/trpc";
 const User: NextPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [clickedAccount, setClickedAccount] = useState<AccountBase>();
-  const [openaiResponse, setOpenaiResponse] = useState<string>("");
 
   const { appUser } = getAppUser();
 
@@ -21,7 +20,6 @@ const User: NextPage = () => {
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );
-  const ai = trpc.ai.test.useMutation();
 
   const loading = useRef(
     <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700" />,
@@ -31,17 +29,6 @@ const User: NextPage = () => {
     <section className="flex h-full w-full flex-col items-center gap-y-3">
       <H2>All Accounts</H2>
 
-      <button
-        type="button"
-        onClick={async () => {
-          const response = await ai.mutateAsync();
-          setOpenaiResponse(JSON.stringify(response, null, 2));
-          console.log(response);
-        }}
-      >
-        ai test
-      </button>
-      <pre>{openaiResponse}</pre>
       {showModal && (
         <motion.div
           className="absolute left-0 top-0 z-[11] h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"

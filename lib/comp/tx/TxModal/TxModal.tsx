@@ -10,8 +10,10 @@ import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
+import supabase from "server/supabaseClient";
 import Cat from "./Cat/Cat";
 import SplitList from "./SplitList/SplitList";
+import type { Receipt } from "@/types/receipt";
 
 interface Props {
   onClose: () => void;
@@ -20,8 +22,14 @@ interface Props {
 
 const TxModal = (props: Props) => {
   const tx = useTxStore((state) => state.txOnModal);
+  const createTx = trpc.tx.create.useMutation();
   const deleteTx = trpc.tx.delete.useMutation();
+  const [uploadedImg, setUploadedImg] = React.useState<File>();
+  const [uploadedImgUrl, setUploadedImgUrl] = React.useState<string>();
   const { appUser } = getAppUser();
+  const processReceipt = trpc.receipt.process.useMutation();
+  const createReceipt = trpc.receipt.create.useMutation();
+  const [receipt, setReceipt] = React.useState<Receipt>();
   const auth = trpc.auth.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
@@ -139,6 +147,75 @@ const TxModal = (props: Props) => {
               >
                 <H1 className="px-3">${amount * -1}</H1>
               </SplitList>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  if (!e.target.files) {
+                    console.error("No file uploaded.");
+                    return;
+                  }
+                  const img = e.target.files[0];
+                  setUploadedImg(img);
+                  setUploadedImgUrl(URL.createObjectURL(img));
+                }}
+              />
+              {uploadedImg && uploadedImgUrl && !receipt ? (
+                <div>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const uploadResponse = await supabase.storage
+                        .from("receipts")
+                        .upload(tx.name, uploadedImg, { upsert: true });
+                      if (uploadResponse.error) {
+                        console.error(
+                          "Error uploading image",
+                          uploadResponse.error,
+                        );
+                        return;
+                      }
+                      const signedUrlResponse = await supabase.storage
+                        .from("receipts")
+                        .createSignedUrl(tx.name, 60);
+
+                      if (
+                        signedUrlResponse.error ||
+                        !signedUrlResponse.data.signedUrl
+                      ) {
+                        console.error(
+                          "Error getting signed URL",
+                          signedUrlResponse.error,
+                        );
+                        return;
+                      }
+
+                      const response = await processReceipt.mutateAsync({
+                        signedUrl: signedUrlResponse.data.signedUrl,
+                      });
+
+                      let txId = tx.id;
+                      if (!txId) {
+                        const createdTx = await createTx.mutateAsync(tx);
+                        txId = createdTx.id;
+                      }
+
+                      if (!response) return;
+                      setReceipt(response);
+                      await createReceipt.mutateAsync({
+                        id: txId,
+                        receipt: { txId, ...response },
+                      });
+                    }}
+                  >
+                    Upload
+                  </button>
+
+                  <Image src={uploadedImgUrl} alt="" width={300} height={500} />
+                </div>
+              ) : (
+                <pre>{JSON.stringify(tx.receipt, null, 2)}</pre>
+              )}
             </div>
 
             <div className="flex flex-col items-start gap-y-3">

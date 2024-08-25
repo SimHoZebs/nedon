@@ -32,6 +32,7 @@ export const convertToFullTx = (
       emptyCat({ nameArray: plaidTx.category || [], amount: plaidTx.amount }),
     ],
     splitArray: txInDB?.splitArray || [createNewSplit(userId, plaidTx)],
+    receipt: txInDB?.receipt || null,
   };
 };
 
