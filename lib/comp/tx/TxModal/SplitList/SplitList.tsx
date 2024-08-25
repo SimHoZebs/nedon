@@ -1,5 +1,4 @@
 import type React from "react";
-import { useState } from "react";
 
 import { ActionBtn, Button, SecondaryBtn } from "@/comp/Button";
 import { H3 } from "@/comp/Heading";
@@ -85,6 +84,7 @@ const SplitList = (props: Props) => {
         originTxId: null,
         catArray: tx.catArray,
         splitArray: unsavedSplitArray,
+        receipt: null,
       });
     }
     //otherwise, update the tx

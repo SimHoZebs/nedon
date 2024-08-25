@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { procedure, router } from "../trpc";
-import { type Receipt, ReceiptInputSchema } from "@/util/types";
+import { type Receipt, ReceiptSchema } from "@/types/receipt";
 import db from "@/util/db";
 import { imgAnnotator } from "server/gcloudClient";
 import openai from "server/openaiClient";
@@ -10,11 +10,11 @@ const receiptRouter = router({
     .input(
       z.object({
         id: z.string(),
-        receipt: ReceiptInputSchema,
+        receipt: ReceiptSchema,
       }),
     )
     .mutation(async ({ input }) => {
-      const { items, txId, ...receiptWithoutItems } = input.receipt;
+      const { items, ...receiptWithoutItems } = input.receipt;
 
       const updatedTx = await db.tx.update({
         where: {

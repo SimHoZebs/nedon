@@ -204,7 +204,7 @@ const TxModal = (props: Props) => {
                       setReceipt(response);
                       await createReceipt.mutateAsync({
                         id: txId,
-                        receipt: { txId, ...response },
+                        receipt: response,
                       });
                     }}
                   >
