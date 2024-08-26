@@ -26,6 +26,7 @@ const SplitUser = (props: Props) => {
   const unsavedCatArray = useTxStore((s) => s.unsavedCatArray);
   const setUnsavedCatArray = useTxStore((s) => s.setUnsavedCatArray);
   const setEditedIndexArray = useTxStore((s) => s.setEditedSplitIndexArray);
+  const isEditingSplit = useTxStore((state) => state.isEditingSplit);
 
   const split = unsavedSplitArray[props.index];
   const txAmount = tx ? tx.amount : 0;
@@ -62,14 +63,16 @@ const SplitUser = (props: Props) => {
         {focusedIndex !== undefined ? (
           <div className="aspect-square w-5" />
         ) : (
-          <button
-            type="button"
-            title="Remove user from split"
-            className="group flex w-5"
-            onClick={() => removeUser()}
-          >
-            <span className="icon-[clarity--remove-line] h-5 w-5 text-zinc-500 group-hover:text-pink-400" />
-          </button>
+          isEditingSplit && (
+            <button
+              type="button"
+              title="Remove user from split"
+              className="group flex w-5"
+              onClick={() => removeUser()}
+            >
+              <span className="icon-[clarity--remove-line] h-5 w-5 text-zinc-500 group-hover:text-pink-400" />
+            </button>
+          )
         )}
         {props.children}
 

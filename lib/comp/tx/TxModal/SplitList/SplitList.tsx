@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { ActionBtn, Button, SecondaryBtn } from "@/comp/Button";
+import { ActionBtn, Button } from "@/comp/Button";
 import { H3 } from "@/comp/Heading";
 
 import getAppUser from "@/util/getAppUser";
@@ -104,25 +104,13 @@ const SplitList = (props: Props) => {
 
   return (
     <div className="flex w-full flex-col gap-y-3">
-      <div className="flex items-center gap-x-3">
-        {props.children}
-        {appUser?.myConnectionArray &&
-          appUser.myConnectionArray.length > 0 &&
-          focusedIndex === undefined && (
-            <SecondaryBtn onClick={() => setFocusedSplitIndex(0)}>
-              <span className="icon-[lucide--split] m-1 h-4 w-4" />
-              Split
-            </SecondaryBtn>
-          )}
-      </div>
-
       {(unsavedSplitArray.length > 1 || focusedIndex !== undefined) && (
         <div className="flex flex-col gap-y-1">
-          <div className="flex w-full gap-x-2 px-3">
+          <div className="flex w-full gap-x-2 px-3 ">
             <H3>Split</H3>
 
             {isEditingSplit ? (
-              <div className="flex gap-x-2">
+              <div className="flex gap-x-2 ">
                 <ActionBtn
                   disabled={isWrongSplit}
                   onClickAsync={async () => {

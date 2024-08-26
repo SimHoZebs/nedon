@@ -2,7 +2,7 @@ import Image from "next/image";
 import type { AuthGetResponse } from "plaid";
 import React, { useEffect } from "react";
 
-import { ActionBtn, CloseBtn } from "@/comp/Button";
+import { ActionBtn, CloseBtn, SecondaryBtn } from "@/comp/Button";
 import { H1 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
 
@@ -10,10 +10,9 @@ import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import supabase from "server/supabaseClient";
-import Cat from "./Cat/Cat";
 import SplitList from "./SplitList/SplitList";
-import type { Receipt } from "@/types/receipt";
+import Cat from "./Cat/Cat";
+import Receipt from "./Receipt";
 
 interface Props {
   onClose: () => void;
@@ -22,19 +21,14 @@ interface Props {
 
 const TxModal = (props: Props) => {
   const tx = useTxStore((state) => state.txOnModal);
-  const createTx = trpc.tx.create.useMutation();
   const deleteTx = trpc.tx.delete.useMutation();
-  const [uploadedImg, setUploadedImg] = React.useState<File>();
-  const [uploadedImgUrl, setUploadedImgUrl] = React.useState<string>();
   const { appUser } = getAppUser();
-  const processReceipt = trpc.receipt.process.useMutation();
-  const createReceipt = trpc.receipt.create.useMutation();
-  const [receipt, setReceipt] = React.useState<Receipt>();
   const auth = trpc.auth.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );
   const queryClient = trpc.useUtils();
+  const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
 
   const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
   const setUnsavedSplitArray = useTxStore(
@@ -138,89 +132,35 @@ const TxModal = (props: Props) => {
             </div>
           </section>
 
-          <div className="flex flex-col justify-between gap-y-3 px-3 md:flex-row">
-            <div>
-              <SplitList
-                onAmountChange={(index, splitAmount) => {
-                  props.onSplitAmountChange(index, splitAmount);
-                }}
-              >
-                <H1 className="px-3">${amount * -1}</H1>
-              </SplitList>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  if (!e.target.files) {
-                    console.error("No file uploaded.");
-                    return;
-                  }
-                  const img = e.target.files[0];
-                  setUploadedImg(img);
-                  setUploadedImgUrl(URL.createObjectURL(img));
-                }}
-              />
-              {uploadedImg && uploadedImgUrl && !receipt ? (
-                <div>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const uploadResponse = await supabase.storage
-                        .from("receipts")
-                        .upload(tx.name, uploadedImg, { upsert: true });
-                      if (uploadResponse.error) {
-                        console.error(
-                          "Error uploading image",
-                          uploadResponse.error,
-                        );
-                        return;
-                      }
-                      const signedUrlResponse = await supabase.storage
-                        .from("receipts")
-                        .createSignedUrl(tx.name, 60);
-
-                      if (
-                        signedUrlResponse.error ||
-                        !signedUrlResponse.data.signedUrl
-                      ) {
-                        console.error(
-                          "Error getting signed URL",
-                          signedUrlResponse.error,
-                        );
-                        return;
-                      }
-
-                      const response = await processReceipt.mutateAsync({
-                        signedUrl: signedUrlResponse.data.signedUrl,
-                      });
-
-                      let txId = tx.id;
-                      if (!txId) {
-                        const createdTx = await createTx.mutateAsync(tx);
-                        txId = createdTx.id;
-                      }
-
-                      if (!response) return;
-                      setReceipt(response);
-                      await createReceipt.mutateAsync({
-                        id: txId,
-                        receipt: response,
-                      });
-                    }}
-                  >
-                    Upload
-                  </button>
-
-                  <Image src={uploadedImgUrl} alt="" width={300} height={500} />
+          <div className="flex flex-col justify-between gap-y-3 px-3 ">
+            <div className="flex flex-col gap-y-3">
+              <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-x-3 gap-y-1">
+                <div className="flex">
+                  <H1 className="px-3">${amount * -1}</H1>
+                  {appUser?.myConnectionArray &&
+                    appUser.myConnectionArray.length > 0 &&
+                    focusedIndex === undefined &&
+                    tx.splitArray.length < 1 && (
+                      <SecondaryBtn onClick={() => setFocusedSplitIndex(0)}>
+                        <span className="icon-[lucide--split] m-1 h-4 w-4" />
+                        Split
+                      </SecondaryBtn>
+                    )}
                 </div>
-              ) : (
-                <pre>{JSON.stringify(tx.receipt, null, 2)}</pre>
-              )}
+                <Cat />
+              </div>
+
+              <div className="flex flex-col gap-3 md:flex-row">
+                <SplitList
+                  onAmountChange={(index, splitAmount) => {
+                    props.onSplitAmountChange(index, splitAmount);
+                  }}
+                />
+                <Receipt />
+              </div>
             </div>
 
             <div className="flex flex-col items-start gap-y-3">
-              <Cat />
-
               <ActionBtn
                 onClickAsync={async () => {
                   if (!tx.id) {

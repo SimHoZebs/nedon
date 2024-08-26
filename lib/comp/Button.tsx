@@ -133,9 +133,9 @@ export const CloseBtn = (props: CloseBtnProps) => {
     <button
       type="button"
       aria-label="Close"
-      className={`m-1 flex rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400 ${
+      className={`m-1 h-6 w-6 flex rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400 ${
         props.isForMobile && "lg:hidden"
-      } ${props.isForDesktop && "hidden"} }`}
+      } ${props.isForDesktop && "hidden lg:block"}`}
       onClick={props.onClose}
     >
       <span className="icon-[iconamoon--close-fill] h-6 w-6 rounded-full text-zinc-400 hover:text-pink-400" />
