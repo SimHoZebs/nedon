@@ -12,8 +12,46 @@ const Receipt = () => {
   const processReceipt = trpc.receipt.process.useMutation();
   const createReceipt = trpc.receipt.create.useMutation();
 
-  const [uploadedImg, setUploadedImg] = React.useState<File>();
-  const [uploadedImgUrl, setUploadedImgUrl] = React.useState<string>();
+  const [receiptImg, setReceiptImg] = React.useState<File>();
+  const [receiptImgURL, setReceiptImgURL] = React.useState<string>();
+
+  const uploadAndProcess = async () => {
+    if (!tx || !receiptImg) {
+      console.error("No transaction to upload receipt to");
+      return;
+    }
+    const uploadResponse = await supabase.storage
+      .from("receipts")
+      .upload(tx.name, receiptImg, { upsert: true });
+    if (uploadResponse.error) {
+      console.error("Error uploading image", uploadResponse.error);
+      return;
+    }
+    const signedUrlResponse = await supabase.storage
+      .from("receipts")
+      .createSignedUrl(tx.name, 60);
+
+    if (signedUrlResponse.error || !signedUrlResponse.data.signedUrl) {
+      console.error("Error getting signed URL", signedUrlResponse.error);
+      return;
+    }
+
+    const response = await processReceipt.mutateAsync({
+      signedUrl: signedUrlResponse.data.signedUrl,
+    });
+
+    let txId = tx.id;
+    if (!txId) {
+      const createdTx = await createTx.mutateAsync(tx);
+      txId = createdTx.id;
+    }
+
+    if (!response) return;
+    await createReceipt.mutateAsync({
+      id: txId,
+      receipt: response,
+    });
+  };
 
   return (
     <div>
@@ -28,64 +66,19 @@ const Receipt = () => {
               return;
             }
             const img = e.target.files[0];
-            setUploadedImg(img);
-            setUploadedImgUrl(URL.createObjectURL(img));
+            setReceiptImg(img);
+            setReceiptImgURL(URL.createObjectURL(img));
           }}
         />
       )}
-      {uploadedImg && !tx?.receipt ? (
+      {receiptImg && !tx?.receipt ? (
         <div className="flex">
-          <button
-            type="button"
-            onClick={async () => {
-              if (!tx) {
-                console.error("No transaction to upload receipt to");
-                return;
-              }
-              const uploadResponse = await supabase.storage
-                .from("receipts")
-                .upload(tx.name, uploadedImg, { upsert: true });
-              if (uploadResponse.error) {
-                console.error("Error uploading image", uploadResponse.error);
-                return;
-              }
-              const signedUrlResponse = await supabase.storage
-                .from("receipts")
-                .createSignedUrl(tx.name, 60);
-
-              if (
-                signedUrlResponse.error ||
-                !signedUrlResponse.data.signedUrl
-              ) {
-                console.error(
-                  "Error getting signed URL",
-                  signedUrlResponse.error,
-                );
-                return;
-              }
-
-              const response = await processReceipt.mutateAsync({
-                signedUrl: signedUrlResponse.data.signedUrl,
-              });
-
-              let txId = tx.id;
-              if (!txId) {
-                const createdTx = await createTx.mutateAsync(tx);
-                txId = createdTx.id;
-              }
-
-              if (!response) return;
-              await createReceipt.mutateAsync({
-                id: txId,
-                receipt: response,
-              });
-            }}
-          >
+          <button type="button" onClick={uploadAndProcess}>
             Upload
           </button>
 
-          {uploadedImgUrl && (
-            <Image src={uploadedImgUrl} alt="" width={300} height={500} />
+          {receiptImgURL && (
+            <Image src={receiptImgURL} alt="" width={300} height={500} />
           )}
         </div>
       ) : (
