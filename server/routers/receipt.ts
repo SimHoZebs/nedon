@@ -14,7 +14,7 @@ const receiptRouter = router({
       }),
     )
     .mutation(async ({ input }) => {
-      const { items, ...receiptWithoutItems } = input.receipt;
+      const { items, id, ...receiptWithoutItems } = input.receipt;
 
       const updatedTx = await db.tx.update({
         where: {

@@ -4,6 +4,7 @@ import { trpc } from "@/util/trpc";
 import supabase from "server/supabaseClient";
 import Image from "next/image";
 import { H3 } from "@/comp/Heading";
+import Input from "@/comp/Input";
 
 const Receipt = () => {
   const tx = useTxStore((state) => state.txOnModal);
@@ -53,6 +54,12 @@ const Receipt = () => {
     });
   };
 
+  const receiptSum =
+    tx?.receipt?.items.reduce(
+      (sum, item) => sum + item.unit_price * item.quantity,
+      0,
+    ) || 0;
+
   return (
     <div>
       <H3>Receipt</H3>
@@ -71,7 +78,7 @@ const Receipt = () => {
           }}
         />
       )}
-      {receiptImg && !tx?.receipt ? (
+      {receiptImg && !tx?.receipt && (
         <div className="flex">
           <button type="button" onClick={uploadAndProcess}>
             Upload
@@ -81,8 +88,34 @@ const Receipt = () => {
             <Image src={receiptImgURL} alt="" width={300} height={500} />
           )}
         </div>
-      ) : (
-        tx?.receipt && <pre>{JSON.stringify(tx.receipt, null, 2)}</pre>
+      )}
+
+      {tx?.receipt?.id && (
+        <div className="flex flex-col">
+          {tx.receipt.items.map((item) => (
+            <div key={item.id} className="flex">
+              <Input type="number" value={item.quantity} />
+              <Input value={item.name} />
+              <Input type="number" value={item.unit_price} />
+            </div>
+          ))}
+          <div className="flex">
+            <p>tips</p>
+            <Input value={tx.receipt.tip} />
+            <p>({(tx.receipt.tip * 100) / tx.amount}%)</p>
+          </div>
+          <div className="flex">
+            <p>tax</p>
+            <Input value={tx.receipt.tax} />
+          </div>
+          <p
+            className={`h-5 text-red-800 ${
+              receiptSum !== tx.amount ? "" : "hidden"
+            }`}
+          >
+            Receipt total is {receiptSum}; {tx.amount - receiptSum} off
+          </p>
+        </div>
       )}
     </div>
   );

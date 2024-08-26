@@ -152,10 +152,10 @@ const SplitList = (props: Props) => {
           </div>
 
           <p
-            className={`h-5 ${
+            className={`h-5 text-red-800 ${
               updatedSplitAmount !== txAmount && unsavedSplitArray.length > 0
-                ? "text-red-800"
-                : "text-transparent"
+                ? ""
+                : "hidden"
             }`}
           >
             {`Current split total is $${updatedSplitAmount}; ${parseMoney(
