@@ -140,7 +140,7 @@ const TxModal = (props: Props) => {
                   {appUser?.myConnectionArray &&
                     appUser.myConnectionArray.length > 0 &&
                     focusedIndex === undefined &&
-                    tx.splitArray.length < 1 && (
+                    tx.splitArray.length < 2 && (
                       <SecondaryBtn onClick={() => setFocusedSplitIndex(0)}>
                         <span className="icon-[lucide--split] m-1 h-4 w-4" />
                         Split

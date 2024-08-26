@@ -1,9 +1,9 @@
 import React from "react";
 import { useTxStore } from "@/util/txStore";
 import { trpc } from "@/util/trpc";
-import type { Receipt as TReceipt } from "@/types/receipt";
 import supabase from "server/supabaseClient";
 import Image from "next/image";
+import { H3 } from "@/comp/Heading";
 
 const Receipt = () => {
   const tx = useTxStore((state) => state.txOnModal);
@@ -14,24 +14,26 @@ const Receipt = () => {
 
   const [uploadedImg, setUploadedImg] = React.useState<File>();
   const [uploadedImgUrl, setUploadedImgUrl] = React.useState<string>();
-  const [receipt, setReceipt] = React.useState<TReceipt>();
 
   return (
     <div>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => {
-          if (!e.target.files) {
-            console.error("No file uploaded.");
-            return;
-          }
-          const img = e.target.files[0];
-          setUploadedImg(img);
-          setUploadedImgUrl(URL.createObjectURL(img));
-        }}
-      />
-      {uploadedImg && uploadedImgUrl && !receipt ? (
+      <H3>Receipt</H3>
+      {!tx?.receipt && (
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            if (!e.target.files) {
+              console.error("No file uploaded.");
+              return;
+            }
+            const img = e.target.files[0];
+            setUploadedImg(img);
+            setUploadedImgUrl(URL.createObjectURL(img));
+          }}
+        />
+      )}
+      {uploadedImg && !tx?.receipt ? (
         <div className="flex">
           <button
             type="button"
@@ -73,7 +75,6 @@ const Receipt = () => {
               }
 
               if (!response) return;
-              setReceipt(response);
               await createReceipt.mutateAsync({
                 id: txId,
                 receipt: response,
@@ -83,10 +84,12 @@ const Receipt = () => {
             Upload
           </button>
 
-          <Image src={uploadedImgUrl} alt="" width={300} height={500} />
+          {uploadedImgUrl && (
+            <Image src={uploadedImgUrl} alt="" width={300} height={500} />
+          )}
         </div>
       ) : (
-        tx && <pre>{JSON.stringify(tx.receipt, null, 2)}</pre>
+        tx?.receipt && <pre>{JSON.stringify(tx.receipt, null, 2)}</pre>
       )}
     </div>
   );
