@@ -6,12 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "vitest",
+    "db-up": "docker compose up -d",
+    "db-down": "docker compose down",
+    "db-it": "docker exec -it nedon-db psql -U postgres -d nedon",
+
     "format": "prettier --write . && biome check . --apply",
     "biome": "biome check .",
     "tsc": "tsc",
+
     "vercel-build": "prisma generate && prisma migrate deploy && next build",
-    "migrate-prod": "dotenv -e .env.prod prisma migrate deploy",
-    "test": "vitest"
+    "migrate-prod": "dotenv -e .env.prod prisma migrate deploy"
   },
   "dependencies": {
     "@google-cloud/vision": "^4.3.2",

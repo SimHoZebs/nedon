@@ -1,0 +1,18 @@
+
+services:
+  db:
+    container_name: nedon-db
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: nedon
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "9876:5432"
+    expose:
+      - "9876"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
