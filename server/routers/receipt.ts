@@ -71,7 +71,8 @@ const receiptRouter = router({
 
       if (message.content[0].type !== "text") return null;
       try {
-        return JSON.parse(message.content[0].text.value) as Receipt;
+        const receipt = JSON.parse(message.content[0].text.value);
+        return receipt.properties as Receipt;
       } catch (e) {
         console.error("JSON.parse failed", e);
         return null;

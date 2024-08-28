@@ -12,6 +12,7 @@ const Receipt = () => {
   const createTx = trpc.tx.create.useMutation();
   const processReceipt = trpc.receipt.process.useMutation();
   const createReceipt = trpc.receipt.create.useMutation();
+  const queryClient = trpc.useUtils();
 
   const [receiptImg, setReceiptImg] = React.useState<File>();
   const [receiptImgURL, setReceiptImgURL] = React.useState<string>();
@@ -47,11 +48,17 @@ const Receipt = () => {
       txId = createdTx.id;
     }
 
-    if (!response) return;
+    if (!response) {
+      console.error("Error processing receipt. response:", response);
+      return;
+    }
+
     await createReceipt.mutateAsync({
       id: txId,
       receipt: response,
     });
+
+    queryClient.tx.getAll.invalidate();
   };
 
   const receiptSum =
