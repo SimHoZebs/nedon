@@ -469,7 +469,7 @@ export const ReceiptItemSchema = z.object({
   description: z.string(),
   quantity: z.number().int(),
   unit_price: z.number(),
-  receiptId: z.string().optional(),
+  receiptId: z.string(),
 })
 
 export type ReceiptItem = z.infer<typeof ReceiptItemSchema>
