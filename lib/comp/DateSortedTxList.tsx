@@ -9,7 +9,7 @@ import TxCard from "./tx/TxCard";
 
 interface Props {
   sortedTxArray: FullTxClientSide[][][][];
-  setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowModal?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const DateSortedTxList = (props: Props) => {

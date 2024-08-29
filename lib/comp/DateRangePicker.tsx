@@ -43,51 +43,25 @@ const DateRangePicker = (props: Props) => {
   };
 
   return (
-    <div className="flex self-start">
-      {props.date && (
-        <div className="flex items-center ">
-          <Button
-            onClick={() => {
-              handleRangeChange(-1);
-            }}
-          >
-            <span className="icon-[tabler--chevron-left] h-6 w-6" />
-          </Button>
-          <H2>{props.date.getMonth() + 1}</H2>
-          <Button
-            onClick={() => {
-              handleRangeChange(1);
-            }}
-          >
-            <span className="icon-[tabler--chevron-right] h-6 w-6" />
-          </Button>
-        </div>
-      )}
-      {/*
-      <select
-        title="scope"
-        className="bg-zinc-800"
-        name="scope"
-        id=""
-        value={props.rangeFormat}
-        onChange={(e) => {
-          const test = z.union([
-            z.literal("date"),
-            z.literal("month"),
-            z.literal("year"),
-            z.literal("all"),
-          ]);
-          const result = test.parse(e.target.value);
-          props.setRangeFormat(result);
-        }}
-      >
-        <option value="date">date</option>
-        <option value="month">month</option>
-        <option value="year">year</option>
-        <option value="all">all</option>
-      </select>
-      */}
-    </div>
+    props.date && (
+      <div className="flex items-center ">
+        <Button
+          onClick={() => {
+            handleRangeChange(-1);
+          }}
+        >
+          <span className="icon-[tabler--chevron-left] h-6 w-6" />
+        </Button>
+        <H2>{props.date.getMonth() + 1}</H2>
+        <Button
+          onClick={() => {
+            handleRangeChange(1);
+          }}
+        >
+          <span className="icon-[tabler--chevron-right] h-6 w-6" />
+        </Button>
+      </div>
+    )
   );
 };
 

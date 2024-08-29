@@ -8,7 +8,7 @@ import type { FullTxClientSide } from "@/util/types";
 
 interface Props {
   tx: FullTxClientSide;
-  setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowModal?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const TxCard = (props: Props) => {
   const setTxOnModal = useTxStore((state) => state.setTxOnModal);
@@ -21,10 +21,18 @@ const TxCard = (props: Props) => {
     <section
       className="flex h-fit w-full flex-col justify-between gap-x-4 gap-y-1 border border-zinc-400 px-3 py-2 text-start hover:cursor-pointer hover:bg-zinc-800 hover:text-zinc-200"
       onKeyDown={() => {
+        if (!props.setShowModal) {
+          console.log("props.setShowModal not implemented");
+          return;
+        }
         props.setShowModal(true);
         setTxOnModal(props.tx);
       }}
       onClick={() => {
+        if (!props.setShowModal) {
+          console.log("props.setShowModal not implemented");
+          return;
+        }
         props.setShowModal(true);
         setTxOnModal(props.tx);
       }}
