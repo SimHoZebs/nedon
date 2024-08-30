@@ -1,4 +1,7 @@
-import { ReceiptSchema } from "@/types/receipt";
+import {
+  type ReceiptOptionalDefaultsWithChildren,
+  ReceiptOptionalDefaultsWithChildrenSchema,
+} from "@/types/receipt";
 import type { Group, User } from "@prisma/client";
 import type { Cat, Split, Tx } from "@prisma/client";
 import type { Transaction } from "plaid";
@@ -10,7 +13,6 @@ import {
   TxOptionalDefaultsSchema,
   UserSchema,
 } from "prisma/generated/zod";
-import type { ReceiptOptionalDefaultsWithRelations } from "@/types/receipt";
 import { z } from "zod";
 
 export type UserClientSide = Omit<User, "ACCESS_TOKEN"> & {
@@ -42,7 +44,7 @@ export type TreedCatWithTx = {
 export type TxInDB = Tx & {
   splitArray: Split[];
   catArray: Cat[];
-  receipt: ReceiptOptionalDefaultsWithRelations | null;
+  receipt: ReceiptOptionalDefaultsWithChildren | null;
 };
 
 //CAT
@@ -83,7 +85,7 @@ export const isSplitArrayInDB = (obj: unknown): obj is Split[] => {
 export const TxClientSideSchema = TxOptionalDefaultsSchema.extend({
   catArray: z.array(CatClientSideSchema),
   splitArray: z.array(SplitClientSideSchema),
-  receipt: ReceiptSchema.nullable(),
+  receipt: ReceiptOptionalDefaultsWithChildrenSchema.nullable(),
 });
 export type TxClientSide = z.infer<typeof TxClientSideSchema>;
 
@@ -93,7 +95,7 @@ export const FullTxSchema = TxOptionalDefaultsSchema.extend({
   id: z.string(),
   catArray: z.array(CatSchema),
   splitArray: z.array(SplitOptionalDefaultsSchema),
-  receipt: ReceiptSchema.nullable(),
+  receipt: ReceiptOptionalDefaultsWithChildrenSchema.nullable(),
 });
 export type FullTx = z.infer<typeof FullTxSchema> & Transaction;
 

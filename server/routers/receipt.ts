@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { procedure, router } from "../trpc";
-import { type Receipt, ReceiptSchema } from "@/types/receipt";
+import {
+  type ReceiptOptionalDefaultsWithChildren,
+  ReceiptOptionalDefaultsWithChildrenSchema,
+} from "@/types/receipt";
 import db from "@/util/db";
 import { imgAnnotator } from "server/gcloudClient";
 import openai from "server/openaiClient";
@@ -10,7 +13,7 @@ const receiptRouter = router({
     .input(
       z.object({
         id: z.string(),
-        receipt: ReceiptSchema,
+        receipt: ReceiptOptionalDefaultsWithChildrenSchema,
       }),
     )
     .mutation(async ({ input }) => {
@@ -48,7 +51,13 @@ const receiptRouter = router({
       const [result] = await imgAnnotator.textDetection(input.signedUrl);
 
       const textAnnotationArray = result.textAnnotations;
-      if (!textAnnotationArray) return null;
+      if (!textAnnotationArray || textAnnotationArray.length < 0) {
+        console.error(
+          "No text annotations found. textAnnotationArray:",
+          textAnnotationArray,
+        );
+        return null;
+      }
 
       const thread = await openai.beta.threads.create();
 
@@ -72,7 +81,23 @@ const receiptRouter = router({
       if (message.content[0].type !== "text") return null;
       try {
         const receipt = JSON.parse(message.content[0].text.value);
-        return receipt.properties as Receipt;
+
+        const parsedReceipt =
+          ReceiptOptionalDefaultsWithChildrenSchema.safeParse(receipt);
+
+        if (parsedReceipt.success) return parsedReceipt.data;
+
+        console.error(
+          "Receipt parse failed",
+          JSON.stringify(parsedReceipt.error, null, 2),
+        );
+
+        //Rarely, the receipt is in a different shape.
+        if ("properties" in receipt) return receipt.properties;
+
+        //Hopefully this never happens
+        console.error("Unrecognized JSON shape.", receipt);
+        return null;
       } catch (e) {
         console.error("JSON.parse failed", e);
         return null;

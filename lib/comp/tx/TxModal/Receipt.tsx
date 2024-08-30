@@ -22,25 +22,32 @@ const Receipt = () => {
       console.error("No transaction to upload receipt to");
       return;
     }
+    console.log("uploading receipt...");
     const uploadResponse = await supabase.storage
       .from("receipts")
       .upload(tx.name, receiptImg, { upsert: true });
+    console.log("receipt uploaded");
     if (uploadResponse.error) {
       console.error("Error uploading image", uploadResponse.error);
       return;
     }
+    console.log("getting signed URL...");
     const signedUrlResponse = await supabase.storage
       .from("receipts")
       .createSignedUrl(tx.name, 60);
+    console.log("signed URL received");
 
     if (signedUrlResponse.error || !signedUrlResponse.data.signedUrl) {
       console.error("Error getting signed URL", signedUrlResponse.error);
       return;
     }
 
+    console.log("processing receipt...");
     const response = await processReceipt.mutateAsync({
       signedUrl: signedUrlResponse.data.signedUrl,
     });
+
+    console.log("receipt processed");
 
     let txId = tx.id;
     if (!txId) {
@@ -53,12 +60,17 @@ const Receipt = () => {
       return;
     }
 
+    console.log("creating receipt...");
+
     await createReceipt.mutateAsync({
       id: txId,
       receipt: response,
     });
 
-    queryClient.tx.getAll.invalidate();
+    console.log("receipt created");
+    console.log("invalidating cache...");
+    await queryClient.tx.getAll.invalidate();
+    console.log("cache invalidated");
   };
 
   const receiptSum =
