@@ -133,7 +133,7 @@ model Receipt {
   items          ReceiptItem[]
   payment_method String
 
-  tx   Tx     @relation(fields: [txId], references: [id])
+  tx   Tx     @relation(fields: [txId], references: [id], onDelete: Cascade)
   txId String @unique
 }
 
