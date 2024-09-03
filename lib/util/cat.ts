@@ -25,10 +25,6 @@ export const emptyCat = ({
     catShortName[nameArray?.at(-1) || "Unknown"]?.shortName || "Unknown",
   );
 
-  // console.log(
-  //   "Checking the other arrays : ",
-  //   nameArray?.slice(-1)[0] || "Unknown",
-  // );
   return {
     id: undefined,
     txId: txId,
