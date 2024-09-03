@@ -28,6 +28,7 @@ const CatChip = (props: Props) => {
   const queryClient = trpc.useUtils();
   const deleteCat = trpc.cat.delete.useMutation();
 
+  console.log("Cat name: ", props.cat.name);
   return (
     <div className="flex flex-col gap-2">
       <div

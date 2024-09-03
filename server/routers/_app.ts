@@ -15,10 +15,10 @@ import { stripUserSecrets } from "@/util/user";
 import { procedure, router } from "../trpc";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS, client } from "../util";
 import catRouter from "./cat";
+import receiptRouter from "./receipt";
 import splitRouter from "./split";
 import txRouter from "./tx";
 import userRouter from "./user";
-import receiptRouter from "./receipt";
 
 const setAccessToken = async ({
   publicToken,
@@ -122,6 +122,7 @@ export const appRouter = router({
 
   getCatOptionArray: procedure.input(z.undefined()).query(async () => {
     const response = await client.categoriesGet({});
+    console.log(response.data.categories);
     return convertPlaidCatsToHierarchicalArray(response.data.categories);
   }),
 });

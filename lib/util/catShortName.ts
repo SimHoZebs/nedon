@@ -1,16 +1,28 @@
 const catShortStyleArray: {
   [key: string]: {
-    short: string;
+    shortName: string;
   };
 } = {
   "Airlines and Aviation Services": {
-    short: "Airline Services",
+    shortName: "Airline Services",
   },
   "Gyms and Fitness Centers": {
-    short: "Fitness",
+    shortName: "Fitness",
+  },
+  "Government Departments and Agencies": {
+    shortName: "Government Agencies",
+  },
+  "Disabled Persons Services": {
+    shortName: "Disablility Service",
+  },
+  "Facilities and Nursing Homes": {
+    shortName: "Nursing home",
+  },
+  "Day Care and Preschools": {
+    shortName: "Childcare Services",
   },
   Unknown: {
-    short: "test",
+    shortName: "test",
   },
 };
 
