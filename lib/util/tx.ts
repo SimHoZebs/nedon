@@ -14,6 +14,7 @@ export const resetFullTx = (fullTx: FullTxClientSide): FullTxClientSide => ({
     }),
   ],
   id: undefined,
+  receipt: null,
 });
 
 export const convertToFullTx = (

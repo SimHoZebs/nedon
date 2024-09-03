@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { procedure, router } from "../trpc";
 import {
+  PureReceiptWithChildrenSchema,
   type ReceiptOptionalDefaultsWithChildren,
   ReceiptOptionalDefaultsWithChildrenSchema,
 } from "@/types/receipt";
@@ -82,8 +83,7 @@ const receiptRouter = router({
       try {
         const receipt = JSON.parse(message.content[0].text.value);
 
-        const parsedReceipt =
-          ReceiptOptionalDefaultsWithChildrenSchema.safeParse(receipt);
+        const parsedReceipt = PureReceiptWithChildrenSchema.safeParse(receipt);
 
         if (parsedReceipt.success) return parsedReceipt.data;
 
@@ -93,7 +93,8 @@ const receiptRouter = router({
         );
 
         //Rarely, the receipt is in a different shape.
-        if ("properties" in receipt) return receipt.properties;
+        if ("properties" in receipt)
+          return receipt.properties as PureReceiptWithChildrenSchema;
 
         //Hopefully this never happens
         console.error("Unrecognized JSON shape.", receipt);

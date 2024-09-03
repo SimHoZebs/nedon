@@ -94,13 +94,13 @@ export type FullTxClientSide = Transaction & TxClientSide;
 export const FullTxSchema = TxOptionalDefaultsSchema.extend({
   id: z.string(),
   catArray: z.array(CatSchema),
-  splitArray: z.array(SplitOptionalDefaultsSchema),
+  splitArray: z.array(SplitSchema),
   receipt: ReceiptOptionalDefaultsWithChildrenSchema.nullable(),
 });
 export type FullTx = z.infer<typeof FullTxSchema> & Transaction;
 
-export function isFullTxInDB(tx: FullTxClientSide): tx is FullTx {
-  return !!tx.id;
+export function isFullTxInDB(tx: unknown): tx is FullTx {
+  return (tx as FullTx).id !== undefined;
 }
 
 export function isPlaidTx(plaidTx: unknown): plaidTx is FullTxClientSide {

@@ -5,11 +5,13 @@ import supabase from "server/supabaseClient";
 import Image from "next/image";
 import { H3 } from "@/comp/Heading";
 import Input from "@/comp/Input";
+import { type FullTxClientSide, isFullTxInDB, type TxInDB } from "@/util/types";
 
 const Receipt = () => {
   const tx = useTxStore((state) => state.txOnModal);
 
   const createTx = trpc.tx.create.useMutation();
+  const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);
   const processReceipt = trpc.receipt.process.useMutation();
   const createReceipt = trpc.receipt.create.useMutation();
   const queryClient = trpc.useUtils();
@@ -49,11 +51,9 @@ const Receipt = () => {
 
     console.log("receipt processed");
 
-    let txId = tx.id;
-    if (!txId) {
-      const createdTx = await createTx.mutateAsync(tx);
-      txId = createdTx.id;
-    }
+    const latestTx: FullTxClientSide | TxInDB = tx.id
+      ? tx
+      : await createTx.mutateAsync(tx);
 
     if (!response) {
       console.error("Error processing receipt. response:", response);
@@ -62,15 +62,21 @@ const Receipt = () => {
 
     console.log("creating receipt...");
 
-    await createReceipt.mutateAsync({
-      id: txId,
+    if (!isFullTxInDB(latestTx)) {
+      console.error("latestTx is not FullTxInDB", latestTx);
+      return;
+    }
+    const createdReceipt = await createReceipt.mutateAsync({
+      id: latestTx.id,
       receipt: response,
     });
+    console.log("receipt created", createdReceipt);
 
-    console.log("receipt created");
-    console.log("invalidating cache...");
-    await queryClient.tx.getAll.invalidate();
-    console.log("cache invalidated");
+    refreshTxModalData({ ...latestTx, receipt: createdReceipt });
+    queryClient.tx.getAll.invalidate();
+
+    setReceiptImg(undefined);
+    setReceiptImgURL(undefined);
   };
 
   const receiptSum =
