@@ -84,7 +84,7 @@ const TxCard = (props: Props) => {
               ) : (
                 <span className={`${getCatStyle(cat.nameArray).icon} w-4`} />
               )}
-              <p className="text-xs">{cat.nameArray.at(-1)}</p>
+              <p className="text-xs">{cat.name}</p>
             </div>
           ))}
         </div>
