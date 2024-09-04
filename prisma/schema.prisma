@@ -111,11 +111,11 @@ model CatSettings {
   name   String
   budget Float
 
-  parent   CatSettings?  @relation("SubCategory", fields: [parentId], references: [id])
+  parent   CatSettings?  @relation("SubCategory", fields: [parentId], references: [id], onDelete: Cascade)
   parentId String?
   children CatSettings[] @relation("SubCategory")
 
-  User   User   @relation(fields: [userId], references: [id])
+  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 }
 
