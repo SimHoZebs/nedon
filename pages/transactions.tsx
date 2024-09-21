@@ -11,6 +11,7 @@ import { trpc } from "@/util/trpc";
 import { filterTxByDate, organizeTxByTime } from "@/util/tx";
 import type { FullTxClientSide } from "@/util/types";
 import useDateRange from "@/util/useDateRange";
+import { ActionBtn } from "@/comp/Button";
 
 const Page: NextPage = () => {
   const { appUser } = getAppUser();
@@ -70,13 +71,16 @@ const Page: NextPage = () => {
       </AnimatePresence>
 
       <div className="flex w-full max-w-sm flex-col items-center gap-y-2 lg:max-w-md">
-        <DateRangePicker
-          date={date}
-          setDate={setDate}
-          rangeFormat={rangeFormat}
-          setRangeFormat={setRangeFormat}
-        />
+        <div className="flex w-full justify-between">
+          <DateRangePicker
+            date={date}
+            setDate={setDate}
+            rangeFormat={rangeFormat}
+            setRangeFormat={setRangeFormat}
+          />
 
+          <ActionBtn variant="primary">+ transaction</ActionBtn>
+        </div>
         <DateSortedTxList
           setShowModal={setShowModal}
           sortedTxArray={sortedTxArray}
