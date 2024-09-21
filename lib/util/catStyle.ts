@@ -96,6 +96,11 @@ const catStyleArray: {
     bgColor: "bg-green-300",
     textColor: "text-green-300",
   },
+  test: {
+    icon: "icon-[mdi--shape-outline]",
+    bgColor: "bg-zinc-400",
+    textColor: "text-zinc-400",
+  },
   Unknown: {
     icon: "icon-[mdi--shape-outline]",
     bgColor: "bg-zinc-400",

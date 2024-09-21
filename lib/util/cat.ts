@@ -1,5 +1,6 @@
 import type { Category as PlaidCat } from "plaid";
 
+import catShortName from "./catShortName";
 import catStyleArray from "./catStyle";
 import parseMoney from "./parseMoney";
 import type { TxType } from "./tx";
@@ -19,13 +20,23 @@ export const emptyCat = ({
   nameArray?: string[];
   amount: number;
 }): CatClientSide => {
+  console.log(
+    "Shortened :",
+    catShortName[nameArray?.at(-1) || "Unknown"]?.shortName || "Unknown",
+  );
+
   return {
     id: undefined,
     txId: txId,
-    name: nameArray?.slice(-1)[0] || "Unknown",
+    name: nameArray ? getShortCatName(nameArray) : "Unknown",
     nameArray: nameArray || [],
     amount: amount,
   };
+};
+
+export const getShortCatName = (nameArray: string[]) => {
+  const shortName = catShortName[nameArray.slice(-1)[0]]?.shortName;
+  return shortName ? shortName : nameArray.slice(-1)[0];
 };
 
 export const getCatStyle = (nameArray: string[]) => {

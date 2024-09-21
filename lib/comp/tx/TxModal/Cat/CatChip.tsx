@@ -1,3 +1,4 @@
+import { includes } from "cypress/types/lodash";
 import type React from "react";
 
 import { getCatStyle } from "@/util/cat";
@@ -27,6 +28,7 @@ const CatChip = (props: Props) => {
   const queryClient = trpc.useUtils();
   const deleteCat = trpc.cat.delete.useMutation();
 
+  console.log("Cat name: ", props.cat.name);
   return (
     <div className="flex flex-col gap-2">
       <div
@@ -50,7 +52,8 @@ const CatChip = (props: Props) => {
         <div className={"group flex h-full flex-col items-start text-zinc-300"}>
           <div className="flex w-full justify-between gap-x-2">
             <p className={props.isEditTarget ? "animate-pulse" : ""}>
-              {props.cat.nameArray.at(-1)}
+              {props.cat.name}
+              {/* {props.cat.nameArray.at(-1)} */}
             </p>
 
             {
