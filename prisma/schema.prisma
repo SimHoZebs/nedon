@@ -53,8 +53,7 @@ model User {
 //or split.
 //Also created when a user accepts a split from another user.
 model Tx {
-  id      String @id @default(cuid())
-  plaidId String //plaid tranasction_id
+  id String @id @default(cuid())
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -75,6 +74,39 @@ model Tx {
   splitArray Split[] //Splits that were created from this tx
 
   receipt Receipt?
+
+  //Plaid's Transaction object
+  plaidId                            String   @unique //plaid tranasction_id
+  account_id                         String
+  amount                             Float
+  iso_currency_code                  String?
+  unofficial_currency_code           String?
+  category                           String[]
+  category_id                        String?
+  check_number                       String?
+  date                               String
+  name                               String
+  merchant_name                      String?
+  original_description               String?
+  pending                            Boolean
+  pending_transaction_id             String?
+  account_owner                      String?
+  transaction_id                     String
+  transaction_type                   String?
+  logo_url                           String?
+  website                            String?
+  authorized_date                    String?
+  authorized_datetime                String?
+  datetime                           String?
+  payment_channel                    String
+  transaction_code                   String? //TransactionCode enum
+  personal_finance_category_icon_url String?
+  counterparties                     String[]
+  merchant_entity_id                 String?
+
+  personal_finance_category Json? //PersonalFinanceCategory
+  location                  Json
+  payment_meta              Json
 }
 
 //Created for Bob when Alice splits their transaction with Bob.

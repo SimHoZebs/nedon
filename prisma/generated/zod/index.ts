@@ -1,9 +1,53 @@
 import { z } from 'zod';
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 /////////////////////////////////////////
 // HELPER FUNCTIONS
 /////////////////////////////////////////
+
+// JSON
+//------------------------------------------------------
+
+export type NullableJsonInput = Prisma.JsonValue | null | 'JsonNull' | 'DbNull' | Prisma.NullTypes.DbNull | Prisma.NullTypes.JsonNull;
+
+export const transformJsonNull = (v?: NullableJsonInput) => {
+  if (!v || v === 'DbNull') return Prisma.DbNull;
+  if (v === 'JsonNull') return Prisma.JsonNull;
+  return v;
+};
+
+export const JsonValueSchema: z.ZodType<Prisma.JsonValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.literal(null),
+    z.record(z.lazy(() => JsonValueSchema.optional())),
+    z.array(z.lazy(() => JsonValueSchema)),
+  ])
+);
+
+export type JsonValueType = z.infer<typeof JsonValueSchema>;
+
+export const NullableJsonValue = z
+  .union([JsonValueSchema, z.literal('DbNull'), z.literal('JsonNull')])
+  .nullable()
+  .transform((v) => transformJsonNull(v));
+
+export type NullableJsonValueType = z.infer<typeof NullableJsonValue>;
+
+export const InputJsonValueSchema: z.ZodType<Prisma.InputJsonValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.object({ toJSON: z.function(z.tuple([]), z.any()) }),
+    z.record(z.lazy(() => z.union([InputJsonValueSchema, z.literal(null)]))),
+    z.array(z.lazy(() => z.union([InputJsonValueSchema, z.literal(null)]))),
+  ])
+);
+
+export type InputJsonValueType = z.infer<typeof InputJsonValueSchema>;
 
 
 /////////////////////////////////////////
@@ -16,7 +60,7 @@ export const GroupScalarFieldEnumSchema = z.enum(['id','ownerId']);
 
 export const UserScalarFieldEnumSchema = z.enum(['id','name','ACCESS_TOKEN','PUBLIC_TOKEN','ITEM_ID','TRANSFER_ID','PAYMENT_ID']);
 
-export const TxScalarFieldEnumSchema = z.enum(['id','plaidId','userId','userTotal','originTxId']);
+export const TxScalarFieldEnumSchema = z.enum(['id','userId','userTotal','originTxId','plaidId','account_id','amount','iso_currency_code','unofficial_currency_code','category','category_id','check_number','date','name','merchant_name','original_description','pending','pending_transaction_id','account_owner','transaction_id','transaction_type','logo_url','website','authorized_date','authorized_datetime','datetime','payment_channel','transaction_code','personal_finance_category_icon_url','counterparties','merchant_entity_id','personal_finance_category','location','payment_meta']);
 
 export const SplitScalarFieldEnumSchema = z.enum(['id','userId','amount','txId','originTxId']);
 
@@ -30,9 +74,15 @@ export const ReceiptItemScalarFieldEnumSchema = z.enum(['id','name','description
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
+export const NullableJsonNullValueInputSchema = z.enum(['DbNull','JsonNull',]).transform((value) => value === 'JsonNull' ? Prisma.JsonNull : value === 'DbNull' ? Prisma.DbNull : value);
+
+export const JsonNullValueInputSchema = z.enum(['JsonNull',]).transform((value) => (value === 'JsonNull' ? Prisma.JsonNull : value));
+
 export const QueryModeSchema = z.enum(['default','insensitive']);
 
 export const NullsOrderSchema = z.enum(['first','last']);
+
+export const JsonNullValueFilterSchema = z.enum(['DbNull','JsonNull','AnyNull',]).transform((value) => value === 'JsonNull' ? Prisma.JsonNull : value === 'DbNull' ? Prisma.JsonNull : value === 'AnyNull' ? Prisma.AnyNull : value);
 /////////////////////////////////////////
 // MODELS
 /////////////////////////////////////////
@@ -169,10 +219,39 @@ export const UserOptionalDefaultsWithRelationsSchema: z.ZodType<UserOptionalDefa
 
 export const TxSchema = z.object({
   id: z.string().cuid(),
-  plaidId: z.string(),
   userId: z.string(),
   userTotal: z.number(),
   originTxId: z.string().nullable(),
+  plaidId: z.string(),
+  account_id: z.string(),
+  amount: z.number(),
+  iso_currency_code: z.string().nullable(),
+  unofficial_currency_code: z.string().nullable(),
+  category: z.string().array(),
+  category_id: z.string().nullable(),
+  check_number: z.string().nullable(),
+  date: z.string(),
+  name: z.string(),
+  merchant_name: z.string().nullable(),
+  original_description: z.string().nullable(),
+  pending: z.boolean(),
+  pending_transaction_id: z.string().nullable(),
+  account_owner: z.string().nullable(),
+  transaction_id: z.string(),
+  transaction_type: z.string().nullable(),
+  logo_url: z.string().nullable(),
+  website: z.string().nullable(),
+  authorized_date: z.string().nullable(),
+  authorized_datetime: z.string().nullable(),
+  datetime: z.string().nullable(),
+  payment_channel: z.string(),
+  transaction_code: z.string().nullable(),
+  personal_finance_category_icon_url: z.string().nullable(),
+  counterparties: z.string().array(),
+  merchant_entity_id: z.string().nullable(),
+  personal_finance_category: JsonValueSchema.nullable(),
+  location: JsonValueSchema,
+  payment_meta: JsonValueSchema,
 })
 
 export type Tx = z.infer<typeof TxSchema>
@@ -199,7 +278,9 @@ export type TxRelations = {
   receipt?: ReceiptWithRelations | null;
 };
 
-export type TxWithRelations = z.infer<typeof TxSchema> & TxRelations
+export type TxWithRelations = Omit<z.infer<typeof TxSchema>, "personal_finance_category"> & {
+  personal_finance_category?: JsonValueType | null;
+} & TxRelations
 
 export const TxWithRelationsSchema: z.ZodType<TxWithRelations> = TxSchema.merge(z.object({
   user: z.lazy(() => UserWithRelationsSchema),
@@ -224,7 +305,9 @@ export type TxOptionalDefaultsRelations = {
   receipt?: ReceiptOptionalDefaultsWithRelations | null;
 };
 
-export type TxOptionalDefaultsWithRelations = z.infer<typeof TxOptionalDefaultsSchema> & TxOptionalDefaultsRelations
+export type TxOptionalDefaultsWithRelations = Omit<z.infer<typeof TxOptionalDefaultsSchema>, "personal_finance_category"> & {
+  personal_finance_category?: JsonValueType | null;
+} & TxOptionalDefaultsRelations
 
 export const TxOptionalDefaultsWithRelationsSchema: z.ZodType<TxOptionalDefaultsWithRelations> = TxOptionalDefaultsSchema.merge(z.object({
   user: z.lazy(() => UserOptionalDefaultsWithRelationsSchema),
