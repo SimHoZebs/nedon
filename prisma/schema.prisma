@@ -5,6 +5,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator json {
+  provider = "prisma-json-types-generator"
+  // namespace = "PrismaJson"
+  // clientOutput = "<finds it automatically>"
+  // (./ -> relative to schema, or an importable path to require() it)
+}
+
 generator zod {
   provider                         = "zod-prisma-types"
   createOptionalDefaultValuesTypes = true
@@ -77,10 +84,16 @@ model Tx {
 
   receipt Receipt?
 
-  plaidId String @unique //plaid tranasction_id
-  date    String
-  name    String
-  plaidTx Json //is forced as Plaid Transaction object through utility function
+  //duplicate fields from plaidTx because these are important enough to manipulate
+  plaidId   String @unique //plaid tranasction_id
+  name      String
+  amount    Float
+  date      String
+  datetime  String
+  accountId String
+
+  /// [PlaidTx]
+  plaidTx Json?
 }
 
 //Created for Bob when Alice splits their transaction with Bob.

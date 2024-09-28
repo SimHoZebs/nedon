@@ -1,3 +1,8 @@
+import { type Cat, CatOptionalDefaultsSchema } from "prisma/generated/zod";
+import { z } from "zod";
+
+import type { TxClientSide } from "./tx";
+
 export type TreedCat = {
   name: string;
   subCatArray: TreedCat[];

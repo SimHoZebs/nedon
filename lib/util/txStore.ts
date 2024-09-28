@@ -2,14 +2,11 @@ import type { Cat, Split } from "@prisma/client";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
+import type { CatClientSide } from "@/types/cat";
+import { type SplitClientSide, isSplitArrayInDB } from "@/types/split";
+import type { TxClientSide, TxInDB } from "@/types/tx";
+
 import { resetFullTx } from "./tx";
-import {
-  type CatClientSide,
-  type FullTxClientSide,
-  type SplitClientSide,
-  type TxInDB,
-  isSplitArrayInDB,
-} from "./types";
 
 /**
  * Tx depends on three forms of data:
@@ -20,8 +17,8 @@ import {
  *
  * */
 interface Store {
-  txOnModal: FullTxClientSide | undefined;
-  setTxOnModal: (tx?: FullTxClientSide) => void;
+  txOnModal: TxClientSide | undefined;
+  setTxOnModal: (tx?: TxClientSide) => void;
 
   /**
    * Only use this function when new data is expected from the database.
@@ -62,7 +59,7 @@ export const useTxStore = create<Store>()(
   devtools(
     (set) => ({
       txOnModal: undefined,
-      setTxOnModal: (transasction: FullTxClientSide | undefined) =>
+      setTxOnModal: (transasction?: TxClientSide) =>
         set({ txOnModal: transasction }),
 
       refreshTxModalData: (dbData: TxInDB | Split[] | Cat[]) => {

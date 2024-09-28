@@ -4,10 +4,11 @@ import type React from "react";
 import { getCatStyle } from "@/util/cat";
 import parseMoney from "@/util/parseMoney";
 import { useTxStore } from "@/util/txStore";
-import type { FullTxClientSide } from "@/util/types";
+
+import type { TxClientSide } from "@/types/tx";
 
 interface Props {
-  tx: FullTxClientSide;
+  tx: TxClientSide;
   setShowModal?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const TxCard = (props: Props) => {
@@ -53,7 +54,7 @@ const TxCard = (props: Props) => {
             <span className="icon-[lucide--split] h-4 w-4 text-zinc-400" />
           )}
           <div>{splitAmount ? splitAmount * -1 : props.tx.amount * -1}</div>
-          <div>{props.tx.iso_currency_code}</div>
+          <div>{props.tx.plaidTx?.iso_currency_code || "US"}</div>
         </div>
       </section>
 
@@ -73,10 +74,10 @@ const TxCard = (props: Props) => {
                 getCatStyle(cat.nameArray).bgColor
               }`}
             >
-              {props.tx.counterparties?.[0]?.logo_url ? (
+              {props.tx.plaidTx?.counterparties?.[0]?.logo_url ? (
                 <Image
                   className="rounded-full"
-                  src={props.tx.counterparties[0].logo_url}
+                  src={props.tx.plaidTx?.counterparties[0].logo_url}
                   alt=""
                   width={16}
                   height={16}

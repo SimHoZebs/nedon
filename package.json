@@ -30,6 +30,7 @@
     "next": "14.2.13",
     "openai": "^4.63.0",
     "plaid": "28.0.0",
+    "prisma-json-types-generator": "^3.0.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-plaid-link": "^3.6.0",

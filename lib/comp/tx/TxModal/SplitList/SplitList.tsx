@@ -7,7 +7,6 @@ import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import { type TxInDB, isFullTxInDB } from "@/util/types";
 
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
@@ -75,22 +74,7 @@ const SplitList = (props: Props) => {
     }
 
     //if tx doesn't exist, create one
-    let txDBData: TxInDB;
-    if (!isFullTxInDB(tx)) {
-      txDBData = await createTx.mutateAsync({
-        userId: appUser.id,
-        plaidId: tx.plaidId,
-        userTotal: tx.amount,
-        originTxId: null,
-        catArray: tx.catArray,
-        splitArray: unsavedSplitArray,
-        receipt: null,
-      });
-    }
-    //otherwise, update the tx
-    else {
-      txDBData = await updateTx.mutateAsync(tx);
-    }
+    const txDBData = await updateTx.mutateAsync(tx);
 
     refreshTxModalData(txDBData);
     queryClient.tx.invalidate();
@@ -106,11 +90,11 @@ const SplitList = (props: Props) => {
     <div className="flex w-full flex-col gap-y-3">
       {(unsavedSplitArray.length > 1 || focusedIndex !== undefined) && (
         <div className="flex flex-col gap-y-1">
-          <div className="flex w-full gap-x-2 px-3 ">
+          <div className="flex w-full gap-x-2 px-3">
             <H3>Split</H3>
 
             {isEditingSplit ? (
-              <div className="flex gap-x-2 ">
+              <div className="flex gap-x-2">
                 <ActionBtn
                   disabled={isWrongSplit}
                   onClickAsync={async () => {

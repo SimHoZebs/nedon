@@ -6,16 +6,50 @@ import type {
 import { z } from "zod";
 
 import db from "@/util/db";
-import { convertToFullTx } from "@/util/tx";
-import {
-  type FullTxClientSide,
-  FullTxSchema,
-  TxClientSideSchema,
-  type TxInDB,
-} from "@/util/types";
+import { createTx } from "@/util/tx";
+
+import { type TxClientSide, TxClientSideSchema, type TxInDB } from "@/types/tx";
 
 import { procedure, router } from "../trpc";
 import { client } from "../util";
+
+const createTxInDB = async (txClientSide: TxClientSide) => {
+  return await db.tx.create({
+    data: {
+      ...txClientSide,
+      plaidTx: txClientSide.plaidTx || undefined,
+      receipt: txClientSide.receipt
+        ? {
+            create: {
+              ...txClientSide.receipt,
+              items: {
+                createMany: { data: txClientSide.receipt.items },
+              },
+            },
+          }
+        : undefined,
+      splitArray: {
+        create: txClientSide.splitArray.map((split) => ({
+          ...split,
+        })),
+      },
+      catArray: {
+        create: txClientSide.catArray.map((cat) => ({
+          ...cat,
+        })),
+      },
+    },
+    include: {
+      catArray: true,
+      splitArray: true,
+      receipt: {
+        include: {
+          items: true,
+        },
+      },
+    },
+  });
+};
 
 const txRouter = router({
   getWithoutPlaid: procedure
@@ -42,7 +76,7 @@ const txRouter = router({
     }),
 
   getAll: procedure
-    .input(z.object({ id: z.string(), cursor: z.string().optional() }))
+    .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       const user = await db.user.findFirst({ where: { id: input.id } });
       if (!user || !user.ACCESS_TOKEN) return null;
@@ -53,7 +87,7 @@ const txRouter = router({
       // Removed tx ids
       let removed: RemovedTransaction[] = [];
       let hasMore = true;
-      let cursor = input.cursor;
+      let cursor = user.cursor || undefined;
 
       // Iterate through each page of new tx updates for item
       while (hasMore) {
@@ -77,9 +111,22 @@ const txRouter = router({
         cursor = data.next_cursor;
       }
 
+      // update cursor in db asynchonously
+      db.user.update({ where: { id: user.id }, data: { cursor: cursor } });
+
+      // newly added txs gets created
+      //FUTURE: make this somehow asynchoronous so users don't have to wait for all txs to be added to see their existing tx
+      for (const plaidTx of added) {
+        const newTx: TxClientSide = createTx(user.id, plaidTx);
+        await createTxInDB(newTx);
+      }
+
       const txArray: TxInDB[] = await db.tx.findMany({
         where: {
-          userId: user.id,
+          OR: [
+            { userId: user.id },
+            { splitArray: { some: { userId: user.id } } },
+          ],
         },
         include: {
           catArray: true,
@@ -92,15 +139,54 @@ const txRouter = router({
         },
       });
 
-      const full: FullTxClientSide[] = added.map((plaidTx) => {
-        const matchingTx = txArray.find(
+      // modified txs gets updated and removed txs gets deleted
+      for (const plaidTx of modified) {
+        const matchingTx = txArray.findIndex(
           (tx) => tx.plaidId === plaidTx.transaction_id,
         );
+        if (matchingTx !== -1) {
+          const updated = createTx(user.id, plaidTx, txArray[matchingTx]);
+          txArray[matchingTx] = updated;
 
-        return convertToFullTx(user.id, plaidTx, matchingTx);
-      });
+          db.tx.update({
+            where: {
+              id: txArray[matchingTx].id,
+            },
+            data: {
+              plaidId: updated.plaidId,
+              catArray: {
+                create: updated.catArray.map((cat) => ({
+                  name: cat.name,
+                  nameArray: cat.nameArray,
+                  amount: cat.amount,
+                })),
+              },
+              splitArray: {
+                create: updated.splitArray.map((split) => ({
+                  userId: split.userId,
+                  amount: split.amount,
+                })),
+              },
+            },
+          });
+        }
+      }
 
-      return full;
+      for (const plaidTx of removed) {
+        const matchingTxIndex = txArray.findIndex(
+          (tx) => tx.plaidId === plaidTx.transaction_id,
+        );
+        if (matchingTxIndex !== -1) {
+          txArray.splice(matchingTxIndex, 1);
+          db.tx.delete({
+            where: {
+              id: txArray[matchingTxIndex].id,
+            },
+          });
+        }
+      }
+
+      return txArray;
     }),
 
   //all tx meta including the user
@@ -131,44 +217,10 @@ const txRouter = router({
     }),
 
   create: procedure.input(TxClientSideSchema).mutation(async ({ input }) => {
-    const data = {
-      plaidId: input.plaidId,
-      userId: input.userId,
-      userTotal: input.userTotal,
-    };
-
-    const tx = await db.tx.create({
-      data: {
-        ...data,
-        catArray: {
-          create: input.catArray.map((cat) => ({
-            name: cat.name,
-            nameArray: cat.nameArray,
-            amount: cat.amount,
-          })),
-        },
-        splitArray: {
-          create: input.splitArray.map((split) => ({
-            userId: split.userId,
-            amount: split.amount,
-          })),
-        },
-      },
-      include: {
-        catArray: true,
-        splitArray: true,
-        receipt: {
-          include: {
-            items: true,
-          },
-        },
-      },
-    });
-
-    return tx;
+    return await createTxInDB(input);
   }),
 
-  update: procedure.input(FullTxSchema).mutation(async ({ input }) => {
+  update: procedure.input(TxClientSideSchema).mutation(async ({ input }) => {
     const tx = await db.tx.update({
       where: {
         id: input.id,
@@ -202,30 +254,6 @@ const txRouter = router({
 
     return tx;
   }),
-
-  //createMeta could've been modified instead but this avoids accidentally missing txId for Plaid txs.
-  createManually: procedure
-    .input(TxClientSideSchema)
-    .mutation(async ({ input }) => {
-      const tx = await db.tx.create({
-        data: {
-          plaidId: input.plaidId,
-          userTotal: input.userTotal,
-          user: {
-            connect: {
-              id: input.userId,
-            },
-          },
-          splitArray: {
-            create: input.splitArray.map((split) => ({
-              ...split,
-            })),
-          },
-        },
-      });
-
-      return tx;
-    }),
 
   delete: procedure
     .input(z.object({ id: z.string() }))

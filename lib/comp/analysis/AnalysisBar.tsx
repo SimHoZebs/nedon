@@ -1,7 +1,8 @@
 import React from "react";
 
 import { getCatStyle, subCatTotal } from "@/util/cat";
-import type { TreedCatWithTx } from "@/util/types";
+
+import type { TreedCatWithTx } from "@/types/cat";
 
 interface Props {
   organizedTxByCatArray: TreedCatWithTx[];
@@ -14,12 +15,12 @@ const AnalysisBar = (props: Props) => {
       {props.organizedTxByCatArray.map((cat) => (
         <div
           key={cat.name}
-          className={`+  h-full ${getCatStyle([cat.name]).bgColor}`}
+          className={`+ h-full ${getCatStyle([cat.name]).bgColor}`}
           style={{
             width: `${(
               ((cat.spending + subCatTotal(cat, "spending")) /
                 props.spendingTotal) *
-              100
+                100
             ).toString()}%`,
           }}
         />

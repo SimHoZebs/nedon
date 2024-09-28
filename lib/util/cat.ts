@@ -1,14 +1,11 @@
 import type { Category as PlaidCat } from "plaid";
 
+import type { CatClientSide, TreedCat, TreedCatWithTx } from "@/types/cat";
+import type { TxClientSide } from "@/types/tx";
+
 import catStyleArray from "./catStyle";
 import parseMoney from "./parseMoney";
 import type { TxType } from "./tx";
-import type {
-  CatClientSide,
-  FullTxClientSide,
-  TreedCat,
-  TreedCatWithTx,
-} from "./types";
 
 export const emptyCat = ({
   txId,
@@ -46,7 +43,7 @@ export const convertPlaidCatsToHierarchicalArray = (
 
 export const fillArrayByCat = (
   resultArray: TreedCatWithTx[],
-  tx: FullTxClientSide,
+  tx: TxClientSide,
   cat: CatClientSide,
 ): TreedCatWithTx[] => {
   const nameArray = cat.nameArray;

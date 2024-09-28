@@ -1,14 +1,17 @@
-import React from "react";
-import { useTxStore } from "@/util/txStore";
-import { trpc } from "@/util/trpc";
-import supabase from "server/supabaseClient";
 import Image from "next/image";
+import React from "react";
+import supabase from "server/supabaseClient";
+
 import { H3 } from "@/comp/Heading";
 import Input from "@/comp/Input";
-import { type FullTxClientSide, isFullTxInDB, type TxInDB } from "@/util/types";
+
+import { trpc } from "@/util/trpc";
+import { useTxStore } from "@/util/txStore";
+
+import { type TxClientSide, type TxInDB, isTxInDB } from "@/types/tx";
 
 const Receipt = () => {
-  const tx = useTxStore((state) => state.txOnModal);
+  const tx: TxClientSide | undefined = useTxStore((state) => state.txOnModal);
 
   const createTx = trpc.tx.create.useMutation();
   const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);
@@ -51,7 +54,7 @@ const Receipt = () => {
 
     console.log("receipt processed");
 
-    const latestTx: FullTxClientSide | TxInDB = tx.id
+    const latestTx: TxClientSide | TxInDB = tx.id
       ? tx
       : await createTx.mutateAsync(tx);
 
@@ -62,7 +65,7 @@ const Receipt = () => {
 
     console.log("creating receipt...");
 
-    if (!isFullTxInDB(latestTx)) {
+    if (!isTxInDB(latestTx)) {
       console.error("latestTx is not FullTxInDB", latestTx);
       return;
     }

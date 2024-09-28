@@ -3,7 +3,8 @@ import type { CatSettings } from "prisma/generated/zod";
 import { getCatStyle, subCatTotal } from "@/util/cat";
 import parseMoney from "@/util/parseMoney";
 import type { TxType } from "@/util/tx";
-import type { TreedCatWithTx } from "@/util/types";
+
+import type { TreedCatWithTx } from "@/types/cat";
 
 import { H3 } from "../Heading";
 

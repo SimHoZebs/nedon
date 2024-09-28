@@ -5,7 +5,8 @@ import { ActionBtn, Button } from "@/comp/Button";
 import { emptyCat } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import type { CatClientSide } from "@/util/types";
+
+import type { CatClientSide } from "@/types/cat";
 
 import CatChip from "./CatChip";
 import CatPicker from "./CatPicker";
@@ -35,7 +36,7 @@ const Cat = () => {
   return (
     <div className="flex gap-y-1">
       <div className="flex flex-col gap-y-1">
-        <div className="relative flex w-full flex-wrap items-center gap-2 ">
+        <div className="relative flex w-full flex-wrap items-center gap-2">
           {unsavedCatArray?.map((cat, index) => (
             <CatChip
               key={cat.id}

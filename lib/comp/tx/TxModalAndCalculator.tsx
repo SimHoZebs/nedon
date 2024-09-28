@@ -4,7 +4,8 @@ import React, { useEffect } from "react";
 import parseMoney from "@/util/parseMoney";
 import { useStore } from "@/util/store";
 import { useTxStore } from "@/util/txStore";
-import type { SplitClientSide } from "@/util/types";
+
+import type { SplitClientSide } from "@/types/split";
 
 import Calculator from "./TxModal/SplitList/Calculator";
 import TxModal from "./TxModal/TxModal";

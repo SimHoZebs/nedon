@@ -1,6 +1,13 @@
 import type { Group, User } from "@prisma/client";
+import type { Transaction } from "plaid";
 import { UserSchema } from "prisma/generated/zod";
 import { z } from "zod";
+
+declare global {
+  namespace PrismaJson {
+    type PlaidTx = Transaction;
+  }
+}
 
 export type UserClientSide = Omit<User, "ACCESS_TOKEN"> & {
   hasAccessToken: boolean;

@@ -10,9 +10,9 @@ import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import SplitList from "./SplitList/SplitList";
 import Cat from "./Cat/Cat";
 import Receipt from "./Receipt";
+import SplitList from "./SplitList/SplitList";
 
 interface Props {
   onClose: () => void;
@@ -82,10 +82,10 @@ const TxModal = (props: Props) => {
             <div className="flex w-full flex-col gap-y-1 lg:w-fit">
               <div className="flex w-full items-start justify-between">
                 <div className="flex items-center gap-x-2">
-                  {tx.counterparties?.[0]?.logo_url && (
+                  {tx.plaidTx?.counterparties?.[0]?.logo_url && (
                     <Image
                       className="rounded-lg"
-                      src={tx.counterparties[0].logo_url}
+                      src={tx.plaidTx.counterparties[0].logo_url}
                       alt=""
                       width={56}
                       height={56}
@@ -112,7 +112,7 @@ const TxModal = (props: Props) => {
                 {auth.isLoading
                   ? ""
                   : (auth.data as unknown as AuthGetResponse).accounts.find(
-                      (account) => account.account_id === tx.account_id,
+                      (account) => account.account_id === tx.accountId,
                     )?.name || ""}
               </p>
             </div>
@@ -127,14 +127,15 @@ const TxModal = (props: Props) => {
               />
               <p>Created at {tx.datetime || "1970-01-23 12:34:56"}</p>
               <p>
-                Authorized at {tx.authorized_datetime || "1970-01-23 12:34:56"}
+                Authorized at{" "}
+                {tx.plaidTx?.authorized_datetime || "1970-01-23 12:34:56"}
               </p>
             </div>
           </section>
 
-          <div className="flex flex-col justify-between gap-y-3 px-3 ">
+          <div className="flex flex-col justify-between gap-y-3 px-3">
             <div className="flex flex-col gap-y-3">
-              <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-x-3 gap-y-1">
+              <div className="flex flex-col gap-x-3 gap-y-1 md:flex-row md:items-center md:justify-between">
                 <div className="flex">
                   <H1 className="px-3">${amount * -1}</H1>
                   {appUser?.myConnectionArray &&

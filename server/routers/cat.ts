@@ -7,7 +7,8 @@ import {
 import { z } from "zod";
 
 import db from "@/util/db";
-import { CatClientSideSchema } from "@/util/types";
+
+import { CatClientSideSchema } from "@/types/cat";
 
 import { procedure, router } from "../trpc";
 

@@ -1,14 +1,12 @@
-import type { Transaction } from "plaid";
-
-import type { SplitClientSide } from "./types";
+import type { SplitClientSide } from "@/types/split";
 
 export const createNewSplit = (
   userId: string,
-  plaidTx: Transaction,
+  amount: number,
 ): SplitClientSide => {
   return {
-    userId: userId,
+    userId,
     txId: null,
-    amount: plaidTx.amount,
+    amount,
   };
 };

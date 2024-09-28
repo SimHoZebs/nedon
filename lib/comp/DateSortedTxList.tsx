@@ -2,13 +2,14 @@ import type React from "react";
 
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
-import type { FullTxClientSide } from "@/util/types";
+
+import type { TxClientSide } from "@/types/tx";
 
 import { H2, H3 } from "./Heading";
 import TxCard from "./tx/TxCard";
 
 interface Props {
-  sortedTxArray: FullTxClientSide[][][][];
+  sortedTxArray: TxClientSide[][][][];
   setShowModal?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -34,7 +35,7 @@ const DateSortedTxList = (props: Props) => {
         ))}
     </ol>
   ) : (
-    <ol className="no-scrollbar flex w-full max-w-sm flex-col items-center gap-y-2  overflow-y-scroll px-1 lg:max-w-md">
+    <ol className="no-scrollbar flex w-full max-w-sm flex-col items-center gap-y-2 overflow-y-scroll px-1 lg:max-w-md">
       {props.sortedTxArray.map((year) =>
         year.map((month, j) => (
           <li
@@ -60,7 +61,7 @@ const DateSortedTxList = (props: Props) => {
                             <TxCard
                               setShowModal={props.setShowModal}
                               tx={tx}
-                              key={tx.transaction_id}
+                              key={tx.plaidId}
                             />
                           ),
                       )

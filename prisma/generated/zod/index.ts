@@ -60,7 +60,7 @@ export const GroupScalarFieldEnumSchema = z.enum(['id','ownerId']);
 
 export const UserScalarFieldEnumSchema = z.enum(['id','name','ACCESS_TOKEN','PUBLIC_TOKEN','ITEM_ID','TRANSFER_ID','PAYMENT_ID','cursor']);
 
-export const TxScalarFieldEnumSchema = z.enum(['id','userId','userTotal','originTxId','plaidId','date','name','plaidTx']);
+export const TxScalarFieldEnumSchema = z.enum(['id','userId','userTotal','originTxId','plaidId','name','amount','date','datetime','accountId','plaidTx']);
 
 export const SplitScalarFieldEnumSchema = z.enum(['id','userId','amount','txId','originTxId']);
 
@@ -74,7 +74,7 @@ export const ReceiptItemScalarFieldEnumSchema = z.enum(['id','name','description
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
-export const JsonNullValueInputSchema = z.enum(['JsonNull',]).transform((value) => (value === 'JsonNull' ? Prisma.JsonNull : value));
+export const NullableJsonNullValueInputSchema = z.enum(['DbNull','JsonNull',]).transform((value) => value === 'JsonNull' ? Prisma.JsonNull : value === 'DbNull' ? Prisma.DbNull : value);
 
 export const QueryModeSchema = z.enum(['default','insensitive']);
 
@@ -222,9 +222,15 @@ export const TxSchema = z.object({
   userTotal: z.number(),
   originTxId: z.string().nullable(),
   plaidId: z.string(),
-  date: z.string(),
   name: z.string(),
-  plaidTx: JsonValueSchema,
+  amount: z.number(),
+  date: z.string(),
+  datetime: z.string(),
+  accountId: z.string(),
+  /**
+   * [PlaidTx]
+   */
+  plaidTx: JsonValueSchema.nullable(),
 })
 
 export type Tx = z.infer<typeof TxSchema>
@@ -251,7 +257,9 @@ export type TxRelations = {
   receipt?: ReceiptWithRelations | null;
 };
 
-export type TxWithRelations = z.infer<typeof TxSchema> & TxRelations
+export type TxWithRelations = Omit<z.infer<typeof TxSchema>, "plaidTx"> & {
+  plaidTx?: JsonValueType | null;
+} & TxRelations
 
 export const TxWithRelationsSchema: z.ZodType<TxWithRelations> = TxSchema.merge(z.object({
   user: z.lazy(() => UserWithRelationsSchema),
@@ -276,7 +284,9 @@ export type TxOptionalDefaultsRelations = {
   receipt?: ReceiptOptionalDefaultsWithRelations | null;
 };
 
-export type TxOptionalDefaultsWithRelations = z.infer<typeof TxOptionalDefaultsSchema> & TxOptionalDefaultsRelations
+export type TxOptionalDefaultsWithRelations = Omit<z.infer<typeof TxOptionalDefaultsSchema>, "plaidTx"> & {
+  plaidTx?: JsonValueType | null;
+} & TxOptionalDefaultsRelations
 
 export const TxOptionalDefaultsWithRelationsSchema: z.ZodType<TxOptionalDefaultsWithRelations> = TxOptionalDefaultsSchema.merge(z.object({
   user: z.lazy(() => UserOptionalDefaultsWithRelationsSchema),

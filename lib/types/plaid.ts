@@ -6,14 +6,15 @@ import {
 } from "plaid";
 import { z } from "zod";
 
-export const TransactionTransactionTypeEnumSchema: z.ZodType<TransactionTransactionTypeEnum> =
-  z.nativeEnum(TransactionTransactionTypeEnum);
+export const TransactionTransactionTypeEnumSchema = z.nativeEnum(
+  TransactionTransactionTypeEnum,
+);
 
-export const TransactionPaymentChannelEnumSchema: z.ZodType<TransactionPaymentChannelEnum> =
-  z.nativeEnum(TransactionPaymentChannelEnum);
+export const TransactionPaymentChannelEnumSchema = z.nativeEnum(
+  TransactionPaymentChannelEnum,
+);
 
-export const TransactionCodeSchema: z.ZodType<TransactionCode> =
-  z.nativeEnum(TransactionCode);
+export const TransactionCodeSchema = z.nativeEnum(TransactionCode);
 
 export const plaidTxSchema: z.ZodType<Transaction> = z.object({
   account_id: z.string(),

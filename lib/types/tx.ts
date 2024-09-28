@@ -1,28 +1,39 @@
-import type { Cat, Split, Tx } from "@prisma/client";
+import type { Tx } from "@prisma/client";
 import {
-  ReceiptOptionalDefaultsWithChildrenSchema,
-  type ReceiptOptionalDefaultsWithChildren,
-} from "./receipt";
+  CatSchema,
+  SplitSchema,
+  TxOptionalDefaultsSchema,
+  TxSchema,
+} from "prisma/generated/zod";
 import { z } from "zod";
+
 import { CatClientSideSchema } from "./cat";
-import { SplitClientSideSchema } from "./split";
 import { plaidTxSchema } from "./plaid";
-import { TxOptionalDefaultsSchema } from "prisma/generated/zod";
+import { ReceiptOptionalDefaultsWithChildrenSchema } from "./receipt";
+import { SplitClientSideSchema } from "./split";
 
-export type TxInDB = Tx & {
-  splitArray: Split[];
-  catArray: Cat[];
-  receipt: ReceiptOptionalDefaultsWithChildren | null;
-};
-
-export const TxClientSideSchema = TxOptionalDefaultsSchema.extend({
+//Although cat and split fields are created when a tx is created, they can exist without id when it's being created on the client side.
+export const TxSoloSchema = TxOptionalDefaultsSchema.extend({
   catArray: z.array(CatClientSideSchema),
   splitArray: z.array(SplitClientSideSchema),
   receipt: ReceiptOptionalDefaultsWithChildrenSchema.nullable(),
-  plaidTx: plaidTxSchema,
 });
 
-export type TxClientSide = z.infer<typeof TxClientSideSchema>;
+export interface TxSolo extends z.infer<typeof TxSoloSchema> {}
+
+export const TxClientSideSchema = TxSoloSchema.extend({
+  plaidTx: plaidTxSchema.nullable(),
+});
+
+export interface TxClientSide extends z.infer<typeof TxClientSideSchema> {}
+
+export const TxInDBSchema = TxSchema.extend({
+  catArray: z.array(CatSchema),
+  splitArray: z.array(SplitSchema),
+  receipt: ReceiptOptionalDefaultsWithChildrenSchema.nullable(),
+});
+
+export interface TxInDB extends z.infer<typeof TxInDBSchema> {}
 
 export function isTxInDB(tx: unknown): tx is Tx {
   return (tx as Tx).id !== undefined;
