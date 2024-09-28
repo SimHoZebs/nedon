@@ -28,7 +28,7 @@ const AccountModal = (props: Props) => {
   const sortedTxArray = useMemo(() => {
     if (!txArray.data) return [[[[]]]];
     const filteredTxArray = txArray.data.filter(
-      (tx) => tx.account_id === props.clickedAccount?.account_id,
+      (tx) => tx.accountId === props.clickedAccount?.account_id,
     );
     return organizeTxByTime(filteredTxArray);
   }, [props.clickedAccount?.account_id, txArray.data]);
@@ -43,7 +43,7 @@ const AccountModal = (props: Props) => {
             <div className="flex w-full flex-row justify-between lg:flex-col lg:justify-normal">
               <div className="">
                 <H1>{props.clickedAccount.name}</H1>
-                <p className="text-zinc-400 ">
+                <p className="text-zinc-400">
                   {props.clickedAccount.official_name}
                 </p>
               </div>
