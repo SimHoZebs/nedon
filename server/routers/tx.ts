@@ -13,7 +13,7 @@ import { type TxClientSide, TxClientSideSchema, type TxInDB } from "@/types/tx";
 import { procedure, router } from "../trpc";
 import { client } from "../util";
 
-const createTxInDB = async (txClientSide: TxClientSide) => {
+const createTxInDB = async (txClientSide: TxClientSide): Promise<TxInDB> => {
   return await db.tx.create({
     data: {
       ...txClientSide,

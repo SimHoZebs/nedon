@@ -31,10 +31,11 @@ export const TxInDBSchema = TxSchema.extend({
   catArray: z.array(CatSchema),
   splitArray: z.array(SplitSchema),
   receipt: ReceiptOptionalDefaultsWithChildrenSchema.nullable(),
+  plaidTx: plaidTxSchema.nullable(),
 });
 
 export interface TxInDB extends z.infer<typeof TxInDBSchema> {}
 
-export function isTxInDB(tx: unknown): tx is Tx {
+export function isTxInDB(tx: unknown): tx is TxInDB {
   return (tx as Tx).id !== undefined;
 }

@@ -28,7 +28,7 @@ const Page = () => {
   const { appUser } = getAppUser();
   const [scopedTxArray, setScopedTxArray] = useState<TxClientSide[]>([]);
 
-  const txArray = trpc.tx.getAll.useQuery<TxClientSide[]>(
+  const txArray = trpc.tx.getAll.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );

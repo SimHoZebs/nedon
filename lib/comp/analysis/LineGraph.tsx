@@ -28,7 +28,7 @@ interface Props {
 
 const LineGraph = (props: Props) => {
   const { appUser } = getAppUser();
-  const txArray = trpc.tx.getAll.useQuery<TxClientSide[]>(
+  const txArray = trpc.tx.getAll.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );

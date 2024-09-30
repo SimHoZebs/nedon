@@ -14,18 +14,20 @@ import CatPicker from "./CatPicker";
 const offScreen = { x: -800, y: -800 };
 
 const Cat = () => {
+  const queryClient = trpc.useUtils();
   const setUnsavedCatArray = useTxStore((state) => state.setUnsavedCatArray);
   const tx = useTxStore((state) => state.txOnModal);
   const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);
   const catPickerRef = useRef<HTMLDivElement>(null);
-  const upsertManyCat = trpc.cat.upsertMany.useMutation();
+  const upsertManyCat = trpc.cat.upsertMany.useMutation({
+    async onMutate({ txId, catArray }) {},
+  });
 
   const unsavedCatArray = useTxStore((state) => state.unsavedCatArray);
 
   //Indicator for if (undefined) and which (number) cat is being edited. 'if' is needed for CatChip.tsx to highlight the editing cat.
   const [editingCatIndex, setEditingMergedCatIndex] = useState<number>();
   const [isManaging, setIsManaging] = useState(false);
-  const queryClient = trpc.useUtils();
 
   //Picker always exists; Modal.tsx hides it with overflow-hidden
   const [pickerPosition, setPickerPosition] = useState<{

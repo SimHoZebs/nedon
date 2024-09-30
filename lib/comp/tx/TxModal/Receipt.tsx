@@ -54,9 +54,7 @@ const Receipt = () => {
 
     console.log("receipt processed");
 
-    const latestTx: TxClientSide | TxInDB = tx.id
-      ? tx
-      : await createTx.mutateAsync(tx);
+    const latestTx = tx.id ? tx : await createTx.mutateAsync(tx);
 
     if (!response) {
       console.error("Error processing receipt. response:", response);
