@@ -54,7 +54,7 @@ export function createTx(
     date: txInDB?.date || plaidTx?.date || "",
     userTotal: txInDB?.userTotal || 0,
     originTxId: txInDB?.originTxId || null,
-    datetime: txInDB?.datetime || plaidTx?.date || "",
+    datetime: txInDB?.datetime || plaidTx?.datetime || "",
     plaidId: txInDB?.plaidId || plaidTx?.transaction_id || "",
     userId: userId,
     accountId: txInDB?.accountId || plaidTx?.account_id || "",

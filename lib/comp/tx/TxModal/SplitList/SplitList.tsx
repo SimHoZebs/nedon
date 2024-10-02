@@ -16,7 +16,6 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const SplitList = (props: Props) => {
-  const createTx = trpc.tx.create.useMutation();
   const updateTx = trpc.tx.update.useMutation();
   const deleteSplit = trpc.split.delete.useMutation();
   const queryClient = trpc.useUtils();
@@ -73,7 +72,6 @@ const SplitList = (props: Props) => {
         await deleteSplit.mutateAsync({ splitId: split.id });
     }
 
-    //if tx doesn't exist, create one
     const txDBData = await updateTx.mutateAsync(tx);
 
     refreshTxModalData(txDBData);

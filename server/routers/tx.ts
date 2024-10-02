@@ -89,7 +89,6 @@ const txRouter = router({
         let removed: RemovedTransaction[] = [];
         let hasMore = true;
         let cursor = user.cursor || undefined;
-        console.log("cursor: ", cursor);
 
         // Iterate through each page of new tx updates for item
         while (hasMore) {
@@ -112,7 +111,6 @@ const txRouter = router({
           // Update cursor to the next cursor
           cursor = data.next_cursor;
         }
-        console.log("updated cursor: ", cursor);
 
         // update cursor in db asynchonously
         db.user
