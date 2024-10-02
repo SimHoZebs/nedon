@@ -11,6 +11,7 @@ import { useTxStore } from "@/util/txStore";
 import { type TxClientSide, isTxInDB } from "@/types/tx";
 import { ActionBtn } from "@/comp/Button";
 import { createStructuredResponse } from "@/types/types";
+import type { PureReceiptWithChildren } from "@/types/receipt";
 
 const Receipt = () => {
   const tx: TxClientSide | undefined = useTxStore((state) => state.txOnModal);
@@ -27,28 +28,31 @@ const Receipt = () => {
 
   // returns boolean based on success
   const uploadAndProcess = async () => {
+    const sr = createStructuredResponse<PureReceiptWithChildren>({
+      success: false,
+      data: undefined,
+      clientMsg: "Error uploading receipt",
+      devMsg: "",
+    });
+
     if (!tx || !receiptImg) {
-      return createStructuredResponse({
-        success: false,
-        data: undefined,
-        devMsg: "No transaction to upload receipt to",
-        clientMsg: "Error uploading receipt",
-      });
+      sr.devMsg = "No transaction to upload receipt to";
+      return sr;
     }
+
     console.log("uploading receipt...");
     const uploadResponse = await supabase.storage
       .from("receipts")
       .upload(tx.name, receiptImg, { upsert: true });
     console.log("receipt uploaded");
+
     if (uploadResponse.error) {
       console.error("Error uploading image", uploadResponse.error);
-      return createStructuredResponse({
-        success: false,
-        data: undefined,
-        clientMsg: `Error uploading image: ${uploadResponse.error}`,
-        devMsg: "Error uploading image",
-      });
+      sr.clientMsg = `Error uploading image: ${uploadResponse.error}`;
+      sr.devMsg = "Error uploading image";
+      return sr;
     }
+
     console.log("getting signed URL...");
     const signedUrlResponse = await supabase.storage
       .from("receipts")
@@ -56,12 +60,8 @@ const Receipt = () => {
     console.log("signed URL received");
 
     if (signedUrlResponse.error || !signedUrlResponse.data.signedUrl) {
-      return createStructuredResponse({
-        success: false,
-        data: undefined,
-        devMsg: "Error getting signed URL",
-        clientMsg: "Error processing receipt",
-      });
+      sr.devMsg = "Error getting signed URL";
+      return sr;
     }
 
     console.log("processing receipt...");
@@ -78,13 +78,8 @@ const Receipt = () => {
     console.log("creating receipt...");
 
     if (!isTxInDB(latestTx)) {
-      console.error("latestTx is not FullTxInDB", latestTx);
-      return createStructuredResponse({
-        success: false,
-        data: undefined,
-        clientMsg: "Error processing receipt",
-        devMsg: "latestTx is not FullTxInDB",
-      });
+      sr.devMsg = "latestTx is not FullTxInDB";
+      return sr;
     }
 
     const createdReceipt = await createReceipt.mutateAsync({
@@ -98,7 +93,8 @@ const Receipt = () => {
 
     setReceiptImg(undefined);
     setReceiptImgURL(undefined);
-    return response;
+    sr.data = response.data;
+    return sr;
   };
 
   const receiptSum =
