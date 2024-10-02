@@ -86,7 +86,7 @@ const SplitList = (props: Props) => {
 
   return (
     <div className="flex w-full flex-col gap-y-3">
-      {(unsavedSplitArray.length > 1 || focusedIndex !== undefined) && (
+      {(unsavedSplitArray.length > 0 || focusedIndex !== undefined) && (
         <div className="flex flex-col gap-y-1">
           <div className="flex w-full gap-x-2 px-3">
             <H3>Split</H3>
