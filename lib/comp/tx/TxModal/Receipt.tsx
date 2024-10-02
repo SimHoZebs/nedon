@@ -25,6 +25,7 @@ const Receipt = () => {
   const [receiptImg, setReceiptImg] = React.useState<File>();
   const [receiptImgURL, setReceiptImgURL] = React.useState<string>();
   const [errorMsg, setErrorMsg] = React.useState<string>("");
+  const [progressMsg, setProgressMsg] = React.useState<string>("");
 
   // returns boolean based on success
   const uploadAndProcess = async () => {
@@ -40,7 +41,7 @@ const Receipt = () => {
       return sr;
     }
 
-    console.log("uploading receipt...");
+    setProgressMsg("Uploading receipt...");
     const uploadResponse = await supabase.storage
       .from("receipts")
       .upload(tx.name, receiptImg, { upsert: true });
@@ -53,7 +54,7 @@ const Receipt = () => {
       return sr;
     }
 
-    console.log("getting signed URL...");
+    setProgressMsg("Getting signed URL...");
     const signedUrlResponse = await supabase.storage
       .from("receipts")
       .createSignedUrl(tx.name, 60);
@@ -64,7 +65,7 @@ const Receipt = () => {
       return sr;
     }
 
-    console.log("processing receipt...");
+    setProgressMsg("Processing receipt...");
     const response = await processReceipt.mutateAsync({
       signedUrl: signedUrlResponse.data.signedUrl,
     });
@@ -75,7 +76,7 @@ const Receipt = () => {
 
     if (!response.data) return response;
 
-    console.log("creating receipt...");
+    setProgressMsg("Adding receipt to transaction...");
 
     if (!isTxInDB(latestTx)) {
       sr.devMsg = "latestTx is not FullTxInDB";
@@ -86,13 +87,13 @@ const Receipt = () => {
       id: latestTx.id,
       receipt: response.data,
     });
-    console.log("receipt created", createdReceipt);
-
+    setProgressMsg("");
     refreshTxModalData({ ...latestTx, receipt: createdReceipt });
     queryClient.tx.getAll.invalidate();
 
     setReceiptImg(undefined);
     setReceiptImgURL(undefined);
+    sr.success = true;
     sr.data = response.data;
     return sr;
   };
@@ -139,6 +140,7 @@ const Receipt = () => {
             Upload
           </ActionBtn>
           <p className="text-red-400">{errorMsg}</p>
+          <p>{progressMsg}</p>
 
           {receiptImgURL && (
             <Image src={receiptImgURL} alt="" width={300} height={500} />
