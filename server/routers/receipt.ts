@@ -52,58 +52,64 @@ const receiptRouter = router({
   process: procedure
     .input(z.object({ signedUrl: z.string() }))
     .mutation(async ({ input }) => {
-      const [result] = await imgAnnotator.textDetection(input.signedUrl);
-
-      const textAnnotationArray = result.textAnnotations;
-      if (!textAnnotationArray || textAnnotationArray.length < 0) {
-        console.error(
-          "No text annotations found. textAnnotationArray:",
-          textAnnotationArray,
-        );
-        return null;
-      }
-
-      const thread = await openai.beta.threads.create();
-
-      await openai.beta.threads.messages.create(thread.id, {
-        role: "user",
-        content: textAnnotationArray[0].description || "",
-      });
-
-      const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
-        assistant_id: "asst_ThX4O8JDzBsGV7BO43RA3FVE",
-      });
-
-      if (run.status !== "completed") {
-        console.error("Run failed", run);
-        return null;
-      }
-
-      const message = (await openai.beta.threads.messages.list(run.thread_id))
-        .data[0];
-
-      if (message.content[0].type !== "text") return null;
       try {
-        const receipt = JSON.parse(message.content[0].text.value);
+        const [result] = await imgAnnotator.textDetection(input.signedUrl);
 
-        const parsedReceipt = PureReceiptWithChildrenSchema.safeParse(receipt);
+        const textAnnotationArray = result.textAnnotations;
+        if (!textAnnotationArray || textAnnotationArray.length < 0) {
+          console.error(
+            "No text annotations found. textAnnotationArray:",
+            textAnnotationArray,
+          );
+          return null;
+        }
 
-        if (parsedReceipt.success) return parsedReceipt.data;
+        const thread = await openai.beta.threads.create();
 
-        console.error(
-          "Receipt parse failed",
-          JSON.stringify(parsedReceipt.error, null, 2),
-        );
+        await openai.beta.threads.messages.create(thread.id, {
+          role: "user",
+          content: textAnnotationArray[0].description || "",
+        });
 
-        //Rarely, the receipt is in a different shape.
-        if ("properties" in receipt)
-          return receipt.properties as PureReceiptWithChildrenSchema;
+        const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
+          assistant_id: "asst_ThX4O8JDzBsGV7BO43RA3FVE",
+        });
 
-        //Hopefully this never happens
-        console.error("Unrecognized JSON shape.", receipt);
-        return null;
+        if (run.status !== "completed") {
+          console.error("Run failed", run);
+          return null;
+        }
+
+        const message = (await openai.beta.threads.messages.list(run.thread_id))
+          .data[0];
+
+        if (message.content[0].type !== "text") return null;
+        try {
+          const receipt = JSON.parse(message.content[0].text.value);
+
+          const parsedReceipt =
+            PureReceiptWithChildrenSchema.safeParse(receipt);
+
+          if (parsedReceipt.success) return parsedReceipt.data;
+
+          console.error(
+            "Receipt parse failed",
+            JSON.stringify(parsedReceipt.error, null, 2),
+          );
+
+          //Rarely, the receipt is in a different shape.
+          if ("properties" in receipt)
+            return receipt.properties as PureReceiptWithChildrenSchema;
+
+          //Hopefully this never happens
+          console.error("Unrecognized JSON shape.", receipt);
+          return null;
+        } catch (e) {
+          console.error("JSON.parse failed", e);
+          return null;
+        }
       } catch (e) {
-        console.error("JSON.parse failed", e);
+        console.error("Error processing receipt", e);
         return null;
       }
     }),
