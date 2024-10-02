@@ -8,7 +8,9 @@ import Input from "@/comp/Input";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import { type TxClientSide, type TxInDB, isTxInDB } from "@/types/tx";
+import { type TxClientSide, isTxInDB } from "@/types/tx";
+import { ActionBtn } from "@/comp/Button";
+import { createStructuredResponse } from "@/types/types";
 
 const Receipt = () => {
   const tx: TxClientSide | undefined = useTxStore((state) => state.txOnModal);
@@ -21,11 +23,17 @@ const Receipt = () => {
 
   const [receiptImg, setReceiptImg] = React.useState<File>();
   const [receiptImgURL, setReceiptImgURL] = React.useState<string>();
+  const [errorMsg, setErrorMsg] = React.useState<string>("");
 
+  // returns boolean based on success
   const uploadAndProcess = async () => {
     if (!tx || !receiptImg) {
-      console.error("No transaction to upload receipt to");
-      return;
+      return createStructuredResponse({
+        success: false,
+        data: undefined,
+        devMsg: "No transaction to upload receipt to",
+        clientMsg: "Error uploading receipt",
+      });
     }
     console.log("uploading receipt...");
     const uploadResponse = await supabase.storage
@@ -34,7 +42,12 @@ const Receipt = () => {
     console.log("receipt uploaded");
     if (uploadResponse.error) {
       console.error("Error uploading image", uploadResponse.error);
-      return;
+      return createStructuredResponse({
+        success: false,
+        data: undefined,
+        clientMsg: `Error uploading image: ${uploadResponse.error}`,
+        devMsg: "Error uploading image",
+      });
     }
     console.log("getting signed URL...");
     const signedUrlResponse = await supabase.storage
@@ -43,8 +56,12 @@ const Receipt = () => {
     console.log("signed URL received");
 
     if (signedUrlResponse.error || !signedUrlResponse.data.signedUrl) {
-      console.error("Error getting signed URL", signedUrlResponse.error);
-      return;
+      return createStructuredResponse({
+        success: false,
+        data: undefined,
+        devMsg: "Error getting signed URL",
+        clientMsg: "Error processing receipt",
+      });
     }
 
     console.log("processing receipt...");
@@ -56,20 +73,23 @@ const Receipt = () => {
 
     const latestTx = tx.id ? tx : await createTx.mutateAsync(tx);
 
-    if (!response) {
-      console.error("Error processing receipt. response:", response);
-      return;
-    }
+    if (!response.data) return response;
 
     console.log("creating receipt...");
 
     if (!isTxInDB(latestTx)) {
       console.error("latestTx is not FullTxInDB", latestTx);
-      return;
+      return createStructuredResponse({
+        success: false,
+        data: undefined,
+        clientMsg: "Error processing receipt",
+        devMsg: "latestTx is not FullTxInDB",
+      });
     }
+
     const createdReceipt = await createReceipt.mutateAsync({
       id: latestTx.id,
-      receipt: response,
+      receipt: response.data,
     });
     console.log("receipt created", createdReceipt);
 
@@ -78,6 +98,7 @@ const Receipt = () => {
 
     setReceiptImg(undefined);
     setReceiptImgURL(undefined);
+    return response;
   };
 
   const receiptSum =
@@ -98,17 +119,30 @@ const Receipt = () => {
               console.error("No file uploaded.");
               return;
             }
+            setReceiptImg(undefined);
+            setReceiptImgURL(undefined);
+            setErrorMsg("");
             const img = e.target.files[0];
             setReceiptImg(img);
             setReceiptImgURL(URL.createObjectURL(img));
           }}
         />
       )}
-      {receiptImg && !tx?.receipt && (
-        <div className="flex">
-          <button type="button" onClick={uploadAndProcess}>
+      {(errorMsg || (receiptImg && !tx?.receipt)) && (
+        <div className="flex flex-col">
+          <ActionBtn
+            onClickAsync={async () => {
+              const result = await uploadAndProcess();
+              if (!result.success) {
+                setErrorMsg(result.clientMsg);
+              }
+              setReceiptImg(undefined);
+              setReceiptImgURL(undefined);
+            }}
+          >
             Upload
-          </button>
+          </ActionBtn>
+          <p className="text-red-400">{errorMsg}</p>
 
           {receiptImgURL && (
             <Image src={receiptImgURL} alt="" width={300} height={500} />

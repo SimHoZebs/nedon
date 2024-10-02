@@ -20,7 +20,7 @@ export const PureReceiptWithChildrenSchema = ReceiptOptionalDefaultsSchema.omit(
   },
 ).merge(z.object({ items: z.array(PureReceiptItemSchema) }));
 
-export type PureReceiptWithChildrenSchema = z.infer<
+export type PureReceiptWithChildren = z.infer<
   typeof PureReceiptWithChildrenSchema
 >;
 

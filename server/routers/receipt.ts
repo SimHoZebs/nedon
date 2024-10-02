@@ -5,12 +5,13 @@ import { z } from "zod";
 import db from "@/util/db";
 
 import {
+  type PureReceiptWithChildren,
   PureReceiptWithChildrenSchema,
-  type ReceiptOptionalDefaultsWithChildren,
   ReceiptOptionalDefaultsWithChildrenSchema,
 } from "@/types/receipt";
 
 import { procedure, router } from "../trpc";
+import { createStructuredResponse, StructuredResponse } from "@/types/types";
 
 const receiptRouter = router({
   create: procedure
@@ -52,6 +53,9 @@ const receiptRouter = router({
   process: procedure
     .input(z.object({ signedUrl: z.string() }))
     .mutation(async ({ input }) => {
+      const sr = (val: StructuredResponse<PureReceiptWithChildren>) =>
+        createStructuredResponse<PureReceiptWithChildren>(val);
+
       try {
         const [result] = await imgAnnotator.textDetection(input.signedUrl);
 
@@ -61,7 +65,13 @@ const receiptRouter = router({
             "No text annotations found. textAnnotationArray:",
             textAnnotationArray,
           );
-          return null;
+          return createStructuredResponse<PureReceiptWithChildren>({
+            success: false,
+            data: undefined,
+            clientMsg:
+              "We received your image, but we found no text on it. Try again with a clearer image or contact support.",
+            devMsg: JSON.stringify(textAnnotationArray, null, 2),
+          });
         }
 
         const thread = await openai.beta.threads.create();
@@ -77,40 +87,91 @@ const receiptRouter = router({
 
         if (run.status !== "completed") {
           console.error("Run failed", run);
-          return null;
+          return createStructuredResponse<PureReceiptWithChildren>({
+            success: false,
+            data: undefined,
+            clientMsg:
+              "We received your image, but failed to process it. The error seems to be on us. Try again or contact support.",
+            devMsg: JSON.stringify(run, null, 2),
+          });
         }
 
         const message = (await openai.beta.threads.messages.list(run.thread_id))
           .data[0];
 
-        if (message.content[0].type !== "text") return null;
+        if (message.content[0].type !== "text")
+          return createStructuredResponse<PureReceiptWithChildren>({
+            success: false,
+            data: undefined,
+            clientMsg:
+              "We received your image, but failed to process it. It is either not a receipt or we failed to recognize it. Try again with the same or clearer image or contact support.",
+            devMsg: JSON.stringify(message, null, 2),
+          });
         try {
           const receipt = JSON.parse(message.content[0].text.value);
 
           const parsedReceipt =
             PureReceiptWithChildrenSchema.safeParse(receipt);
 
-          if (parsedReceipt.success) return parsedReceipt.data;
-
-          console.error(
-            "Receipt parse failed",
-            JSON.stringify(parsedReceipt.error, null, 2),
-          );
+          if (parsedReceipt.success)
+            return createStructuredResponse<PureReceiptWithChildren>({
+              success: true,
+              data: parsedReceipt.data,
+              clientMsg: "Receipt processed successfully.",
+              devMsg: "",
+            });
 
           //Rarely, the receipt is in a different shape.
           if ("properties" in receipt)
-            return receipt.properties as PureReceiptWithChildrenSchema;
+            return createStructuredResponse<PureReceiptWithChildren>({
+              success: true,
+              data: receipt.properties as PureReceiptWithChildren,
+              clientMsg: "Receipt processed successfully.",
+              devMsg: "",
+            });
+
+          if (parsedReceipt.error) {
+            console.error(
+              "Receipt parse failed",
+              JSON.stringify(parsedReceipt.error, null, 2),
+            );
+            return createStructuredResponse<PureReceiptWithChildren>({
+              success: false,
+              data: undefined,
+              clientMsg:
+                "We received your image, but failed to process it. It is either not a receipt or we failed to recognize it. Try again with the same or clearer image or contact support.",
+              devMsg: JSON.stringify(parsedReceipt.error, null, 2),
+            });
+          }
 
           //Hopefully this never happens
           console.error("Unrecognized JSON shape.", receipt);
-          return null;
+          return createStructuredResponse<PureReceiptWithChildren>({
+            success: false,
+            data: undefined,
+            clientMsg:
+              "We received your image, but failed to process it. It is either not a receipt or we failed to recognize it. Try again with the same or clearer image or contact support.",
+            devMsg: `Unrecognized JSON shape: ${JSON.stringify(receipt, null, 2)}`,
+          });
         } catch (e) {
           console.error("JSON.parse failed", e);
-          return null;
+          return createStructuredResponse<PureReceiptWithChildren>({
+            success: false,
+            data: undefined,
+            clientMsg:
+              "We received your image, but failed to process it. It is either not a receipt or we failed to recognize it. Try again with the same or clearer image or contact support.",
+            devMsg: JSON.stringify(e, null, 2),
+          });
         }
       } catch (e) {
         console.error("Error processing receipt", e);
-        return null;
+        return createStructuredResponse<PureReceiptWithChildren>({
+          success: false,
+          data: undefined,
+          clientMsg:
+            "We received your image, but failed to process it. It is either not a receipt or we failed to recognize it. Try again with the same or clearer image or contact support.",
+          devMsg: JSON.stringify(e, null, 2),
+        });
       }
     }),
 });
