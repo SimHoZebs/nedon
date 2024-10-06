@@ -1,7 +1,8 @@
-import type {
-  RemovedTransaction,
-  Transaction,
-  TransactionsSyncRequest,
+import {
+  PlaidErrorType,
+  type RemovedTransaction,
+  type Transaction,
+  type TransactionsSyncRequest,
 } from "plaid";
 import { z } from "zod";
 
@@ -98,18 +99,31 @@ const txRouter = router({
             count: 50,
           };
 
-          const response = await client.transactionsSync(request);
-          const data = response.data;
-          // Add this page of results
-          added = added.concat(data.added);
-          modified = modified.concat(data.modified);
-          removed = removed.concat(data.removed);
+          try {
+            const response = await client.transactionsSync(request);
+            const data = response.data;
+            // Add this page of results
+            added = added.concat(data.added);
+            modified = modified.concat(data.modified);
+            removed = removed.concat(data.removed);
 
-          // hasMore = data.has_more;
-          hasMore = false; //disabling fetch for over 100 txs
+            hasMore = data.has_more;
 
-          // Update cursor to the next cursor
-          cursor = data.next_cursor;
+            // Update cursor to the next cursor
+            cursor = data.next_cursor;
+          } catch (error) {
+            if (
+              error.response.data.error_type === PlaidErrorType.TransactionError
+            ) {
+              console.log(
+                `${PlaidErrorType.TransactionError}, Resetting sync cursor`,
+              );
+              cursor = user.cursor || undefined;
+            } else {
+              console.log("Error in transactionsSync: ", error);
+              return null;
+            }
+          }
         }
 
         // update cursor in db asynchonously
@@ -152,7 +166,8 @@ const txRouter = router({
           );
           if (matchingTxIndex !== -1) {
             console.log("Somehow there is no matching tx?");
-            createTx(user.id, plaidTx, txArray[matchingTxIndex]);
+            const newTx = createTx(user.id, plaidTx, txArray[matchingTxIndex]);
+            createTxInDB(newTx).then();
           } else {
             const matchingTx = txArray[matchingTxIndex];
 
@@ -234,6 +249,12 @@ const txRouter = router({
   }),
 
   update: procedure.input(TxClientSideSchema).mutation(async ({ input }) => {
+    const catToCreate = input.catArray.filter((cat) => !cat.id);
+    const catToUpdate = input.catArray.filter((cat) => cat.id);
+    const splitToCreate = input.splitArray.filter((split) => !split.id);
+    const splitToUpdate = input.splitArray.filter((split) => split.id);
+    console.log("input", input);
+
     const tx = await db.tx.update({
       where: {
         id: input.id,
@@ -241,16 +262,36 @@ const txRouter = router({
       data: {
         plaidId: input.plaidId,
         catArray: {
-          create: input.catArray.map((cat) => ({
-            name: cat.name,
-            nameArray: cat.nameArray,
-            amount: cat.amount,
+          createMany: {
+            data: catToCreate.map((cat) => ({
+              name: cat.name,
+              nameArray: cat.nameArray,
+              amount: cat.amount,
+            })),
+          },
+          updateMany: catToUpdate.map((cat) => ({
+            where: { id: cat.id },
+            data: {
+              name: cat.name,
+              nameArray: cat.nameArray,
+              amount: cat.amount,
+            },
           })),
         },
+
         splitArray: {
-          create: input.splitArray.map((split) => ({
-            userId: split.userId,
-            amount: split.amount,
+          createMany: {
+            data: splitToCreate.map((split) => ({
+              userId: split.userId,
+              amount: split.amount,
+            })),
+          },
+          updateMany: splitToUpdate.map((split) => ({
+            where: { id: split.id },
+            data: {
+              userId: split.userId,
+              amount: split.amount,
+            },
           })),
         },
       },
