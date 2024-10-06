@@ -7,7 +7,7 @@ import catStyleArray from "./catStyle";
 import parseMoney from "./parseMoney";
 import type { TxType } from "./tx";
 
-export const emptyCat = ({
+export const createNewCat = ({
   txId,
   nameArray,
   amount = 0,

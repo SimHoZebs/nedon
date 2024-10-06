@@ -5,7 +5,7 @@ import React, {
   useState,
 } from "react";
 
-import { emptyCat } from "@/util/cat";
+import { createNewCat } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
@@ -69,7 +69,7 @@ const CatPicker = forwardRef(
       }
 
       //The last element is the temporary category this update is for.
-      tmpCatArray[tmpCatArray.length - 1] = emptyCat({
+      tmpCatArray[tmpCatArray.length - 1] = createNewCat({
         nameArray: tmpNameArray,
         amount: 0,
       });

@@ -72,6 +72,8 @@ const SplitList = (props: Props) => {
         await deleteSplit.mutateAsync({ splitId: split.id });
     }
 
+    tx.splitArray = unsavedSplitArray;
+
     const txDBData = await updateTx.mutateAsync(tx);
 
     refreshTxModalData(txDBData);

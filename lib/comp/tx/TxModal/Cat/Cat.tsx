@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 
 import { ActionBtn, Button } from "@/comp/Button";
 
-import { emptyCat } from "@/util/cat";
+import { createNewCat } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
@@ -80,7 +80,7 @@ const Cat = () => {
                 structuredClone(unsavedCatArray);
 
               //add a new cat
-              tmpCatArray.push(emptyCat({ amount: 0, txId: tx?.id }));
+              tmpCatArray.push(createNewCat({ amount: 0, txId: tx?.id }));
 
               setUnsavedCatArray(tmpCatArray);
 

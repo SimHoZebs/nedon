@@ -3,7 +3,7 @@ import type { Transaction } from "plaid";
 import type { TreedCatWithTx } from "@/types/cat";
 import type { TxClientSide, TxInDB } from "@/types/tx";
 
-import { emptyCat, fillArrayByCat } from "./cat";
+import { createNewCat, fillArrayByCat } from "./cat";
 import { createNewSplit } from "./split";
 
 export const resetFullTx = (tx: TxClientSide): TxClientSide => ({
@@ -11,7 +11,7 @@ export const resetFullTx = (tx: TxClientSide): TxClientSide => ({
   plaidTx: tx.plaidTx,
   splitArray: [createNewSplit(tx.userId, tx.amount)],
   catArray: [
-    emptyCat({
+    createNewCat({
       nameArray: tx.plaidTx?.category || [],
       amount: tx.amount,
     }),
@@ -59,13 +59,17 @@ export function createTx(
     userId: userId,
     accountId: txInDB?.accountId || plaidTx?.account_id || "",
     catArray: txInDB?.catArray || [
-      emptyCat({
+      createNewCat({
         nameArray: plaidTx?.category || [],
         amount: plaidTx?.amount || 0,
       }),
     ],
     splitArray: txInDB?.splitArray || [
-      createNewSplit(userId, txInDB?.amount || plaidTx?.amount || 0),
+      createNewSplit(
+        userId,
+        txInDB?.amount || plaidTx?.amount || 0,
+        txInDB?.id,
+      ),
     ],
     receipt: txInDB?.receipt || null,
   };
