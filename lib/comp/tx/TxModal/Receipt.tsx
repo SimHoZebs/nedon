@@ -70,6 +70,16 @@ const Receipt = () => {
       signedUrl: signedUrlResponse.data.signedUrl,
     });
 
+    if (
+      (response.data && !response.data.is_receipt) ||
+      processReceipt.isError
+    ) {
+      sr.clientMsg =
+        "Hmmm, this doesn't look like a receipt. If it is, try again with a clearer image.";
+      sr.devMsg = response.devMsg + processReceipt.error;
+      return sr;
+    }
+
     console.log("receipt processed");
 
     const latestTx = tx.id ? tx : await createTx.mutateAsync(tx);
@@ -132,6 +142,7 @@ const Receipt = () => {
               const result = await uploadAndProcess();
               if (!result.success) {
                 setErrorMsg(result.clientMsg);
+                setProgressMsg("");
               }
               setReceiptImg(undefined);
               setReceiptImgURL(undefined);
