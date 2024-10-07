@@ -142,7 +142,11 @@ const receiptRouter = router({
         }
       } catch (e) {
         console.error("Error processing receipt", e);
-        sr.devMsg = JSON.stringify(e, null, 2);
+        if (e instanceof Error) {
+          sr.devMsg = e.message;
+        } else if (typeof e === "string") {
+          sr.devMsg = e;
+        }
         return sr;
       }
     }),
