@@ -1,5 +1,9 @@
 import type { SplitClientSide } from "@/types/split";
 
+//Q. In what scenario would a split be created without a txId?
+//A. When new txs are found from plaid, they are converted to txs and splits are created for them.
+//The txId is not known at this point, so the txId is set to null.
+//The txId is set when the tx is created in the db.
 export const createNewSplit = (
   userId: string,
   amount: number,
@@ -7,7 +11,7 @@ export const createNewSplit = (
 ): SplitClientSide => {
   return {
     userId,
-    txId,
+    txId: txId || null,
     amount,
   };
 };

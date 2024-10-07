@@ -113,7 +113,9 @@ const txRouter = router({
             cursor = data.next_cursor;
           } catch (error) {
             if (
-              error.response.data.error_type === PlaidErrorType.TransactionError
+              // biome-ignore lint/suspicious/noExplicitAny: because fuck making types for stupid errors
+              (error as any).response.data.error_type ===
+              PlaidErrorType.TransactionError
             ) {
               console.log(
                 `${PlaidErrorType.TransactionError}, Resetting sync cursor`,

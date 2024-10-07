@@ -4,9 +4,9 @@ import { devtools } from "zustand/middleware";
 
 import type { CatClientSide } from "@/types/cat";
 import { type SplitClientSide, isSplitArrayInDB } from "@/types/split";
-import type { TxClientSide, TxInDB } from "@/types/tx";
+import { isTxInDB, type TxClientSide, type TxInDB } from "@/types/tx";
 
-import { resetFullTx } from "./tx";
+import { resetTx } from "./tx";
 
 /**
  * Tx depends on three forms of data:
@@ -99,7 +99,9 @@ export const useTxStore = create<Store>()(
         set((store) => {
           if (!store.txOnModal) return store;
 
-          const tx = resetFullTx(store.txOnModal);
+          if (!isTxInDB(store.txOnModal)) return store;
+
+          const tx = resetTx(store.txOnModal);
 
           return {
             txOnModal: tx,

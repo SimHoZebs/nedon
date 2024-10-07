@@ -6,17 +6,17 @@ import type { TxClientSide, TxInDB } from "@/types/tx";
 import { createNewCat, fillArrayByCat } from "./cat";
 import { createNewSplit } from "./split";
 
-export const resetFullTx = (tx: TxClientSide): TxClientSide => ({
+//expects txInDB when resetting any tx that isn't new
+export const resetTx = (tx: TxInDB): TxInDB => ({
   ...tx,
   plaidTx: tx.plaidTx,
-  splitArray: [createNewSplit(tx.userId, tx.amount)],
+  splitArray: [createNewSplit(tx.userId, tx.amount, tx.id)],
   catArray: [
     createNewCat({
       nameArray: tx.plaidTx?.category || [],
       amount: tx.amount,
     }),
   ],
-  id: undefined,
   receipt: null,
 });
 

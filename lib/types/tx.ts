@@ -28,8 +28,8 @@ export const TxClientSideSchema = TxSoloSchema.extend({
 export interface TxClientSide extends z.infer<typeof TxClientSideSchema> {}
 
 export const TxInDBSchema = TxSchema.extend({
-  catArray: z.array(CatSchema),
-  splitArray: z.array(SplitSchema),
+  catArray: z.union([z.array(CatClientSideSchema), z.array(CatSchema)]),
+  splitArray: z.union([z.array(SplitClientSideSchema), z.array(SplitSchema)]),
   receipt: ReceiptOptionalDefaultsWithChildrenSchema.nullable(),
   plaidTx: plaidTxSchema.nullable(),
 });
