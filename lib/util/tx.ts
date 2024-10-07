@@ -142,6 +142,7 @@ export const filterTxByDate = (
 ) => {
   return txArray.filter((tx) => {
     const txDate = new Date(tx.date);
+    txDate.setDate(txDate.getDate() + 1);
     let isMatch = false;
 
     isMatch = txDate.getFullYear() === date.getFullYear();
