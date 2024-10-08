@@ -73,6 +73,7 @@ const receiptRouter = router({
           sr.clientMsg =
             "We received your image, but we found no text on it. Try again with a clearer image or contact support.";
           sr.devMsg = JSON.stringify(textAnnotationArray, null, 2);
+          console.error(sr);
           return sr;
         }
 
@@ -92,6 +93,7 @@ const receiptRouter = router({
           sr.clientMsg =
             "We received your image, but failed to process it. The error seems to be on us. Try again or contact support.";
           sr.devMsg = `openai failed run. ${JSON.stringify(run, null, 2)}`;
+          console.error(sr);
           return sr;
         }
 
@@ -102,6 +104,8 @@ const receiptRouter = router({
           sr.clientMsg =
             "We received your image, but found no text on it. Try again with a clearer image or contact support.";
           sr.devMsg = JSON.stringify(message, null, 2);
+
+          console.error(sr);
           return sr;
         }
 
@@ -129,15 +133,18 @@ const receiptRouter = router({
 
           if (parsedReceipt.error) {
             sr.devMsg = `Receipt parsing failed ${JSON.stringify(parsedReceipt.error, null, 2)}`;
+            console.error(sr);
             return sr;
           }
 
           //Hopefully this never happens
           sr.devMsg = `Unrecognized JSON shape: ${JSON.stringify(receipt, null, 2)}`;
+          console.error(sr);
           return sr;
         } catch (e) {
           console.error("JSON.parse failed", e);
           sr.devMsg = JSON.stringify(e, null, 2);
+          console.error(sr);
           return sr;
         }
       } catch (e) {
@@ -147,6 +154,7 @@ const receiptRouter = router({
         } else if (typeof e === "string") {
           sr.devMsg = e;
         }
+        console.error(sr);
         return sr;
       }
     }),
