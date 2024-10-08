@@ -22,11 +22,11 @@ import type { TxType } from "@/util/tx";
 import useDateRange from "@/util/useDateRange";
 
 import type { TreedCatWithTx } from "@/types/cat";
-import type { TxClientSide } from "@/types/tx";
+import type { TxInDB } from "@/types/tx";
 
 const Page = () => {
   const { appUser } = getAppUser();
-  const [scopedTxArray, setScopedTxArray] = useState<TxClientSide[]>([]);
+  const [scopedTxArray, setScopedTxArray] = useState<TxInDB[]>([]);
 
   const txArray = trpc.tx.getAll.useQuery(
     { id: appUser ? appUser.id : "" },

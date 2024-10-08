@@ -4,11 +4,10 @@ import type React from "react";
 import { getCatStyle } from "@/util/cat";
 import parseMoney from "@/util/parseMoney";
 import { useTxStore } from "@/util/txStore";
-
-import type { TxClientSide } from "@/types/tx";
+import type { TxInDB } from "@/types/tx";
 
 interface Props {
-  tx: TxClientSide;
+  tx: TxInDB;
   setShowModal?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const TxCard = (props: Props) => {

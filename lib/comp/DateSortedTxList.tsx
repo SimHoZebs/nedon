@@ -3,13 +3,12 @@ import type React from "react";
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 
-import type { TxClientSide } from "@/types/tx";
-
 import { H2, H3 } from "./Heading";
 import TxCard from "./tx/TxCard";
+import type { TxInDB } from "@/types/tx";
 
 interface Props {
-  sortedTxArray: TxClientSide[][][][];
+  sortedTxArray: TxInDB[][][][];
   setShowModal?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 

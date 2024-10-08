@@ -8,13 +8,13 @@ import Input from "@/comp/Input";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import { type TxClientSide, isTxInDB } from "@/types/tx";
+import { isTxInDB } from "@/types/tx";
 import { ActionBtn } from "@/comp/Button";
 import { createStructuredResponse } from "@/types/types";
 import type { PureReceiptWithChildren } from "@/types/receipt";
 
 const Receipt = () => {
-  const tx: TxClientSide | undefined = useTxStore((state) => state.txOnModal);
+  const tx = useTxStore((state) => state.txOnModal);
 
   const createTx = trpc.tx.create.useMutation();
   const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);

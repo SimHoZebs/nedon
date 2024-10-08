@@ -7,14 +7,20 @@ import {
 import { z } from "zod";
 
 import db from "@/util/db";
-import { createTx } from "@/util/tx";
+import { createTxFromPlaidTx, mergePlaidTxWithTx, resetTx } from "@/util/tx";
 
-import { type TxClientSide, TxClientSideSchema, type TxInDB } from "@/types/tx";
+import {
+  type TxInDB,
+  TxInDBSchema,
+  type UnsavedTx,
+  UnsavedTxInDBSchema,
+  UnsavedTxSchema,
+} from "@/types/tx";
 
 import { procedure, router } from "../trpc";
 import { client } from "../util";
 
-const createTxInDB = async (txClientSide: TxClientSide): Promise<TxInDB> => {
+const createTxInDB = async (txClientSide: UnsavedTx): Promise<TxInDB> => {
   return await db.tx.create({
     data: {
       ...txClientSide,
@@ -139,7 +145,7 @@ const txRouter = router({
         // newly added txs gets created
         //FUTURE: make this somehow asynchoronous so users don't have to wait for all txs to be added to see their existing tx
         for (const plaidTx of added) {
-          const newTx: TxClientSide = createTx(user.id, plaidTx);
+          const newTx = createTxFromPlaidTx(user.id, plaidTx);
           await createTxInDB(newTx);
         }
 
@@ -168,7 +174,7 @@ const txRouter = router({
           );
           if (matchingTxIndex !== -1) {
             console.log("Somehow there is no matching tx?");
-            const newTx = createTx(user.id, plaidTx, txArray[matchingTxIndex]);
+            const newTx = mergePlaidTxWithTx(txArray[matchingTxIndex], plaidTx);
             createTxInDB(newTx).then();
           } else {
             const matchingTx = txArray[matchingTxIndex];
@@ -246,11 +252,11 @@ const txRouter = router({
       });
     }),
 
-  create: procedure.input(TxClientSideSchema).mutation(async ({ input }) => {
+  create: procedure.input(UnsavedTxSchema).mutation(async ({ input }) => {
     return await createTxInDB(input);
   }),
 
-  update: procedure.input(TxClientSideSchema).mutation(async ({ input }) => {
+  update: procedure.input(UnsavedTxInDBSchema).mutation(async ({ input }) => {
     const catToCreate = input.catArray.filter((cat) => !cat.id);
     const catToUpdate = input.catArray.filter((cat) => cat.id);
     const splitToCreate = input.splitArray.filter((split) => !split.id);
@@ -309,6 +315,63 @@ const txRouter = router({
     });
 
     return tx;
+  }),
+
+  reset: procedure.input(TxInDBSchema).mutation(async ({ input }) => {
+    const newTx = resetTx(input);
+
+    await db.tx.update({
+      where: {
+        id: input.id,
+      },
+      data: {
+        plaidId: newTx.plaidId,
+        catArray: {
+          deleteMany: {},
+        },
+        splitArray: {
+          deleteMany: {},
+        },
+        receipt: {
+          delete: {},
+        },
+      },
+    });
+
+    const createCat = db.cat.create({
+      data: {
+        name: newTx.catArray[0].name,
+        nameArray: newTx.catArray[0].nameArray,
+        amount: newTx.catArray[0].amount,
+        txId: input.id,
+      },
+    });
+
+    const createSplit = db.split.create({
+      data: {
+        userId: newTx.splitArray[0].userId,
+        amount: newTx.splitArray[0].amount,
+        txId: input.id,
+        originTxId: input.id,
+      },
+    });
+
+    await db.$transaction([createCat, createSplit]);
+
+    return await db.tx.findUnique({
+      where: {
+        id: input.id,
+      },
+      include: {
+        catArray: true,
+        splitArray: true,
+        receipt: {
+          include: {
+            items: true,
+          },
+        },
+      },
+    });
   }),
 
   delete: procedure

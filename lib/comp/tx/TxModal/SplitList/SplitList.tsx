@@ -10,6 +10,7 @@ import { useTxStore } from "@/util/txStore";
 
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
+import { isUnsavedTxInDB } from "@/types/tx";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   onAmountChange: (index: number, splitAmount: string) => void;
@@ -73,6 +74,11 @@ const SplitList = (props: Props) => {
     }
 
     tx.splitArray = unsavedSplitArray;
+
+    if (!isUnsavedTxInDB(tx)) {
+      console.error("Can't update Tx if tx doesn't exist in db", tx);
+      return;
+    }
 
     const txDBData = await updateTx.mutateAsync(tx);
 

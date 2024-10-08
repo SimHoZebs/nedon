@@ -17,8 +17,7 @@ import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { type TxType, filterTxByDate, organizeTxByTime } from "@/util/tx";
-
-import type { TxClientSide } from "@/types/tx";
+import type { TxInDB } from "@/types/tx";
 
 interface Props {
   date: Date;
@@ -72,7 +71,7 @@ const LineGraph = (props: Props) => {
 
 // txArray is a sorted array of FullTx of a single month, starting with latest date
 const generateDailyTxSumArray = (
-  txArray: TxClientSide[][],
+  txArray: TxInDB[][],
   txType: TxType,
   dateLen: number,
 ) => {

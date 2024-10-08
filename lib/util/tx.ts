@@ -1,13 +1,12 @@
 import type { Transaction } from "plaid";
 
 import type { TreedCatWithTx } from "@/types/cat";
-import type { TxClientSide, TxInDB } from "@/types/tx";
+import type { TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
 
 import { createNewCat, fillArrayByCat } from "./cat";
 import { createNewSplit } from "./split";
 
-//expects txInDB when resetting any tx that isn't new
-export const resetTx = (tx: TxInDB): TxInDB => ({
+export const resetTx = (tx: TxInDB): UnsavedTxInDB => ({
   ...tx,
   plaidTx: tx.plaidTx,
   splitArray: [createNewSplit(tx.userId, tx.amount, tx.id)],
@@ -20,36 +19,52 @@ export const resetTx = (tx: TxInDB): TxInDB => ({
   receipt: null,
 });
 
-export function createTx(
-  userId: string,
-  plaidTx: undefined,
-  txInDB: TxInDB,
-): TxInDB;
-export function createTx(
-  userId: string,
-  plaidTx: undefined,
-  txInDB: TxClientSide,
-): TxClientSide;
-export function createTx(
+export const mergePlaidTxWithTx = (
+  tx: TxInDB,
+  plaidTx: Transaction,
+): TxInDB => {
+  return {
+    ...tx,
+    plaidTx: plaidTx,
+  };
+};
+
+export const createTxFromPlaidTx = (
   userId: string,
   plaidTx: Transaction,
+): UnsavedTx => {
+  return {
+    id: undefined,
+    plaidTx: plaidTx,
+    name: plaidTx.name,
+    amount: plaidTx.amount,
+    date: plaidTx.date,
+    userTotal: 0,
+    originTxId: null,
+    datetime: plaidTx.datetime || "",
+    plaidId: plaidTx.transaction_id,
+    userId: userId,
+    accountId: plaidTx.account_id,
+    catArray: [
+      createNewCat({
+        nameArray: plaidTx.category,
+        amount: plaidTx.amount,
+      }),
+    ],
+    splitArray: [createNewSplit(userId, plaidTx.amount, "")],
+    receipt: null,
+  };
+};
+
+export function createTx(
+  userId: string,
   txInDB: TxInDB,
-): TxInDB;
-export function createTx(userId: string, plaidTx: Transaction): TxClientSide;
-export function createTx(
-  userId: string,
-  plaidTx: Transaction,
-  txInDB?: TxInDB,
-): TxInDB | TxClientSide;
-export function createTx(
-  userId: string,
   plaidTx?: Transaction,
-  txInDB?: TxInDB | TxClientSide,
-): TxInDB | TxClientSide {
+): UnsavedTx {
   return {
     plaidTx: plaidTx || null,
-    id: txInDB?.id,
-    name: txInDB?.name || plaidTx?.name || "",
+    id: txInDB.id,
+    name: txInDB.name,
     amount: txInDB?.amount || plaidTx?.amount || 0,
     date: txInDB?.date || plaidTx?.date || "",
     userTotal: txInDB?.userTotal || 0,
@@ -75,7 +90,7 @@ export function createTx(
   };
 }
 
-export const organizeTxByCat = (txArray: TxClientSide[]) => {
+export const organizeTxByCat = (txArray: TxInDB[]) => {
   const catArray: TreedCatWithTx[] = [];
 
   for (const tx of txArray) {
@@ -89,13 +104,13 @@ export const organizeTxByCat = (txArray: TxClientSide[]) => {
   return catArray;
 };
 
-export const organizeTxByTime = (txArray: TxClientSide[]) => {
+export const organizeTxByTime = (txArray: TxInDB[]) => {
   const txSortedByTimeArray = txArray.sort(
     (a, b) =>
       new Date(b.datetime ? b.datetime : b.date).getTime() -
       new Date(a.datetime ? a.datetime : a.date).getTime(),
   );
-  const txOrganizedByTimeArray: TxClientSide[][][][] = [[[[]]]];
+  const txOrganizedByTimeArray: TxInDB[][][][] = [[[[]]]];
 
   let lastDate: Date | undefined = undefined;
   let yearIndex = -1;
@@ -136,7 +151,7 @@ export const organizeTxByTime = (txArray: TxClientSide[]) => {
 };
 
 export const filterTxByDate = (
-  txArray: TxClientSide[],
+  txArray: TxInDB[],
   date: Date,
   rangeFormat: "year" | "month" | "date",
 ) => {

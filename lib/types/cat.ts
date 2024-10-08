@@ -1,7 +1,6 @@
 import { type Cat, CatOptionalDefaultsSchema } from "prisma/generated/zod";
 import { z } from "zod";
-
-import type { TxClientSide } from "./tx";
+import { TxInDB } from "./tx";
 
 export type TreedCat = {
   name: string;
@@ -13,7 +12,7 @@ export type TreedCatWithTx = {
   budget: number;
   spending: number;
   received: number;
-  txArray: TxClientSide[];
+  txArray: TxInDB[];
   subCatArray: TreedCatWithTx[];
 };
 

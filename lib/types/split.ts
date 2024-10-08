@@ -13,6 +13,7 @@ export type SplitClientSide = z.infer<typeof SplitClientSideSchema>;
 export const isSplitInDB = (split: SplitClientSide): split is Split => {
   return split.userId !== undefined;
 };
+
 export const isSplitArrayInDB = (obj: unknown): obj is Split[] => {
   if (!Array.isArray(obj)) return false;
   try {

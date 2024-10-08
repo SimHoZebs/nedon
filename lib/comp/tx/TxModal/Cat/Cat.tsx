@@ -80,7 +80,9 @@ const Cat = () => {
                 structuredClone(unsavedCatArray);
 
               //add a new cat
-              tmpCatArray.push(createNewCat({ amount: 0, txId: tx?.id }));
+              tmpCatArray.push(
+                createNewCat({ amount: 0, txId: tx?.id, nameArray: [] }),
+              );
 
               setUnsavedCatArray(tmpCatArray);
 

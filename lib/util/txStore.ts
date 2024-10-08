@@ -4,9 +4,7 @@ import { devtools } from "zustand/middleware";
 
 import type { CatClientSide } from "@/types/cat";
 import { type SplitClientSide, isSplitArrayInDB } from "@/types/split";
-import { isTxInDB, type TxClientSide, type TxInDB } from "@/types/tx";
-
-import { resetTx } from "./tx";
+import type { TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
 
 /**
  * Tx depends on three forms of data:
@@ -17,8 +15,8 @@ import { resetTx } from "./tx";
  *
  * */
 interface Store {
-  txOnModal: TxClientSide | undefined;
-  setTxOnModal: (tx?: TxClientSide) => void;
+  txOnModal: UnsavedTx | UnsavedTxInDB | TxInDB | null;
+  setTxOnModal: (tx: UnsavedTx | TxInDB) => void;
 
   /**
    * Only use this function when new data is expected from the database.
@@ -27,7 +25,7 @@ interface Store {
   refreshTxModalData: (tx: TxInDB | Split[] | Cat[]) => void;
 
   //only to reset tx to a state without a txInDB
-  resetTx: () => void;
+  //resetTx: () => void;
 
   //catArray
   hasEditedCatArray: boolean;
@@ -58,8 +56,8 @@ interface Store {
 export const useTxStore = create<Store>()(
   devtools(
     (set) => ({
-      txOnModal: undefined,
-      setTxOnModal: (transasction?: TxClientSide) =>
+      txOnModal: null,
+      setTxOnModal: (transasction: UnsavedTx | TxInDB) =>
         set({ txOnModal: transasction }),
 
       refreshTxModalData: (dbData: TxInDB | Split[] | Cat[]) => {
@@ -94,20 +92,20 @@ export const useTxStore = create<Store>()(
           };
         });
       },
-
-      resetTx: () =>
-        set((store) => {
-          if (!store.txOnModal) return store;
-
-          if (!isTxInDB(store.txOnModal)) return store;
-
-          const tx = resetTx(store.txOnModal);
-
-          return {
-            txOnModal: tx,
-            unsavedSplitArray: tx.splitArray,
-          };
-        }),
+      //
+      // resetTx: () =>
+      //   set((store) => {
+      //     if (!store.txOnModal) return store;
+      //
+      //     if (!isTxInDB(store.txOnModal)) return store;
+      //
+      //     const tx = resetTx(store.txOnModal);
+      //
+      //     return {
+      //       txOnModal: tx,
+      //       unsavedSplitArray: tx.splitArray,
+      //     };
+      //   }),
 
       hasEditedCatArray: false,
       setHasEditedCatArray: (hasEditedCatArray: boolean) =>

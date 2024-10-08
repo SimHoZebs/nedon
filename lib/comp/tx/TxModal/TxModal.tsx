@@ -13,6 +13,7 @@ import { useTxStore } from "@/util/txStore";
 import Cat from "./Cat/Cat";
 import Receipt from "./Receipt";
 import SplitList from "./SplitList/SplitList";
+import { isTxInDB } from "@/types/tx";
 
 interface Props {
   onClose: () => void;
@@ -21,7 +22,8 @@ interface Props {
 
 const TxModal = (props: Props) => {
   const tx = useTxStore((state) => state.txOnModal);
-  const deleteTx = trpc.tx.delete.useMutation();
+  const resetTx = trpc.tx.reset.useMutation();
+
   const { appUser } = getAppUser();
   const auth = trpc.auth.useQuery(
     { id: appUser ? appUser.id : "" },
@@ -29,6 +31,7 @@ const TxModal = (props: Props) => {
   );
   const queryClient = trpc.useUtils();
   const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
+  const setTxOnModal = useTxStore((state) => state.setTxOnModal);
 
   const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
   const setUnsavedSplitArray = useTxStore(
@@ -38,7 +41,7 @@ const TxModal = (props: Props) => {
   const setSplitAmountDisplayArray = useTxStore(
     (state) => state.setSplitAmountDisplayArray,
   );
-  const resetTx = useTxStore((s) => s.resetTx);
+  // const resetTx = useTxStore((s) => s.resetTx);
   const setFocusedSplitIndex = useTxStore((s) => s.setFocusedSplitIndex);
   const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
 
@@ -164,13 +167,15 @@ const TxModal = (props: Props) => {
             <div className="flex flex-col items-start gap-y-3">
               <ActionBtn
                 onClickAsync={async () => {
-                  if (!tx.id) {
-                    console.error("Can't delete tx. tx not in db.");
+                  if (!isTxInDB(tx)) {
                     return;
                   }
 
-                  resetTx();
-                  await deleteTx.mutateAsync({ id: tx.id });
+                  const resettedTx = await resetTx.mutateAsync(tx);
+                  if (!resettedTx) {
+                    return;
+                  }
+                  setTxOnModal(resettedTx);
 
                   await queryClient.tx.invalidate();
                 }}
