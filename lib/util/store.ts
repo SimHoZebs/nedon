@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
 import type { GroupClientSide, UserClientSide } from "@/types/types";
+import { TxInDB } from "@/types/tx";
 
 export const useLocalStoreDelay = <T, F>(
   store: (callback: (state: T) => unknown) => unknown,
@@ -51,6 +52,9 @@ interface Store {
 
   verticalCatPicker: boolean;
   setVerticalCatPicker: (verticalCatPicker: boolean) => void;
+
+  txOragnizedByTimeArray: TxInDB[][][][];
+  setTxOragnizedByTimeArray: (txOragnizedByTimeArray: TxInDB[][][][]) => void;
 }
 
 export const useStore = create<Store>()(
@@ -72,6 +76,10 @@ export const useStore = create<Store>()(
       verticalCatPicker: false,
       setVerticalCatPicker: (verticalCatPicker: boolean) =>
         set({ verticalCatPicker }),
+
+      txOragnizedByTimeArray: [],
+      setTxOragnizedByTimeArray: (txOragnizedByTimeArray: string[]) =>
+        set({ txOragnizedByTimeArray }),
     }),
 
     { name: "global-store" },

@@ -2,16 +2,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { NextPage } from "next";
 import React, { useEffect, useMemo, useState } from "react";
 
+import { ActionBtn } from "@/comp/Button";
 import DateRangePicker from "@/comp/DateRangePicker";
 import DateSortedTxList from "@/comp/DateSortedTxList";
 import TxModalAndCalculator from "@/comp/tx/TxModalAndCalculator";
 
 import getAppUser from "@/util/getAppUser";
+import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
-import { filterTxByDate, organizeTxByTime } from "@/util/tx";
+import { getScopeIndex } from "@/util/tx";
 import useDateRange from "@/util/useDateRange";
-import { ActionBtn } from "@/comp/Button";
-import type { TxInDB } from "@/types/tx";
 
 const Page: NextPage = () => {
   const { appUser } = getAppUser();
@@ -21,10 +21,13 @@ const Page: NextPage = () => {
     { staleTime: 3600000, enabled: appUser?.hasAccessToken },
   );
 
+  const txOragnizedByTimeArray = useStore(
+    (store) => store.txOragnizedByTimeArray,
+  );
   const [showModal, setShowModal] = useState(false);
-  const [scopedTxArray, setScopedTxArray] = useState<TxInDB[]>([]);
   const { date, setDate, rangeFormat, setRangeFormat } =
     useDateRange(undefined);
+  const [YMD, setYMD] = useState([-1, -1, -1]);
 
   useEffect(() => {
     if (!txArray.data) {
@@ -36,18 +39,30 @@ const Page: NextPage = () => {
     }
 
     if (rangeFormat === "all") {
-      setScopedTxArray(txArray.data);
       return;
     }
 
-    const filteredArray = filterTxByDate(txArray.data, date, rangeFormat);
-
-    setScopedTxArray(filteredArray);
-  }, [date, rangeFormat, txArray.data, txArray.status]);
+    const [y, m, d] = getScopeIndex(txOragnizedByTimeArray, date, rangeFormat);
+    setYMD([y, m, d]);
+  }, [date, rangeFormat, txArray.data, txArray.status, txOragnizedByTimeArray]);
 
   const sortedTxArray = useMemo(() => {
-    return organizeTxByTime(scopedTxArray);
-  }, [scopedTxArray]);
+    const [y, m, d] = YMD;
+
+    // Typically means dateRange hasn't been set yet
+    if (y === -1) return [[[[]]]];
+
+    switch (rangeFormat) {
+      case "year":
+        return [txOragnizedByTimeArray[y]];
+      case "month":
+        return [[txOragnizedByTimeArray[y][m]]];
+      case "date":
+        return [[[txOragnizedByTimeArray[y][m][d]]]];
+      default:
+        return txOragnizedByTimeArray;
+    }
+  }, [txOragnizedByTimeArray, YMD, rangeFormat]);
 
   return (
     <section className="flex w-full justify-center">
@@ -79,7 +94,14 @@ const Page: NextPage = () => {
             setRangeFormat={setRangeFormat}
           />
 
-          <ActionBtn variant="primary">+ transaction</ActionBtn>
+          <ActionBtn
+            variant="primary"
+            onClick={() => {
+              setShowModal(true);
+            }}
+          >
+            + transaction
+          </ActionBtn>
         </div>
         <DateSortedTxList
           setShowModal={setShowModal}

@@ -119,6 +119,7 @@ export const organizeTxByTime = (txArray: TxInDB[]) => {
 
   for (const tx of txSortedByTimeArray) {
     const date = new Date(tx.date);
+    date.setDate(date.getDate() + 1);
     if (!lastDate) {
       yearIndex++;
       monthIndex++;
@@ -167,6 +168,49 @@ export const filterTxByDate = (
     isMatch = txDate.getDate() === date.getDate();
     return isMatch;
   });
+};
+
+export const getScopeIndex = (
+  txOragnizedByTimeArray: TxInDB[][][][],
+  date: Date,
+  rangeFormat: "year" | "month" | "date",
+): [number, number, number] => {
+  let [y, m, d]: [number, number, number] = [-1, -1, -1];
+
+  if (txOragnizedByTimeArray.length === 0) return [y, m, d];
+
+  for (const [yIndex, year] of txOragnizedByTimeArray.entries()) {
+    const txDate = new Date(year[0][0][0].date);
+    txDate.setDate(txDate.getDate() + 1);
+    if (txDate.getFullYear() === date.getFullYear()) {
+      y = yIndex;
+      break;
+    }
+  }
+
+  if (rangeFormat === "year") return [y, m, d];
+
+  for (const [mIndex, month] of txOragnizedByTimeArray[y].entries()) {
+    const txDate = new Date(month[0][0].date);
+    txDate.setDate(txDate.getDate() + 1);
+    if (txDate.getMonth() === date.getMonth()) {
+      m = mIndex;
+      break;
+    }
+  }
+
+  if (rangeFormat === "month") return [y, m, d];
+
+  for (const [dIndex, dateArray] of txOragnizedByTimeArray[y][m].entries()) {
+    const txDate = new Date(dateArray[0].date);
+    txDate.setDate(txDate.getDate() + 1);
+    if (txDate.getDate() === date.getDate()) {
+      d = dIndex;
+      break;
+    }
+  }
+
+  return [y, m, d];
 };
 
 export const txTypeArray: ["spending", "received", "transfers"] = [

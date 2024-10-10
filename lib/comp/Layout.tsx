@@ -1,4 +1,4 @@
-import { Hanken_Grotesk, Space_Grotesk } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/router";
 import type React from "react";
 import { useEffect } from "react";
@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import getAppUser from "@/util/getAppUser";
 import { useLocalStore, useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
+import { organizeTxByTime } from "@/util/tx";
 
 import { NavBtn } from "./Button";
 
@@ -17,19 +18,29 @@ const customFont = Space_Grotesk({
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
+  const { appUser, allUsers } = getAppUser();
 
   const setUserId = useLocalStore((state) => state.setUserId);
   const setScreenType = useStore((state) => state.setScreenType);
+  const txOragnizedByTimeArray = useStore(
+    (state) => state.txOragnizedByTimeArray,
+  );
+  const setTxOragnizedByTimeArray = useStore(
+    (state) => state.setTxOragnizedByTimeArray,
+  );
+
   const createUser = trpc.user.create.useMutation();
   const updateUser = trpc.user.update.useMutation();
   const sandboxPublicToken = trpc.sandBoxAccess.useQuery(
     { instituteID: undefined },
     { staleTime: 360000, enabled: false },
   );
+  const txArray = trpc.tx.getAll.useQuery(
+    { id: appUser ? appUser.id : "" },
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken },
+  );
   const setAccessToken = trpc.setAccessToken.useMutation();
   const queryClient = trpc.useUtils();
-
-  const { appUser, allUsers } = getAppUser();
 
   useEffect(() => {
     const createUserWithPlaid = async () => {
@@ -69,6 +80,15 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
     setAccessToken,
     updateUser,
   ]);
+
+  useEffect(() => {
+    if (txOragnizedByTimeArray.length > 0) return;
+
+    if (txArray.data) {
+      const response = organizeTxByTime(txArray.data);
+      setTxOragnizedByTimeArray(response);
+    }
+  }, [txOragnizedByTimeArray.length, txArray.data, setTxOragnizedByTimeArray]);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null;
