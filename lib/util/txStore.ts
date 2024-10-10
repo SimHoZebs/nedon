@@ -4,7 +4,12 @@ import { devtools } from "zustand/middleware";
 
 import type { CatClientSide } from "@/types/cat";
 import { type SplitClientSide, isSplitArrayInDB } from "@/types/split";
-import type { TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
+import {
+  isTxInDB,
+  type TxInDB,
+  type UnsavedTx,
+  type UnsavedTxInDB,
+} from "@/types/tx";
 
 /**
  * Tx depends on three forms of data:
@@ -18,6 +23,7 @@ interface Store {
   txOnModal: UnsavedTx | UnsavedTxInDB | TxInDB | null;
   setTxOnModal: (tx: UnsavedTx | TxInDB) => void;
 
+  setSplitOnModal: (splitArray: Split[]) => void;
   /**
    * Only use this function when new data is expected from the database.
    * Refreshes client data with database data after it processed client's update.
@@ -59,6 +65,24 @@ export const useTxStore = create<Store>()(
       txOnModal: null,
       setTxOnModal: (transasction: UnsavedTx | TxInDB) =>
         set({ txOnModal: transasction }),
+
+      setSplitOnModal: (splitArray: Split[]) => {
+        set((store) => {
+          if (!store.txOnModal) return store;
+
+          const clone = structuredClone(store.txOnModal);
+          if (!isTxInDB(clone)) return store;
+
+          const tx = clone as TxInDB;
+
+          return {
+            txOnModal: {
+              ...tx,
+              splitArray: splitArray,
+            },
+          };
+        });
+      },
 
       refreshTxModalData: (dbData: TxInDB | Split[] | Cat[]) => {
         set((store) => {

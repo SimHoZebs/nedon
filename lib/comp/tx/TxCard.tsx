@@ -69,11 +69,11 @@ const TxCard = (props: Props) => {
           {props.tx.catArray.map((cat) => (
             <div
               key={cat.id}
-              className={`flex min-w-max gap-x-1 rounded-full p-2 text-zinc-800 ${
-                getCatStyle(cat.nameArray).bgColor
-              }`}
+              className={`flex min-w-max gap-x-1 rounded-full p-2 ${getCatStyle(cat.nameArray).border} ${getCatStyle(cat.nameArray).textColor}`}
             >
-              <span className={`${getCatStyle(cat.nameArray).icon} w-4`} />
+              <span
+                className={`${getCatStyle(cat.nameArray).icon} ${getCatStyle(cat.nameArray).textColor} w-4`}
+              />
               <p className="text-xs">{cat.nameArray.at(-1)}</p>
             </div>
           ))}

@@ -22,7 +22,7 @@ const DateSortedTxList = (props: Props) => {
 
   return txArray.isLoading ? (
     <ol className="flex h-fit w-full flex-col gap-y-3">
-      <H2>Loading</H2>
+      <H2 className="animate-pulse">Loading...</H2>
 
       {Array(10)
         .fill(0)

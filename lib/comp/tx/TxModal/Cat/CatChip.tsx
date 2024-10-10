@@ -40,7 +40,7 @@ const CatChip = (props: Props) => {
         onClick={(e) => props.onCatChipClick(e)}
       >
         <span
-          className={`flex h-6 w-6 rounded-full p-1 ${
+          className={`flex h-6 w-6 p-1 ${
             getCatStyle(props.cat.nameArray)?.textColor
           } ${
             getCatStyle(props.cat.nameArray)?.icon ||
