@@ -8,7 +8,7 @@ const Modal = (props: Props) => {
   return (
     <motion.div
       className={twMerge(
-        `pointer-events-auto z-20 flex h-full w-full flex-col gap-y-2 overflow-y-auto rounded-xl bg-zinc-800 shadow-lg shadow-zinc-900 outline outline-1 outline-zinc-700 lg:h-4/5 lg:w-4/5 ${props.className}`,
+        `pointer-events-auto z-20 flex h-full w-full flex-col gap-y-2 overflow-y-auto bg-zinc-900 shadow-lg shadow-zinc-900 outline outline-1 lg:h-4/5 lg:w-4/5 ${props.className}`,
       )}
       onMouseDown={(e) => {
         e.stopPropagation();

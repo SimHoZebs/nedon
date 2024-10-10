@@ -1,7 +1,6 @@
 import type React from "react";
 
 import { getCatStyle } from "@/util/cat";
-import parseMoney from "@/util/parseMoney";
 import { useTxStore } from "@/util/txStore";
 import type { TxInDB } from "@/types/tx";
 import getAppUser from "@/util/getAppUser";
