@@ -12,9 +12,11 @@ import LineGraph from "@/comp/analysis/LineGraph";
 
 import { calcCatTypeTotal, subCatTotal } from "@/util/cat";
 import getAppUser from "@/util/getAppUser";
+import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import {
   filterTxByDate,
+  getScopeIndex,
   organizeTxByCat,
   txTypeArray as txTypes,
 } from "@/util/tx";
@@ -26,7 +28,10 @@ import type { TxInDB } from "@/types/tx";
 
 const Page = () => {
   const { appUser } = getAppUser();
-  const [scopedTxArray, setScopedTxArray] = useState<TxInDB[]>([]);
+  const txOragnizedByTimeArray = useStore(
+    (store) => store.txOragnizedByTimeArray,
+  );
+  const [YMD, setYMD] = useState([-1, -1, -1]);
 
   const txArray = trpc.tx.getAll.useQuery(
     { id: appUser ? appUser.id : "" },
@@ -60,17 +65,21 @@ const Page = () => {
     }
 
     if (rangeFormat === "all") {
-      setScopedTxArray(txArray.data);
       return;
     }
 
-    const filteredArray = filterTxByDate(txArray.data, date, rangeFormat);
-
-    setScopedTxArray(filteredArray);
-  }, [date, rangeFormat, txArray.data, txArray.status]);
+    const [y, m, d] = getScopeIndex(txOragnizedByTimeArray, date, rangeFormat);
+    setYMD([y, m, d]);
+  }, [date, rangeFormat, txArray.data, txArray.status, txOragnizedByTimeArray]);
 
   const treedCatWithTxArray = useMemo(() => {
-    const organizedTxByCatArray = organizeTxByCat(scopedTxArray);
+    const [y, m, d] = YMD;
+
+    if (y === -1) return [];
+
+    const organizedTxByCatArray = organizeTxByCat(
+      txOragnizedByTimeArray[y][m].flat(),
+    );
 
     return organizedTxByCatArray.sort((a, b) => {
       const aTotal = Math.abs(
@@ -83,7 +92,7 @@ const Page = () => {
       );
       return aTotal - bTotal;
     });
-  }, [scopedTxArray, txType]);
+  }, [txType, txOragnizedByTimeArray, YMD]);
 
   const spendingTotal = calcCatTypeTotal(treedCatWithTxArray, "spending");
 
