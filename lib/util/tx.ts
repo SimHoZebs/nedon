@@ -151,25 +151,6 @@ export const organizeTxByTime = (txArray: TxInDB[]) => {
   return txOrganizedByTimeArray;
 };
 
-export const filterTxByDate = (
-  txArray: TxInDB[],
-  date: Date,
-  rangeFormat: "year" | "month" | "date",
-) => {
-  return txArray.filter((tx) => {
-    const txDate = new Date(tx.date);
-    txDate.setDate(txDate.getDate() + 1);
-    let isMatch = false;
-
-    isMatch = txDate.getFullYear() === date.getFullYear();
-    if (rangeFormat === "year" || !isMatch) return isMatch;
-    isMatch = txDate.getMonth() === date.getMonth();
-    if (rangeFormat === "month" || !isMatch) return isMatch;
-    isMatch = txDate.getDate() === date.getDate();
-    return isMatch;
-  });
-};
-
 export const getScopeIndex = (
   txOragnizedByTimeArray: TxInDB[][][][],
   date: Date,

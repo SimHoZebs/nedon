@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Line,
   LineChart,
@@ -13,45 +13,66 @@ import type {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
-import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
-import { trpc } from "@/util/trpc";
-import { type TxType, filterTxByDate, organizeTxByTime } from "@/util/tx";
+import { useStore } from "@/util/store";
+import type { TxType } from "@/util/tx";
+
 import type { TxInDB } from "@/types/tx";
 
 interface Props {
   date: Date;
   rangeFormat: "date" | "month" | "year" | "all";
   txType: TxType;
+  YMD: [number, number, number];
 }
 
 const LineGraph = (props: Props) => {
-  const { appUser } = getAppUser();
-  const txArray = trpc.tx.getAll.useQuery(
-    { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: !!appUser },
+  const txOragnizedByTimeArray = useStore(
+    (store) => store.txOragnizedByTimeArray,
   );
+  const [dailyTxSumArray, setDailyTxSumArray] = useState([
+    { date: 0, amount: 0 },
+  ]);
 
-  const thisMonthTxArray =
-    txArray.data && props.rangeFormat !== "all"
-      ? filterTxByDate(txArray.data, props.date, props.rangeFormat)
-      : [];
+  useEffect(() => {
+    if (props.rangeFormat === "all") {
+      const sum = generateDailyTxSumArray(
+        txOragnizedByTimeArray.flat(2),
+        props.txType,
+        31,
+      );
+      setDailyTxSumArray(sum);
+    } else {
+      const [y, m, d] = props.YMD;
 
-  // Get the number of days in the month
-  const date = new Date(props.date.getFullYear(), props.date.getMonth() + 1, 1);
+      if (y === -1) return;
+      const thisMonthTxArray = txOragnizedByTimeArray[y][m];
+      // Get the number of days in the month
+      const date = new Date(
+        props.date.getFullYear(),
+        props.date.getMonth() + 1,
+        1,
+      );
 
-  date.setDate(date.getDate() - 1);
+      date.setDate(date.getDate() - 1);
 
-  const timeSortedThisMonthTxArray = organizeTxByTime(thisMonthTxArray)[0][0];
-
-  const dailyTxSumArray = generateDailyTxSumArray(
-    timeSortedThisMonthTxArray,
+      const sum = generateDailyTxSumArray(
+        thisMonthTxArray,
+        props.txType,
+        date.getDate(),
+      );
+      setDailyTxSumArray(sum);
+    }
+  }, [
+    props.date,
+    props.rangeFormat,
+    txOragnizedByTimeArray,
     props.txType,
-    date.getDate(),
-  );
+    props.YMD,
+  ]);
 
   return (
-    <div className="h-64 w-full relative pr-4 pt-2 text-xs">
+    <div className="relative h-64 w-full pr-4 pt-2 text-xs">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={dailyTxSumArray}>
           <XAxis dataKey="date" />

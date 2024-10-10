@@ -15,7 +15,6 @@ import getAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import {
-  filterTxByDate,
   getScopeIndex,
   organizeTxByCat,
   txTypeArray as txTypes,
@@ -24,14 +23,13 @@ import type { TxType } from "@/util/tx";
 import useDateRange from "@/util/useDateRange";
 
 import type { TreedCatWithTx } from "@/types/cat";
-import type { TxInDB } from "@/types/tx";
 
 const Page = () => {
   const { appUser } = getAppUser();
   const txOragnizedByTimeArray = useStore(
     (store) => store.txOragnizedByTimeArray,
   );
-  const [YMD, setYMD] = useState([-1, -1, -1]);
+  const [YMD, setYMD] = useState<[number, number, number]>([-1, -1, -1]);
 
   const txArray = trpc.tx.getAll.useQuery(
     { id: appUser ? appUser.id : "" },
@@ -157,7 +155,12 @@ const Page = () => {
           />
 
           {date && (
-            <LineGraph txType={txType} date={date} rangeFormat={rangeFormat} />
+            <LineGraph
+              txType={txType}
+              date={date}
+              rangeFormat={rangeFormat}
+              YMD={YMD}
+            />
           )}
 
           <AnalysisBar
