@@ -1,21 +1,22 @@
-import Image from "next/image";
 import type React from "react";
 
 import { getCatStyle } from "@/util/cat";
 import parseMoney from "@/util/parseMoney";
 import { useTxStore } from "@/util/txStore";
 import type { TxInDB } from "@/types/tx";
+import getAppUser from "@/util/getAppUser";
 
 interface Props {
   tx: TxInDB;
   setShowModal?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const TxCard = (props: Props) => {
+  const { appUser } = getAppUser();
   const setTxOnModal = useTxStore((state) => state.setTxOnModal);
 
-  const splitAmount = parseMoney(
-    props.tx.catArray.reduce((total, cat) => total + cat.amount, 0),
-  );
+  const splitAmount = props.tx.splitArray.find(
+    (split) => split.userId === appUser?.id,
+  )?.amount;
 
   return (
     <section
@@ -73,17 +74,7 @@ const TxCard = (props: Props) => {
                 getCatStyle(cat.nameArray).bgColor
               }`}
             >
-              {props.tx.plaidTx?.counterparties?.[0]?.logo_url ? (
-                <Image
-                  className="rounded-full"
-                  src={props.tx.plaidTx?.counterparties[0].logo_url}
-                  alt=""
-                  width={16}
-                  height={16}
-                />
-              ) : (
-                <span className={`${getCatStyle(cat.nameArray).icon} w-4`} />
-              )}
+              <span className={`${getCatStyle(cat.nameArray).icon} w-4`} />
               <p className="text-xs">{cat.nameArray.at(-1)}</p>
             </div>
           ))}
