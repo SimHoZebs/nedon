@@ -10,9 +10,10 @@ import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import SplitList from "./SplitList/SplitList";
 import Cat from "./Cat/Cat";
 import Receipt from "./Receipt";
+import SplitList from "./SplitList/SplitList";
+import { isTxInDB } from "@/types/tx";
 
 interface Props {
   onClose: () => void;
@@ -21,7 +22,8 @@ interface Props {
 
 const TxModal = (props: Props) => {
   const tx = useTxStore((state) => state.txOnModal);
-  const deleteTx = trpc.tx.delete.useMutation();
+  const resetTx = trpc.tx.reset.useMutation();
+
   const { appUser } = getAppUser();
   const auth = trpc.auth.useQuery(
     { id: appUser ? appUser.id : "" },
@@ -29,6 +31,7 @@ const TxModal = (props: Props) => {
   );
   const queryClient = trpc.useUtils();
   const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
+  const setTxOnModal = useTxStore((state) => state.setTxOnModal);
 
   const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
   const setUnsavedSplitArray = useTxStore(
@@ -38,7 +41,7 @@ const TxModal = (props: Props) => {
   const setSplitAmountDisplayArray = useTxStore(
     (state) => state.setSplitAmountDisplayArray,
   );
-  const resetTx = useTxStore((s) => s.resetTx);
+  // const resetTx = useTxStore((s) => s.resetTx);
   const setFocusedSplitIndex = useTxStore((s) => s.setFocusedSplitIndex);
   const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
 
@@ -82,10 +85,10 @@ const TxModal = (props: Props) => {
             <div className="flex w-full flex-col gap-y-1 lg:w-fit">
               <div className="flex w-full items-start justify-between">
                 <div className="flex items-center gap-x-2">
-                  {tx.counterparties?.[0]?.logo_url && (
+                  {tx.plaidTx?.counterparties?.[0]?.logo_url && (
                     <Image
                       className="rounded-lg"
-                      src={tx.counterparties[0].logo_url}
+                      src={tx.plaidTx.counterparties[0].logo_url}
                       alt=""
                       width={56}
                       height={56}
@@ -112,7 +115,7 @@ const TxModal = (props: Props) => {
                 {auth.isLoading
                   ? ""
                   : (auth.data as unknown as AuthGetResponse).accounts.find(
-                      (account) => account.account_id === tx.account_id,
+                      (account) => account.account_id === tx.accountId,
                     )?.name || ""}
               </p>
             </div>
@@ -127,14 +130,15 @@ const TxModal = (props: Props) => {
               />
               <p>Created at {tx.datetime || "1970-01-23 12:34:56"}</p>
               <p>
-                Authorized at {tx.authorized_datetime || "1970-01-23 12:34:56"}
+                Authorized at{" "}
+                {tx.plaidTx?.authorized_datetime || "1970-01-23 12:34:56"}
               </p>
             </div>
           </section>
 
-          <div className="flex flex-col justify-between gap-y-3 px-3 ">
+          <div className="flex flex-col justify-between gap-y-3 px-3">
             <div className="flex flex-col gap-y-3">
-              <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-x-3 gap-y-1">
+              <div className="flex flex-col gap-x-3 gap-y-1 md:flex-row md:items-center md:justify-between">
                 <div className="flex">
                   <H1 className="px-3">${amount * -1}</H1>
                   {appUser?.myConnectionArray &&
@@ -163,13 +167,15 @@ const TxModal = (props: Props) => {
             <div className="flex flex-col items-start gap-y-3">
               <ActionBtn
                 onClickAsync={async () => {
-                  if (!tx.id) {
-                    console.error("Can't delete tx. tx not in db.");
+                  if (!isTxInDB(tx)) {
                     return;
                   }
 
-                  resetTx();
-                  await deleteTx.mutateAsync({ id: tx.id });
+                  const resettedTx = await resetTx.mutateAsync(tx);
+                  if (!resettedTx) {
+                    return;
+                  }
+                  setTxOnModal(resettedTx);
 
                   await queryClient.tx.invalidate();
                 }}

@@ -9,14 +9,15 @@ import catStyleArray from "@/util/catStyle";
 import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
-import type { TreedCatWithTx } from "@/util/types";
+import { organizeTxByTime } from "@/util/tx";
+
+import type { TreedCatWithTx } from "@/types/cat";
 
 import { Button, CloseBtn } from "../Button";
+import DateSortedTxList from "../DateSortedTxList";
 import { H1, H2 } from "../Heading";
 import Input from "../Input";
 import Modal from "../Modal";
-import DateSortedTxList from "../DateSortedTxList";
-import { organizeTxByTime } from "@/util/tx";
 
 interface Props {
   setShowModal: (show: boolean) => void;

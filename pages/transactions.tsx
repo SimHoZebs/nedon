@@ -9,9 +9,9 @@ import TxModalAndCalculator from "@/comp/tx/TxModalAndCalculator";
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { filterTxByDate, organizeTxByTime } from "@/util/tx";
-import type { FullTxClientSide } from "@/util/types";
 import useDateRange from "@/util/useDateRange";
 import { ActionBtn } from "@/comp/Button";
+import type { TxInDB } from "@/types/tx";
 
 const Page: NextPage = () => {
   const { appUser } = getAppUser();
@@ -22,7 +22,7 @@ const Page: NextPage = () => {
   );
 
   const [showModal, setShowModal] = useState(false);
-  const [scopedTxArray, setScopedTxArray] = useState<FullTxClientSide[]>([]);
+  const [scopedTxArray, setScopedTxArray] = useState<TxInDB[]>([]);
   const { date, setDate, rangeFormat, setRangeFormat } =
     useDateRange(undefined);
 

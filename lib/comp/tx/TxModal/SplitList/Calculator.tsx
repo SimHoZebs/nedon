@@ -46,14 +46,14 @@ const Calculator = (props: Props) => {
   };
 
   return (
-    <div className="z-10 flex h-[40vh] w-full flex-col items-end rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900 lg:absolute ">
+    <div className="z-10 flex h-[40vh] w-full flex-col items-end rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900 lg:absolute">
       <div className="pointer-events-auto grid h-full w-full grid-rows-4">
         {calcButtons.map((row) => (
-          <div key={row.toString()} className="grid h-full w-full grid-cols-4 ">
+          <div key={row.toString()} className="grid h-full w-full grid-cols-4">
             {row.map((btn) => (
               <button
                 className={`flex items-center justify-center hover:cursor-pointer ${
-                  btn === "del" ? " text-pink-400 " : ""
+                  btn === "del" ? "text-pink-400" : ""
                 }`}
                 type="button"
                 key={btn}

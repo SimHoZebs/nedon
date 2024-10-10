@@ -5,6 +5,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator json {
+  provider = "prisma-json-types-generator"
+  // namespace = "PrismaJson"
+  // clientOutput = "<finds it automatically>"
+  // (./ -> relative to schema, or an importable path to require() it)
+}
+
 generator zod {
   provider                         = "zod-prisma-types"
   createOptionalDefaultValuesTypes = true
@@ -35,6 +42,8 @@ model User {
   ITEM_ID      String?
   TRANSFER_ID  String? // The transfer_id is only relevant for Transfer ACH product.
   PAYMENT_ID   String? // The payment_id is only relevant for the UK/EU Payment Initiation product.
+
+  cursor String? //tracker for transaction updates
 
   ownedTxArray Tx[] //transactions I own
   splitTxArray Split[] @relation("splitUserArray") //Splits I am included in
@@ -75,38 +84,16 @@ model Tx {
 
   receipt Receipt?
 
-  //Plaid's Transaction object
-  plaidId                            String   @unique //plaid tranasction_id
-  account_id                         String
-  amount                             Float
-  iso_currency_code                  String?
-  unofficial_currency_code           String?
-  category                           String[]
-  category_id                        String?
-  check_number                       String?
-  date                               String
-  name                               String
-  merchant_name                      String?
-  original_description               String?
-  pending                            Boolean
-  pending_transaction_id             String?
-  account_owner                      String?
-  transaction_id                     String
-  transaction_type                   String?
-  logo_url                           String?
-  website                            String?
-  authorized_date                    String?
-  authorized_datetime                String?
-  datetime                           String?
-  payment_channel                    String
-  transaction_code                   String? //TransactionCode enum
-  personal_finance_category_icon_url String?
-  counterparties                     String[]
-  merchant_entity_id                 String?
+  //duplicate fields from plaidTx because these are important enough to manipulate
+  plaidId   String @unique //plaid tranasction_id
+  name      String
+  amount    Float
+  date      String
+  datetime  String
+  accountId String
 
-  personal_finance_category Json? //PersonalFinanceCategory
-  location                  Json
-  payment_meta              Json
+  /// [PlaidTx]
+  plaidTx Json?
 }
 
 //Created for Bob when Alice splits their transaction with Bob.

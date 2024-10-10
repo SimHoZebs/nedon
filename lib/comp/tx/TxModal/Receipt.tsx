@@ -1,11 +1,17 @@
-import React from "react";
-import { useTxStore } from "@/util/txStore";
-import { trpc } from "@/util/trpc";
-import supabase from "server/supabaseClient";
 import Image from "next/image";
+import React from "react";
+import supabase from "server/supabaseClient";
+
 import { H3 } from "@/comp/Heading";
 import Input from "@/comp/Input";
-import { type FullTxClientSide, isFullTxInDB, type TxInDB } from "@/util/types";
+
+import { trpc } from "@/util/trpc";
+import { useTxStore } from "@/util/txStore";
+
+import { isTxInDB } from "@/types/tx";
+import { ActionBtn } from "@/comp/Button";
+import { createStructuredResponse } from "@/types/types";
+import type { PureReceiptWithChildren } from "@/types/receipt";
 
 const Receipt = () => {
   const tx = useTxStore((state) => state.txOnModal);
@@ -18,65 +24,88 @@ const Receipt = () => {
 
   const [receiptImg, setReceiptImg] = React.useState<File>();
   const [receiptImgURL, setReceiptImgURL] = React.useState<string>();
+  const [errorMsg, setErrorMsg] = React.useState<string>("");
+  const [progressMsg, setProgressMsg] = React.useState<string>("");
 
+  // returns boolean based on success
   const uploadAndProcess = async () => {
+    const sr = createStructuredResponse<PureReceiptWithChildren>({
+      success: false,
+      data: undefined,
+      clientMsg: "Error uploading receipt",
+      devMsg: "",
+    });
+
     if (!tx || !receiptImg) {
-      console.error("No transaction to upload receipt to");
-      return;
+      sr.devMsg = "No transaction to upload receipt to";
+      return sr;
     }
-    console.log("uploading receipt...");
+
+    setProgressMsg("Uploading receipt...");
     const uploadResponse = await supabase.storage
       .from("receipts")
       .upload(tx.name, receiptImg, { upsert: true });
     console.log("receipt uploaded");
+
     if (uploadResponse.error) {
       console.error("Error uploading image", uploadResponse.error);
-      return;
+      sr.clientMsg = `Error uploading image: ${uploadResponse.error}`;
+      sr.devMsg = "Error uploading image";
+      return sr;
     }
-    console.log("getting signed URL...");
+
+    setProgressMsg("Getting signed URL...");
     const signedUrlResponse = await supabase.storage
       .from("receipts")
       .createSignedUrl(tx.name, 60);
     console.log("signed URL received");
 
     if (signedUrlResponse.error || !signedUrlResponse.data.signedUrl) {
-      console.error("Error getting signed URL", signedUrlResponse.error);
-      return;
+      sr.devMsg = "Error getting signed URL";
+      return sr;
     }
 
-    console.log("processing receipt...");
+    setProgressMsg("Processing receipt...");
     const response = await processReceipt.mutateAsync({
       signedUrl: signedUrlResponse.data.signedUrl,
     });
 
+    if (
+      (response.data && !response.data.is_receipt) ||
+      processReceipt.isError
+    ) {
+      sr.clientMsg =
+        "Hmmm, this doesn't look like a receipt. If it is, try again with a clearer image.";
+      sr.devMsg = response.devMsg + processReceipt.error;
+      return sr;
+    }
+
     console.log("receipt processed");
 
-    const latestTx: FullTxClientSide | TxInDB = tx.id
-      ? tx
-      : await createTx.mutateAsync(tx);
+    const latestTx = tx.id ? tx : await createTx.mutateAsync(tx);
 
-    if (!response) {
-      console.error("Error processing receipt. response:", response);
-      return;
+    if (!response.data) return response;
+
+    setProgressMsg("Adding receipt to transaction...");
+
+    if (!isTxInDB(latestTx)) {
+      sr.devMsg = "latestTx is not FullTxInDB";
+      return sr;
     }
 
-    console.log("creating receipt...");
-
-    if (!isFullTxInDB(latestTx)) {
-      console.error("latestTx is not FullTxInDB", latestTx);
-      return;
-    }
     const createdReceipt = await createReceipt.mutateAsync({
       id: latestTx.id,
-      receipt: response,
+      receipt: response.data,
     });
-    console.log("receipt created", createdReceipt);
-
+    setProgressMsg("");
     refreshTxModalData({ ...latestTx, receipt: createdReceipt });
     queryClient.tx.getAll.invalidate();
 
     setReceiptImg(undefined);
     setReceiptImgURL(undefined);
+    sr.success = true;
+    sr.data = response.data;
+    return sr;
   };
 
   const receiptSum =
@@ -97,17 +126,32 @@ const Receipt = () => {
               console.error("No file uploaded.");
               return;
             }
+            setReceiptImg(undefined);
+            setReceiptImgURL(undefined);
+            setErrorMsg("");
             const img = e.target.files[0];
             setReceiptImg(img);
             setReceiptImgURL(URL.createObjectURL(img));
           }}
         />
       )}
-      {receiptImg && !tx?.receipt && (
-        <div className="flex">
-          <button type="button" onClick={uploadAndProcess}>
+      {(errorMsg || (receiptImg && !tx?.receipt)) && (
+        <div className="flex flex-col">
+          <ActionBtn
+            onClickAsync={async () => {
+              const result = await uploadAndProcess();
+              if (!result.success) {
+                setErrorMsg(result.clientMsg);
+                setProgressMsg("");
+              }
+              setReceiptImg(undefined);
+              setReceiptImgURL(undefined);
+            }}
+          >
             Upload
-          </button>
+          </ActionBtn>
+          <p className="text-red-400">{errorMsg}</p>
+          <p>{progressMsg}</p>
 
           {receiptImgURL && (
             <Image src={receiptImgURL} alt="" width={300} height={500} />

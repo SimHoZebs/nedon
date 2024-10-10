@@ -1,6 +1,6 @@
 import type { Group, User } from "@prisma/client";
 
-import type { GroupClientSide, UserClientSide } from "./types";
+import type { GroupClientSide, UserClientSide } from "@/types/types";
 
 export const emptyUser: UserClientSide = {
   id: "",
@@ -8,6 +8,7 @@ export const emptyUser: UserClientSide = {
   hasAccessToken: false,
   PUBLIC_TOKEN: null,
   ITEM_ID: null,
+  cursor: null,
   // The transfer_id is only relevant for Transfer ACH product.
   TRANSFER_ID: null,
   // The payment_id is only relevant for the UK/EU Payment Initiation product.

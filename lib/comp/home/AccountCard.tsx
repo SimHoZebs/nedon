@@ -14,7 +14,7 @@ const AccountCard = (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
       >
         {children}
       </button>
-      <div className="absolute left-1 top-1 h-full w-full bg-zinc-700"></div>
+      <div className="absolute left-1 top-1 h-full w-full bg-zinc-700" />
     </div>
   );
 };

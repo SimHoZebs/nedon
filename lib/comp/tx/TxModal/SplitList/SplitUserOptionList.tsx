@@ -4,9 +4,9 @@ import { Button } from "@/comp/Button";
 
 import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
-import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import type { SplitClientSide } from "@/util/types";
+
+import type { SplitClientSide } from "@/types/split";
 
 const SplitUserOptionList = () => {
   const { appUser } = getAppUser();

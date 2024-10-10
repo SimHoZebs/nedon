@@ -58,9 +58,9 @@ export const TransactionIsolationLevelSchema = z.enum(['ReadUncommitted','ReadCo
 
 export const GroupScalarFieldEnumSchema = z.enum(['id','ownerId']);
 
-export const UserScalarFieldEnumSchema = z.enum(['id','name','ACCESS_TOKEN','PUBLIC_TOKEN','ITEM_ID','TRANSFER_ID','PAYMENT_ID']);
+export const UserScalarFieldEnumSchema = z.enum(['id','name','ACCESS_TOKEN','PUBLIC_TOKEN','ITEM_ID','TRANSFER_ID','PAYMENT_ID','cursor']);
 
-export const TxScalarFieldEnumSchema = z.enum(['id','userId','userTotal','originTxId','plaidId','account_id','amount','iso_currency_code','unofficial_currency_code','category','category_id','check_number','date','name','merchant_name','original_description','pending','pending_transaction_id','account_owner','transaction_id','transaction_type','logo_url','website','authorized_date','authorized_datetime','datetime','payment_channel','transaction_code','personal_finance_category_icon_url','counterparties','merchant_entity_id','personal_finance_category','location','payment_meta']);
+export const TxScalarFieldEnumSchema = z.enum(['id','userId','userTotal','originTxId','plaidId','name','amount','date','datetime','accountId','plaidTx']);
 
 export const SplitScalarFieldEnumSchema = z.enum(['id','userId','amount','txId','originTxId']);
 
@@ -75,8 +75,6 @@ export const ReceiptItemScalarFieldEnumSchema = z.enum(['id','name','description
 export const SortOrderSchema = z.enum(['asc','desc']);
 
 export const NullableJsonNullValueInputSchema = z.enum(['DbNull','JsonNull',]).transform((value) => value === 'JsonNull' ? Prisma.JsonNull : value === 'DbNull' ? Prisma.DbNull : value);
-
-export const JsonNullValueInputSchema = z.enum(['JsonNull',]).transform((value) => (value === 'JsonNull' ? Prisma.JsonNull : value));
 
 export const QueryModeSchema = z.enum(['default','insensitive']);
 
@@ -149,6 +147,7 @@ export const UserSchema = z.object({
   ITEM_ID: z.string().nullable(),
   TRANSFER_ID: z.string().nullable(),
   PAYMENT_ID: z.string().nullable(),
+  cursor: z.string().nullable(),
 })
 
 export type User = z.infer<typeof UserSchema>
@@ -223,35 +222,15 @@ export const TxSchema = z.object({
   userTotal: z.number(),
   originTxId: z.string().nullable(),
   plaidId: z.string(),
-  account_id: z.string(),
-  amount: z.number(),
-  iso_currency_code: z.string().nullable(),
-  unofficial_currency_code: z.string().nullable(),
-  category: z.string().array(),
-  category_id: z.string().nullable(),
-  check_number: z.string().nullable(),
-  date: z.string(),
   name: z.string(),
-  merchant_name: z.string().nullable(),
-  original_description: z.string().nullable(),
-  pending: z.boolean(),
-  pending_transaction_id: z.string().nullable(),
-  account_owner: z.string().nullable(),
-  transaction_id: z.string(),
-  transaction_type: z.string().nullable(),
-  logo_url: z.string().nullable(),
-  website: z.string().nullable(),
-  authorized_date: z.string().nullable(),
-  authorized_datetime: z.string().nullable(),
-  datetime: z.string().nullable(),
-  payment_channel: z.string(),
-  transaction_code: z.string().nullable(),
-  personal_finance_category_icon_url: z.string().nullable(),
-  counterparties: z.string().array(),
-  merchant_entity_id: z.string().nullable(),
-  personal_finance_category: JsonValueSchema.nullable(),
-  location: JsonValueSchema,
-  payment_meta: JsonValueSchema,
+  amount: z.number(),
+  date: z.string(),
+  datetime: z.string(),
+  accountId: z.string(),
+  /**
+   * [PlaidTx]
+   */
+  plaidTx: JsonValueSchema.nullable(),
 })
 
 export type Tx = z.infer<typeof TxSchema>
@@ -278,8 +257,8 @@ export type TxRelations = {
   receipt?: ReceiptWithRelations | null;
 };
 
-export type TxWithRelations = Omit<z.infer<typeof TxSchema>, "personal_finance_category"> & {
-  personal_finance_category?: JsonValueType | null;
+export type TxWithRelations = Omit<z.infer<typeof TxSchema>, "plaidTx"> & {
+  plaidTx?: JsonValueType | null;
 } & TxRelations
 
 export const TxWithRelationsSchema: z.ZodType<TxWithRelations> = TxSchema.merge(z.object({
@@ -305,8 +284,8 @@ export type TxOptionalDefaultsRelations = {
   receipt?: ReceiptOptionalDefaultsWithRelations | null;
 };
 
-export type TxOptionalDefaultsWithRelations = Omit<z.infer<typeof TxOptionalDefaultsSchema>, "personal_finance_category"> & {
-  personal_finance_category?: JsonValueType | null;
+export type TxOptionalDefaultsWithRelations = Omit<z.infer<typeof TxOptionalDefaultsSchema>, "plaidTx"> & {
+  plaidTx?: JsonValueType | null;
 } & TxOptionalDefaultsRelations
 
 export const TxOptionalDefaultsWithRelationsSchema: z.ZodType<TxOptionalDefaultsWithRelations> = TxOptionalDefaultsSchema.merge(z.object({

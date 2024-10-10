@@ -7,17 +7,16 @@ import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import { type TxInDB, isFullTxInDB } from "@/util/types";
 
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
+import { isUnsavedTxInDB } from "@/types/tx";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   onAmountChange: (index: number, splitAmount: string) => void;
 }
 
 const SplitList = (props: Props) => {
-  const createTx = trpc.tx.create.useMutation();
   const updateTx = trpc.tx.update.useMutation();
   const deleteSplit = trpc.split.delete.useMutation();
   const queryClient = trpc.useUtils();
@@ -74,23 +73,14 @@ const SplitList = (props: Props) => {
         await deleteSplit.mutateAsync({ splitId: split.id });
     }
 
-    //if tx doesn't exist, create one
-    let txDBData: TxInDB;
-    if (!isFullTxInDB(tx)) {
-      txDBData = await createTx.mutateAsync({
-        userId: appUser.id,
-        plaidId: tx.plaidId,
-        userTotal: tx.amount,
-        originTxId: null,
-        catArray: tx.catArray,
-        splitArray: unsavedSplitArray,
-        receipt: null,
-      });
+    tx.splitArray = unsavedSplitArray;
+
+    if (!isUnsavedTxInDB(tx)) {
+      console.error("Can't update Tx if tx doesn't exist in db", tx);
+      return;
     }
-    //otherwise, update the tx
-    else {
-      txDBData = await updateTx.mutateAsync(tx);
-    }
+
+    const txDBData = await updateTx.mutateAsync(tx);
 
     refreshTxModalData(txDBData);
     queryClient.tx.invalidate();
@@ -104,13 +94,13 @@ const SplitList = (props: Props) => {
 
   return (
     <div className="flex w-full flex-col gap-y-3">
-      {(unsavedSplitArray.length > 1 || focusedIndex !== undefined) && (
+      {(unsavedSplitArray.length > 0 || focusedIndex !== undefined) && (
         <div className="flex flex-col gap-y-1">
-          <div className="flex w-full gap-x-2 px-3 ">
+          <div className="flex w-full gap-x-2 px-3">
             <H3>Split</H3>
 
             {isEditingSplit ? (
-              <div className="flex gap-x-2 ">
+              <div className="flex gap-x-2">
                 <ActionBtn
                   disabled={isWrongSplit}
                   onClickAsync={async () => {

@@ -2,14 +2,9 @@ import type { Cat, Split } from "@prisma/client";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-import { resetFullTx } from "./tx";
-import {
-  type CatClientSide,
-  type FullTxClientSide,
-  type SplitClientSide,
-  type TxInDB,
-  isSplitArrayInDB,
-} from "./types";
+import type { CatClientSide } from "@/types/cat";
+import { type SplitClientSide, isSplitArrayInDB } from "@/types/split";
+import type { TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
 
 /**
  * Tx depends on three forms of data:
@@ -20,8 +15,8 @@ import {
  *
  * */
 interface Store {
-  txOnModal: FullTxClientSide | undefined;
-  setTxOnModal: (tx?: FullTxClientSide) => void;
+  txOnModal: UnsavedTx | UnsavedTxInDB | TxInDB | null;
+  setTxOnModal: (tx: UnsavedTx | TxInDB) => void;
 
   /**
    * Only use this function when new data is expected from the database.
@@ -30,7 +25,7 @@ interface Store {
   refreshTxModalData: (tx: TxInDB | Split[] | Cat[]) => void;
 
   //only to reset tx to a state without a txInDB
-  resetTx: () => void;
+  //resetTx: () => void;
 
   //catArray
   hasEditedCatArray: boolean;
@@ -61,8 +56,8 @@ interface Store {
 export const useTxStore = create<Store>()(
   devtools(
     (set) => ({
-      txOnModal: undefined,
-      setTxOnModal: (transasction: FullTxClientSide | undefined) =>
+      txOnModal: null,
+      setTxOnModal: (transasction: UnsavedTx | TxInDB) =>
         set({ txOnModal: transasction }),
 
       refreshTxModalData: (dbData: TxInDB | Split[] | Cat[]) => {
@@ -97,18 +92,20 @@ export const useTxStore = create<Store>()(
           };
         });
       },
-
-      resetTx: () =>
-        set((store) => {
-          if (!store.txOnModal) return store;
-
-          const tx = resetFullTx(store.txOnModal);
-
-          return {
-            txOnModal: tx,
-            unsavedSplitArray: tx.splitArray,
-          };
-        }),
+      //
+      // resetTx: () =>
+      //   set((store) => {
+      //     if (!store.txOnModal) return store;
+      //
+      //     if (!isTxInDB(store.txOnModal)) return store;
+      //
+      //     const tx = resetTx(store.txOnModal);
+      //
+      //     return {
+      //       txOnModal: tx,
+      //       unsavedSplitArray: tx.splitArray,
+      //     };
+      //   }),
 
       hasEditedCatArray: false,
       setHasEditedCatArray: (hasEditedCatArray: boolean) =>

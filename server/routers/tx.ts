@@ -1,21 +1,62 @@
-import type {
-  RemovedTransaction,
-  Transaction,
-  TransactionsSyncRequest,
+import {
+  PlaidErrorType,
+  type RemovedTransaction,
+  type Transaction,
+  type TransactionsSyncRequest,
 } from "plaid";
 import { z } from "zod";
 
 import db from "@/util/db";
-import { convertToFullTx } from "@/util/tx";
+import { createTxFromPlaidTx, mergePlaidTxWithTx, resetTx } from "@/util/tx";
+
 import {
-  type FullTxClientSide,
-  FullTxSchema,
-  TxClientSideSchema,
   type TxInDB,
-} from "@/util/types";
+  TxInDBSchema,
+  type UnsavedTx,
+  UnsavedTxInDBSchema,
+  UnsavedTxSchema,
+} from "@/types/tx";
 
 import { procedure, router } from "../trpc";
 import { client } from "../util";
+
+const createTxInDB = async (txClientSide: UnsavedTx): Promise<TxInDB> => {
+  return await db.tx.create({
+    data: {
+      ...txClientSide,
+      plaidTx: txClientSide.plaidTx || undefined,
+      receipt: txClientSide.receipt
+        ? {
+            create: {
+              ...txClientSide.receipt,
+              items: {
+                createMany: { data: txClientSide.receipt.items },
+              },
+            },
+          }
+        : undefined,
+      splitArray: {
+        create: txClientSide.splitArray.map((split) => ({
+          ...split,
+        })),
+      },
+      catArray: {
+        create: txClientSide.catArray.map((cat) => ({
+          ...cat,
+        })),
+      },
+    },
+    include: {
+      catArray: true,
+      splitArray: true,
+      receipt: {
+        include: {
+          items: true,
+        },
+      },
+    },
+  });
+};
 
 const txRouter = router({
   getWithoutPlaid: procedure
@@ -42,65 +83,146 @@ const txRouter = router({
     }),
 
   getAll: procedure
-    .input(z.object({ id: z.string(), cursor: z.string().optional() }))
+    .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
-      const user = await db.user.findFirst({ where: { id: input.id } });
-      if (!user || !user.ACCESS_TOKEN) return null;
+      try {
+        const user = await db.user.findFirst({ where: { id: input.id } });
+        if (!user || !user.ACCESS_TOKEN) return null;
 
-      // New tx updates since "cursor"
-      let added: Transaction[] = [];
-      let modified: Transaction[] = [];
-      // Removed tx ids
-      let removed: RemovedTransaction[] = [];
-      let hasMore = true;
-      let cursor = input.cursor;
+        // New tx updates since "cursor"
+        let added: Transaction[] = [];
+        let modified: Transaction[] = [];
+        // Removed tx ids
+        let removed: RemovedTransaction[] = [];
+        let hasMore = true;
+        let cursor = user.cursor || undefined;
 
-      // Iterate through each page of new tx updates for item
-      while (hasMore) {
-        const request: TransactionsSyncRequest = {
-          access_token: user.ACCESS_TOKEN,
-          cursor: cursor,
-          count: 50,
-        };
+        // Iterate through each page of new tx updates for item
+        while (hasMore) {
+          const request: TransactionsSyncRequest = {
+            access_token: user.ACCESS_TOKEN,
+            cursor: cursor,
+            count: 50,
+          };
 
-        const response = await client.transactionsSync(request);
-        const data = response.data;
-        // Add this page of results
-        added = added.concat(data.added);
-        modified = modified.concat(data.modified);
-        removed = removed.concat(data.removed);
+          try {
+            const response = await client.transactionsSync(request);
+            const data = response.data;
+            // Add this page of results
+            added = added.concat(data.added);
+            modified = modified.concat(data.modified);
+            removed = removed.concat(data.removed);
 
-        // hasMore = data.has_more;
-        hasMore = false; //disabling fetch for over 100 txs
+            hasMore = data.has_more;
 
-        // Update cursor to the next cursor
-        cursor = data.next_cursor;
-      }
+            // Update cursor to the next cursor
+            cursor = data.next_cursor;
+          } catch (error) {
+            if (
+              // biome-ignore lint/suspicious/noExplicitAny: because fuck making types for stupid errors
+              (error as any).response.data.error_type ===
+              PlaidErrorType.TransactionError
+            ) {
+              console.log(
+                `${PlaidErrorType.TransactionError}, Resetting sync cursor`,
+              );
+              cursor = user.cursor || undefined;
+            } else {
+              console.log("Error in transactionsSync: ", error);
+              return null;
+            }
+          }
+        }
 
-      const txArray: TxInDB[] = await db.tx.findMany({
-        where: {
-          userId: user.id,
-        },
-        include: {
-          catArray: true,
-          splitArray: true,
-          receipt: {
-            include: {
-              items: true,
+        // update cursor in db asynchonously
+        db.user
+          .update({
+            where: { id: user.id },
+            data: { cursor: cursor },
+          })
+          .then();
+
+        // newly added txs gets created
+        //FUTURE: make this somehow asynchoronous so users don't have to wait for all txs to be added to see their existing tx
+        for (const plaidTx of added) {
+          const newTx = createTxFromPlaidTx(user.id, plaidTx);
+          await createTxInDB(newTx);
+        }
+
+        const txArray: TxInDB[] = await db.tx.findMany({
+          where: {
+            OR: [
+              { userId: user.id },
+              { splitArray: { some: { userId: user.id } } },
+            ],
+          },
+          include: {
+            catArray: true,
+            splitArray: true,
+            receipt: {
+              include: {
+                items: true,
+              },
             },
           },
-        },
-      });
+        });
 
-      const full: FullTxClientSide[] = added.map((plaidTx) => {
-        const matchingTx = txArray.find(
-          (tx) => tx.plaidId === plaidTx.transaction_id,
-        );
+        // modified txs gets updated and removed txs gets deleted
+        for (const plaidTx of modified) {
+          const matchingTxIndex = txArray.findIndex(
+            (tx) => tx.plaidId === plaidTx.transaction_id,
+          );
+          if (matchingTxIndex !== -1) {
+            console.log("Somehow there is no matching tx?");
+            const newTx = mergePlaidTxWithTx(txArray[matchingTxIndex], plaidTx);
+            createTxInDB(newTx).then();
+          } else {
+            const matchingTx = txArray[matchingTxIndex];
 
-        return convertToFullTx(user.id, plaidTx, matchingTx);
-      });
+            await db.tx.update({
+              where: {
+                id: matchingTx.id,
+              },
+              data: {
+                plaidId: matchingTx.plaidId,
+                catArray: {
+                  create: matchingTx.catArray.map((cat) => ({
+                    name: cat.name,
+                    nameArray: cat.nameArray,
+                    amount: cat.amount,
+                  })),
+                },
+                splitArray: {
+                  create: matchingTx.splitArray.map((split) => ({
+                    userId: split.userId,
+                    amount: split.amount,
+                  })),
+                },
+              },
+            });
+          }
+        }
 
-      return full;
+        for (const plaidTx of removed) {
+          const matchingTxIndex = txArray.findIndex(
+            (tx) => tx.plaidId === plaidTx.transaction_id,
+          );
+          if (matchingTxIndex !== -1) {
+            txArray.splice(matchingTxIndex, 1);
+            db.tx.delete({
+              where: {
+                id: txArray[matchingTxIndex].id,
+              },
+            });
+          }
+        }
+
+        return txArray;
+      } catch (error) {
+        console.log(error);
+        console.log("Input: ", input);
+        return null;
+      }
     }),
 
   //all tx meta including the user
@@ -130,45 +252,17 @@ const txRouter = router({
       });
     }),
 
-  create: procedure.input(TxClientSideSchema).mutation(async ({ input }) => {
-    const data = {
-      plaidId: input.plaidId,
-      userId: input.userId,
-      userTotal: input.userTotal,
-    };
-
-    const tx = await db.tx.create({
-      data: {
-        ...data,
-        catArray: {
-          create: input.catArray.map((cat) => ({
-            name: cat.name,
-            nameArray: cat.nameArray,
-            amount: cat.amount,
-          })),
-        },
-        splitArray: {
-          create: input.splitArray.map((split) => ({
-            userId: split.userId,
-            amount: split.amount,
-          })),
-        },
-      },
-      include: {
-        catArray: true,
-        splitArray: true,
-        receipt: {
-          include: {
-            items: true,
-          },
-        },
-      },
-    });
-
-    return tx;
+  create: procedure.input(UnsavedTxSchema).mutation(async ({ input }) => {
+    return await createTxInDB(input);
   }),
 
-  update: procedure.input(FullTxSchema).mutation(async ({ input }) => {
+  update: procedure.input(UnsavedTxInDBSchema).mutation(async ({ input }) => {
+    const catToCreate = input.catArray.filter((cat) => !cat.id);
+    const catToUpdate = input.catArray.filter((cat) => cat.id);
+    const splitToCreate = input.splitArray.filter((split) => !split.id);
+    const splitToUpdate = input.splitArray.filter((split) => split.id);
+    console.log("input", input);
+
     const tx = await db.tx.update({
       where: {
         id: input.id,
@@ -176,16 +270,36 @@ const txRouter = router({
       data: {
         plaidId: input.plaidId,
         catArray: {
-          create: input.catArray.map((cat) => ({
-            name: cat.name,
-            nameArray: cat.nameArray,
-            amount: cat.amount,
+          createMany: {
+            data: catToCreate.map((cat) => ({
+              name: cat.name,
+              nameArray: cat.nameArray,
+              amount: cat.amount,
+            })),
+          },
+          updateMany: catToUpdate.map((cat) => ({
+            where: { id: cat.id },
+            data: {
+              name: cat.name,
+              nameArray: cat.nameArray,
+              amount: cat.amount,
+            },
           })),
         },
+
         splitArray: {
-          create: input.splitArray.map((split) => ({
-            userId: split.userId,
-            amount: split.amount,
+          createMany: {
+            data: splitToCreate.map((split) => ({
+              userId: split.userId,
+              amount: split.amount,
+            })),
+          },
+          updateMany: splitToUpdate.map((split) => ({
+            where: { id: split.id },
+            data: {
+              userId: split.userId,
+              amount: split.amount,
+            },
           })),
         },
       },
@@ -203,29 +317,62 @@ const txRouter = router({
     return tx;
   }),
 
-  //createMeta could've been modified instead but this avoids accidentally missing txId for Plaid txs.
-  createManually: procedure
-    .input(TxClientSideSchema)
-    .mutation(async ({ input }) => {
-      const tx = await db.tx.create({
-        data: {
-          plaidId: input.plaidId,
-          userTotal: input.userTotal,
-          user: {
-            connect: {
-              id: input.userId,
-            },
-          },
-          splitArray: {
-            create: input.splitArray.map((split) => ({
-              ...split,
-            })),
+  reset: procedure.input(TxInDBSchema).mutation(async ({ input }) => {
+    const newTx = resetTx(input);
+
+    await db.tx.update({
+      where: {
+        id: input.id,
+      },
+      data: {
+        plaidId: newTx.plaidId,
+        catArray: {
+          deleteMany: {},
+        },
+        splitArray: {
+          deleteMany: {},
+        },
+        receipt: {
+          delete: {},
+        },
+      },
+    });
+
+    const createCat = db.cat.create({
+      data: {
+        name: newTx.catArray[0].name,
+        nameArray: newTx.catArray[0].nameArray,
+        amount: newTx.catArray[0].amount,
+        txId: input.id,
+      },
+    });
+
+    const createSplit = db.split.create({
+      data: {
+        userId: newTx.splitArray[0].userId,
+        amount: newTx.splitArray[0].amount,
+        txId: input.id,
+        originTxId: input.id,
+      },
+    });
+
+    await db.$transaction([createCat, createSplit]);
+
+    return await db.tx.findUnique({
+      where: {
+        id: input.id,
+      },
+      include: {
+        catArray: true,
+        splitArray: true,
+        receipt: {
+          include: {
+            items: true,
           },
         },
-      });
-
-      return tx;
-    }),
+      },
+    });
+  }),
 
   delete: procedure
     .input(z.object({ id: z.string() }))

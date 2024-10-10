@@ -1,9 +1,14 @@
-import { type Split, SplitOptionalDefaultsSchema } from "prisma/generated/zod";
+import {
+  type Split,
+  SplitOptionalDefaultsSchema,
+  SplitSchema,
+} from "prisma/generated/zod";
 import { z } from "zod";
 
 import db from "@/util/db";
 
 import { procedure, router } from "../trpc";
+import { isSplitArrayInDB } from "@/types/split";
 
 const splitRouter = router({
   create: procedure
@@ -89,6 +94,28 @@ const splitRouter = router({
           id: input.splitId,
         },
       });
+    }),
+
+  deleteMany: procedure
+    .input(z.union([z.array(z.string()), z.array(SplitSchema)]))
+    .mutation(async ({ input }) => {
+      if (isSplitArrayInDB(input)) {
+        await db.split.deleteMany({
+          where: {
+            id: {
+              in: input.map((split) => split.id),
+            },
+          },
+        });
+      } else {
+        await db.split.deleteMany({
+          where: {
+            id: {
+              in: input,
+            },
+          },
+        });
+      }
     }),
 });
 

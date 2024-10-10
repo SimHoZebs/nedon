@@ -1,13 +1,17 @@
-import { z } from "zod";
-import { procedure, router } from "../trpc";
-import {
-  PureReceiptWithChildrenSchema,
-  type ReceiptOptionalDefaultsWithChildren,
-  ReceiptOptionalDefaultsWithChildrenSchema,
-} from "@/types/receipt";
-import db from "@/util/db";
 import { imgAnnotator } from "server/gcloudClient";
 import openai from "server/openaiClient";
+import { z } from "zod";
+
+import db from "@/util/db";
+
+import {
+  type PureReceiptWithChildren,
+  PureReceiptWithChildrenSchema,
+  ReceiptOptionalDefaultsWithChildrenSchema,
+} from "@/types/receipt";
+
+import { procedure, router } from "../trpc";
+import { createStructuredResponse } from "@/types/types";
 
 const receiptRouter = router({
   create: procedure
@@ -49,59 +53,109 @@ const receiptRouter = router({
   process: procedure
     .input(z.object({ signedUrl: z.string() }))
     .mutation(async ({ input }) => {
-      const [result] = await imgAnnotator.textDetection(input.signedUrl);
-
-      const textAnnotationArray = result.textAnnotations;
-      if (!textAnnotationArray || textAnnotationArray.length < 0) {
-        console.error(
-          "No text annotations found. textAnnotationArray:",
-          textAnnotationArray,
-        );
-        return null;
-      }
-
-      const thread = await openai.beta.threads.create();
-
-      await openai.beta.threads.messages.create(thread.id, {
-        role: "user",
-        content: textAnnotationArray[0].description || "",
+      const sr = createStructuredResponse<PureReceiptWithChildren>({
+        success: false,
+        data: undefined,
+        clientMsg:
+          "We received your image, but failed to process it. It is either not a receipt or we failed to recognize it. Try again with the same or clearer image or contact support.",
+        devMsg: "",
       });
 
-      const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
-        assistant_id: "asst_ThX4O8JDzBsGV7BO43RA3FVE",
-      });
-
-      if (run.status !== "completed") {
-        console.error("Run failed", run);
-        return null;
-      }
-
-      const message = (await openai.beta.threads.messages.list(run.thread_id))
-        .data[0];
-
-      if (message.content[0].type !== "text") return null;
       try {
-        const receipt = JSON.parse(message.content[0].text.value);
+        const [result] = await imgAnnotator.textDetection(input.signedUrl);
 
-        const parsedReceipt = PureReceiptWithChildrenSchema.safeParse(receipt);
+        const textAnnotationArray = result.textAnnotations;
+        if (!textAnnotationArray || textAnnotationArray.length < 0) {
+          console.error(
+            "No text annotations found. textAnnotationArray:",
+            textAnnotationArray,
+          );
+          sr.clientMsg =
+            "We received your image, but we found no text on it. Try again with a clearer image or contact support.";
+          sr.devMsg = JSON.stringify(textAnnotationArray, null, 2);
+          console.error(sr);
+          return sr;
+        }
 
-        if (parsedReceipt.success) return parsedReceipt.data;
+        const thread = await openai.beta.threads.create();
 
-        console.error(
-          "Receipt parse failed",
-          JSON.stringify(parsedReceipt.error, null, 2),
-        );
+        await openai.beta.threads.messages.create(thread.id, {
+          role: "user",
+          content: textAnnotationArray[0].description || "",
+        });
 
-        //Rarely, the receipt is in a different shape.
-        if ("properties" in receipt)
-          return receipt.properties as PureReceiptWithChildrenSchema;
+        const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
+          assistant_id: "asst_ThX4O8JDzBsGV7BO43RA3FVE",
+        });
 
-        //Hopefully this never happens
-        console.error("Unrecognized JSON shape.", receipt);
-        return null;
+        if (run.status !== "completed") {
+          console.error("Run failed", run);
+          sr.clientMsg =
+            "We received your image, but failed to process it. The error seems to be on us. Try again or contact support.";
+          sr.devMsg = `openai failed run. ${JSON.stringify(run, null, 2)}`;
+          console.error(sr);
+          return sr;
+        }
+
+        const message = (await openai.beta.threads.messages.list(run.thread_id))
+          .data[0];
+
+        if (message.content[0].type !== "text") {
+          sr.clientMsg =
+            "We received your image, but found no text on it. Try again with a clearer image or contact support.";
+          sr.devMsg = JSON.stringify(message, null, 2);
+
+          console.error(sr);
+          return sr;
+        }
+
+        try {
+          const receipt = JSON.parse(message.content[0].text.value);
+
+          const parsedReceipt =
+            PureReceiptWithChildrenSchema.safeParse(receipt);
+
+          if (parsedReceipt.success) {
+            sr.success = true;
+            sr.data = parsedReceipt.data;
+            sr.clientMsg = "Receipt processed successfully.";
+            sr.devMsg = "";
+            return sr;
+          }
+
+          //Rarely, the receipt is in a different shape.
+          if ("properties" in receipt) {
+            sr.success = true;
+            sr.data = receipt.properties as PureReceiptWithChildren;
+            sr.clientMsg = "Receipt processed successfully.";
+            sr.devMsg = "";
+          }
+
+          if (parsedReceipt.error) {
+            sr.devMsg = `Receipt parsing failed ${JSON.stringify(parsedReceipt.error, null, 2)}`;
+            console.error(sr);
+            return sr;
+          }
+
+          //Hopefully this never happens
+          sr.devMsg = `Unrecognized JSON shape: ${JSON.stringify(receipt, null, 2)}`;
+          console.error(sr);
+          return sr;
+        } catch (e) {
+          console.error("JSON.parse failed", e);
+          sr.devMsg = JSON.stringify(e, null, 2);
+          console.error(sr);
+          return sr;
+        }
       } catch (e) {
-        console.error("JSON.parse failed", e);
-        return null;
+        console.error("Error processing receipt", e);
+        if (e instanceof Error) {
+          sr.devMsg = e.message;
+        } else if (typeof e === "string") {
+          sr.devMsg = e;
+        }
+        console.error(sr);
+        return sr;
       }
     }),
 });

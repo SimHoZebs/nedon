@@ -44,7 +44,7 @@ const DateRangePicker = (props: Props) => {
 
   return (
     props.date && (
-      <div className="flex items-center ">
+      <div className="flex items-center">
         <Button
           onClick={() => {
             handleRangeChange(-1);

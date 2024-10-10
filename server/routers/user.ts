@@ -3,8 +3,9 @@ import { UserSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 import db from "@/util/db";
-import { type UserClientSide, UserClientSideSchema } from "@/util/types";
 import { stripUserSecrets } from "@/util/user";
+
+import { type UserClientSide, UserClientSideSchema } from "@/types/types";
 
 import { procedure, router } from "../trpc";
 import { PLAID_PRODUCTS } from "../util";

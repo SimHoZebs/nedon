@@ -2,10 +2,11 @@ import React, { useRef, useState } from "react";
 
 import { ActionBtn, Button } from "@/comp/Button";
 
-import { emptyCat } from "@/util/cat";
+import { createNewCat } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import type { CatClientSide } from "@/util/types";
+
+import type { CatClientSide } from "@/types/cat";
 
 import CatChip from "./CatChip";
 import CatPicker from "./CatPicker";
@@ -13,18 +14,20 @@ import CatPicker from "./CatPicker";
 const offScreen = { x: -800, y: -800 };
 
 const Cat = () => {
+  const queryClient = trpc.useUtils();
   const setUnsavedCatArray = useTxStore((state) => state.setUnsavedCatArray);
   const tx = useTxStore((state) => state.txOnModal);
   const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);
   const catPickerRef = useRef<HTMLDivElement>(null);
-  const upsertManyCat = trpc.cat.upsertMany.useMutation();
+  const upsertManyCat = trpc.cat.upsertMany.useMutation({
+    async onMutate({ txId, catArray }) {},
+  });
 
   const unsavedCatArray = useTxStore((state) => state.unsavedCatArray);
 
   //Indicator for if (undefined) and which (number) cat is being edited. 'if' is needed for CatChip.tsx to highlight the editing cat.
   const [editingCatIndex, setEditingMergedCatIndex] = useState<number>();
   const [isManaging, setIsManaging] = useState(false);
-  const queryClient = trpc.useUtils();
 
   //Picker always exists; Modal.tsx hides it with overflow-hidden
   const [pickerPosition, setPickerPosition] = useState<{
@@ -35,7 +38,7 @@ const Cat = () => {
   return (
     <div className="flex gap-y-1">
       <div className="flex flex-col gap-y-1">
-        <div className="relative flex w-full flex-wrap items-center gap-2 ">
+        <div className="relative flex w-full flex-wrap items-center gap-2">
           {unsavedCatArray?.map((cat, index) => (
             <CatChip
               key={cat.id}
@@ -77,7 +80,9 @@ const Cat = () => {
                 structuredClone(unsavedCatArray);
 
               //add a new cat
-              tmpCatArray.push(emptyCat({ amount: 0, txId: tx?.id }));
+              tmpCatArray.push(
+                createNewCat({ amount: 0, txId: tx?.id, nameArray: [] }),
+              );
 
               setUnsavedCatArray(tmpCatArray);
 

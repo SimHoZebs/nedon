@@ -1,14 +1,17 @@
-import type { Transaction } from "plaid";
+import type { SplitClientSide } from "@/types/split";
 
-import type { SplitClientSide } from "./types";
-
+//Q. In what scenario would a split be created without a txId?
+//A. When new txs are found from plaid, they are converted to txs and splits are created for them.
+//The txId is not known at this point, so the txId is set to null.
+//The txId is set when the tx is created in the db.
 export const createNewSplit = (
   userId: string,
-  plaidTx: Transaction,
+  amount: number,
+  txId?: string,
 ): SplitClientSide => {
   return {
-    userId: userId,
-    txId: null,
-    amount: plaidTx.amount,
+    userId,
+    txId: txId || null,
+    amount,
   };
 };
