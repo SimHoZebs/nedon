@@ -1,3 +1,4 @@
-!*.ignore
+!*.*ignore
 !*.env
 !*.env.prod
+!.*.json

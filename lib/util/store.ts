@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
+import type { TxInDB } from "@/types/tx";
 import type { GroupClientSide, UserClientSide } from "@/types/types";
-import { TxInDB } from "@/types/tx";
 
 export const useLocalStoreDelay = <T, F>(
   store: (callback: (state: T) => unknown) => unknown,
@@ -78,7 +78,7 @@ export const useStore = create<Store>()(
         set({ verticalCatPicker }),
 
       txOragnizedByTimeArray: [],
-      setTxOragnizedByTimeArray: (txOragnizedByTimeArray: string[]) =>
+      setTxOragnizedByTimeArray: (txOragnizedByTimeArray) =>
         set({ txOragnizedByTimeArray }),
     }),
 
