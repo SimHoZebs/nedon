@@ -48,7 +48,7 @@ const DateSortedTxList = (props: Props) => {
                   key={Math.random() * (k + 1)}
                 >
                   <H3>{day[0]?.date.slice(8)}</H3>
-                  <ol className="flex flex-col gap-y-3">
+                  <ol className="flex flex-col ">
                     {day.length === 0 ? (
                       <div>
                         No tx this month! That{"'"}s a good thing, right?

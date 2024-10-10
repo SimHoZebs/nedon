@@ -51,7 +51,7 @@ const LineGraph = (props: Props) => {
   );
 
   return (
-    <div className="h-64 w-full rounded-lg bg-zinc-800 pr-4 pt-2 text-xs">
+    <div className="h-64 w-full relative pr-4 pt-2 text-xs">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={dailyTxSumArray}>
           <XAxis dataKey="date" />
