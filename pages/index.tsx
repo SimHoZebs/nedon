@@ -3,7 +3,7 @@ import type { NextPage } from "next";
 import type { AccountBase, AuthGetResponse } from "plaid";
 import React, { useRef, useState } from "react";
 
-import { H1, H2 } from "@/comp/Heading";
+import { H1, H2, H3 } from "@/comp/Heading";
 import AccountCard from "@/comp/home/AccountCard";
 import AccountModal from "@/comp/home/AccountModal";
 
@@ -25,10 +25,13 @@ const User: NextPage = () => {
     <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700" />,
   );
 
+  const total = auth.data?.accounts.reduce((current, account) => {
+    account.balances.available && (current += account.balances.available);
+    return current;
+  }, 0);
+
   return (
     <section className="flex h-full w-full flex-col items-center gap-y-3">
-      <H2>All Accounts</H2>
-
       {showModal && (
         <motion.div
           className="absolute left-0 top-0 z-[11] h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
@@ -51,10 +54,16 @@ const User: NextPage = () => {
         )}
       </AnimatePresence>
 
-      <div className="flex w-full max-w-md flex-col gap-y-3">
+      <div className="flex items-center w-full max-w-md flex-col gap-y-3">
+        <H2>All Accounts</H2>
+
+        <div className="flex w-full">
+          <H3>Total: ${total}</H3>
+        </div>
+
         {auth.fetchStatus === "idle" && auth.status !== "pending" ? (
           auth.data ? (
-            (auth.data as unknown as AuthGetResponse).accounts.map(
+            auth.data.accounts.map(
               (account) =>
                 account.balances.available && (
                   <AccountCard
