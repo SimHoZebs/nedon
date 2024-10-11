@@ -127,7 +127,8 @@ export const organizeTxByTime = (txArray: TxInDB[]) => {
       lastDate = date;
     }
 
-    //other indexs are resetted because the other ifs are guaranteed to be true.
+    //other indexs are resetted because if one if statement is true,
+    //the following ifs are expected to be true as well and adjust the indexs accordingly.
     if (lastDate.getFullYear() !== date.getFullYear()) {
       yearIndex++;
       monthIndex = -1;
@@ -139,6 +140,17 @@ export const organizeTxByTime = (txArray: TxInDB[]) => {
       txOrganizedByTimeArray[yearIndex][monthIndex] = [];
     }
     if (lastDate.getDate() !== date.getDate()) {
+      dateIndex++;
+      txOrganizedByTimeArray[yearIndex][monthIndex][dateIndex] = [];
+    }
+
+    //fallback for when year differs but month somehow matches.
+    if (monthIndex === -1) {
+      monthIndex++;
+      txOrganizedByTimeArray[yearIndex][monthIndex] = [];
+    }
+    //fallback for when month differs but date somehow matches.
+    if (dateIndex === -1) {
       dateIndex++;
       txOrganizedByTimeArray[yearIndex][monthIndex][dateIndex] = [];
     }
