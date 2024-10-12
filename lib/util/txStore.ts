@@ -4,12 +4,9 @@ import { devtools } from "zustand/middleware";
 
 import type { CatClientSide } from "@/types/cat";
 import { type SplitClientSide, isSplitArrayInDB } from "@/types/split";
-import {
-  isTxInDB,
-  type TxInDB,
-  type UnsavedTx,
-  type UnsavedTxInDB,
-} from "@/types/tx";
+import type { TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
+
+import { useStore } from "./store";
 
 /**
  * Tx depends on three forms of data:
@@ -20,10 +17,15 @@ import {
  *
  * */
 interface Store {
+  txOnModalIndex: number[] | null;
+  setTxOnModalIndex: (index: number[] | null) => void;
+
   txOnModal: UnsavedTx | UnsavedTxInDB | TxInDB | null;
   setTxOnModal: (tx: UnsavedTx | TxInDB) => void;
 
-  setSplitOnModal: (splitArray: Split[]) => void;
+  setSplitArray: (splitArray: SplitClientSide[]) => void;
+  setCatArray: (catArray: CatClientSide[]) => void;
+
   /**
    * Only use this function when new data is expected from the database.
    * Refreshes client data with database data after it processed client's update.
@@ -31,18 +33,11 @@ interface Store {
   refreshTxModalData: (tx: TxInDB | Split[] | Cat[]) => void;
 
   //only to reset tx to a state without a txInDB
-  //resetTx: () => void;
+  resetTx: () => void;
 
   //catArray
   hasEditedCatArray: boolean;
   setHasEditedCatArray: (hasEditedCatArray: boolean) => void;
-
-  unsavedCatArray: CatClientSide[];
-  setUnsavedCatArray: (catArray: CatClientSide[]) => void;
-
-  //splitArray
-  unsavedSplitArray: SplitClientSide[];
-  setUnsavedSplitArray: (splitArray: SplitClientSide[]) => void;
 
   isEditingSplit: boolean;
   setIsEditingSplit: (isEditingSplit: boolean) => void;
@@ -62,23 +57,37 @@ interface Store {
 export const useTxStore = create<Store>()(
   devtools(
     (set) => ({
-      txOnModal: null,
-      setTxOnModal: (transasction: UnsavedTx | TxInDB) =>
-        set({ txOnModal: transasction }),
+      txOnModalIndex: null,
+      setTxOnModalIndex: (index) => set({ txOnModalIndex: index }),
 
-      setSplitOnModal: (splitArray: Split[]) => {
+      txOnModal: null,
+      setTxOnModal: (tx) => set({ txOnModal: tx }),
+
+      setSplitArray: (splitArray) => {
         set((store) => {
           if (!store.txOnModal) return store;
 
           const clone = structuredClone(store.txOnModal);
-          if (!isTxInDB(clone)) return store;
-
-          const tx = clone as TxInDB;
 
           return {
             txOnModal: {
-              ...tx,
+              ...clone,
               splitArray: splitArray,
+            },
+          };
+        });
+      },
+
+      setCatArray: (catArray) => {
+        set((store) => {
+          if (!store.txOnModal) return store;
+
+          const clone = structuredClone(store.txOnModal);
+
+          return {
+            txOnModal: {
+              ...clone,
+              catArray: catArray,
             },
           };
         });
@@ -116,32 +125,24 @@ export const useTxStore = create<Store>()(
           };
         });
       },
-      //
-      // resetTx: () =>
-      //   set((store) => {
-      //     if (!store.txOnModal) return store;
-      //
-      //     if (!isTxInDB(store.txOnModal)) return store;
-      //
-      //     const tx = resetTx(store.txOnModal);
-      //
-      //     return {
-      //       txOnModal: tx,
-      //       unsavedSplitArray: tx.splitArray,
-      //     };
-      //   }),
+
+      resetTx: () =>
+        set((store) => {
+          if (!store.txOnModalIndex) return store;
+          const [y, m, d, i] = store.txOnModalIndex;
+
+          const txOrganizedByTimeArray =
+            useStore.getState().txOragnizedByTimeArray;
+          return {
+            txOnModal: store.txOnModal
+              ? txOrganizedByTimeArray[y][m][d][i]
+              : null,
+          };
+        }),
 
       hasEditedCatArray: false,
       setHasEditedCatArray: (hasEditedCatArray: boolean) =>
         set({ hasEditedCatArray: hasEditedCatArray }),
-
-      unsavedCatArray: [],
-      setUnsavedCatArray: (catArray: CatClientSide[]) =>
-        set({ unsavedCatArray: catArray }),
-
-      unsavedSplitArray: [],
-      setUnsavedSplitArray: (splitArray: SplitClientSide[]) =>
-        set({ unsavedSplitArray: splitArray }),
 
       editedSplitIndexArray: [],
       setEditedSplitIndexArray: (

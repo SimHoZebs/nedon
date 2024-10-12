@@ -8,9 +8,10 @@ import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
+import { isUnsavedTxInDB } from "@/types/tx";
+
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
-import { isUnsavedTxInDB } from "@/types/tx";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   onAmountChange: (index: number, splitAmount: string) => void;
@@ -20,17 +21,14 @@ const SplitList = (props: Props) => {
   const updateTx = trpc.tx.update.useMutation();
   const deleteSplit = trpc.split.delete.useMutation();
   const queryClient = trpc.useUtils();
+  const resetTx = useTxStore((state) => state.resetTx);
 
   const { appUser } = getAppUser();
   const isEditingSplit = useTxStore((state) => state.isEditingSplit);
   const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
   const tx = useTxStore((state) => state.txOnModal);
   const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);
-  const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
-  const setUnsavedSplitArray = useTxStore(
-    (state) => state.setUnsavedSplitArray,
-  );
-  const setUnsavedCatArray = useTxStore((state) => state.setUnsavedCatArray);
+  const setCatArray = useTxStore((state) => state.setCatArray);
   const splitAmountDisplayArray = useTxStore(
     (state) => state.splitAmountDisplayArray,
   );
@@ -51,12 +49,13 @@ const SplitList = (props: Props) => {
 
   const txAmount = tx?.amount || 0;
 
+  const splitArray = tx?.splitArray || [];
+
   const updatedSplitAmount = parseMoney(
-    unsavedSplitArray.reduce((amount, split) => amount + split.amount, 0),
+    splitArray.reduce((amount, split) => amount + split.amount, 0),
   );
 
-  const isWrongSplit =
-    updatedSplitAmount !== txAmount && unsavedSplitArray.length > 0;
+  const isWrongSplit = updatedSplitAmount !== txAmount && splitArray.length > 0;
 
   const syncSplit = async () => {
     if (!appUser || !tx) {
@@ -64,16 +63,16 @@ const SplitList = (props: Props) => {
       return;
     }
 
-    //delete splits that are not in unsavedSplitArray
+    //delete splits that are not in splitArray
     for (const split of tx.splitArray) {
       if (
         split.id &&
-        !unsavedSplitArray.find((unsavedSplit) => unsavedSplit.id === split.id)
+        !splitArray.find((unsavedSplit) => unsavedSplit.id === split.id)
       )
         await deleteSplit.mutateAsync({ splitId: split.id });
     }
 
-    tx.splitArray = unsavedSplitArray;
+    tx.splitArray = splitArray;
 
     if (!isUnsavedTxInDB(tx)) {
       console.error("Can't update Tx if tx doesn't exist in db", tx);
@@ -94,7 +93,7 @@ const SplitList = (props: Props) => {
 
   return (
     <div className="flex w-full flex-col gap-y-3">
-      {(unsavedSplitArray.length > 0 || focusedIndex !== undefined) && (
+      {(splitArray.length > 0 || focusedIndex !== undefined) && (
         <div className="flex flex-col gap-y-1">
           <div className="flex w-full gap-x-2 px-3">
             <H3>Split</H3>
@@ -119,8 +118,8 @@ const SplitList = (props: Props) => {
                       console.error("Can't reset splitArray. tx is undefined");
                       return;
                     }
-                    setUnsavedSplitArray(tx.splitArray);
-                    setUnsavedCatArray(tx.catArray);
+                    resetTx();
+                    setCatArray(tx.catArray);
                     const splitAmountArray = tx.splitArray.map((split) =>
                       split.amount.toString(),
                     );
@@ -143,7 +142,7 @@ const SplitList = (props: Props) => {
 
           <p
             className={`h-5 text-red-800 ${
-              updatedSplitAmount !== txAmount && unsavedSplitArray.length > 0
+              updatedSplitAmount !== txAmount && splitArray.length > 0
                 ? ""
                 : "hidden"
             }`}
@@ -155,7 +154,7 @@ const SplitList = (props: Props) => {
           </p>
 
           <div className="flex flex-col gap-y-1 px-3 md:w-fit">
-            {unsavedSplitArray.map((split, i) => (
+            {splitArray.map((split, i) => (
               <div
                 key={split.id}
                 className="flex w-full items-center gap-x-2 sm:gap-x-3"
@@ -181,7 +180,7 @@ const SplitList = (props: Props) => {
             ))}
           </div>
 
-          {focusedIndex !== undefined && unsavedSplitArray.length > 1 && (
+          {focusedIndex !== undefined && splitArray.length > 1 && (
             <div className="flex items-center gap-x-4 px-2">
               <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
                 split evenly

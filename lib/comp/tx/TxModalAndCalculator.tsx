@@ -15,8 +15,7 @@ interface Props {
 }
 
 const TxModalAndCalculator = (props: Props) => {
-  const unsavedSplitArray = useTxStore((s) => s.unsavedSplitArray);
-  const setUnsavedSplitArray = useTxStore((s) => s.setUnsavedSplitArray);
+  const setSplitArray = useTxStore((s) => s.setSplitArray);
   const splitAmountDisplayArray = useTxStore((s) => s.splitAmountDisplayArray);
   const setSpiltAmountDisplayArray = useTxStore(
     (s) => s.setSplitAmountDisplayArray,
@@ -24,16 +23,17 @@ const TxModalAndCalculator = (props: Props) => {
   const isEditingSplit = useTxStore((s) => s.isEditingSplit);
   const editedSplitIndexArray = useTxStore((s) => s.editedSplitIndexArray);
   const hasEditedCatArray = useTxStore((s) => s.hasEditedCatArray);
-  const unsavedCatArray = useTxStore((s) => s.unsavedCatArray);
   const focusedSplitIndex = useTxStore((state) => state.focusedSplitIndex);
   const tx = useTxStore((state) => state.txOnModal);
   const txAmount = tx?.amount || 0;
+  const catArray = tx?.catArray || [];
+  const splitArray = tx?.splitArray || [];
   const [isCalcHidden, setIsCalcHidden] = React.useState(false);
   const screenType = useStore((s) => s.screenType);
 
   //Changes a user's split amount and balances
   const changeSplitAmount = (index: number, newAmount: number) => {
-    const updatedSplitArray = structuredClone(unsavedSplitArray);
+    const updatedSplitArray = structuredClone(splitArray);
 
     const newAmountFloored = Math.max(Math.min(newAmount, txAmount), 0);
 
@@ -60,7 +60,7 @@ const TxModalAndCalculator = (props: Props) => {
 
     // include tx.user's if needed
     if (hasEditedCatArray) {
-      editedSplitAmountTotal += unsavedCatArray.reduce(
+      editedSplitAmountTotal += catArray.reduce(
         (acc, cat) => acc + cat.amount,
         0,
       );
@@ -78,7 +78,7 @@ const TxModalAndCalculator = (props: Props) => {
       }
     });
 
-    setUnsavedSplitArray(updatedSplitArray);
+    setSplitArray(updatedSplitArray);
     const updatedSplitAmountDisplayArray = updatedSplitArray.map((split) =>
       split.amount.toString(),
     );

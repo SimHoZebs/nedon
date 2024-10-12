@@ -42,8 +42,8 @@ const Page: NextPage = () => {
       return;
     }
 
-    const [y, m, d] = getScopeIndex(txOragnizedByTimeArray, date, rangeFormat);
-    setYMD([y, m, d]);
+    const ymd = getScopeIndex(txOragnizedByTimeArray, date, rangeFormat);
+    setYMD(ymd);
   }, [date, rangeFormat, txArray.data, txArray.status, txOragnizedByTimeArray]);
 
   const sortedTxArray = useMemo(() => {
@@ -103,7 +103,10 @@ const Page: NextPage = () => {
             + transaction
           </ActionBtn>
         </div>
+
         <DateSortedTxList
+          YMD={YMD}
+          rangeFormat={rangeFormat}
           setShowModal={setShowModal}
           sortedTxArray={sortedTxArray}
         />

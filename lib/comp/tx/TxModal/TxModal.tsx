@@ -10,10 +10,11 @@ import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
+import { isTxInDB } from "@/types/tx";
+
 import Cat from "./Cat/Cat";
 import Receipt from "./Receipt";
 import SplitList from "./SplitList/SplitList";
-import { isTxInDB } from "@/types/tx";
 
 interface Props {
   onClose: () => void;
@@ -33,11 +34,8 @@ const TxModal = (props: Props) => {
   const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
   const setTxOnModal = useTxStore((state) => state.setTxOnModal);
 
-  const unsavedSplitArray = useTxStore((state) => state.unsavedSplitArray);
-  const setUnsavedSplitArray = useTxStore(
-    (state) => state.setUnsavedSplitArray,
-  );
-  const setUnsavedCatArray = useTxStore((state) => state.setUnsavedCatArray);
+  const setSplitArray = useTxStore((state) => state.setSplitArray);
+  const setCatArray = useTxStore((state) => state.setCatArray);
   const setSplitAmountDisplayArray = useTxStore(
     (state) => state.setSplitAmountDisplayArray,
   );
@@ -60,18 +58,21 @@ const TxModal = (props: Props) => {
       return;
     }
 
-    setUnsavedSplitArray(tx.splitArray);
-    setUnsavedCatArray(tx.catArray);
-  }, [setUnsavedSplitArray, setUnsavedCatArray, tx]);
+    setSplitArray(tx.splitArray);
+    setCatArray(tx.catArray);
+  }, [setSplitArray, setCatArray, tx]);
 
   useEffect(() => {
+    if (!tx) {
+      return;
+    }
     setSplitAmountDisplayArray(
-      unsavedSplitArray.map((split) => split.amount.toString()),
+      tx.splitArray.map((split) => split.amount.toString()),
     );
-  }, [setSplitAmountDisplayArray, unsavedSplitArray]);
+  }, [setSplitAmountDisplayArray, tx]);
 
   const onClose = () => {
-    setUnsavedSplitArray([]);
+    setSplitArray([]);
     setSplitAmountDisplayArray([]);
     setFocusedSplitIndex(undefined);
     setIsEditingSplit(false);
@@ -95,7 +96,10 @@ const TxModal = (props: Props) => {
                     />
                   )}
 
-                  <H1>{tx.name}</H1>
+                  <div className="group flex items-center gap-3">
+                    <H1>{tx.name}</H1>
+                    <span className="icon-[mdi--edit] invisible h-5 w-5 cursor-pointer text-zinc-400 group-hover:visible" />
+                  </div>
                 </div>
 
                 <CloseBtn
@@ -128,11 +132,11 @@ const TxModal = (props: Props) => {
                   props.onClose();
                 }}
               />
-              <p>Created at {tx.datetime || "1970-01-23 12:34:56"}</p>
               <p>
                 Authorized at{" "}
-                {tx.plaidTx?.authorized_datetime || "1970-01-23 12:34:56"}
+                {tx.plaidTx?.authorized_date || "1970-01-23 12:34:56"}
               </p>
+              <p>Posted at {tx.date || "1970-01-23 12:34:56"}</p>
             </div>
           </section>
 

@@ -2,14 +2,18 @@ import type React from "react";
 
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
+import { useTxStore } from "@/util/txStore";
+
+import type { TxInDB } from "@/types/tx";
 
 import { H2, H3 } from "./Heading";
 import TxCard from "./tx/TxCard";
-import type { TxInDB } from "@/types/tx";
 
 interface Props {
   sortedTxArray: TxInDB[][][][];
   setShowModal?: React.Dispatch<React.SetStateAction<boolean>>;
+  YMD?: number[];
+  rangeFormat?: "year" | "month" | "date" | "all";
 }
 
 const DateSortedTxList = (props: Props) => {
@@ -19,6 +23,34 @@ const DateSortedTxList = (props: Props) => {
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: appUser?.hasAccessToken },
   );
+  const setTxOnModal = useTxStore((state) => state.setTxOnModal);
+  const setTxOnModalIndex = useTxStore((state) => state.setTxOnModalIndex);
+
+  const onInteraction = (tx: TxInDB, index: number[]) => {
+    if (!props.setShowModal) {
+      console.log("props.setShowModal not implemented");
+      return;
+    }
+    const [j, k, l] = index;
+    const [y, m, d] = props.YMD || [0, 0, 0];
+
+    switch (props.rangeFormat) {
+      case "year":
+        setTxOnModalIndex([y, j, k, l]);
+        break;
+      case "month":
+        setTxOnModalIndex([y, m, k, l]);
+        break;
+      case "date":
+        setTxOnModalIndex([j, m, d, l]);
+        break;
+      default:
+        console.error("rangeFormat not implemented");
+    }
+
+    props.setShowModal(true);
+    setTxOnModal(tx);
+  };
 
   return txArray.isLoading ? (
     <ol className="flex h-fit w-full flex-col gap-y-3">
@@ -48,17 +80,17 @@ const DateSortedTxList = (props: Props) => {
                   key={Math.random() * (k + 1)}
                 >
                   <H3>{day[0]?.date.slice(8)}</H3>
-                  <ol className="flex flex-col ">
+                  <ol className="flex flex-col">
                     {day.length === 0 ? (
                       <div>
                         No tx this month! That{"'"}s a good thing, right?
                       </div>
                     ) : (
                       day.map(
-                        (tx) =>
+                        (tx, l) =>
                           tx && (
                             <TxCard
-                              setShowModal={props.setShowModal}
+                              onInteraction={() => onInteraction(tx, [j, k, l])}
                               tx={tx}
                               key={tx.plaidId}
                             />

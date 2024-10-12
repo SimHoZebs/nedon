@@ -17,18 +17,18 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 
 const SplitUser = (props: Props) => {
   const tx = useTxStore((state) => state.txOnModal);
-  const unsavedSplitArray = useTxStore((s) => s.unsavedSplitArray);
-  const setUnsavedSplitArray = useTxStore((s) => s.setUnsavedSplitArray);
+  const splitArray = tx?.splitArray || [];
+  const setSplitArray = useTxStore((s) => s.setSplitArray);
   const amountDisplayArray = useTxStore((s) => s.splitAmountDisplayArray);
   const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
   const amountDisplay = amountDisplayArray[props.index];
   const amount = Number.parseFloat(amountDisplay);
-  const unsavedCatArray = useTxStore((s) => s.unsavedCatArray);
-  const setUnsavedCatArray = useTxStore((s) => s.setUnsavedCatArray);
+  const catArray = tx?.catArray || [];
+  const setCatArray = useTxStore((s) => s.setCatArray);
   const setEditedIndexArray = useTxStore((s) => s.setEditedSplitIndexArray);
   const isEditingSplit = useTxStore((state) => state.isEditingSplit);
 
-  const split = unsavedSplitArray[props.index];
+  const split = splitArray[props.index];
   const txAmount = tx ? tx.amount : 0;
   const isModified =
     props.editedIndexArray.find(
@@ -36,12 +36,12 @@ const SplitUser = (props: Props) => {
     ) !== undefined;
 
   const removeUser = () => {
-    const updatedCatArray = structuredClone(unsavedCatArray);
-    const updatedSplitArray = structuredClone(unsavedSplitArray);
+    const updatedCatArray = structuredClone(catArray);
+    const updatedSplitArray = structuredClone(splitArray);
 
-    //remove split from unsavedSplitArray
+    //remove split from splitArray
     updatedSplitArray.splice(props.index, 1);
-    setUnsavedSplitArray(updatedSplitArray);
+    setSplitArray(updatedSplitArray);
 
     //add split amount back to unassigned category
     const unassignedCat = updatedCatArray.findIndex(
@@ -54,7 +54,7 @@ const SplitUser = (props: Props) => {
     }
 
     updatedCatArray[unassignedCat].amount += amount;
-    setUnsavedCatArray(updatedCatArray);
+    setCatArray(updatedCatArray);
   };
 
   return (

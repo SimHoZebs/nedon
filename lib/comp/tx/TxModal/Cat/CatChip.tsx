@@ -22,8 +22,8 @@ type Props = {
 
 const CatChip = (props: Props) => {
   const tx = useTxStore((store) => store.txOnModal);
-  const unsavedCatArray = useTxStore((store) => store.unsavedCatArray);
-  const setUnsavedCatArray = useTxStore((store) => store.setUnsavedCatArray);
+  const catArray = tx?.catArray || [];
+  const setCatArray = useTxStore((store) => store.setCatArray);
   const refreshDBData = useTxStore((store) => store.refreshTxModalData);
   const queryClient = trpc.useUtils();
   const deleteCat = trpc.cat.delete.useMutation();
@@ -69,7 +69,7 @@ const CatChip = (props: Props) => {
                       );
                       return;
                     }
-                    const tmpCatArray = structuredClone(unsavedCatArray);
+                    const tmpCatArray = structuredClone(catArray);
                     tmpCatArray.splice(props.index, 1);
 
                     if (!isCatArrayInDB(tmpCatArray)) {
@@ -117,9 +117,9 @@ const CatChip = (props: Props) => {
                     tx.amount,
                     Math.max(0, valueToNum),
                   );
-                  const tmpCatArray = structuredClone(unsavedCatArray);
+                  const tmpCatArray = structuredClone(catArray);
                   tmpCatArray[props.index].amount = flooredAmount;
-                  setUnsavedCatArray(tmpCatArray);
+                  setCatArray(tmpCatArray);
                 }}
               />
             </p>

@@ -1,17 +1,16 @@
 import type React from "react";
 
 import { getCatStyle } from "@/util/cat";
-import { useTxStore } from "@/util/txStore";
-import type { TxInDB } from "@/types/tx";
 import getAppUser from "@/util/getAppUser";
 
+import type { TxInDB } from "@/types/tx";
+
 interface Props {
+  onInteraction: () => void;
   tx: TxInDB;
-  setShowModal?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const TxCard = (props: Props) => {
   const { appUser } = getAppUser();
-  const setTxOnModal = useTxStore((state) => state.setTxOnModal);
 
   const splitAmount = props.tx.splitArray.find(
     (split) => split.userId === appUser?.id,
@@ -20,22 +19,8 @@ const TxCard = (props: Props) => {
   return (
     <section
       className="flex h-fit w-full flex-col justify-between gap-x-4 gap-y-1 border border-zinc-400 px-3 py-2 text-start hover:cursor-pointer hover:bg-zinc-800 hover:text-zinc-200"
-      onKeyDown={() => {
-        if (!props.setShowModal) {
-          console.log("props.setShowModal not implemented");
-          return;
-        }
-        props.setShowModal(true);
-        setTxOnModal(props.tx);
-      }}
-      onClick={() => {
-        if (!props.setShowModal) {
-          console.log("props.setShowModal not implemented");
-          return;
-        }
-        props.setShowModal(true);
-        setTxOnModal(props.tx);
-      }}
+      onKeyDown={props.onInteraction}
+      onClick={props.onInteraction}
     >
       <section className="flex w-full justify-between gap-x-3 truncate">
         <div className="flex-start flex h-full justify-center gap-x-2 truncate">

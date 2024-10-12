@@ -28,9 +28,9 @@ const CatPicker = forwardRef(
       staleTime: Number.POSITIVE_INFINITY,
     });
     const queryClient = trpc.useUtils();
-    const unsavedCatArray = useTxStore((state) => state.unsavedCatArray);
 
     const tx = useTxStore((state) => state.txOnModal);
+    const catArray = tx?.catArray || [];
     const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);
     const screenType = useStore((state) => state.screenType);
     const [unsavedNameArray, setCurrentNameArray] = useState<string[]>([]);
@@ -61,7 +61,7 @@ const CatPicker = forwardRef(
         return;
       }
 
-      const tmpCatArray = structuredClone(unsavedCatArray);
+      const tmpCatArray = structuredClone(catArray);
       const tmpNameArray = structuredClone(unsavedNameArray);
       const tmpTx = structuredClone(tx);
       if (clickedTreedCat) {
@@ -138,7 +138,7 @@ const CatPicker = forwardRef(
                 onClick={() => {
                   if (!tx)
                     return console.error(
-                      "Can't reset unsavedSplitArray. tx is undefined.",
+                      "Can't reset splitArray. tx is undefined.",
                     );
                   resetPicker();
                 }}
@@ -169,7 +169,7 @@ const CatPicker = forwardRef(
                 e.stopPropagation();
                 if (!tx)
                   return console.error(
-                    "Can't reset unsavedSplitArray. tx is undefined.",
+                    "Can't reset splitArray. tx is undefined.",
                   );
                 resetPicker();
                 props.closePicker();
