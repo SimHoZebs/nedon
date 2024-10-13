@@ -34,33 +34,14 @@ const TxModal = (props: Props) => {
   const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
   const setTxOnModal = useTxStore((state) => state.setTxOnModal);
 
-  const setSplitArray = useTxStore((state) => state.setSplitArray);
-  const setCatArray = useTxStore((state) => state.setCatArray);
+  const resetTxOnModal = useTxStore((state) => state.resetTx);
   const setSplitAmountDisplayArray = useTxStore(
     (state) => state.setSplitAmountDisplayArray,
   );
-  // const resetTx = useTxStore((s) => s.resetTx);
   const setFocusedSplitIndex = useTxStore((s) => s.setFocusedSplitIndex);
   const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
 
   const amount = tx ? tx.amount : 0;
-
-  useEffect(() => {
-    console.debug("txModal dependencies updated");
-    if (!tx) {
-      console.error(
-        "Nedon couldn't load transaction data into the modal to display. This prevents splits and categories from showing on your screen.",
-      );
-      console.error(
-        "TECHNICAL: Unable to set unsavedSplitArray and unsavedCatArray. tx is",
-        tx,
-      );
-      return;
-    }
-
-    setSplitArray(tx.splitArray);
-    setCatArray(tx.catArray);
-  }, [setSplitArray, setCatArray, tx]);
 
   useEffect(() => {
     if (!tx) {
@@ -72,7 +53,7 @@ const TxModal = (props: Props) => {
   }, [setSplitAmountDisplayArray, tx]);
 
   const onClose = () => {
-    setSplitArray([]);
+    resetTxOnModal();
     setSplitAmountDisplayArray([]);
     setFocusedSplitIndex(undefined);
     setIsEditingSplit(false);
