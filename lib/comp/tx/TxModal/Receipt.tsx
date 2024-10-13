@@ -2,16 +2,16 @@ import Image from "next/image";
 import React from "react";
 import supabase from "server/supabaseClient";
 
+import { ActionBtn } from "@/comp/Button";
 import { H3 } from "@/comp/Heading";
 import Input from "@/comp/Input";
 
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import { isTxInDB } from "@/types/tx";
-import { ActionBtn } from "@/comp/Button";
-import { createStructuredResponse } from "@/types/types";
 import type { PureReceiptWithChildren } from "@/types/receipt";
+import { isTxInDB } from "@/types/tx";
+import { createStructuredResponse } from "@/types/types";
 
 const Receipt = () => {
   const tx = useTxStore((state) => state.txOnModal);
@@ -120,6 +120,7 @@ const Receipt = () => {
       {!tx?.receipt && (
         <input
           type="file"
+          capture="environment"
           accept="image/*"
           onChange={(e) => {
             if (!e.target.files) {
@@ -160,31 +161,68 @@ const Receipt = () => {
       )}
 
       {tx?.receipt?.id && (
-        <div className="flex flex-col">
+        <table className="table-fixed border-separate border-spacing-1 sm:w-auto">
           {tx.receipt.items.map((item) => (
-            <div key={item.id} className="flex">
-              <Input type="number" value={item.quantity} />
-              <Input value={item.name} />
-              <Input type="number" value={item.unit_price} />
-            </div>
+            <tr key={item.id}>
+              <td>
+                <Input
+                  className="w-10 sm:w-10"
+                  type="number"
+                  value={item.quantity}
+                />
+              </td>
+              <td>
+                <Input className="w-full sm:w-48" value={item.name} />
+              </td>
+              <td className="flex">
+                <p>$</p>
+                <Input
+                  className="w-20 sm:w-20"
+                  type="number"
+                  value={item.unit_price}
+                />
+              </td>
+            </tr>
           ))}
-          <div className="flex">
-            <p>tips</p>
-            <Input value={tx.receipt.tip} />
-            <p>({(tx.receipt.tip * 100) / tx.amount}%)</p>
-          </div>
-          <div className="flex">
-            <p>tax</p>
-            <Input value={tx.receipt.tax} />
-          </div>
-          <p
-            className={`h-5 text-red-800 ${
-              receiptSum !== tx.amount ? "" : "hidden"
-            }`}
-          >
-            Receipt total is {receiptSum}; {tx.amount - receiptSum} off
-          </p>
-        </div>
+
+          <tr>
+            <td className="">
+              <p>tip</p>
+            </td>
+
+            <td className="flex items-end gap-1">
+              <Input
+                className="w-20 sm:w-20"
+                type="number"
+                value={tx.receipt.tip}
+              />
+              <p className="text-xs">({(tx.receipt.tip * 100) / tx.amount}%)</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>tax</p>
+            </td>
+            <td>
+              <Input
+                className="w-20 sm:w-20"
+                type="number"
+                value={tx.receipt.tax}
+              />
+            </td>
+          </tr>
+        </table>
+      )}
+
+      {tx?.amount && (
+        <p
+          className={`h-5 text-pink-500 ${
+            receiptSum !== tx.amount ? "" : "hidden"
+          }`}
+        >
+          Receipt total is {receiptSum}, which is {tx.amount - receiptSum} off
+          from this transaction. Adjust your receipt to match the amount.
+        </p>
       )}
     </div>
   );
