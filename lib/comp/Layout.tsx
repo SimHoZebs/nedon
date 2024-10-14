@@ -82,13 +82,12 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   ]);
 
   useEffect(() => {
-    if (txOragnizedByTimeArray.length > 0) return;
-
     if (txArray.data) {
+      console.log("updating txOragnizedByTimeArray");
       const response = organizeTxByTime(txArray.data);
       setTxOragnizedByTimeArray(response);
     }
-  }, [txOragnizedByTimeArray.length, txArray.data, setTxOragnizedByTimeArray]);
+  }, [txArray.data, setTxOragnizedByTimeArray]);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null;

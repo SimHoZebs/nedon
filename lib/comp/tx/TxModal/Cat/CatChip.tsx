@@ -24,7 +24,6 @@ const CatChip = (props: Props) => {
   const tx = useTxStore((store) => store.txOnModal);
   const catArray = tx?.catArray || [];
   const setCatArray = useTxStore((store) => store.setCatArray);
-  const refreshDBData = useTxStore((store) => store.refreshTxModalData);
   const queryClient = trpc.useUtils();
   const deleteCat = trpc.cat.delete.useMutation();
 
@@ -80,7 +79,6 @@ const CatChip = (props: Props) => {
                       return;
                     }
 
-                    refreshDBData(tmpCatArray);
                     await deleteCat.mutateAsync({
                       id: props.cat.id,
                     });

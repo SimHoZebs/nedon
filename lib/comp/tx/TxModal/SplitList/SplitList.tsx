@@ -18,7 +18,13 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const SplitList = (props: Props) => {
-  const updateTx = trpc.tx.update.useMutation();
+  const updateTx = trpc.tx.update.useMutation({
+    onSuccess: async () => {
+      console.log("updateTx success, invalidating tx.getAll");
+      await queryClient.tx.getAll.invalidate();
+      console.log("tx.getAll invalidated");
+    },
+  });
   const deleteSplit = trpc.split.delete.useMutation();
   const queryClient = trpc.useUtils();
   const resetTx = useTxStore((state) => state.resetTx);
@@ -27,7 +33,6 @@ const SplitList = (props: Props) => {
   const isEditingSplit = useTxStore((state) => state.isEditingSplit);
   const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
   const tx = useTxStore((state) => state.txOnModal);
-  const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);
   const setCatArray = useTxStore((state) => state.setCatArray);
   const splitAmountDisplayArray = useTxStore(
     (state) => state.splitAmountDisplayArray,
@@ -79,10 +84,7 @@ const SplitList = (props: Props) => {
       return;
     }
 
-    const txDBData = await updateTx.mutateAsync(tx);
-
-    refreshTxModalData(txDBData);
-    queryClient.tx.invalidate();
+    await updateTx.mutateAsync(tx);
   };
 
   const resetEditingSplit = () => {

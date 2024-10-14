@@ -17,7 +17,6 @@ const Cat = () => {
   const queryClient = trpc.useUtils();
   const setCatArray = useTxStore((state) => state.setCatArray);
   const tx = useTxStore((state) => state.txOnModal);
-  const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);
   const catPickerRef = useRef<HTMLDivElement>(null);
   const upsertManyCat = trpc.cat.upsertMany.useMutation();
 
@@ -121,12 +120,11 @@ const Cat = () => {
                   return;
                 }
 
-                const updatedCatArray = await upsertManyCat.mutateAsync({
+                await upsertManyCat.mutateAsync({
                   catArray: catArray,
                   txId: tx.id,
                 });
 
-                refreshTxModalData(updatedCatArray);
                 setIsManaging(false);
                 queryClient.tx.invalidate();
               }}

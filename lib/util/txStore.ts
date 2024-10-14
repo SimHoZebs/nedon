@@ -1,9 +1,8 @@
-import type { Cat, Split } from "@prisma/client";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 import type { CatClientSide } from "@/types/cat";
-import { type SplitClientSide, isSplitArrayInDB } from "@/types/split";
+import type { SplitClientSide } from "@/types/split";
 import type { TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
 
 import { useStore } from "./store";
@@ -30,9 +29,6 @@ interface Store {
    * Only use this function when new data is expected from the database.
    * Refreshes client data with database data after it processed client's update.
    */
-  refreshTxModalData: (tx: TxInDB | Split[] | Cat[]) => void;
-
-  //only to reset tx to a state without a txInDB
   resetTx: () => void;
 
   //catArray
@@ -88,39 +84,6 @@ export const useTxStore = create<Store>()(
             txOnModal: {
               ...clone,
               catArray: catArray,
-            },
-          };
-        });
-      },
-
-      refreshTxModalData: (dbData: TxInDB | Split[] | Cat[]) => {
-        set((store) => {
-          if (!store.txOnModal) return store;
-
-          const clone = structuredClone(store.txOnModal);
-          //is Split[]
-          if (isSplitArrayInDB(dbData)) {
-            return {
-              txOnModal: {
-                ...clone,
-                splitArray: dbData,
-              },
-            };
-          }
-          //is Cat[]
-          if (Array.isArray(dbData)) {
-            return {
-              txOnModal: {
-                ...clone,
-                catArray: dbData,
-              },
-            };
-          }
-          //is TxInDB
-          return {
-            txOnModal: {
-              ...clone,
-              ...dbData,
             },
           };
         });

@@ -31,7 +31,6 @@ const CatPicker = forwardRef(
 
     const tx = useTxStore((state) => state.txOnModal);
     const catArray = tx?.catArray || [];
-    const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);
     const screenType = useStore((state) => state.screenType);
     const [unsavedNameArray, setCurrentNameArray] = useState<string[]>([]);
     const [currentOptionArray, setCurrentOptionArray] = useState<TreedCat[]>(
@@ -78,14 +77,12 @@ const CatPicker = forwardRef(
 
       if (!tmpTx.id) {
         console.log("tx.id is undefined. Creating a new tx.", tmpTx);
-        const newTx = await createTx.mutateAsync(tmpTx);
-        refreshTxModalData(newTx);
+        await createTx.mutateAsync(tmpTx);
       } else {
-        const upsertedCatArray = await upsertCatArray.mutateAsync({
+        await upsertCatArray.mutateAsync({
           txId: tmpTx.id,
           catArray: tmpCatArray,
         });
-        refreshTxModalData(upsertedCatArray);
       }
 
       queryClient.tx.invalidate();

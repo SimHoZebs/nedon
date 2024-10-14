@@ -7,6 +7,7 @@ import { H1 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
 
 import getAppUser from "@/util/getAppUser";
+import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
@@ -23,8 +24,17 @@ interface Props {
 
 const TxModal = (props: Props) => {
   const tx = useTxStore((state) => state.txOnModal);
-  const resetTx = trpc.tx.reset.useMutation();
+  const resetTx = trpc.tx.reset.useMutation({
+    onSuccess: async (data) => {
+      console.log("resetTx success, invalidating tx.getAll", data);
+      await queryClient.tx.getAll.invalidate();
+      console.log("tx.getAll invalidated");
+    },
+  });
 
+  const txOragnizedByTimeArray = useStore(
+    (store) => store.txOragnizedByTimeArray,
+  );
   const { appUser } = getAppUser();
   const auth = trpc.auth.useQuery(
     { id: appUser ? appUser.id : "" },
@@ -32,7 +42,6 @@ const TxModal = (props: Props) => {
   );
   const queryClient = trpc.useUtils();
   const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
-  const setTxOnModal = useTxStore((state) => state.setTxOnModal);
 
   const resetTxOnModal = useTxStore((state) => state.resetTx);
   const setSplitAmountDisplayArray = useTxStore(
@@ -40,6 +49,7 @@ const TxModal = (props: Props) => {
   );
   const setFocusedSplitIndex = useTxStore((s) => s.setFocusedSplitIndex);
   const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
+  const YMD = useTxStore((state) => state.txOnModalIndex);
 
   const amount = tx ? tx.amount : 0;
 
@@ -51,6 +61,15 @@ const TxModal = (props: Props) => {
       tx.splitArray.map((split) => split.amount.toString()),
     );
   }, [setSplitAmountDisplayArray, tx]);
+
+  useEffect(() => {
+    if (txOragnizedByTimeArray.length === 0) return;
+
+    if (!YMD) return;
+
+    console.log("resetTxOnModal");
+    resetTxOnModal();
+  }, [txOragnizedByTimeArray, YMD, resetTxOnModal]);
 
   const onClose = () => {
     resetTxOnModal();
@@ -160,9 +179,7 @@ const TxModal = (props: Props) => {
                   if (!resettedTx) {
                     return;
                   }
-                  setTxOnModal(resettedTx);
-
-                  await queryClient.tx.invalidate();
+                  resetTxOnModal();
                 }}
               >
                 Reset transaction data

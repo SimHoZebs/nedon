@@ -17,7 +17,6 @@ const Receipt = () => {
   const tx = useTxStore((state) => state.txOnModal);
 
   const createTx = trpc.tx.create.useMutation();
-  const refreshTxModalData = useTxStore((state) => state.refreshTxModalData);
   const processReceipt = trpc.receipt.process.useMutation();
   const createReceipt = trpc.receipt.create.useMutation();
   const queryClient = trpc.useUtils();
@@ -93,13 +92,12 @@ const Receipt = () => {
       return sr;
     }
 
-    const createdReceipt = await createReceipt.mutateAsync({
+    await createReceipt.mutateAsync({
       id: latestTx.id,
       receipt: response.data,
     });
-    setProgressMsg("");
-    refreshTxModalData({ ...latestTx, receipt: createdReceipt });
     queryClient.tx.getAll.invalidate();
+    setProgressMsg("");
 
     setReceiptImg(undefined);
     setReceiptImgURL(undefined);
