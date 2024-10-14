@@ -1,11 +1,11 @@
 import type { Category as PlaidCat } from "plaid";
 
 import type { CatClientSide, TreedCat, TreedCatWithTx } from "@/types/cat";
+import type { TxInDB } from "@/types/tx";
 
 import catStyleArray from "./catStyle";
 import parseMoney from "./parseMoney";
 import type { TxType } from "./tx";
-import type { TxInDB } from "@/types/tx";
 
 export const createNewCat = ({
   txId,

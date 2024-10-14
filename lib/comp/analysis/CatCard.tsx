@@ -16,9 +16,11 @@ interface Props {
 }
 
 const CatCard = (props: Props) => {
-  const subCatTotalAmount = Math.abs(
-    subCatTotal(props.cat, props.txType) +
-      (props.txType === "spending" ? props.cat.spending : props.cat.received),
+  const subCatTotalAmount = parseMoney(
+    Math.abs(
+      subCatTotal(props.cat, props.txType) +
+        (props.txType === "spending" ? props.cat.spending : props.cat.received),
+    ),
   );
   console.log("subCatTotalAmount", subCatTotalAmount);
 

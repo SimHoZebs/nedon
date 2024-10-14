@@ -122,6 +122,7 @@ const Connections = () => {
               }}
             >
               <span className="icon-[mdi--user-remove-outline] h-5 w-5" />
+              remove connection
             </Button>
           </div>
         ))}
