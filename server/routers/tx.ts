@@ -332,9 +332,11 @@ const txRouter = router({
         splitArray: {
           deleteMany: {},
         },
-        receipt: {
-          delete: {},
-        },
+        receipt: input.receipt
+          ? {
+              delete: {},
+            }
+          : undefined,
       },
     });
 

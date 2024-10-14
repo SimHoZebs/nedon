@@ -214,7 +214,7 @@ const Receipt = () => {
         </table>
       )}
 
-      {tx?.amount && (
+      {tx?.amount && tx.receipt && (
         <p
           className={`h-5 text-pink-500 ${
             receiptSum !== tx.amount ? "" : "hidden"
