@@ -156,5 +156,5 @@ export const calcCatTypeTotal = (
     return total + amount + subCatTotal(cat, txType);
   }, 0);
 
-  return parseMoney(spending);
+  return spending;
 };

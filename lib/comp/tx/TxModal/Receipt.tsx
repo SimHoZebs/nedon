@@ -6,6 +6,7 @@ import { ActionBtn } from "@/comp/Button";
 import { H3 } from "@/comp/Heading";
 import Input from "@/comp/Input";
 
+import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
@@ -106,11 +107,16 @@ const Receipt = () => {
     return sr;
   };
 
-  const receiptSum =
-    tx?.receipt?.items.reduce(
-      (sum, item) => sum + item.unit_price * item.quantity,
-      0,
-    ) || 0;
+  const receiptSum = parseMoney(
+    tx?.receipt
+      ? (tx.receipt.items.reduce(
+          (sum, item) => sum + item.unit_price * item.quantity,
+          0,
+        ) || 0) +
+          tx.receipt.tip +
+          tx.receipt.tax
+      : 0,
+  );
 
   return (
     <div>
@@ -160,17 +166,16 @@ const Receipt = () => {
 
       {tx?.receipt?.id && (
         <table className="table-fixed border-separate border-spacing-1 sm:w-auto">
+          <tr>
+            <th>Item</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+          </tr>
           {tx.receipt.items.map((item) => (
             <tr key={item.id}>
               <td>
-                <Input
-                  className="w-10 sm:w-10"
-                  type="number"
-                  value={item.quantity}
-                />
-              </td>
-              <td>
-                <Input className="w-full sm:w-48" value={item.name} />
+                <Input className="w-full sm:w-40" value={item.name} />
               </td>
               <td className="flex">
                 <p>$</p>
@@ -180,6 +185,16 @@ const Receipt = () => {
                   value={item.unit_price}
                 />
               </td>
+              <td>
+                <Input
+                  className="w-10 sm:w-10"
+                  type="number"
+                  value={item.quantity}
+                />
+              </td>
+              <td>
+                <p>${item.unit_price * item.quantity}</p>
+              </td>
             </tr>
           ))}
 
@@ -188,9 +203,13 @@ const Receipt = () => {
               <p>tip</p>
             </td>
 
-            <td className="flex items-end gap-1">
+            <td />
+            <td />
+
+            <td className="flex items-end">
+              <p>$</p>
               <Input
-                className="w-20 sm:w-20"
+                className="w-12 sm:w-12"
                 type="number"
                 value={tx.receipt.tip}
               />
@@ -201,9 +220,12 @@ const Receipt = () => {
             <td>
               <p>tax</p>
             </td>
-            <td>
+            <td />
+            <td />
+            <td className="flex items-end">
+              <p>$</p>
               <Input
-                className="w-20 sm:w-20"
+                className="w-12 sm:w-12"
                 type="number"
                 value={tx.receipt.tax}
               />
@@ -218,8 +240,9 @@ const Receipt = () => {
             receiptSum !== tx.amount ? "" : "hidden"
           }`}
         >
-          Receipt total is {receiptSum}, which is {tx.amount - receiptSum} off
-          from this transaction. Adjust your receipt to match the amount.
+          Receipt total is <b>${receiptSum}</b>, which is{" "}
+          <b>${parseMoney(tx.amount - receiptSum)}</b> off from this
+          transaction. Adjust your receipt to match the amount.
         </p>
       )}
     </div>

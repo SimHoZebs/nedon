@@ -82,7 +82,7 @@ const SplitUser = (props: Props) => {
               <label htmlFor="amount">$</label>
               <Input
                 className={twMerge(
-                  "w-full",
+                  "w-full sm:w-20",
                   isModified ? "outline outline-2 outline-zinc-700" : "",
                 )}
                 id="amount"
@@ -119,7 +119,7 @@ const SplitUser = (props: Props) => {
 
             <div className="flex items-center text-xl">
               <Input
-                className="sm:w-20 lg:w-20"
+                className="sm:w-16 lg:w-16"
                 title="ratio"
                 id="ratio"
                 type="number"
