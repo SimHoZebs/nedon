@@ -242,6 +242,10 @@ export type Tx = z.infer<typeof TxSchema>
 
 export const TxOptionalDefaultsSchema = TxSchema.merge(z.object({
   id: z.string().cuid().optional(),
+  userTotal: z.number().optional(),
+  recurring: z.boolean().optional(),
+  MDS: z.number().int().optional(),
+  amount: z.number().optional(),
 }))
 
 export type TxOptionalDefaults = z.infer<typeof TxOptionalDefaultsSchema>
@@ -319,6 +323,7 @@ export type Split = z.infer<typeof SplitSchema>
 
 export const SplitOptionalDefaultsSchema = SplitSchema.merge(z.object({
   id: z.string().cuid().optional(),
+  amount: z.number().optional(),
 }))
 
 export type SplitOptionalDefaults = z.infer<typeof SplitOptionalDefaultsSchema>
@@ -376,6 +381,7 @@ export type Cat = z.infer<typeof CatSchema>
 
 export const CatOptionalDefaultsSchema = CatSchema.merge(z.object({
   id: z.string().cuid().optional(),
+  amount: z.number().optional(),
 }))
 
 export type CatOptionalDefaults = z.infer<typeof CatOptionalDefaultsSchema>
@@ -490,6 +496,11 @@ export type Receipt = z.infer<typeof ReceiptSchema>
 
 export const ReceiptOptionalDefaultsSchema = ReceiptSchema.merge(z.object({
   id: z.string().cuid().optional(),
+  subtotal: z.number().optional(),
+  currency: z.string().optional(),
+  tax: z.number().optional(),
+  tip: z.number().optional(),
+  grand_total: z.number().optional(),
 }))
 
 export type ReceiptOptionalDefaults = z.infer<typeof ReceiptOptionalDefaultsSchema>
@@ -544,6 +555,8 @@ export type ReceiptItem = z.infer<typeof ReceiptItemSchema>
 
 export const ReceiptItemOptionalDefaultsSchema = ReceiptItemSchema.merge(z.object({
   id: z.string().cuid().optional(),
+  quantity: z.number().int().optional(),
+  unit_price: z.number().optional(),
 }))
 
 export type ReceiptItemOptionalDefaults = z.infer<typeof ReceiptItemOptionalDefaultsSchema>

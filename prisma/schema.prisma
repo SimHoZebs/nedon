@@ -68,7 +68,7 @@ model Tx {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   //For tracking splits. Can be less than tx.amount, but is target total of catArray.amount
-  userTotal Float
+  userTotal Float @default(0)
   catArray  Cat[]
 
   splitTxArray Tx[] @relation("originTx") //transactions that were split from this tx
@@ -84,13 +84,13 @@ model Tx {
 
   receipt Receipt?
 
-  recurring Boolean
-  MDS       Int //-1 = undetermined, 0 = Saving, 1 - 5 scale between Mandatory and Discretionary
+  recurring Boolean @default(false)
+  MDS       Int     @default(-1) //-1 = undetermined, 0 = Saving, 1 - 5 scale between Mandatory and Discretionary
 
   //duplicate fields from plaidTx because these are important enough to manipulate
   plaidId   String @unique //plaid tranasction_id
   name      String
-  amount    Float
+  amount    Float  @default(0)
   date      String
   datetime  String
   accountId String
@@ -107,7 +107,7 @@ model Split {
   userId String
   user   User   @relation("splitUserArray", fields: [userId], references: [id], onDelete: Cascade)
 
-  amount Float
+  amount Float @default(0)
 
   //transaction associated with this split
   txId String? @unique
@@ -122,7 +122,7 @@ model Cat {
   id        String   @id @default(cuid())
   name      String
   nameArray String[]
-  amount    Float
+  amount    Float    @default(0)
 
   tx   Tx     @relation(fields: [txId], references: [id], onDelete: Cascade)
   txId String
@@ -148,11 +148,11 @@ model Receipt {
   date           String
   merchant       String
   items          ReceiptItem[]
-  subtotal       Float
-  currency       String
-  tax            Float
-  tip            Float
-  grand_total    Float
+  subtotal       Float         @default(0)
+  currency       String        @default("USD")
+  tax            Float         @default(0)
+  tip            Float         @default(0)
+  grand_total    Float         @default(0)
   payment_method String
   online_link    String
 
@@ -164,8 +164,8 @@ model ReceiptItem {
   id          String  @id @default(cuid())
   name        String
   description String
-  quantity    Int
-  unit_price  Float
+  quantity    Int     @default(1)
+  unit_price  Float   @default(0)
   receipt     Receipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
   receiptId   String
 }
