@@ -84,6 +84,9 @@ model Tx {
 
   receipt Receipt?
 
+  recurring Boolean
+  MDS       Int //-1 = undetermined, 0 = Saving, 1 - 5 scale between Mandatory and Discretionary
+
   //duplicate fields from plaidTx because these are important enough to manipulate
   plaidId   String @unique //plaid tranasction_id
   name      String

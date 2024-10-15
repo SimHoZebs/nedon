@@ -38,6 +38,8 @@ export const createTxFromPlaidTx = (
     plaidTx: plaidTx,
     name: plaidTx.name,
     amount: plaidTx.amount,
+    recurring: false,
+    MDS: -1,
     date: plaidTx.date,
     userTotal: 0,
     originTxId: null,
@@ -55,40 +57,6 @@ export const createTxFromPlaidTx = (
     receipt: null,
   };
 };
-
-export function createTx(
-  userId: string,
-  txInDB: TxInDB,
-  plaidTx?: Transaction,
-): UnsavedTx {
-  return {
-    plaidTx: plaidTx || null,
-    id: txInDB.id,
-    name: txInDB.name,
-    amount: txInDB?.amount || plaidTx?.amount || 0,
-    date: txInDB?.date || plaidTx?.date || "",
-    userTotal: txInDB?.userTotal || 0,
-    originTxId: txInDB?.originTxId || null,
-    datetime: txInDB?.datetime || plaidTx?.datetime || "",
-    plaidId: txInDB?.plaidId || plaidTx?.transaction_id || "",
-    userId: userId,
-    accountId: txInDB?.accountId || plaidTx?.account_id || "",
-    catArray: txInDB?.catArray || [
-      createNewCat({
-        nameArray: plaidTx?.category || [],
-        amount: plaidTx?.amount || 0,
-      }),
-    ],
-    splitArray: txInDB?.splitArray || [
-      createNewSplit(
-        userId,
-        txInDB?.amount || plaidTx?.amount || 0,
-        txInDB?.id,
-      ),
-    ],
-    receipt: txInDB?.receipt || null,
-  };
-}
 
 export const organizeTxByCat = (txArray: TxInDB[]) => {
   const catArray: TreedCatWithTx[] = [];
