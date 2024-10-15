@@ -9,9 +9,9 @@ import {
   PureReceiptWithChildrenSchema,
   ReceiptOptionalDefaultsWithChildrenSchema,
 } from "@/types/receipt";
+import { createStructuredResponse } from "@/types/types";
 
 import { procedure, router } from "../trpc";
-import { createStructuredResponse } from "@/types/types";
 
 const receiptRouter = router({
   create: procedure
@@ -129,6 +129,7 @@ const receiptRouter = router({
             sr.data = receipt.properties as PureReceiptWithChildren;
             sr.clientMsg = "Receipt processed successfully.";
             sr.devMsg = "";
+            return sr;
           }
 
           if (parsedReceipt.error) {

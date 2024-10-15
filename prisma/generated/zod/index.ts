@@ -68,7 +68,7 @@ export const CatScalarFieldEnumSchema = z.enum(['id','name','nameArray','amount'
 
 export const CatSettingsScalarFieldEnumSchema = z.enum(['id','name','budget','parentId','userId']);
 
-export const ReceiptScalarFieldEnumSchema = z.enum(['id','is_receipt','transaction_id','date','merchant','currency','tax','tip','total','grand_total','payment_method','txId']);
+export const ReceiptScalarFieldEnumSchema = z.enum(['id','is_receipt','transaction_id','date','merchant','subtotal','currency','tax','tip','grand_total','payment_method','online_link','txId']);
 
 export const ReceiptItemScalarFieldEnumSchema = z.enum(['id','name','description','quantity','unit_price','receiptId']);
 
@@ -471,12 +471,13 @@ export const ReceiptSchema = z.object({
   transaction_id: z.string(),
   date: z.string(),
   merchant: z.string(),
+  subtotal: z.number(),
   currency: z.string(),
   tax: z.number(),
   tip: z.number(),
-  total: z.number(),
   grand_total: z.number(),
   payment_method: z.string(),
+  online_link: z.string(),
   txId: z.string(),
 })
 

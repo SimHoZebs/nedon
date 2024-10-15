@@ -24,6 +24,7 @@ const createTxInDB = async (txClientSide: UnsavedTx): Promise<TxInDB> => {
   return await db.tx.create({
     data: {
       ...txClientSide,
+      originTxId: txClientSide.originTxId || undefined,
       plaidTx: txClientSide.plaidTx || undefined,
       receipt: txClientSide.receipt
         ? {
@@ -36,12 +37,12 @@ const createTxInDB = async (txClientSide: UnsavedTx): Promise<TxInDB> => {
           }
         : undefined,
       splitArray: {
-        create: txClientSide.splitArray.map((split) => ({
+        create: txClientSide.splitArray.map(({ originTxId, ...split }) => ({
           ...split,
         })),
       },
       catArray: {
-        create: txClientSide.catArray.map((cat) => ({
+        create: txClientSide.catArray.map(({ txId, ...cat }) => ({
           ...cat,
         })),
       },
