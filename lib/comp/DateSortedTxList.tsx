@@ -66,7 +66,7 @@ const DateSortedTxList = (props: Props) => {
         ))}
     </ol>
   ) : (
-    <ol className="no-scrollbar flex w-full max-w-sm flex-col items-center gap-y-2 overflow-y-scroll px-1 lg:max-w-md">
+    <ol className="no-scrollbar flex h-full w-full max-w-md flex-col items-center gap-y-2 overflow-y-scroll px-1">
       {props.sortedTxArray.map((year) =>
         year.map((month, j) => (
           <li

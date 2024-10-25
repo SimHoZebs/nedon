@@ -113,7 +113,7 @@ export const SecondaryBtn = (props: SecondaryBtnProps) => {
   return (
     <Button
       {...rest}
-      className={`gap-x-1 rounded-lg bg-indigo-600 bg-opacity-20 font-semibold text-indigo-300 hover:bg-opacity-40 hover:text-indigo-200 ${
+      className={`gap-x-1 rounded-lg bg-indigo-600 bg-opacity-20 text-indigo-300 hover:bg-opacity-40 hover:text-indigo-200 ${
         props.variant ? "text-xs" : ""
       }`}
     >

@@ -78,7 +78,7 @@ const SplitUser = (props: Props) => {
 
         <div className="flex w-full flex-col">
           <div className="flex w-full justify-between gap-x-2">
-            <div className="flex items-center justify-between gap-x-2 text-2xl">
+            <div className="flex items-center justify-between gap-x-2 text-2xl font-light">
               <label htmlFor="amount">$</label>
               <Input
                 className={twMerge(
@@ -117,7 +117,7 @@ const SplitUser = (props: Props) => {
               />
             </div>
 
-            <div className="flex items-center text-xl">
+            <div className="flex items-center text-xl font-light">
               <Input
                 className="sm:w-16 lg:w-16"
                 title="ratio"

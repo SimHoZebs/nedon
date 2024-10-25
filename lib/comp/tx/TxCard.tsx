@@ -18,19 +18,17 @@ const TxCard = (props: Props) => {
 
   return (
     <section
-      className="flex h-fit w-full flex-col justify-between gap-x-4 gap-y-1 border border-zinc-400 px-3 py-2 text-start hover:cursor-pointer hover:bg-zinc-800 hover:text-zinc-200"
+      className="flex h-fit w-full flex-col justify-between gap-x-4 gap-y-1 rounded-lg px-3 py-2 text-start hover:cursor-pointer hover:bg-zinc-800 hover:text-zinc-200"
       onKeyDown={props.onInteraction}
       onClick={props.onInteraction}
     >
       <section className="flex w-full justify-between gap-x-3 truncate">
         <div className="flex-start flex h-full justify-center gap-x-2 truncate">
-          <p className="truncate text-base font-semibold sm:text-lg">
-            {props.tx.name}
-          </p>
+          <p className="truncate text-base sm:text-lg">{props.tx.name}</p>
         </div>
 
         <div
-          className={`flex items-center gap-x-1 text-base sm:text-lg ${
+          className={`flex items-center gap-x-1 text-base font-light sm:text-lg ${
             props.tx.amount > 0 ? "" : "text-green-300"
           }`}
         >
@@ -43,10 +41,13 @@ const TxCard = (props: Props) => {
       </section>
 
       <section className="flex h-fit w-full justify-between gap-x-1">
-        <p className="text-xs text-zinc-400">{props.tx.datetime || "12:34"}</p>
+        <p className="text-xs font-light text-zinc-400">
+          {props.tx.datetime || "12:34"}
+        </p>
 
         <div
           className="no-scrollbar flex gap-x-1 overflow-x-auto overscroll-none"
+          // scroll horizontally on mouse wheel
           onWheel={(e) => {
             e.currentTarget.scrollLeft += e.deltaY * 0.5;
           }}
@@ -59,7 +60,7 @@ const TxCard = (props: Props) => {
               <span
                 className={`${getCatStyle(cat.nameArray).icon} ${getCatStyle(cat.nameArray).textColor} w-4`}
               />
-              <p className="text-xs">{cat.nameArray.at(-1)}</p>
+              <p className="text-xs font-light">{cat.nameArray.at(-1)}</p>
             </div>
           ))}
         </div>

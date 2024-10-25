@@ -124,6 +124,7 @@ const Receipt = () => {
       {!tx?.receipt && (
         <input
           type="file"
+          className="font-light"
           capture="environment"
           accept="image/*"
           onChange={(e) => {

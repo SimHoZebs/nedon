@@ -112,7 +112,7 @@ const TxModal = (props: Props) => {
               </div>
 
               <p
-                className={`h-6 w-40 rounded-lg ${
+                className={`h-6 w-40 rounded-lg font-light ${
                   auth.isLoading && "animate-pulse bg-zinc-700"
                 } `}
               >
@@ -137,6 +137,16 @@ const TxModal = (props: Props) => {
                 {tx.plaidTx?.authorized_date || "1970-01-23 12:34:56"}
               </p>
               <p>Posted at {tx.date || "1970-01-23 12:34:56"}</p>
+
+              {tx.plaidTx?.location.address && (
+                <div className="flex">
+                  <span className="icon-[mdi--location-on-outline]" />
+                  <p>
+                    {tx.plaidTx?.location.address &&
+                      JSON.stringify(tx.plaidTx?.location)}
+                  </p>
+                </div>
+              )}
             </div>
           </section>
 

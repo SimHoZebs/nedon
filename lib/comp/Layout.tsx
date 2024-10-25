@@ -140,14 +140,6 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
           <NavBtn
             router={router}
-            route="/transactions"
-            icon="icon-[mdi--swap-horizontal]"
-          >
-            Transactions
-          </NavBtn>
-
-          <NavBtn
-            router={router}
             route="/analytics"
             icon="icon-[mdi--google-analytics]"
           >
