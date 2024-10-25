@@ -107,7 +107,7 @@ const User: NextPage = () => {
           )}
         </AnimatePresence>
 
-        <div className="flex w-full max-w-md flex-col items-center gap-y-3">
+        <div className="flex w-full max-w-md flex-col items-center">
           <H2>All Accounts</H2>
 
           <div className="flex w-full">

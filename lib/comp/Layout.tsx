@@ -123,7 +123,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   return (
     <div
-      className={`flex h-[100dvh] w-[100dvw] flex-col bg-zinc-900 text-sm font-medium text-zinc-300 sm:flex-row sm:text-base ${customFont.variable} font-sans`}
+      className={`flex h-[100dvh] w-[100dvw] flex-col bg-zinc-900 text-sm text-zinc-300 sm:flex-row sm:text-base ${customFont.variable} font-sans`}
     >
       <main className="no-scrollbar h-full w-full overflow-auto px-5 py-3">
         {props.children}

@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
-import React from "react";
+import React, { type ChangeEvent } from "react";
+import { z } from "zod";
 
 import { ActionBtn, Button } from "@/comp/Button";
 import { H2 } from "@/comp/Heading";
@@ -8,6 +9,16 @@ import CreateUserBtn from "@/comp/user/CreateuserBtn";
 import getAppUser from "@/util/getAppUser";
 import { useLocalStore, useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
+
+const ChaseCSVSchema = z.object({
+  Amount: z.string(),
+  Balance: z.string(),
+  CheckorSlip: z.string(),
+  Description: z.string(),
+  Details: z.string(),
+  PostingDate: z.string(),
+  Type: z.string(),
+});
 
 const Settings = () => {
   const router = useRouter();
@@ -22,6 +33,56 @@ const Settings = () => {
   const removeConnection = trpc.user.removeConnection.useMutation();
   const queryClient = trpc.useUtils();
   const setUserId = useLocalStore((state) => state.setUserId);
+
+  const csvToTx = async (e: ChangeEvent<HTMLInputElement>) => {
+    console.log("csvToTx");
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+      const text = e.target?.result;
+      if (!text) return;
+
+      if (typeof text === "string") {
+        const lines = text.split("\n");
+
+        const headers = lines[0].split(",");
+
+        const txArray = lines.slice(1);
+        const txs: Record<string, string>[] = [];
+        for (const tx of txArray) {
+          const values = tx.replace(/\r$/, "").split(",");
+          if (values.length === 1) continue;
+          txs.push(
+            headers.reduce(
+              (tx, header, i) => {
+                //replace non alphabet characters with empty string
+                const cleanedHeader = header.replace(/[^a-zA-Z]/g, "");
+
+                //replace multiple spaces with single space
+                const value = values[i].replace(/\s{2,}/g, " ");
+
+                tx[cleanedHeader] = value;
+                return tx;
+              },
+              {} as Record<string, string>,
+            ),
+          );
+        }
+
+        console.log(txs);
+        console.log(txs[0]);
+        const chaseTxArray = z.array(ChaseCSVSchema).safeParse(txs);
+        if (!chaseTxArray.success) {
+          console.error(chaseTxArray.error);
+          return;
+        }
+      }
+    };
+
+    reader.readAsText(file);
+  };
 
   return (
     <section className="flex h-full w-full flex-col items-start gap-y-3">
@@ -47,6 +108,8 @@ const Settings = () => {
         />
         <label htmlFor="verticalCatPicker">make cat picker vertical</label>
       </div>
+
+      <input type="file" onChange={csvToTx} />
 
       <H2>DEBUG AREA</H2>
       <div className="flex flex-col gap-3">
