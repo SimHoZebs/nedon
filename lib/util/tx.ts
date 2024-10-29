@@ -1,7 +1,7 @@
 import type { Transaction } from "plaid";
 
 import type { TreedCatWithTx } from "@/types/cat";
-import type { TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
+import type { ChaseCSVTx, TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
 
 import { createNewCat, fillArrayByCat } from "./cat";
 import { createNewSplit } from "./split";
@@ -26,6 +26,35 @@ export const mergePlaidTxWithTx = (
   return {
     ...tx,
     plaidTx: plaidTx,
+  };
+};
+
+export const createTxFromChaseCSV = (
+  chaseCSVTx: ChaseCSVTx,
+  userId: string,
+): UnsavedTx => {
+  return {
+    id: undefined,
+    plaidTx: null,
+    name: chaseCSVTx.Description,
+    amount: Number.parseFloat(chaseCSVTx.Amount),
+    recurring: false,
+    MDS: -1,
+    date: chaseCSVTx.PostingDate,
+    userTotal: 0,
+    originTxId: null,
+    datetime: "",
+    plaidId: null,
+    userId,
+    accountId: null,
+    catArray: [
+      createNewCat({
+        nameArray: [],
+        amount: Number.parseFloat(chaseCSVTx.Amount),
+      }),
+    ],
+    splitArray: [createNewSplit(userId, Number.parseFloat(chaseCSVTx.Amount))],
+    receipt: null,
   };
 };
 

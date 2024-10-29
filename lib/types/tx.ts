@@ -47,3 +47,15 @@ export interface TxInDB extends z.infer<typeof TxInDBSchema> {}
 export function isTxInDB(tx: unknown): tx is TxInDB {
   return (tx as Tx).id !== undefined;
 }
+
+export const ChaseCSVTxSchema = z.object({
+  Amount: z.string(),
+  Balance: z.string(),
+  CheckorSlip: z.string(),
+  Description: z.string(),
+  Details: z.string(),
+  PostingDate: z.string(),
+  Type: z.string(),
+});
+
+export type ChaseCSVTx = z.infer<typeof ChaseCSVTxSchema>;

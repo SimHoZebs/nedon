@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import React, { type ChangeEvent } from "react";
+import React, { type ChangeEvent, useRef } from "react";
 import { z } from "zod";
 
 import { ActionBtn, Button } from "@/comp/Button";
@@ -9,28 +9,23 @@ import CreateUserBtn from "@/comp/user/CreateuserBtn";
 import getAppUser from "@/util/getAppUser";
 import { useLocalStore, useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
+import { createTxFromChaseCSV } from "@/util/tx";
 
-const ChaseCSVSchema = z.object({
-  Amount: z.string(),
-  Balance: z.string(),
-  CheckorSlip: z.string(),
-  Description: z.string(),
-  Details: z.string(),
-  PostingDate: z.string(),
-  Type: z.string(),
-});
+import { type ChaseCSVTx, ChaseCSVTxSchema } from "@/types/tx";
 
 const Settings = () => {
   const router = useRouter();
   const verticalCatPicker = useStore((state) => state.verticalCatPicker);
   const setVerticalCatPicker = useStore((state) => state.setVerticalCatPicker);
+  const [csvTxArray, setCsvTxArray] = React.useState<ChaseCSVTx[]>([]);
+  const csvInputRef = useRef<HTMLInputElement>(null);
 
-  const { appUser } = getAppUser();
-  const { allUsers } = getAppUser();
+  const { appUser, allUsers } = getAppUser();
   const deleteAll = trpc.user.deleteAll.useMutation();
   const deleteUser = trpc.user.delete.useMutation();
   const addConnection = trpc.user.addConnection.useMutation();
   const removeConnection = trpc.user.removeConnection.useMutation();
+  const createManyTx = trpc.tx.createMany.useMutation();
   const queryClient = trpc.useUtils();
   const setUserId = useLocalStore((state) => state.setUserId);
 
@@ -53,7 +48,10 @@ const Settings = () => {
         const txs: Record<string, string>[] = [];
         for (const tx of txArray) {
           const values = tx.replace(/\r$/, "").split(",");
+
+          //means its the last line, which is empty
           if (values.length === 1) continue;
+
           txs.push(
             headers.reduce(
               (tx, header, i) => {
@@ -61,7 +59,9 @@ const Settings = () => {
                 const cleanedHeader = header.replace(/[^a-zA-Z]/g, "");
 
                 //replace multiple spaces with single space
-                const value = values[i].replace(/\s{2,}/g, " ");
+                const value = values[i]
+                  .replace(/\s{2,}/g, " ")
+                  .replaceAll('"', "");
 
                 tx[cleanedHeader] = value;
                 return tx;
@@ -71,13 +71,14 @@ const Settings = () => {
           );
         }
 
-        console.log(txs);
-        console.log(txs[0]);
-        const chaseTxArray = z.array(ChaseCSVSchema).safeParse(txs);
+        const chaseTxArray = z.array(ChaseCSVTxSchema).safeParse(txs);
         if (!chaseTxArray.success) {
           console.error(chaseTxArray.error);
           return;
         }
+
+        setCsvTxArray(chaseTxArray.data);
+        console.log(chaseTxArray.data[0]);
       }
     };
 
@@ -109,7 +110,31 @@ const Settings = () => {
         <label htmlFor="verticalCatPicker">make cat picker vertical</label>
       </div>
 
-      <input type="file" onChange={csvToTx} />
+      <input type="file" onChange={csvToTx} ref={csvInputRef} />
+      <Button
+        onClick={() => {
+          const el = csvInputRef.current;
+          if (!el) return;
+          el.value = "";
+        }}
+      >
+        reset csvToTx
+      </Button>
+      <Button
+        onClickAsync={async () => {
+          if (!appUser || csvTxArray.length < 1) return;
+
+          const txArray = csvTxArray.map((csvTx) =>
+            createTxFromChaseCSV(csvTx, appUser.id),
+          );
+          console.log("uploading txArray");
+          await createManyTx.mutateAsync(txArray);
+          await queryClient.tx.getAll.invalidate();
+          console.log("done");
+        }}
+      >
+        upload csvTx
+      </Button>
 
       <H2>DEBUG AREA</H2>
       <div className="flex flex-col gap-3">
