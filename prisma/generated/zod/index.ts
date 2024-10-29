@@ -223,12 +223,12 @@ export const TxSchema = z.object({
   originTxId: z.string().nullable(),
   recurring: z.boolean(),
   MDS: z.number().int(),
-  plaidId: z.string(),
+  plaidId: z.string().nullable(),
   name: z.string(),
   amount: z.number(),
   date: z.string(),
   datetime: z.string(),
-  accountId: z.string(),
+  accountId: z.string().nullable(),
   /**
    * [PlaidTx]
    */

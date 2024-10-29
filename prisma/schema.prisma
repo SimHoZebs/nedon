@@ -88,12 +88,12 @@ model Tx {
   MDS       Int //-1 = undetermined, 0 = Mandatory, 1 = Discretionary, 2 = Saving
 
   //duplicate fields from plaidTx because these are important enough to manipulate
-  plaidId   String @unique //plaid tranasction_id
+  plaidId   String? @unique //plaid tranasction_id
   name      String
   amount    Float
   date      String
   datetime  String
-  accountId String
+  accountId String?
 
   /// [PlaidTx]
   plaidTx Json?

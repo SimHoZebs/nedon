@@ -20,8 +20,8 @@ import {
 import { procedure, router } from "../trpc";
 import { client } from "../util";
 
-const createTxInDB = async (txClientSide: UnsavedTx): Promise<TxInDB> => {
-  return await db.tx.create({
+const createTxInDBInput = (txClientSide: UnsavedTx) => {
+  return {
     data: {
       ...txClientSide,
       originTxId: txClientSide.originTxId || undefined,
@@ -56,7 +56,7 @@ const createTxInDB = async (txClientSide: UnsavedTx): Promise<TxInDB> => {
         },
       },
     },
-  });
+  };
 };
 
 const txRouter = router({
@@ -145,10 +145,11 @@ const txRouter = router({
 
         // newly added txs gets created
         //FUTURE: make this somehow asynchoronous so users don't have to wait for all txs to be added to see their existing tx
-        for (const plaidTx of added) {
+        const txCreateQueryArray = added.map((plaidTx) => {
           const newTx = createTxFromPlaidTx(user.id, plaidTx);
-          await createTxInDB(newTx);
-        }
+          return db.tx.create(createTxInDBInput(newTx));
+        });
+        await prisma?.$transaction(txCreateQueryArray);
 
         const txArray: TxInDB[] = await db.tx.findMany({
           where: {
@@ -176,7 +177,7 @@ const txRouter = router({
           if (matchingTxIndex !== -1) {
             console.log("Somehow there is no matching tx?");
             const newTx = mergePlaidTxWithTx(txArray[matchingTxIndex], plaidTx);
-            createTxInDB(newTx).then();
+            db.tx.create(createTxInDBInput(newTx)).then();
           } else {
             const matchingTx = txArray[matchingTxIndex];
 
@@ -185,7 +186,7 @@ const txRouter = router({
                 id: matchingTx.id,
               },
               data: {
-                plaidId: matchingTx.plaidId,
+                plaidId: matchingTx.plaidId || undefined,
                 catArray: {
                   create: matchingTx.catArray.map((cat) => ({
                     name: cat.name,
@@ -254,10 +255,20 @@ const txRouter = router({
     }),
 
   create: procedure.input(UnsavedTxSchema).mutation(async ({ input }) => {
-    return await createTxInDB(input);
+    return await db.tx.create(createTxInDBInput(input));
   }),
 
-  update: procedure.input(UnsavedTxInDBSchema).mutation(async ({ input }) => {
+  createMany: procedure
+    .input(z.array(UnsavedTxSchema))
+    .mutation(async ({ input }) => {
+      const txCreateQueryArray = input.map((tx) => {
+        return db.tx.create(createTxInDBInput(tx));
+      });
+
+      return await db.$transaction(txCreateQueryArray);
+    }),
+
+  upsert: procedure.input(UnsavedTxInDBSchema).mutation(async ({ input }) => {
     const catToCreate = input.catArray.filter((cat) => !cat.id);
     const catToUpdate = input.catArray.filter((cat) => cat.id);
     const splitToCreate = input.splitArray.filter((split) => !split.id);
@@ -269,7 +280,7 @@ const txRouter = router({
         id: input.id,
       },
       data: {
-        plaidId: input.plaidId,
+        plaidId: input.plaidId || undefined,
         catArray: {
           createMany: {
             data: catToCreate.map((cat) => ({
@@ -326,7 +337,7 @@ const txRouter = router({
         id: input.id,
       },
       data: {
-        plaidId: newTx.plaidId,
+        plaidId: newTx.plaidId || undefined,
         catArray: {
           deleteMany: {},
         },
