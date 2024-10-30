@@ -28,10 +28,10 @@ const AccountModal = (props: Props) => {
   const sortedTxArray = useMemo(() => {
     if (!txArray.data) return [[[[]]]];
     const filteredTxArray = txArray.data.filter(
-      (tx) => tx.accountId === props.clickedAccount?.account_id,
+      (tx) => tx.accountId === props.clickedAccount.account_id,
     );
     return organizeTxByTime(filteredTxArray);
-  }, [props.clickedAccount?.account_id, txArray.data]);
+  }, [props.clickedAccount.account_id, txArray.data]);
 
   return (
     <div className="pointer-events-none absolute left-0 top-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">

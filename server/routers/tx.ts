@@ -268,7 +268,7 @@ const txRouter = router({
       return await db.$transaction(txCreateQueryArray);
     }),
 
-  upsert: procedure.input(UnsavedTxInDBSchema).mutation(async ({ input }) => {
+  update: procedure.input(UnsavedTxInDBSchema).mutation(async ({ input }) => {
     const catToCreate = input.catArray.filter((cat) => !cat.id);
     const catToUpdate = input.catArray.filter((cat) => cat.id);
     const splitToCreate = input.splitArray.filter((split) => !split.id);
