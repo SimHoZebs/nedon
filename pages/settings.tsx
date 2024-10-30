@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import Papa from "papaparse";
 import React, { type ChangeEvent, useRef } from "react";
 import { z } from "zod";
 
@@ -40,45 +41,22 @@ const Settings = () => {
       if (!text) return;
 
       if (typeof text === "string") {
-        const lines = text.split("\n");
+        const { data } = Papa.parse(text, {
+          header: true,
+          skipEmptyLines: true,
+          transformHeader: (header) => header.replace(/[^a-zA-Z]/g, ""),
+        });
 
-        const headers = lines[0].split(",");
+        console.log("data", data);
 
-        const txArray = lines.slice(1);
-        const txs: Record<string, string>[] = [];
-        for (const tx of txArray) {
-          const values = tx.replace(/\r$/, "").split(",");
-
-          //means its the last line, which is empty
-          if (values.length === 1) continue;
-
-          txs.push(
-            headers.reduce(
-              (tx, header, i) => {
-                //replace non alphabet characters with empty string
-                const cleanedHeader = header.replace(/[^a-zA-Z]/g, "");
-
-                //replace multiple spaces with single space
-                const value = values[i]
-                  .replace(/\s{2,}/g, " ")
-                  .replaceAll('"', "");
-
-                tx[cleanedHeader] = value;
-                return tx;
-              },
-              {} as Record<string, string>,
-            ),
-          );
-        }
-
-        const chaseTxArray = z.array(ChaseCSVTxSchema).safeParse(txs);
+        const chaseTxArray = z.array(ChaseCSVTxSchema).safeParse(data);
         if (!chaseTxArray.success) {
           console.error(chaseTxArray.error);
           return;
         }
 
         setCsvTxArray(chaseTxArray.data);
-        console.log(chaseTxArray.data[0]);
+        console.log(chaseTxArray.data);
       }
     };
 
