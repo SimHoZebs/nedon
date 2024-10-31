@@ -1,26 +1,36 @@
 import { AnimatePresence, motion } from "framer-motion";
 import type { NextPage } from "next";
+import Papa from "papaparse";
 import type { AccountBase } from "plaid";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { z } from "zod";
 
-import { ActionBtn } from "@/comp/Button";
+import { Button, SplitBtn, SplitBtnOptions } from "@/comp/Button";
 import DateRangePicker from "@/comp/DateRangePicker";
 import DateSortedTxList from "@/comp/DateSortedTxList";
 import { H2, H3 } from "@/comp/Heading";
 import AccountCard from "@/comp/home/AccountCard";
 import AccountModal from "@/comp/home/AccountModal";
+import CsvUploadPreviewModal from "@/comp/home/CsvUploadPreviewModal";
 import TxModalAndCalculator from "@/comp/tx/TxModalAndCalculator";
 
 import getAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
-import { getScopeIndex } from "@/util/tx";
+import { createTxFromChaseCSV, getScopeIndex } from "@/util/tx";
 import useDateRange from "@/util/useDateRange";
 
+import { ChaseCSVTxSchema, type UnsavedTx } from "@/types/tx";
+
 const User: NextPage = () => {
-  const [showModal, setShowModal] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  const [showTxModal, setShowTxModal] = useState(false);
+  const [showCsvUploadPreviewModal, setShowCsvUploadPreviewModal] =
+    useState(false);
   const [clickedAccount, setClickedAccount] = useState<AccountBase>();
   const [YMD, setYMD] = useState([-1, -1, -1]);
+  const [csvTxArray, setCsvTxArray] = React.useState<UnsavedTx[]>([]);
+  const csvInputRef = React.useRef<HTMLInputElement>(null);
 
   const { appUser } = getAppUser();
   const { date, setDate, rangeFormat, setRangeFormat } =
@@ -42,10 +52,10 @@ const User: NextPage = () => {
     <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700" />,
   );
 
-  const total = auth.data?.accounts.reduce((current, account) => {
-    account.balances.available && (current += account.balances.available);
-    return current;
-  }, 0);
+  const total = auth.data?.accounts.reduce(
+    (current, account) => current + (account.balances.available || 0),
+    0,
+  );
 
   useEffect(() => {
     if (!txArray.data) {
@@ -82,15 +92,39 @@ const User: NextPage = () => {
     }
   }, [txOragnizedByTimeArray, YMD, rangeFormat]);
 
+  const csvToTxArray = (text: string | ArrayBuffer) => {
+    //idk what to do with ArrayBuffer yet
+    if (typeof text !== "string" || !appUser) return;
+
+    const { data } = Papa.parse(text, {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: (header) => header.replace(/[^a-zA-Z]/g, ""),
+    });
+
+    const chaseTxArray = z.array(ChaseCSVTxSchema).safeParse(data);
+    if (!chaseTxArray.success) {
+      console.error(chaseTxArray.error);
+      return;
+    }
+
+    const txArray = chaseTxArray.data.map((csvTx) =>
+      createTxFromChaseCSV(csvTx, appUser.id),
+    );
+    return txArray;
+  };
+
   return (
     <div className="flex flex-col gap-y-10 lg:flex-row">
       <section className="flex h-full w-full flex-col items-center gap-y-3 lg:w-2/5">
-        {showModal && (
+        {(showAccountModal || showTxModal || showCsvUploadPreviewModal) && (
           <motion.div
             className="absolute left-0 top-0 z-[11] h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
             onMouseDown={(e) => {
               e.stopPropagation();
-              setShowModal(false);
+              setShowAccountModal(false);
+              setShowTxModal(false);
+              setShowCsvUploadPreviewModal(false);
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -99,11 +133,19 @@ const User: NextPage = () => {
         )}
 
         <AnimatePresence>
-          {showModal && clickedAccount && (
+          {showAccountModal && clickedAccount && (
             <AccountModal
-              setShowModal={setShowModal}
+              setShowModal={setShowAccountModal}
               clickedAccount={clickedAccount}
             />
+          )}
+
+          {showTxModal && (
+            <TxModalAndCalculator onClose={() => setShowTxModal(false)} />
+          )}
+
+          {showCsvUploadPreviewModal && (
+            <CsvUploadPreviewModal unsavedTxArray={csvTxArray} />
           )}
         </AnimatePresence>
 
@@ -123,7 +165,7 @@ const User: NextPage = () => {
                       key={account.account_id}
                       onClick={() => {
                         setClickedAccount(account);
-                        setShowModal(true);
+                        setShowAccountModal(true);
                       }}
                     >
                       <p>{account.name}</p>
@@ -152,25 +194,33 @@ const User: NextPage = () => {
       </section>
 
       <section className="flex w-full justify-center lg:w-3/5">
-        {showModal && (
-          <motion.div
-            className="absolute left-0 top-0 z-[11] h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              setShowModal(false);
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
-          />
-        )}
+        <input
+          type="file"
+          accept=".csv"
+          className="hidden"
+          ref={csvInputRef}
+          onChange={(e) => {
+            console.log("file uploaded");
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
 
-        <AnimatePresence>
-          {showModal && (
-            <TxModalAndCalculator onClose={() => setShowModal(false)} />
-          )}
-        </AnimatePresence>
+            reader.onload = async () => {
+              const result = reader.result;
+              if (!result) return;
 
+              const chaseTxArray = csvToTxArray(reader.result);
+
+              if (!chaseTxArray) return;
+
+              setCsvTxArray(chaseTxArray);
+              setShowCsvUploadPreviewModal(true);
+              console.log("completed");
+            };
+
+            reader.readAsText(file);
+          }}
+        />
         <div className="flex w-full max-w-md flex-col items-center gap-y-2">
           <div className="flex w-full justify-between">
             <DateRangePicker
@@ -180,20 +230,27 @@ const User: NextPage = () => {
               setRangeFormat={setRangeFormat}
             />
 
-            <ActionBtn
-              variant="primary"
-              onClick={() => {
-                setShowModal(true);
-              }}
-            >
-              + transaction
-            </ActionBtn>
+            <SplitBtn>
+              Add transaction
+              <SplitBtnOptions>
+                <Button
+                  onClick={() => {
+                    if (!csvInputRef.current) return;
+                    console.log("resetting");
+                    csvInputRef.current.value = "";
+                    csvInputRef.current?.click();
+                  }}
+                >
+                  Upload CSV
+                </Button>
+              </SplitBtnOptions>
+            </SplitBtn>
           </div>
 
           <DateSortedTxList
             YMD={YMD}
             rangeFormat={rangeFormat}
-            setShowModal={setShowModal}
+            setShowModal={setShowTxModal}
             sortedTxArray={sortedTxArray}
           />
         </div>
