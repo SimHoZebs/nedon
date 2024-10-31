@@ -35,7 +35,7 @@ const AccountModal = (props: Props) => {
 
   return (
     <div className="pointer-events-none absolute left-0 top-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
-      <Modal>
+      <Modal className="gap-y-2">
         <div className="flex h-full w-full flex-col items-end justify-between p-3">
           <CloseBtn onClose={() => props.setShowModal(false)} />
 

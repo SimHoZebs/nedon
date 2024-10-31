@@ -80,7 +80,7 @@ const TxModal = (props: Props) => {
 
   return (
     tx && (
-      <Modal>
+      <Modal className="gap-y-2">
         <div className="flex flex-col justify-between gap-y-2">
           <section className="flex w-full flex-col items-start justify-between gap-3 gap-y-2 px-3 pt-3 lg:flex-row">
             <div className="flex w-full flex-col gap-y-1 lg:w-fit">
