@@ -142,3 +142,40 @@ export const CloseBtn = (props: CloseBtnProps) => {
     </button>
   );
 };
+
+type SplitBtnProps = ButtonProps & {};
+
+export const SplitBtn = (props: SplitBtnProps) => {
+  const { children, className, onClickAsync, ...rest } = props;
+  const [showOptions, setShowOptions] = React.useState(false);
+
+  const childrenArray = React.Children.toArray(children);
+
+  return (
+    <div className="relative flex">
+      <Button className={`rounded-l-lg bg-indigo-500 ${className}`} {...rest}>
+        {childrenArray[0]}
+      </Button>
+      <div
+        className="flex cursor-pointer items-center justify-center rounded-r-lg border-l border-l-zinc-300 bg-indigo-500 p-1"
+        onClick={() => setShowOptions(!showOptions)}
+        onKeyUp={() => setShowOptions(!showOptions)}
+      >
+        <span className="icon-[mdi-light--chevron-down]" />
+        {showOptions && childrenArray[1]}
+      </div>
+    </div>
+  );
+};
+
+type SplitBtnOptionsProps = ButtonProps & {};
+
+export const SplitBtnOptions = (props: SplitBtnProps) => {
+  const { children, className, onClickAsync, ...rest } = props;
+
+  return (
+    <div className="absolute right-0 top-10 z-10 flex flex-col rounded-lg bg-zinc-800 p-1">
+      {children}
+    </div>
+  );
+};
