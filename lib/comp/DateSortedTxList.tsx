@@ -74,7 +74,7 @@ const DateSortedTxList = (props: Props) => {
             className="w-full flex-col gap-y-1 pb-1"
           >
             <ol className="flex flex-col gap-y-1">
-              {month.map((day, k) => (
+              {month?.map((day, k) => (
                 <li
                   className="flex w-full flex-col gap-y-1"
                   key={Math.random() * (k + 1)}

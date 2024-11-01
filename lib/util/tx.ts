@@ -170,7 +170,9 @@ export const getScopeIndex = (
   if (txOragnizedByTimeArray.length === 0) return [y, m, d];
 
   for (const [yIndex, year] of txOragnizedByTimeArray.entries()) {
-    const txDate = new Date(year[0][0][0].date);
+    const txDate = new Date(year?.[0]?.[0]?.[0]?.date);
+    if (Number.isNaN(txDate.getDate())) return [y, m, d];
+
     txDate.setDate(txDate.getDate() + 1);
     if (txDate.getFullYear() === date.getFullYear()) {
       y = yIndex;
