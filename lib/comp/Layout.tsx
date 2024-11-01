@@ -1,7 +1,7 @@
 import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/router";
 import type React from "react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import getAppUser from "@/util/getAppUser";
 import { useLocalStore, useStore } from "@/util/store";
@@ -20,11 +20,9 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
   const { appUser, allUsers } = getAppUser();
 
+  const txGetAllRetryCount = useRef(0);
   const setUserId = useLocalStore((state) => state.setUserId);
   const setScreenType = useStore((state) => state.setScreenType);
-  const txOragnizedByTimeArray = useStore(
-    (state) => state.txOragnizedByTimeArray,
-  );
   const setTxOragnizedByTimeArray = useStore(
     (state) => state.setTxOragnizedByTimeArray,
   );
@@ -56,7 +54,9 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
         id: user.id,
       });
 
-      queryClient.user.getAll.invalidate();
+      await queryClient.user.invalidate();
+      await queryClient.auth.invalidate();
+      console.log("User created with Plaid");
     };
 
     if (
@@ -75,25 +75,51 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
     allUsers.isFetching,
     appUser,
     createUser,
-    queryClient.user.getAll,
+    queryClient.user,
+    queryClient.auth,
     sandboxPublicToken,
     setAccessToken,
     updateUser,
   ]);
 
   useEffect(() => {
-    if (txArray.data) {
-      console.log("updating txOragnizedByTimeArray");
-      const response = organizeTxByTime(txArray.data);
-      setTxOragnizedByTimeArray(response);
-    }
-  }, [txArray.data, setTxOragnizedByTimeArray]);
+    const yeet = async () => {
+      if (!appUser?.hasAccessToken) return;
+
+      //undefined cursor should should give user txs for sandbox accounts
+      while (
+        !appUser.cursor &&
+        txGetAllRetryCount.current < 3 &&
+        ((txArray.data && txArray.data.length < 1) || txArray.data === null)
+      ) {
+        console.log("No transactions found. Retrying...");
+
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        txGetAllRetryCount.current += 3;
+        await queryClient.tx.getAll.invalidate();
+      }
+
+      if (txArray.data) {
+        console.log("updating txOragnizedByTimeArray");
+        const response = organizeTxByTime(txArray.data);
+        setTxOragnizedByTimeArray(response);
+      }
+    };
+
+    yeet();
+  }, [
+    appUser,
+    txArray.data,
+    queryClient.tx.getAll,
+    appUser?.cursor,
+    setTxOragnizedByTimeArray,
+  ]);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null;
 
     //it's not like users will constantly change screen type, but...
-    const trackScreenType = (e: UIEvent) => {
+    const trackScreenType = () => {
       // throttle
       if (timeoutId) {
         return;

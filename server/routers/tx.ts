@@ -255,7 +255,7 @@ const txRouter = router({
           }
         }
 
-        console.log("returning txArray");
+        console.log("returning txArray", txArray.length);
         return txArray;
       } catch (error) {
         console.log(error);
