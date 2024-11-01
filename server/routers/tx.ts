@@ -1,3 +1,4 @@
+import type { User } from "@prisma/client";
 import {
   PlaidErrorType,
   type RemovedTransaction,
@@ -7,7 +8,7 @@ import {
 import { z } from "zod";
 
 import db from "@/util/db";
-import { createTxFromPlaidTx, mergePlaidTxWithTx, resetTx } from "@/util/tx";
+import { createTxFromPlaidTx, resetTx } from "@/util/tx";
 
 import {
   type TxInDB,
@@ -19,6 +20,72 @@ import {
 
 import { procedure, router } from "../trpc";
 import { client } from "../util";
+
+const txSync = async (user: User) => {
+  if (!user.ACCESS_TOKEN) {
+    console.log("No access token for user");
+    return null;
+  }
+
+  // New tx updates since "cursor"
+  let added: Transaction[] = [];
+  let modified: Transaction[] = [];
+  // Removed tx ids
+  let removed: RemovedTransaction[] = [];
+  let cursor = user.cursor || undefined;
+  let totalCount = 100;
+  let hasMore = true;
+
+  while (hasMore && totalCount > 0) {
+    const request: TransactionsSyncRequest = {
+      access_token: user.ACCESS_TOKEN,
+      cursor: cursor,
+      count: totalCount,
+    };
+
+    try {
+      console.log(
+        `syncing ${request.count} transactions with cursor ${request.cursor} and accessToken ${request.access_token}`,
+      );
+      const response = await client.transactionsSync(request);
+      const data = response.data;
+      // Add this page of results
+      added = added.concat(data.added);
+      modified = modified.concat(data.modified);
+      removed = removed.concat(data.removed);
+      totalCount =
+        totalCount -
+        data.added.length -
+        data.modified.length -
+        data.removed.length;
+
+      hasMore = data.has_more;
+
+      // Update cursor to the next cursor
+      cursor = data.next_cursor;
+    } catch (error) {
+      if (
+        // biome-ignore lint/suspicious/noExplicitAny: because fuck making types for stupid errors
+        (error as any).response.data.error_type ===
+        PlaidErrorType.TransactionError
+      ) {
+        console.log(
+          `${PlaidErrorType.TransactionError}, Resetting sync cursor`,
+        );
+        cursor = user.cursor || undefined;
+      } else {
+        console.log("Error in transactionsSync: ", error);
+        return null;
+      }
+    }
+  }
+  return {
+    added,
+    modified,
+    removed,
+    cursor,
+  };
+};
 
 const createTxInDBInput = (txClientSide: UnsavedTx) => {
   return {
@@ -88,58 +155,24 @@ const txRouter = router({
     .query(async ({ input }) => {
       try {
         const user = await db.user.findFirst({ where: { id: input.id } });
-        if (!user || !user.ACCESS_TOKEN) return null;
-
-        // New tx updates since "cursor"
-        let added: Transaction[] = [];
-        let modified: Transaction[] = [];
-        // Removed tx ids
-        let removed: RemovedTransaction[] = [];
-        let hasMore = true;
-        let cursor = user.cursor || undefined;
-        let totalCount = 100;
+        if (!user) {
+          console.log("No user found with id: ", input.id);
+          return null;
+        }
 
         // Iterate through each page of new tx updates for item
-        while (hasMore && totalCount > 0) {
-          const request: TransactionsSyncRequest = {
-            access_token: user.ACCESS_TOKEN,
-            cursor: cursor,
-            count: totalCount,
-          };
+        const txSyncResponse = await txSync(user);
+        if (!txSyncResponse) return null;
 
-          try {
-            const response = await client.transactionsSync(request);
-            const data = response.data;
-            // Add this page of results
-            added = added.concat(data.added);
-            modified = modified.concat(data.modified);
-            removed = removed.concat(data.removed);
-            totalCount =
-              totalCount -
-              data.added.length -
-              data.modified.length -
-              data.removed.length;
+        const { added, modified, removed, cursor } = txSyncResponse;
 
-            hasMore = data.has_more;
+        console.log(
+          `added: ${added.length}, modified: ${modified.length}, removed: ${removed.length}`,
+        );
 
-            // Update cursor to the next cursor
-            cursor = data.next_cursor;
-          } catch (error) {
-            if (
-              // biome-ignore lint/suspicious/noExplicitAny: because fuck making types for stupid errors
-              (error as any).response.data.error_type ===
-              PlaidErrorType.TransactionError
-            ) {
-              console.log(
-                `${PlaidErrorType.TransactionError}, Resetting sync cursor`,
-              );
-              cursor = user.cursor || undefined;
-            } else {
-              console.log("Error in transactionsSync: ", error);
-              return null;
-            }
-          }
-        }
+        //at the moment it's impossible to have no cursor and have nothing added.
+        // In the future, this would be a valid condition if the user just created an account without linking their bank account.
+        if (!cursor && added.length < 1) return null;
 
         // update cursor in db asynchonously
         db.user
@@ -155,7 +188,7 @@ const txRouter = router({
           const newTx = createTxFromPlaidTx(user.id, plaidTx);
           return db.tx.create(createTxInDBInput(newTx));
         });
-        await prisma?.$transaction(txCreateQueryArray);
+        await db.$transaction(txCreateQueryArray);
 
         const txArray: TxInDB[] = await db.tx.findMany({
           where: {
@@ -181,34 +214,31 @@ const txRouter = router({
             (tx) => tx.plaidId === plaidTx.transaction_id,
           );
           if (matchingTxIndex !== -1) {
-            console.log("Somehow there is no matching tx?");
-            const newTx = mergePlaidTxWithTx(txArray[matchingTxIndex], plaidTx);
-            db.tx.create(createTxInDBInput(newTx)).then();
-          } else {
-            const matchingTx = txArray[matchingTxIndex];
-
-            await db.tx.update({
-              where: {
-                id: matchingTx.id,
-              },
-              data: {
-                plaidId: matchingTx.plaidId || undefined,
-                catArray: {
-                  create: matchingTx.catArray.map((cat) => ({
-                    name: cat.name,
-                    nameArray: cat.nameArray,
-                    amount: cat.amount,
-                  })),
-                },
-                splitArray: {
-                  create: matchingTx.splitArray.map((split) => ({
-                    userId: split.userId,
-                    amount: split.amount,
-                  })),
-                },
-              },
-            });
+            throw new Error(`Somehow there is no matching tx for ${plaidTx}`);
           }
+          const matchingTx = txArray[matchingTxIndex];
+
+          await db.tx.update({
+            where: {
+              id: matchingTx.id,
+            },
+            data: {
+              plaidId: matchingTx.plaidId || undefined,
+              catArray: {
+                create: matchingTx.catArray.map((cat) => ({
+                  name: cat.name,
+                  nameArray: cat.nameArray,
+                  amount: cat.amount,
+                })),
+              },
+              splitArray: {
+                create: matchingTx.splitArray.map((split) => ({
+                  userId: split.userId,
+                  amount: split.amount,
+                })),
+              },
+            },
+          });
         }
 
         for (const plaidTx of removed) {
@@ -225,6 +255,7 @@ const txRouter = router({
           }
         }
 
+        console.log("returning txArray");
         return txArray;
       } catch (error) {
         console.log(error);
