@@ -97,13 +97,14 @@ const txRouter = router({
         let removed: RemovedTransaction[] = [];
         let hasMore = true;
         let cursor = user.cursor || undefined;
+        let totalCount = 100;
 
         // Iterate through each page of new tx updates for item
-        while (hasMore) {
+        while (hasMore && totalCount > 0) {
           const request: TransactionsSyncRequest = {
             access_token: user.ACCESS_TOKEN,
             cursor: cursor,
-            count: 50,
+            count: totalCount,
           };
 
           try {
@@ -113,6 +114,11 @@ const txRouter = router({
             added = added.concat(data.added);
             modified = modified.concat(data.modified);
             removed = removed.concat(data.removed);
+            totalCount =
+              totalCount -
+              data.added.length -
+              data.modified.length -
+              data.removed.length;
 
             hasMore = data.has_more;
 
