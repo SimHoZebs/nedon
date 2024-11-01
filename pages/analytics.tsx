@@ -73,7 +73,7 @@ const Page = () => {
   const treedCatWithTxArray = useMemo(() => {
     const [y, m, d] = YMD;
 
-    if (y === -1) return [];
+    if (y === -1 || !txOragnizedByTimeArray[y][m]) return [];
 
     const organizedTxByCatArray = organizeTxByCat(
       txOragnizedByTimeArray[y][m].flat(),

@@ -51,7 +51,7 @@ const setAccessToken = async ({
     include: {
       myConnectionArray: true,
     },
-    data: { ...userUpdateData },
+    data: userUpdateData,
   });
 
   return stripUserSecrets(user);
@@ -97,7 +97,7 @@ export const appRouter = router({
       }),
     )
     .mutation(async ({ input }) => {
-      return setAccessToken(input);
+      return await setAccessToken(input);
     }),
 
   // Retrieve ACH or ETF Auth data for an Item's accounts

@@ -22,7 +22,7 @@ import useDateRange from "@/util/useDateRange";
 
 import { ChaseCSVTxSchema, type UnsavedTx } from "@/types/tx";
 
-const User: NextPage = () => {
+const Home: NextPage = () => {
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [showTxModal, setShowTxModal] = useState(false);
   const [showCsvUploadPreviewModal, setShowCsvUploadPreviewModal] =
@@ -259,4 +259,4 @@ const User: NextPage = () => {
   );
 };
 
-export default User;
+export default Home;
