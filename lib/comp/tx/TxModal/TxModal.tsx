@@ -78,6 +78,22 @@ const TxModal = (props: Props) => {
     setIsEditingSplit(false);
   };
 
+  const accountName = auth.isLoading
+    ? ""
+    : (auth.data as unknown as AuthGetResponse).accounts.find(
+        (account) => account.account_id === tx?.accountId,
+      )?.name || "";
+
+  const AccountName = ({ desktop }: { desktop: boolean }) => (
+    <p
+      className={`${desktop ? "hidden lg:block" : "lg:hidden"} h-6 w-40 text-xs font-light text-zinc-400 md:text-sm ${
+        auth.isLoading && "animate-pulse rounded-lg bg-zinc-700"
+      } `}
+    >
+      {accountName}
+    </p>
+  );
+
   return (
     tx && (
       <Modal className="gap-y-2">
@@ -110,21 +126,10 @@ const TxModal = (props: Props) => {
                   }}
                 />
               </div>
-
-              <p
-                className={`h-6 w-40 rounded-lg font-light ${
-                  auth.isLoading && "animate-pulse bg-zinc-700"
-                } `}
-              >
-                {auth.isLoading
-                  ? ""
-                  : (auth.data as unknown as AuthGetResponse).accounts.find(
-                      (account) => account.account_id === tx.accountId,
-                    )?.name || ""}
-              </p>
+              <AccountName desktop={true} />
             </div>
 
-            <div className="flex flex-col items-start text-sm font-light text-zinc-400 lg:items-end">
+            <div className="flex w-full flex-col items-start text-xs font-light text-zinc-400 md:text-sm lg:w-auto lg:items-end">
               <CloseBtn
                 isForDesktop
                 onClose={() => {
@@ -132,21 +137,27 @@ const TxModal = (props: Props) => {
                   props.onClose();
                 }}
               />
-              <p>
-                Authorized at{" "}
-                {tx.plaidTx?.authorized_date || "1970-01-23 12:34:56"}
-              </p>
-              <p>Posted at {tx.date || "1970-01-23 12:34:56"}</p>
 
-              {tx.plaidTx?.location.address && (
-                <div className="flex">
-                  <span className="icon-[mdi--location-on-outline]" />
+              <div className="flex w-full justify-between">
+                <AccountName desktop={false} />
+                <div className="flex flex-col items-end">
                   <p>
-                    {tx.plaidTx?.location.address &&
-                      JSON.stringify(tx.plaidTx?.location)}
+                    Authorized at{" "}
+                    {tx.plaidTx?.authorized_date || "1970-01-23 12:34:56"}
                   </p>
+                  <p>Posted at {tx.date || "1970-01-23 12:34:56"}</p>
+
+                  {tx.plaidTx?.location.address && (
+                    <div className="flex">
+                      <span className="icon-[mdi--location-on-outline]" />
+                      <p>
+                        {tx.plaidTx?.location.address &&
+                          JSON.stringify(tx.plaidTx?.location)}
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </section>
 
