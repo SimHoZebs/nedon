@@ -74,19 +74,19 @@ const DateSortedTxList = (props: Props) => {
             className="w-full flex-col gap-y-1 pb-1"
           >
             <ol className="flex flex-col gap-y-1">
-              {month?.map((day, k) => (
-                <li
-                  className="flex w-full flex-col gap-y-1"
-                  key={Math.random() * (k + 1)}
-                >
-                  <H3>{day[0]?.date.slice(8)}</H3>
-                  <ol className="flex flex-col">
-                    {day.length === 0 ? (
-                      <div>
-                        No tx this month! That{"'"}s a good thing, right?
-                      </div>
-                    ) : (
-                      day.map(
+              {month.map((day, k) =>
+                day.length === 0 ? (
+                  <div key={Math.random() * (k + 1)}>
+                    No tx this month! That{"'"}s a good thing, right?
+                  </div>
+                ) : (
+                  <li
+                    className="flex w-full flex-col gap-y-1"
+                    key={Math.random() * (k + 1)}
+                  >
+                    <H3>{day[0].date.slice(8)}</H3>
+                    <ol className="flex flex-col">
+                      {day.map(
                         (tx, l) =>
                           tx && (
                             <TxCard
@@ -95,11 +95,11 @@ const DateSortedTxList = (props: Props) => {
                               key={tx.plaidId}
                             />
                           ),
-                      )
-                    )}
-                  </ol>
-                </li>
-              ))}
+                      )}
+                    </ol>
+                  </li>
+                ),
+              )}
             </ol>
           </li>
         )),

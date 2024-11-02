@@ -77,15 +77,15 @@ const Home: NextPage = () => {
   const sortedTxArray = useMemo(() => {
     const [y, m, d] = YMD;
 
-    // Typically means dateRange hasn't been set yet
-    if (y === -1) return [[[[]]]];
-
     switch (rangeFormat) {
       case "year":
+        if (y === -1) return [[[[]]]];
         return [txOragnizedByTimeArray[y]];
       case "month":
+        if (m === -1) return [[[[]]]];
         return [[txOragnizedByTimeArray[y][m]]];
       case "date":
+        if (d === -1) return [[[[]]]];
         return [[[txOragnizedByTimeArray[y][m][d]]]];
       default:
         return txOragnizedByTimeArray;

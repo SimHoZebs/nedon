@@ -45,7 +45,10 @@ const LineGraph = (props: Props) => {
     } else {
       const [y, m, d] = props.YMD;
 
-      if (y === -1) return;
+      if (y === -1 || m === -1) {
+        setDailyTxSumArray([]);
+        return;
+      }
       const thisMonthTxArray = txOragnizedByTimeArray[y][m];
       // Get the number of days in the month
       const date = new Date(

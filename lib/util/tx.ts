@@ -181,6 +181,7 @@ export const getScopeIndex = (
   }
 
   if (rangeFormat === "year") return [y, m, d];
+  if (y == -1) return [y, m, d];
 
   for (const [mIndex, month] of txOragnizedByTimeArray[y].entries()) {
     const txDate = new Date(month[0][0].date);
@@ -192,6 +193,7 @@ export const getScopeIndex = (
   }
 
   if (rangeFormat === "month") return [y, m, d];
+  if (m === -1) return [y, m, d];
 
   for (const [dIndex, dateArray] of txOragnizedByTimeArray[y][m].entries()) {
     const txDate = new Date(dateArray[0].date);
