@@ -28,6 +28,7 @@ const CatPicker = forwardRef(
       staleTime: Number.POSITIVE_INFINITY,
     });
     const queryClient = trpc.useUtils();
+    const revertToTxInDB = useTxStore((state) => state.revertToTxInDB);
 
     const tx = useTxStore((state) => state.txOnModal);
     const catArray = tx?.catArray || [];
@@ -41,6 +42,7 @@ const CatPicker = forwardRef(
 
     const resetPicker = () => {
       setCurrentNameArray([]);
+      revertToTxInDB();
 
       if (!catOptionArray.data) {
         console.error(

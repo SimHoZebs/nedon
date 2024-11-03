@@ -29,7 +29,7 @@ interface Store {
    * Only use this function when new data is expected from the database.
    * Refreshes client data with database data after it processed client's update.
    */
-  resetTx: () => void;
+  revertToTxInDB: () => void;
 
   //catArray
   hasEditedCatArray: boolean;
@@ -89,7 +89,7 @@ export const useTxStore = create<Store>()(
         });
       },
 
-      resetTx: () =>
+      revertToTxInDB: () =>
         set((store) => {
           if (!store.txOnModalIndex) return store;
           const [y, m, d, i] = store.txOnModalIndex;

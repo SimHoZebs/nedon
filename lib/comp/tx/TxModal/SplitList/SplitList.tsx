@@ -27,7 +27,7 @@ const SplitList = (props: Props) => {
   });
   const deleteSplit = trpc.split.delete.useMutation();
   const queryClient = trpc.useUtils();
-  const resetTx = useTxStore((state) => state.resetTx);
+  const revertToTxInDB = useTxStore((state) => state.revertToTxInDB);
 
   const { appUser } = getAppUser();
   const isEditingSplit = useTxStore((state) => state.isEditingSplit);
@@ -120,7 +120,7 @@ const SplitList = (props: Props) => {
                       console.error("Can't reset splitArray. tx is undefined");
                       return;
                     }
-                    resetTx();
+                    revertToTxInDB();
                     setCatArray(tx.catArray);
                     const splitAmountArray = tx.splitArray.map((split) =>
                       split.amount.toString(),

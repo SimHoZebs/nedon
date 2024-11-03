@@ -43,7 +43,7 @@ const TxModal = (props: Props) => {
   const queryClient = trpc.useUtils();
   const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
 
-  const resetTxOnModal = useTxStore((state) => state.resetTx);
+  const resetTxOnModal = useTxStore((state) => state.revertToTxInDB);
   const setSplitAmountDisplayArray = useTxStore(
     (state) => state.setSplitAmountDisplayArray,
   );
@@ -165,7 +165,7 @@ const TxModal = (props: Props) => {
             <div className="flex flex-col gap-y-3">
               <div className="flex flex-col gap-x-3 gap-y-1 md:flex-row md:items-center md:justify-between">
                 <div className="flex">
-                  <H1 className="px-3">${amount * -1}</H1>
+                  <H1>${amount * -1}</H1>
                   {appUser?.myConnectionArray &&
                     appUser.myConnectionArray.length > 0 &&
                     focusedIndex === undefined &&
