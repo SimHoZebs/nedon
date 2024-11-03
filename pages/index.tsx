@@ -115,7 +115,7 @@ const Home: NextPage = () => {
   };
 
   return (
-    <div className="flex flex-col gap-y-10 lg:flex-row">
+    <div className="flex h-full flex-col gap-y-10 lg:flex-row lg:overflow-hidden">
       <section className="flex h-full w-full flex-col items-center gap-y-3 lg:w-2/5">
         {(showAccountModal || showTxModal || showCsvUploadPreviewModal) && (
           <motion.div
