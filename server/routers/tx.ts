@@ -13,13 +13,12 @@ import { createTxFromPlaidTx, resetTx } from "@/util/tx";
 import {
   type TxInDB,
   TxInDBSchema,
-  type UnsavedTx,
   UnsavedTxInDBSchema,
   UnsavedTxSchema,
 } from "@/types/tx";
 
 import { procedure, router } from "../trpc";
-import { client } from "../util";
+import { client, createCatInput, createTxInDBInput, txInclude } from "../util";
 
 const txSync = async (user: User) => {
   if (!user.ACCESS_TOKEN) {
@@ -87,45 +86,6 @@ const txSync = async (user: User) => {
   };
 };
 
-const createTxInDBInput = (txClientSide: UnsavedTx) => {
-  return {
-    data: {
-      ...txClientSide,
-      originTxId: txClientSide.originTxId || undefined,
-      plaidTx: txClientSide.plaidTx || undefined,
-      receipt: txClientSide.receipt
-        ? {
-            create: {
-              ...txClientSide.receipt,
-              items: {
-                createMany: { data: txClientSide.receipt.items },
-              },
-            },
-          }
-        : undefined,
-      splitArray: {
-        create: txClientSide.splitArray.map(({ originTxId, ...split }) => ({
-          ...split,
-        })),
-      },
-      catArray: {
-        create: txClientSide.catArray.map(({ txId, ...cat }) => ({
-          ...cat,
-        })),
-      },
-    },
-    include: {
-      catArray: true,
-      splitArray: true,
-      receipt: {
-        include: {
-          items: true,
-        },
-      },
-    },
-  };
-};
-
 const txRouter = router({
   getWithoutPlaid: procedure
     .input(z.object({ userId: z.string(), txId: z.string() }))
@@ -134,15 +94,7 @@ const txRouter = router({
         where: {
           id: input.txId,
         },
-        include: {
-          catArray: true,
-          splitArray: true,
-          receipt: {
-            include: {
-              items: true,
-            },
-          },
-        },
+        include: txInclude,
       });
 
       if (!txInDB) return null;
@@ -151,7 +103,7 @@ const txRouter = router({
     }),
 
   getAll: procedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string(), date: z.string() }))
     .query(async ({ input }) => {
       try {
         const user = await db.user.findFirst({ where: { id: input.id } });
@@ -195,17 +147,10 @@ const txRouter = router({
             OR: [
               { userId: user.id },
               { splitArray: { some: { userId: user.id } } },
+              { recurring: true, userId: user.id, date: {} },
             ],
           },
-          include: {
-            catArray: true,
-            splitArray: true,
-            receipt: {
-              include: {
-                items: true,
-              },
-            },
-          },
+          include: txInclude,
         });
 
         // modified txs gets updated and removed txs gets deleted
@@ -279,15 +224,7 @@ const txRouter = router({
           userId: input.id,
         },
 
-        include: {
-          catArray: true,
-          splitArray: true,
-          receipt: {
-            include: {
-              items: true,
-            },
-          },
-        },
+        include: txInclude,
       });
     }),
 
@@ -306,10 +243,12 @@ const txRouter = router({
     }),
 
   update: procedure.input(UnsavedTxInDBSchema).mutation(async ({ input }) => {
-    const catToCreate = input.catArray.filter((cat) => !cat.id);
-    const catToUpdate = input.catArray.filter((cat) => cat.id);
-    const splitToCreate = input.splitArray.filter((split) => !split.id);
-    const splitToUpdate = input.splitArray.filter((split) => split.id);
+    const { catArray, splitArray, ...rest } = input;
+    const { receipt, plaidTx, ...useful } = rest;
+    const catToCreate = catArray.filter((cat) => !cat.id);
+    const catToUpdate = catArray.filter((cat) => cat.id);
+    const splitToCreate = splitArray.filter((split) => !split.id);
+    const splitToUpdate = splitArray.filter((split) => split.id);
     console.log("input", input);
 
     const tx = await db.tx.update({
@@ -317,14 +256,13 @@ const txRouter = router({
         id: input.id,
       },
       data: {
+        ...useful,
         plaidId: input.plaidId || undefined,
         catArray: {
           createMany: {
-            data: catToCreate.map((cat) => ({
-              name: cat.name,
-              nameArray: cat.nameArray,
-              amount: cat.amount,
-            })),
+            data: catToCreate.map((cat) =>
+              createCatInput({ ...cat, txId: input.id }),
+            ),
           },
           updateMany: catToUpdate.map((cat) => ({
             where: { id: cat.id },
@@ -352,15 +290,7 @@ const txRouter = router({
           })),
         },
       },
-      include: {
-        catArray: true,
-        splitArray: true,
-        receipt: {
-          include: {
-            items: true,
-          },
-        },
-      },
+      include: txInclude,
     });
 
     return tx;
@@ -413,15 +343,7 @@ const txRouter = router({
       where: {
         id: input.id,
       },
-      include: {
-        catArray: true,
-        splitArray: true,
-        receipt: {
-          include: {
-            items: true,
-          },
-        },
-      },
+      include: txInclude,
     });
   }),
 

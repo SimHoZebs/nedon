@@ -1,10 +1,15 @@
+import type { User } from "@prisma/client";
 import type { Transaction } from "plaid";
 
 import type { TreedCatWithTx } from "@/types/cat";
 import type { ChaseCSVTx, TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
+import { UserClientSide } from "@/types/types";
 
 import { createNewCat, fillArrayByCat } from "./cat";
+import getAppUser from "./getAppUser";
 import { createNewSplit } from "./split";
+import { useStore } from "./store";
+import { trpc } from "./trpc";
 
 export const resetTx = (tx: TxInDB): UnsavedTxInDB => ({
   ...tx,
@@ -181,7 +186,7 @@ export const getScopeIndex = (
   }
 
   if (rangeFormat === "year") return [y, m, d];
-  if (y == -1) return [y, m, d];
+  if (y === -1) return [y, m, d];
 
   for (const [mIndex, month] of txOragnizedByTimeArray[y].entries()) {
     const txDate = new Date(month[0][0].date);
@@ -214,3 +219,17 @@ export const txTypeArray: ["spending", "received", "transfers"] = [
 ];
 
 export type TxType = (typeof txTypeArray)[number];
+
+export const useTxGetAll = () => {
+  const { appUser } = getAppUser();
+  const datetime = useStore((store) => store.datetime);
+
+  const txArray = trpc.tx.getAll.useQuery(
+    {
+      id: appUser ? appUser.id : "",
+      date: datetime || new Date(Date.now()).toString(),
+    },
+    { staleTime: 3600000, enabled: appUser?.hasAccessToken && !!datetime },
+  );
+  return txArray;
+};

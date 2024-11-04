@@ -18,6 +18,7 @@ import {
   getScopeIndex,
   organizeTxByCat,
   txTypeArray as txTypes,
+  useTxGetAll,
 } from "@/util/tx";
 import type { TxType } from "@/util/tx";
 import useDateRange from "@/util/useDateRange";
@@ -31,10 +32,7 @@ const Page = () => {
   );
   const [YMD, setYMD] = useState<[number, number, number]>([-1, -1, -1]);
 
-  const txArray = trpc.tx.getAll.useQuery(
-    { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: !!appUser },
-  );
+  const txArray = useTxGetAll();
   const catAllSettings = trpc.cat.getAllSettings.useQuery(appUser?.id || "", {
     enabled: !!appUser,
   });

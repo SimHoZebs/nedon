@@ -2,6 +2,7 @@ import type React from "react";
 
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
+import { useTxGetAll } from "@/util/tx";
 import { useTxStore } from "@/util/txStore";
 
 import type { TxInDB } from "@/types/tx";
@@ -17,12 +18,7 @@ interface Props {
 }
 
 const DateSortedTxList = (props: Props) => {
-  const { appUser } = getAppUser();
-
-  const txArray = trpc.tx.getAll.useQuery(
-    { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken },
-  );
+  const txArray = useTxGetAll();
   const setTxOnModal = useTxStore((state) => state.setTxOnModal);
   const setTxOnModalIndex = useTxStore((state) => state.setTxOnModalIndex);
 

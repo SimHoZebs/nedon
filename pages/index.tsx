@@ -17,7 +17,7 @@ import TxModalAndCalculator from "@/comp/tx/TxModalAndCalculator";
 import getAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
-import { createTxFromChaseCSV, getScopeIndex } from "@/util/tx";
+import { createTxFromChaseCSV, getScopeIndex, useTxGetAll } from "@/util/tx";
 import useDateRange from "@/util/useDateRange";
 
 import { ChaseCSVTxSchema, type UnsavedTx } from "@/types/tx";
@@ -40,10 +40,8 @@ const Home: NextPage = () => {
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );
-  const txArray = trpc.tx.getAll.useQuery(
-    { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken },
-  );
+
+  const txArray = useTxGetAll();
   const txOragnizedByTimeArray = useStore(
     (store) => store.txOragnizedByTimeArray,
   );

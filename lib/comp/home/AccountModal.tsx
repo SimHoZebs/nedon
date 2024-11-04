@@ -5,8 +5,9 @@ import { useMemo } from "react";
 import Modal from "@/comp/Modal";
 
 import getAppUser from "@/util/getAppUser";
+import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
-import { organizeTxByTime } from "@/util/tx";
+import { organizeTxByTime, useTxGetAll } from "@/util/tx";
 
 import { CloseBtn } from "../Button";
 import DateSortedTxList from "../DateSortedTxList";
@@ -18,12 +19,7 @@ interface Props {
 }
 
 const AccountModal = (props: Props) => {
-  const { appUser } = getAppUser();
-
-  const txArray = trpc.tx.getAll.useQuery(
-    { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken },
-  );
+  const txArray = useTxGetAll();
 
   const sortedTxArray = useMemo(() => {
     if (!txArray.data) return [[[[]]]];

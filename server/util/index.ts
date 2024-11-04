@@ -5,6 +5,9 @@ import {
   PlaidEnvironments,
   Products,
 } from "plaid";
+import type { CatOptionalDefaults } from "prisma/generated/zod";
+
+import type { UnsavedTx } from "@/types/tx";
 
 const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
@@ -51,3 +54,48 @@ const configuration = new Configuration({
 });
 
 export const client = new PlaidApi(configuration);
+
+export const createCatInput = (cat: CatOptionalDefaults) => {
+  return { name: cat.name, nameArray: cat.nameArray, amount: cat.amount };
+};
+
+export const txInclude = {
+  catArray: true,
+  splitArray: true,
+  receipt: {
+    include: {
+      items: true,
+    },
+  },
+};
+
+export const createTxInDBInput = (txClientSide: UnsavedTx) => {
+  return {
+    data: {
+      ...txClientSide,
+      originTxId: txClientSide.originTxId || undefined,
+      plaidTx: txClientSide.plaidTx || undefined,
+      receipt: txClientSide.receipt
+        ? {
+            create: {
+              ...txClientSide.receipt,
+              items: {
+                createMany: { data: txClientSide.receipt.items },
+              },
+            },
+          }
+        : undefined,
+      splitArray: {
+        create: txClientSide.splitArray.map(({ originTxId, ...split }) => ({
+          ...split,
+        })),
+      },
+      catArray: {
+        create: txClientSide.catArray.map(({ txId, ...cat }) => ({
+          ...cat,
+        })),
+      },
+    },
+    include: txInclude,
+  };
+};
