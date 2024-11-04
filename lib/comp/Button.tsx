@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { NextRouter } from "next/router";
 import React from "react";
 import { twMerge } from "tailwind-merge";
@@ -80,13 +81,13 @@ interface NavBtnProps extends ButtonProps {
 
 export const NavBtn = (props: NavBtnProps) => {
   return (
-    <Button
-      className={`group justify-center gap-x-2 p-3 hover:bg-indigo-200 hover:bg-opacity-5 hover:text-indigo-200 sm:w-full sm:justify-start ${
+    <Link
+      className={`group flex justify-center gap-x-2 p-3 text-sm transition-all hover:bg-indigo-200 hover:bg-opacity-5 hover:text-indigo-200 sm:w-full sm:justify-start ${
         props.router.pathname === props.route
           ? "bg-indigo-200 bg-opacity-20 text-indigo-200"
           : "text-zinc-300"
       }`}
-      onClick={() => props.router.push(props.route)}
+      href={props.route}
     >
       {props.icon && (
         <span
@@ -98,7 +99,7 @@ export const NavBtn = (props: NavBtnProps) => {
         />
       )}
       <p className="hidden items-center sm:flex">{props.children}</p>
-    </Button>
+    </Link>
   );
 };
 
