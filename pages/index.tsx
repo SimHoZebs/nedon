@@ -33,8 +33,7 @@ const Home: NextPage = () => {
   const csvInputRef = React.useRef<HTMLInputElement>(null);
 
   const { appUser } = getAppUser();
-  const { date, setDate, rangeFormat, setRangeFormat } =
-    useDateRange(undefined);
+  const { date, setDate, rangeFormat, setRangeFormat } = useDateRange();
 
   const auth = trpc.auth.useQuery(
     { id: appUser ? appUser.id : "" },

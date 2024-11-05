@@ -50,7 +50,7 @@ interface Store {
   screenType: "mobile" | "tablet" | "desktop";
   setScreenType: (screenType: "mobile" | "tablet" | "desktop") => void;
 
-  datetime?: string;
+  datetime: string;
   setDatetime: (datetime: string) => void;
 
   verticalCatPicker: boolean;
@@ -72,7 +72,7 @@ export const useStore = create<Store>()(
       appGroup: undefined,
       setAppGroup: (appGroup: GroupClientSide | undefined) => set({ appGroup }),
 
-      datetime: undefined,
+      datetime: new Date(Date.now()).toString(),
       setDatetime: (datetime: string) => set({ datetime }),
 
       screenType: "desktop",

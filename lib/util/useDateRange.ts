@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 
-const useDateRange = (initialDate: Date | undefined) => {
-  const [date, setDate] = useState<Date>(new Date(Date.now()));
+import { useStore } from "./store";
+
+const useDateRange = () => {
+  const initialDate = useStore((state) => state.datetime);
+  const [date, setDate] = useState<Date>(new Date(initialDate));
 
   const [rangeFormat, setRangeFormat] = useState<
     "date" | "month" | "year" | "all"
@@ -9,7 +12,7 @@ const useDateRange = (initialDate: Date | undefined) => {
 
   useEffect(() => {
     if (initialDate) {
-      setDate(initialDate);
+      setDate(new Date(initialDate));
       return;
     }
   }, [initialDate]);

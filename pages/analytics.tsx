@@ -46,8 +46,7 @@ const Page = () => {
 
   const txTypeArray: React.MutableRefObject<typeof txTypes> = useRef(txTypes);
 
-  const { date, setDate, rangeFormat, setRangeFormat } =
-    useDateRange(undefined);
+  const { date, setDate, rangeFormat, setRangeFormat } = useDateRange();
 
   useEffect(() => {
     if (!txArray.data) {
