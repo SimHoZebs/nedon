@@ -26,7 +26,6 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const setTxOragnizedByTimeArray = useStore(
     (state) => state.setTxOragnizedByTimeArray,
   );
-  const setDatetime = useStore((state) => state.setDatetime);
   const txArray = useTxGetAll();
 
   const createUser = trpc.user.create.useMutation();
@@ -37,11 +36,6 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   );
   const setAccessToken = trpc.setAccessToken.useMutation();
   const queryClient = trpc.useUtils();
-
-  useEffect(() => {
-    const currentDate = new Date(Date.now());
-    setDatetime(currentDate.toString());
-  }, [setDatetime]);
 
   useEffect(() => {
     const createUserWithPlaid = async () => {

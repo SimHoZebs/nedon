@@ -36,6 +36,7 @@
     "react-dom": "18.3.1",
     "react-plaid-link": "^3.6.0",
     "recharts": "^2.13.0",
+    "superjson": "^2.2.1",
     "tailwind-merge": "^2.5.4",
     "zod": "^3.23.8",
     "zod-prisma-types": "^3.1.8",

@@ -40,7 +40,7 @@ const CsvUploadPreviewModal = (props: Props) => {
             {props.unsavedTxArray.map((tx) => (
               <tr key={tx.name}>
                 <td>{tx.name}</td>
-                <td>{tx.date}</td>
+                <td>{tx.authorizedDatetime.toString()}</td>
                 <td>{tx.amount}</td>
                 <td>{tx.catArray.at(-1)?.name}</td>
                 <td>{tx.accountId}</td>

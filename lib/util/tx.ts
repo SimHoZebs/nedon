@@ -1,9 +1,7 @@
-import type { User } from "@prisma/client";
 import type { Transaction } from "plaid";
 
 import type { TreedCatWithTx } from "@/types/cat";
 import type { ChaseCSVTx, TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
-import { UserClientSide } from "@/types/types";
 
 import { createNewCat, fillArrayByCat } from "./cat";
 import getAppUser from "./getAppUser";
@@ -45,10 +43,10 @@ export const createTxFromChaseCSV = (
     amount: Number.parseFloat(chaseCSVTx.Amount),
     recurring: false,
     MDS: -1,
-    date: chaseCSVTx.PostingDate,
+    datetime: new Date(chaseCSVTx.PostingDate),
+    authorizedDatetime: new Date(chaseCSVTx.PostingDate),
     userTotal: 0,
     originTxId: null,
-    datetime: "",
     plaidId: null,
     userId,
     accountId: null,
@@ -74,10 +72,10 @@ export const createTxFromPlaidTx = (
     amount: plaidTx.amount,
     recurring: false,
     MDS: -1,
-    date: plaidTx.date,
     userTotal: 0,
     originTxId: null,
-    datetime: plaidTx.datetime || "",
+    datetime: plaidTx.datetime ? new Date(plaidTx.datetime) : null,
+    authorizedDatetime: new Date(plaidTx.authorized_date || 0),
     plaidId: plaidTx.transaction_id,
     userId: userId,
     accountId: plaidTx.account_id,
@@ -108,9 +106,7 @@ export const organizeTxByCat = (txArray: TxInDB[]) => {
 
 export const organizeTxByTime = (txArray: TxInDB[]) => {
   const txSortedByTimeArray = txArray.sort(
-    (a, b) =>
-      new Date(b.datetime ? b.datetime : b.date).getTime() -
-      new Date(a.datetime ? a.datetime : a.date).getTime(),
+    (a, b) => b.authorizedDatetime.getTime() - a.authorizedDatetime.getTime(),
   );
   const txOrganizedByTimeArray: TxInDB[][][][] = [[[[]]]];
 
@@ -120,7 +116,7 @@ export const organizeTxByTime = (txArray: TxInDB[]) => {
   let dateIndex = -1;
 
   for (const tx of txSortedByTimeArray) {
-    const date = new Date(tx.date);
+    const date = new Date(tx.authorizedDatetime);
     date.setDate(date.getDate() + 1);
     if (!lastDate) {
       yearIndex++;
@@ -175,7 +171,7 @@ export const getScopeIndex = (
   if (txOragnizedByTimeArray.length === 0) return [y, m, d];
 
   for (const [yIndex, year] of txOragnizedByTimeArray.entries()) {
-    const txDate = new Date(year?.[0]?.[0]?.[0]?.date);
+    const txDate = new Date(year?.[0]?.[0]?.[0]?.authorizedDatetime);
     if (Number.isNaN(txDate.getDate())) return [y, m, d];
 
     txDate.setDate(txDate.getDate() + 1);
@@ -189,7 +185,7 @@ export const getScopeIndex = (
   if (y === -1) return [y, m, d];
 
   for (const [mIndex, month] of txOragnizedByTimeArray[y].entries()) {
-    const txDate = new Date(month[0][0].date);
+    const txDate = new Date(month[0][0].authorizedDatetime);
     txDate.setDate(txDate.getDate() + 1);
     if (txDate.getMonth() === date.getMonth()) {
       m = mIndex;
@@ -201,7 +197,7 @@ export const getScopeIndex = (
   if (m === -1) return [y, m, d];
 
   for (const [dIndex, dateArray] of txOragnizedByTimeArray[y][m].entries()) {
-    const txDate = new Date(dateArray[0].date);
+    const txDate = new Date(dateArray[0].authorizedDatetime);
     txDate.setDate(txDate.getDate() + 1);
     if (txDate.getDate() === date.getDate()) {
       d = dIndex;

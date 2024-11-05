@@ -60,7 +60,7 @@ export const GroupScalarFieldEnumSchema = z.enum(['id','ownerId']);
 
 export const UserScalarFieldEnumSchema = z.enum(['id','name','ACCESS_TOKEN','PUBLIC_TOKEN','ITEM_ID','TRANSFER_ID','PAYMENT_ID','cursor']);
 
-export const TxScalarFieldEnumSchema = z.enum(['id','userId','userTotal','originTxId','recurring','MDS','plaidId','name','amount','date','datetime','accountId','plaidTx']);
+export const TxScalarFieldEnumSchema = z.enum(['id','userId','userTotal','originTxId','recurring','MDS','plaidId','name','amount','datetime','authorizedDatetime','accountId','plaidTx']);
 
 export const SplitScalarFieldEnumSchema = z.enum(['id','userId','amount','txId','originTxId']);
 
@@ -226,8 +226,8 @@ export const TxSchema = z.object({
   plaidId: z.string().nullable(),
   name: z.string(),
   amount: z.number(),
-  date: z.string(),
-  datetime: z.string(),
+  datetime: z.coerce.date().nullable(),
+  authorizedDatetime: z.coerce.date(),
   accountId: z.string().nullable(),
   /**
    * [PlaidTx]

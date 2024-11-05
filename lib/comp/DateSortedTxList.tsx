@@ -1,7 +1,5 @@
 import type React from "react";
 
-import getAppUser from "@/util/getAppUser";
-import { trpc } from "@/util/trpc";
 import { useTxGetAll } from "@/util/tx";
 import { useTxStore } from "@/util/txStore";
 
@@ -80,7 +78,7 @@ const DateSortedTxList = (props: Props) => {
                     className="flex w-full flex-col gap-y-1"
                     key={Math.random() * (k + 1)}
                   >
-                    <H3>{day[0].date.slice(8)}</H3>
+                    <H3>{day[0].authorizedDatetime.getDate()}</H3>
                     <ol className="flex flex-col">
                       {day.map(
                         (tx, l) =>

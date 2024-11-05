@@ -108,14 +108,14 @@ const generateDailyTxSumArray = (
   for (let i = 0; i < dateLen; i++) {
     //exhausted existing transactions, just add empty sums
     if (txIndex < 0) {
-      const lastDate = new Date(txArray[0][0]?.date);
+      const lastDate = txArray[0][0]?.authorizedDatetime;
       lastDate.setDate(i - 1);
 
       //...unless the last date is the present
       if (lastDate.getTime() - Date.now() > 0) break;
     }
     //if the date is the same as this transaction's date
-    else if (Number.parseInt(txArray[txIndex][0]?.date.slice(8)) === i) {
+    else if (txArray[txIndex][0]?.authorizedDatetime.getDate() === i) {
       amountSum += txArray[txIndex].reduce((acc, curr) => {
         switch (txType) {
           case "spending":

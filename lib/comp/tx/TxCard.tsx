@@ -42,7 +42,7 @@ const TxCard = (props: Props) => {
 
       <section className="flex h-fit w-full justify-between gap-x-1">
         <p className="text-xs font-light text-zinc-400">
-          {props.tx.datetime || "12:34"}
+          {props.tx.authorizedDatetime.toLocaleTimeString()}
         </p>
 
         <div

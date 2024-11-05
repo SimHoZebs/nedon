@@ -145,7 +145,9 @@ const TxModal = (props: Props) => {
                     Authorized at{" "}
                     {tx.plaidTx?.authorized_date || "1970-01-23 12:34:56"}
                   </p>
-                  <p>Posted at {tx.date || "1970-01-23 12:34:56"}</p>
+                  <p>
+                    Posted at {tx.datetime?.toString() || "1970-01-23 12:34:56"}
+                  </p>
 
                   {tx.plaidTx?.location.address && (
                     <div className="flex">
@@ -185,6 +187,11 @@ const TxModal = (props: Props) => {
                     props.onSplitAmountChange(index, splitAmount);
                   }}
                 />
+
+                <div className="flex items-center">
+                  <input type="checkbox" id="recurring" onChange={() => {}} />
+                  <label htmlFor="recurring">Recurring</label>
+                </div>
                 <Receipt />
               </div>
             </div>

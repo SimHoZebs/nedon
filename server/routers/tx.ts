@@ -1,4 +1,5 @@
 import type { User } from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import {
   PlaidErrorType,
   type RemovedTransaction,
@@ -19,6 +20,7 @@ import {
 
 import { procedure, router } from "../trpc";
 import { client, createCatInput, createTxInDBInput, txInclude } from "../util";
+import catRouter from "./cat";
 
 const txSync = async (user: User) => {
   if (!user.ACCESS_TOKEN) {
@@ -126,28 +128,53 @@ const txRouter = router({
         // In the future, this would be a valid condition if the user just created an account without linking their bank account.
         if (!cursor && added.length < 1) return null;
 
-        // update cursor in db asynchonously
-        db.user
-          .update({
-            where: { id: user.id },
-            data: { cursor: cursor },
-          })
-          .then();
-
         // newly added txs gets created
         //FUTURE: make this somehow asynchoronous so users don't have to wait for all txs to be added to see their existing tx
         const txCreateQueryArray = added.map((plaidTx) => {
           const newTx = createTxFromPlaidTx(user.id, plaidTx);
           return db.tx.create(createTxInDBInput(newTx));
         });
-        await db.$transaction(txCreateQueryArray);
+        try {
+          await db.$transaction(txCreateQueryArray);
+        } catch (error) {
+          if (error instanceof PrismaClientKnownRequestError) {
+            switch (error.code) {
+              case "P2002":
+                console.log(error.message);
+                break;
+              default:
+                console.log("Error in creating tx: ", error);
+                return null;
+            }
+          }
+        }
+
+        const date = new Date(input.date);
+
+        const firstDayThisMonth = new Date(
+          date.getFullYear(),
+          date.getMonth(),
+          1,
+        );
+        const lastDayThisMonth = new Date(
+          date.getFullYear(),
+          date.getMonth() + 1,
+          0,
+        );
 
         const txArray: TxInDB[] = await db.tx.findMany({
           where: {
             OR: [
               { userId: user.id },
               { splitArray: { some: { userId: user.id } } },
-              { recurring: true, userId: user.id, date: {} },
+              {
+                recurring: true,
+                userId: user.id,
+                authorizedDatetime: {
+                  gte: firstDayThisMonth.toISOString(),
+                  lte: lastDayThisMonth.toISOString(),
+                },
+              },
             ],
           },
           include: txInclude,
@@ -170,11 +197,7 @@ const txRouter = router({
             data: {
               plaidId: matchingTx.plaidId || undefined,
               catArray: {
-                create: matchingTx.catArray.map((cat) => ({
-                  name: cat.name,
-                  nameArray: cat.nameArray,
-                  amount: cat.amount,
-                })),
+                create: matchingTx.catArray.map((cat) => createCatInput(cat)),
               },
               splitArray: {
                 create: matchingTx.splitArray.map((split) => ({
@@ -199,6 +222,14 @@ const txRouter = router({
             });
           }
         }
+
+        // update cursor in db asynchonously
+        db.user
+          .update({
+            where: { id: user.id },
+            data: { cursor: cursor },
+          })
+          .then();
 
         console.log("returning txArray", txArray.length);
         return txArray;
