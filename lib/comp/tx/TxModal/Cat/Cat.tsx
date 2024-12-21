@@ -11,7 +11,7 @@ import type { CatClientSide } from "@/types/cat";
 import CatChip from "./CatChip";
 import CatPicker from "./CatPicker";
 
-const offScreen = { x: -800, y: -800 };
+const OFFSCREEN = { x: -800, y: -800 };
 
 const Cat = () => {
   const queryClient = trpc.useUtils();
@@ -30,7 +30,7 @@ const Cat = () => {
   const [pickerPosition, setPickerPosition] = useState<{
     x: number;
     y: number;
-  }>(offScreen);
+  }>(OFFSCREEN);
 
   return (
     <div className="flex gap-y-1">
@@ -158,7 +158,7 @@ const Cat = () => {
             closePicker={() => {
               setEditingMergedCatIndex(undefined);
               setIsManaging(false);
-              setPickerPosition(offScreen);
+              setPickerPosition(OFFSCREEN);
             }}
           />
         )}
