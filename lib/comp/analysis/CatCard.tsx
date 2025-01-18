@@ -27,7 +27,7 @@ const CatCard = (props: Props) => {
   return (
     <div
       key={props.cat.name}
-      className="flex cursor-pointer flex-col outline-1 outline-white outline p-3 hover:bg-zinc-700"
+      className="flex cursor-pointer flex-col p-3 outline outline-1 outline-white hover:bg-zinc-700"
       onKeyDown={() => props.showModal()}
       onClick={() => props.showModal()}
     >

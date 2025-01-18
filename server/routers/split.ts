@@ -7,8 +7,9 @@ import { z } from "zod";
 
 import db from "@/util/db";
 
-import { procedure, router } from "../trpc";
 import { isSplitArrayInDB } from "@/types/split";
+
+import { procedure, router } from "../trpc";
 
 const splitRouter = router({
   create: procedure
