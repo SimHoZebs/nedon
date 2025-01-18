@@ -1,6 +1,7 @@
 import { type Cat, CatOptionalDefaultsSchema } from "prisma/generated/zod";
 import { z } from "zod";
-import { TxInDB } from "./tx";
+
+import type { TxInDB } from "./tx";
 
 export type TreedCat = {
   name: string;
