@@ -54,7 +54,7 @@ export type InputJsonValueType = z.infer<typeof InputJsonValueSchema>;
 // ENUMS
 /////////////////////////////////////////
 
-export const TransactionIsolationLevelSchema = z.enum(['ReadUncommitted','ReadCommitted','RepeatableRead','Serializable']);
+export const TransactionIsolationLevelSchema = z.enum(['Serializable']);
 
 export const GroupScalarFieldEnumSchema = z.enum(['id','ownerId']);
 
@@ -64,7 +64,9 @@ export const TxScalarFieldEnumSchema = z.enum(['id','userId','userTotal','origin
 
 export const SplitScalarFieldEnumSchema = z.enum(['id','userId','amount','txId','originTxId']);
 
-export const CatScalarFieldEnumSchema = z.enum(['id','name','nameArray','amount','txId']);
+export const CatScalarFieldEnumSchema = z.enum(['id','name','amount','txId']);
+
+export const CatNameScalarFieldEnumSchema = z.enum(['id','name','catId']);
 
 export const CatSettingsScalarFieldEnumSchema = z.enum(['id','name','budget','parentId','userId']);
 
@@ -75,8 +77,6 @@ export const ReceiptItemScalarFieldEnumSchema = z.enum(['id','name','description
 export const SortOrderSchema = z.enum(['asc','desc']);
 
 export const NullableJsonNullValueInputSchema = z.enum(['DbNull','JsonNull',]).transform((value) => value === 'JsonNull' ? Prisma.JsonNull : value === 'DbNull' ? Prisma.DbNull : value);
-
-export const QueryModeSchema = z.enum(['default','insensitive']);
 
 export const NullsOrderSchema = z.enum(['first','last']);
 
@@ -366,7 +366,6 @@ export const SplitOptionalDefaultsWithRelationsSchema: z.ZodType<SplitOptionalDe
 export const CatSchema = z.object({
   id: z.string().cuid(),
   name: z.string(),
-  nameArray: z.string().array(),
   amount: z.number(),
   txId: z.string(),
 })
@@ -386,12 +385,14 @@ export type CatOptionalDefaults = z.infer<typeof CatOptionalDefaultsSchema>
 //------------------------------------------------------
 
 export type CatRelations = {
+  nameArray: CatNameWithRelations[];
   tx: TxWithRelations;
 };
 
 export type CatWithRelations = z.infer<typeof CatSchema> & CatRelations
 
 export const CatWithRelationsSchema: z.ZodType<CatWithRelations> = CatSchema.merge(z.object({
+  nameArray: z.lazy(() => CatNameWithRelationsSchema).array(),
   tx: z.lazy(() => TxWithRelationsSchema),
 }))
 
@@ -399,13 +400,62 @@ export const CatWithRelationsSchema: z.ZodType<CatWithRelations> = CatSchema.mer
 //------------------------------------------------------
 
 export type CatOptionalDefaultsRelations = {
+  nameArray: CatNameOptionalDefaultsWithRelations[];
   tx: TxOptionalDefaultsWithRelations;
 };
 
 export type CatOptionalDefaultsWithRelations = z.infer<typeof CatOptionalDefaultsSchema> & CatOptionalDefaultsRelations
 
 export const CatOptionalDefaultsWithRelationsSchema: z.ZodType<CatOptionalDefaultsWithRelations> = CatOptionalDefaultsSchema.merge(z.object({
+  nameArray: z.lazy(() => CatNameOptionalDefaultsWithRelationsSchema).array(),
   tx: z.lazy(() => TxOptionalDefaultsWithRelationsSchema),
+}))
+
+/////////////////////////////////////////
+// CAT NAME SCHEMA
+/////////////////////////////////////////
+
+export const CatNameSchema = z.object({
+  id: z.string().cuid(),
+  name: z.string(),
+  catId: z.string(),
+})
+
+export type CatName = z.infer<typeof CatNameSchema>
+
+// CAT NAME OPTIONAL DEFAULTS SCHEMA
+//------------------------------------------------------
+
+export const CatNameOptionalDefaultsSchema = CatNameSchema.merge(z.object({
+  id: z.string().cuid().optional(),
+}))
+
+export type CatNameOptionalDefaults = z.infer<typeof CatNameOptionalDefaultsSchema>
+
+// CAT NAME RELATION SCHEMA
+//------------------------------------------------------
+
+export type CatNameRelations = {
+  cat: CatWithRelations;
+};
+
+export type CatNameWithRelations = z.infer<typeof CatNameSchema> & CatNameRelations
+
+export const CatNameWithRelationsSchema: z.ZodType<CatNameWithRelations> = CatNameSchema.merge(z.object({
+  cat: z.lazy(() => CatWithRelationsSchema),
+}))
+
+// CAT NAME OPTIONAL DEFAULTS RELATION SCHEMA
+//------------------------------------------------------
+
+export type CatNameOptionalDefaultsRelations = {
+  cat: CatOptionalDefaultsWithRelations;
+};
+
+export type CatNameOptionalDefaultsWithRelations = z.infer<typeof CatNameOptionalDefaultsSchema> & CatNameOptionalDefaultsRelations
+
+export const CatNameOptionalDefaultsWithRelationsSchema: z.ZodType<CatNameOptionalDefaultsWithRelations> = CatNameOptionalDefaultsSchema.merge(z.object({
+  cat: z.lazy(() => CatOptionalDefaultsWithRelationsSchema),
 }))
 
 /////////////////////////////////////////
