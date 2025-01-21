@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 generator json {
@@ -21,9 +22,8 @@ generator zod {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model Group {
@@ -120,13 +120,19 @@ model Split {
 }
 
 model Cat {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
-  nameArray String[]
   amount    Float
+  nameArray CatName[]
+  tx        Tx        @relation(fields: [txId], references: [id], onDelete: Cascade)
+  txId      String
+}
 
-  tx   Tx     @relation(fields: [txId], references: [id], onDelete: Cascade)
-  txId String
+model CatName {
+  id    String @id @default(cuid())
+  name  String
+  cat   Cat    @relation(fields: [catId], references: [id], onDelete: Cascade)
+  catId String
 }
 
 model CatSettings {
