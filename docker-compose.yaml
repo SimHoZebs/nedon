@@ -1,7 +1,7 @@
 services:
   db:
     container_name: nedon-db
-    image: postgres:latest
+    image: pgvector/pgvector:pg17
     environment:
       POSTGRES_DB: nedon
       POSTGRES_USER: postgres
