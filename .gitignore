@@ -28,6 +28,7 @@
 *.pem
 /.vscode
 migration_lock.toml
+dev.db
 
 # debug
 npm-debug.log*
