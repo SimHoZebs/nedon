@@ -1,3 +1,4 @@
+import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -241,7 +242,8 @@ describe('SplitBtn', () => {
       </SplitBtn>
     )
     
-    const dropdown = screen.getByRole('generic').querySelector('.icon-\\[mdi-light--chevron-down\\]')?.parentElement
+    // Find the dropdown by class name directly
+    const dropdown = screen.getByRole('button').parentElement?.querySelector('.icon-\\[mdi-light--chevron-down\\]')?.parentElement
     expect(dropdown).toBeInTheDocument()
     
     // Initially options should not be visible

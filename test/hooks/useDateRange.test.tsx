@@ -1,12 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import useDateRange from '@/util/useDateRange'
 
-// Mock the store
-const mockUseStore = vi.fn()
+// Mock the store before importing the hook
 vi.mock('@/util/store', () => ({
-  useStore: mockUseStore,
+  useStore: vi.fn(),
 }))
+
+import useDateRange from '@/util/useDateRange'
+import { useStore } from '@/util/store'
+
+const mockUseStore = useStore as unknown as ReturnType<typeof vi.fn>
 
 describe('useDateRange', () => {
   beforeEach(() => {

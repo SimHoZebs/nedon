@@ -1,3 +1,4 @@
+import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { H1, H2, H3, H4 } from '@/comp/Heading'
