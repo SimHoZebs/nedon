@@ -6,6 +6,23 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./test/setup.ts'],
     globals: true,
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'test/',
+        '**/*.d.ts',
+        '.next/',
+        'dist/',
+        'cypress/',
+        '**/*.config.*',
+        '**/coverage/**'
+      ]
+    },
+    outputFile: {
+      junit: './test-results.xml'
+    },
+    reporters: process.env.CI ? ['verbose', 'junit'] : ['verbose']
   },
   resolve: {
     alias: {
