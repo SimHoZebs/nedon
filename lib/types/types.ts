@@ -1,7 +1,7 @@
 import type { Group, User } from "@prisma/client";
 import type { Transaction } from "plaid";
-import { UserSchema } from "prisma/generated/zod";
 import { z } from "zod";
+import { UserSchema } from "../../prisma/generated/zod";
 
 declare global {
   namespace PrismaJson {

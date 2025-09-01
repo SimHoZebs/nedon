@@ -14,7 +14,7 @@ generator json {
 }
 
 generator zod {
-  provider                         = "zod-prisma-types"
+  provider                         = "prisma-zod-generator"
   createOptionalDefaultValuesTypes = true
   useTypeAssertions                = true
   createInputTypes                 = false

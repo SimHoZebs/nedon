@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from "react";
-
 import { ActionBtn, Button } from "@/comp/Button";
 import Input from "@/comp/Input";
-
 import getAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
+import React, { useEffect, useState } from "react";
 
 const Profile = () => {
   const { appUser } = getAppUser();

@@ -1,12 +1,9 @@
-import { motion } from "framer-motion";
-import React, { useEffect } from "react";
-
+import type { SplitClientSide } from "@/types/split";
 import parseMoney from "@/util/parseMoney";
 import { useStore } from "@/util/store";
 import { useTxStore } from "@/util/txStore";
-
-import type { SplitClientSide } from "@/types/split";
-
+import { motion } from "framer-motion";
+import React, { useEffect } from "react";
 import Calculator from "./TxModal/SplitList/Calculator";
 import TxModal from "./TxModal/TxModal";
 
@@ -93,7 +90,7 @@ const TxModalAndCalculator = (props: Props) => {
   }, [focusedSplitIndex]);
 
   return (
-    <div className="pointer-events-none absolute left-0 top-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
+    <div className="pointer-events-none absolute top-0 left-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
       <TxModal
         onClose={props.onClose}
         onSplitAmountChange={(index, amount) => {

@@ -1,12 +1,9 @@
-import type { User } from "@prisma/client";
-import { UserSchema } from "prisma/generated/zod";
-import { z } from "zod";
-
+import { type UserClientSide, UserClientSideSchema } from "@/types/types";
 import db from "@/util/db";
 import { stripUserSecrets } from "@/util/user";
-
-import { type UserClientSide, UserClientSideSchema } from "@/types/types";
-
+import type { User } from "@prisma/client";
+import { z } from "zod";
+import { UserSchema } from "../../prisma/generated/zod";
 import { procedure, router } from "../trpc";
 import { PLAID_PRODUCTS } from "../util";
 
@@ -68,6 +65,7 @@ const userRouter = router({
           groupArray: true,
         },
       });
+      console.log("created user", user);
 
       return stripUserSecrets(user);
     }),

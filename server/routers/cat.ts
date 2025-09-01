@@ -1,15 +1,12 @@
+import { CatClientSideSchema } from "@/types/cat";
+import db from "@/util/db";
 import type { Cat } from "@prisma/client";
+import { z } from "zod";
 import {
   CatOptionalDefaultsSchema,
   CatSchema,
   CatSettingsOptionalDefaultsSchema,
-} from "prisma/generated/zod";
-import { z } from "zod";
-
-import db from "@/util/db";
-
-import { CatClientSideSchema } from "@/types/cat";
-
+} from "../../prisma/generated/zod";
 import { procedure, router } from "../trpc";
 
 const catRouter = router({

@@ -1,10 +1,3 @@
-import { AnimatePresence, motion } from "framer-motion";
-import type { NextPage } from "next";
-import Papa from "papaparse";
-import type { AccountBase } from "plaid";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { z } from "zod";
-
 import { Button, SplitBtn, SplitBtnOptions } from "@/comp/Button";
 import DateRangePicker from "@/comp/DateRangePicker";
 import DateSortedTxList from "@/comp/DateSortedTxList";
@@ -13,14 +6,18 @@ import AccountCard from "@/comp/home/AccountCard";
 import AccountModal from "@/comp/home/AccountModal";
 import CsvUploadPreviewModal from "@/comp/home/CsvUploadPreviewModal";
 import TxModalAndCalculator from "@/comp/tx/TxModalAndCalculator";
-
+import { ChaseCSVTxSchema, type UnsavedTx } from "@/types/tx";
 import getAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { createTxFromChaseCSV, getScopeIndex, useTxGetAll } from "@/util/tx";
 import useDateRange from "@/util/useDateRange";
-
-import { ChaseCSVTxSchema, type UnsavedTx } from "@/types/tx";
+import { AnimatePresence, motion } from "framer-motion";
+import type { NextPage } from "next";
+import Papa from "papaparse";
+import type { AccountBase } from "plaid";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { z } from "zod";
 
 const Home: NextPage = () => {
   const [showAccountModal, setShowAccountModal] = useState(false);
@@ -116,7 +113,7 @@ const Home: NextPage = () => {
       <section className="flex h-full w-full flex-col items-center gap-y-3 lg:w-2/5">
         {(showAccountModal || showTxModal || showCsvUploadPreviewModal) && (
           <motion.div
-            className="absolute left-0 top-0 z-[11] h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
+            className="bg-opacity-70 absolute top-0 left-0 z-[11] h-full w-full overflow-hidden bg-zinc-950 backdrop-blur-sm sm:justify-center"
             onMouseDown={(e) => {
               e.stopPropagation();
               setShowAccountModal(false);

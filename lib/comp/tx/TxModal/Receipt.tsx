@@ -1,18 +1,15 @@
-import Image from "next/image";
-import React from "react";
-import supabase from "server/supabaseClient";
-
 import { ActionBtn } from "@/comp/Button";
 import { H3 } from "@/comp/Heading";
 import Input from "@/comp/Input";
-
-import parseMoney from "@/util/parseMoney";
-import { trpc } from "@/util/trpc";
-import { useTxStore } from "@/util/txStore";
-
 import type { PureReceiptWithChildren } from "@/types/receipt";
 import { isTxInDB } from "@/types/tx";
 import { createStructuredResponse } from "@/types/types";
+import parseMoney from "@/util/parseMoney";
+import { trpc } from "@/util/trpc";
+import { useTxStore } from "@/util/txStore";
+import Image from "next/image";
+import React from "react";
+import supabase from "server/supabaseClient";
 
 const Receipt = () => {
   const tx = useTxStore((state) => state.txOnModal);

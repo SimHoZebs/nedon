@@ -1,4 +1,8 @@
-import React, { useEffect, useState } from "react";
+import type { TxInDB } from "@/types/tx";
+import parseMoney from "@/util/parseMoney";
+import { useStore } from "@/util/store";
+import type { TxType } from "@/util/tx";
+import { useEffect, useState } from "react";
 import {
   Line,
   LineChart,
@@ -12,12 +16,6 @@ import type {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
-
-import parseMoney from "@/util/parseMoney";
-import { useStore } from "@/util/store";
-import type { TxType } from "@/util/tx";
-
-import type { TxInDB } from "@/types/tx";
 
 interface Props {
   date: Date;
@@ -75,7 +73,7 @@ const LineGraph = (props: Props) => {
   ]);
 
   return (
-    <div className="relative h-64 w-full pr-4 pt-2 text-xs">
+    <div className="relative h-64 w-full pt-2 pr-4 text-xs">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={dailyTxSumArray}>
           <XAxis dataKey="date" />
@@ -140,15 +138,3 @@ const generateDailyTxSumArray = (
 };
 
 export default LineGraph;
-
-interface CustomToolTipProps {
-  toolTipProps: TooltipProps<ValueType, NameType>;
-}
-
-const CustomToolTip = (props: CustomToolTipProps) => {
-  return (
-    <div>
-      {JSON.stringify(props.toolTipProps.payload?.[0]?.payload, null, 2)}
-    </div>
-  );
-};

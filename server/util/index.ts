@@ -1,3 +1,4 @@
+import type { UnsavedTx } from "@/types/tx";
 import {
   Configuration,
   CountryCode,
@@ -6,8 +7,6 @@ import {
   Products,
 } from "plaid";
 import type { CatOptionalDefaults } from "prisma/generated/zod";
-
-import type { UnsavedTx } from "@/types/tx";
 
 const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;

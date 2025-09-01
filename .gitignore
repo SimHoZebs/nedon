@@ -29,6 +29,7 @@
 /.vscode
 migration_lock.toml
 dev.db
+prisma/generated
 
 # debug
 npm-debug.log*

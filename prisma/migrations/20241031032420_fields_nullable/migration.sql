@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Tx" ALTER COLUMN "plaidId" DROP NOT NULL,
-ALTER COLUMN "accountId" DROP NOT NULL;

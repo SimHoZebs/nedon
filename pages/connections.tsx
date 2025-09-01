@@ -1,11 +1,9 @@
-import React, { useMemo, useState } from "react";
-
-import { ActionBtn, Button } from "@/comp/Button";
 import SettleModal from "@/comp/analysis/SettleModal";
-
+import { ActionBtn, Button } from "@/comp/Button";
 import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
+import React, { useMemo, useState } from "react";
 
 /**
  * Page to show all of user's connections and the amount owed by either party.

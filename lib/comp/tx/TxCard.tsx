@@ -1,9 +1,6 @@
-import type React from "react";
-
+import type { TxInDB } from "@/types/tx";
 import { getCatStyle } from "@/util/cat";
 import getAppUser from "@/util/getAppUser";
-
-import type { TxInDB } from "@/types/tx";
 
 interface Props {
   onInteraction: () => void;
@@ -55,12 +52,12 @@ const TxCard = (props: Props) => {
           {props.tx.catArray.map((cat) => (
             <div
               key={cat.id}
-              className={`flex min-w-max gap-x-1 rounded-full p-2 ${getCatStyle(cat.nameArray).border} ${getCatStyle(cat.nameArray).textColor}`}
+              className={`flex min-w-max gap-x-1 rounded-full p-2 ${getCatStyle(cat.name).border} ${getCatStyle(cat.name).textColor}`}
             >
               <span
-                className={`${getCatStyle(cat.nameArray).icon} ${getCatStyle(cat.nameArray).textColor} w-4`}
+                className={`${getCatStyle(cat.name).icon} ${getCatStyle(cat.name).textColor} w-4`}
               />
-              <p className="text-xs font-light">{cat.nameArray.at(-1)}</p>
+              <p className="text-xs font-light">{cat.name.at(-1)}</p>
             </div>
           ))}
         </div>

@@ -1,9 +1,9 @@
+import { z } from "zod";
 import {
   type Split,
   SplitOptionalDefaultsSchema,
   SplitSchema,
-} from "prisma/generated/zod";
-import { z } from "zod";
+} from "../../prisma/generated/zod";
 
 export const SplitClientSideSchema = SplitOptionalDefaultsSchema.extend({
   originTxId: z.string().optional(),

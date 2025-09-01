@@ -1,7 +1,5 @@
-import { trpc } from "@/util/trpc";
-
 import type { UnsavedTx } from "@/types/tx";
-
+import { trpc } from "@/util/trpc";
 import { ActionBtn } from "../Button";
 import Modal from "../Modal";
 
@@ -14,7 +12,7 @@ const CsvUploadPreviewModal = (props: Props) => {
   const queryClient = trpc.useUtils();
 
   return (
-    <div className="pointer-events-none absolute left-0 top-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
+    <div className="pointer-events-none absolute top-0 left-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
       <Modal className="overflow-hidden">
         <div className="sticky top-0 bg-zinc-800 p-3">
           <ActionBtn

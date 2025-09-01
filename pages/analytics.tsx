@@ -1,29 +1,26 @@
-import { AnimatePresence, motion } from "framer-motion";
-import type { CatSettings } from "prisma/generated/zod";
-import type React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
-
-import { Button } from "@/comp/Button";
-import DateRangePicker from "@/comp/DateRangePicker";
 import AnalysisBar from "@/comp/analysis/AnalysisBar";
 import CatCard from "@/comp/analysis/CatCard";
 import CatModal from "@/comp/analysis/CatModal";
 import LineGraph from "@/comp/analysis/LineGraph";
-
+import { Button } from "@/comp/Button";
+import DateRangePicker from "@/comp/DateRangePicker";
+import type { TreedCatWithTx } from "@/types/cat";
 import { calcCatTypeTotal, subCatTotal } from "@/util/cat";
 import getAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
+import type { TxType } from "@/util/tx";
 import {
   getScopeIndex,
   organizeTxByCat,
   txTypeArray as txTypes,
   useTxGetAll,
 } from "@/util/tx";
-import type { TxType } from "@/util/tx";
 import useDateRange from "@/util/useDateRange";
-
-import type { TreedCatWithTx } from "@/types/cat";
+import { AnimatePresence, motion } from "framer-motion";
+import type { CatSettings } from "prisma/generated/zod";
+import type React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const Page = () => {
   const { appUser } = getAppUser();
@@ -107,7 +104,7 @@ const Page = () => {
     <section className="flex flex-col items-center gap-y-4">
       {showModal && (
         <motion.div
-          className="absolute left-0 top-0 z-10 h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
+          className="bg-opacity-70 absolute top-0 left-0 z-10 h-full w-full overflow-hidden bg-zinc-950 backdrop-blur-sm sm:justify-center"
           onMouseDown={(e) => {
             e.stopPropagation();
             setShowModal(false);
@@ -120,7 +117,7 @@ const Page = () => {
 
       <AnimatePresence>
         {showModal && modalData && (
-          <div className="pointer-events-none absolute left-0 top-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
+          <div className="pointer-events-none absolute top-0 left-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
             <CatModal setShowModal={setShowModal} modalData={modalData} />
           </div>
         )}
@@ -134,7 +131,7 @@ const Page = () => {
                 key={type}
                 className={`px-3 text-sm ${
                   txType === type
-                    ? "bg-indigo-200 bg-opacity-20 text-indigo-200"
+                    ? "bg-opacity-20 bg-indigo-200 text-indigo-200"
                     : ""
                 } rounded-md`}
                 onClick={() => setTxType(type)}

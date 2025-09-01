@@ -1,12 +1,9 @@
-import React from "react";
-
 import { Button } from "@/comp/Button";
-
+import type { SplitClientSide } from "@/types/split";
 import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { useTxStore } from "@/util/txStore";
-
-import type { SplitClientSide } from "@/types/split";
+import React from "react";
 
 const SplitUserOptionList = () => {
   const { appUser } = getAppUser();

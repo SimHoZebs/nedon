@@ -1,12 +1,11 @@
 import type { Tx } from "@prisma/client";
+import { z } from "zod";
 import {
   CatSchema,
   SplitSchema,
   TxOptionalDefaultsSchema,
   TxSchema,
-} from "prisma/generated/zod";
-import { z } from "zod";
-
+} from "../../prisma/generated/zod";
 import { CatClientSideSchema } from "./cat";
 import { plaidTxSchema } from "./plaid";
 import { ReceiptOptionalDefaultsWithChildrenSchema } from "./receipt";

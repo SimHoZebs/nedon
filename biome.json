@@ -1,8 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "linter": {
     "enabled": true,
     "rules": {
@@ -18,7 +15,16 @@
     "indentWidth": 2,
     "indentStyle": "space"
   },
-  "files": {
-    "ignore": ["prisma/generated/*", "*.yaml"]
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [":NODE:", ":ALIAS:", ":PACKAGE:"]
+          }
+        }
+      }
+    }
   }
 }

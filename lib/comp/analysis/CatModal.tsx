@@ -1,18 +1,15 @@
-import type {
-  CatSettings,
-  CatSettingsOptionalDefaults,
-} from "prisma/generated/zod";
-import { useEffect, useState } from "react";
-
+import type { TreedCatWithTx } from "@/types/cat";
 import { subCatTotal } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
 import getAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime } from "@/util/tx";
-
-import type { TreedCatWithTx } from "@/types/cat";
-
+import type {
+  CatSettings,
+  CatSettingsOptionalDefaults,
+} from "prisma/generated/zod";
+import { useEffect, useState } from "react";
 import { Button, CloseBtn } from "../Button";
 import DateSortedTxList from "../DateSortedTxList";
 import { H1, H2 } from "../Heading";

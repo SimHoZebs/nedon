@@ -1,9 +1,9 @@
+import { z } from "zod";
 import {
   type ReceiptItem,
   ReceiptItemOptionalDefaultsSchema,
   ReceiptOptionalDefaultsSchema,
-} from "prisma/generated/zod";
-import { z } from "zod";
+} from "../../prisma/generated/zod";
 
 //"Pure" types are types without considering the database schema.
 export const PureReceiptItemSchema = ReceiptItemOptionalDefaultsSchema.omit({

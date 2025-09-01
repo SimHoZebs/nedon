@@ -1,18 +1,14 @@
-import Image from "next/image";
-import type { AuthGetResponse } from "plaid";
-import React, { useEffect } from "react";
-
 import { ActionBtn, CloseBtn, SecondaryBtn } from "@/comp/Button";
 import { H1 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
-
+import { isTxInDB } from "@/types/tx";
 import getAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-
-import { isTxInDB } from "@/types/tx";
-
+import Image from "next/image";
+import type { AuthGetResponse } from "plaid";
+import React, { useEffect } from "react";
 import Cat from "./Cat/Cat";
 import Receipt from "./Receipt";
 import SplitList from "./SplitList/SplitList";

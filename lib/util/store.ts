@@ -1,9 +1,8 @@
+import type { TxInDB } from "@/types/tx";
+import type { GroupClientSide, UserClientSide } from "@/types/types";
 import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-
-import type { TxInDB } from "@/types/tx";
-import type { GroupClientSide, UserClientSide } from "@/types/types";
 
 export const useLocalStoreDelay = <T, F>(
   store: (callback: (state: T) => unknown) => unknown,

@@ -1,8 +1,6 @@
-import { z } from "zod";
-
 import db from "@/util/db";
 import { stripUserSecretsFromGroup } from "@/util/user";
-
+import { z } from "zod";
 import { procedure, router } from "../trpc";
 
 export const groupRouter = router({

@@ -1,8 +1,6 @@
-import type { Transaction } from "plaid";
-
 import type { TreedCatWithTx } from "@/types/cat";
 import type { ChaseCSVTx, TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
-
+import type { Transaction } from "plaid";
 import { createNewCat, fillArrayByCat } from "./cat";
 import getAppUser from "./getAppUser";
 import { createNewSplit } from "./split";
@@ -110,7 +108,7 @@ export const organizeTxByTime = (txArray: TxInDB[]) => {
   );
   const txOrganizedByTimeArray: TxInDB[][][][] = [[[[]]]];
 
-  let lastDate: Date | undefined = undefined;
+  let lastDate: Date | undefined;
   let yearIndex = -1;
   let monthIndex = -1;
   let dateIndex = -1;

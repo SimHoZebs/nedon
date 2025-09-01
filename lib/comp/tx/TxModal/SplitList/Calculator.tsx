@@ -1,6 +1,5 @@
-import React from "react";
-
 import parseMoney from "@/util/parseMoney";
+import React from "react";
 
 interface Props {
   value: string;

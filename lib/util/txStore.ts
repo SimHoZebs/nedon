@@ -1,10 +1,8 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-
 import type { CatClientSide } from "@/types/cat";
 import type { SplitClientSide } from "@/types/split";
 import type { TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
-
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 import { useStore } from "./store";
 
 /**

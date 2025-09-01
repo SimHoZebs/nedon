@@ -1,11 +1,8 @@
+import Modal from "@/comp/Modal";
+import { organizeTxByTime, useTxGetAll } from "@/util/tx";
 import type { AccountBase } from "plaid";
 import type React from "react";
 import { useMemo } from "react";
-
-import Modal from "@/comp/Modal";
-
-import { organizeTxByTime, useTxGetAll } from "@/util/tx";
-
 import { CloseBtn } from "../Button";
 import DateSortedTxList from "../DateSortedTxList";
 import { H1, H2, H3 } from "../Heading";
@@ -27,7 +24,7 @@ const AccountModal = (props: Props) => {
   }, [props.clickedAccount.account_id, txArray.data]);
 
   return (
-    <div className="pointer-events-none absolute left-0 top-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
+    <div className="pointer-events-none absolute top-0 left-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
       <Modal className="gap-y-2">
         <div className="flex h-full w-full flex-col items-end justify-between p-3">
           <CloseBtn onClose={() => props.setShowModal(false)} />

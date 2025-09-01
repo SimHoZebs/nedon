@@ -1,13 +1,9 @@
-import React, { useRef, useState } from "react";
-
 import { ActionBtn, Button } from "@/comp/Button";
-
+import type { CatClientSide } from "@/types/cat";
 import { createNewCat } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-
-import type { CatClientSide } from "@/types/cat";
-
+import React, { useRef, useState } from "react";
 import CatChip from "./CatChip";
 import CatPicker from "./CatPicker";
 

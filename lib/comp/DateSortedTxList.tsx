@@ -1,10 +1,7 @@
-import type React from "react";
-
+import type { TxInDB } from "@/types/tx";
 import { useTxGetAll } from "@/util/tx";
 import { useTxStore } from "@/util/txStore";
-
-import type { TxInDB } from "@/types/tx";
-
+import type React from "react";
 import { H2, H3 } from "./Heading";
 import TxCard from "./tx/TxCard";
 
