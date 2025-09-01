@@ -99,9 +99,6 @@ importers:
       "@iconify/json":
         specifier: ^2.2.380
         version: 2.2.380
-      "@iconify/tailwind":
-        specifier: ^1.2.0
-        version: 1.2.0
       "@iconify/tailwind4":
         specifier: ^1.0.6
         version: 1.0.6(tailwindcss@4.1.12)
@@ -724,12 +721,6 @@ packages:
       }
     peerDependencies:
       tailwindcss: ">= 4"
-
-  "@iconify/tailwind@1.2.0":
-    resolution:
-      {
-        integrity: sha512-KgpIHWOTcRYw1XcoUqyNSrmYyfLLqZYu3AmP8zdfLk0F5TqRO8YerhlvlQmGfn7rJXgPeZN569xPAJnJ53zZxA==,
-      }
 
   "@iconify/types@2.0.0":
     resolution:
@@ -5641,10 +5632,6 @@ snapshots:
       tailwindcss: 4.1.12
     transitivePeerDependencies:
       - supports-color
-
-  "@iconify/tailwind@1.2.0":
-    dependencies:
-      "@iconify/types": 2.0.0
 
   "@iconify/types@2.0.0": {}
 
