@@ -1,14 +1,11 @@
 import type { TreedCatWithTx } from "@/types/cat";
 import { subCatTotal } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
-import getAppUser from "@/util/getAppUser";
+import useAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime } from "@/util/tx";
-import type {
-  CatSettings,
-  CatSettingsOptionalDefaults,
-} from "prisma/generated/zod";
+import type { CatSettings, Prisma } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { Button, CloseBtn } from "../Button";
 import DateSortedTxList from "../DateSortedTxList";
@@ -24,9 +21,11 @@ interface Props {
   };
 }
 
+type test = Prisma.CatSettingsUncheckedCreateInput;
+
 const CatModal = (props: Props) => {
   const { settings, data } = props.modalData;
-  const { appUser } = getAppUser();
+  const { appUser } = useAppUser();
 
   const [budget, setBudget] = useState(0);
 
@@ -100,7 +99,7 @@ const CatModal = (props: Props) => {
                   return;
                 }
 
-                const updatedSettings: CatSettingsOptionalDefaults = settings
+                const updatedSettings = settings
                   ? { ...settings, budget: budget }
                   : {
                       name: data.name,

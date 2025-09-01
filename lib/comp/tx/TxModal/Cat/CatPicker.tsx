@@ -4,12 +4,7 @@ import catStyleArray from "@/util/catStyle";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import React, {
-  type ForwardedRef,
-  forwardRef,
-  useEffect,
-  useState,
-} from "react";
+import { type ForwardedRef, forwardRef, useEffect, useState } from "react";
 
 interface Props {
   appUserCatArray: CatClientSide[];
@@ -69,6 +64,7 @@ const CatPicker = forwardRef(
 
       //The last element is the temporary category this update is for.
       tmpCatArray[tmpCatArray.length - 1] = createNewCat({
+        txId: tmpTx.id || "",
         nameArray: tmpNameArray,
         amount: 0,
       });

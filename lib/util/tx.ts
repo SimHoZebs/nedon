@@ -2,7 +2,7 @@ import type { TreedCatWithTx } from "@/types/cat";
 import type { ChaseCSVTx, TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
 import type { Transaction } from "plaid";
 import { createNewCat, fillArrayByCat } from "./cat";
-import getAppUser from "./getAppUser";
+import useAppUser from "./getAppUser";
 import { createNewSplit } from "./split";
 import { useStore } from "./store";
 import { trpc } from "./trpc";
@@ -13,6 +13,7 @@ export const resetTx = (tx: TxInDB): UnsavedTxInDB => ({
   splitArray: [createNewSplit(tx.userId, tx.amount, tx.id)],
   catArray: [
     createNewCat({
+      txId: tx.id,
       nameArray: tx.plaidTx?.category || [],
       amount: tx.amount,
     }),
@@ -48,12 +49,7 @@ export const createTxFromChaseCSV = (
     plaidId: null,
     userId,
     accountId: null,
-    catArray: [
-      createNewCat({
-        nameArray: [],
-        amount: Number.parseFloat(chaseCSVTx.Amount),
-      }),
-    ],
+    catArray: [],
     splitArray: [createNewSplit(userId, Number.parseFloat(chaseCSVTx.Amount))],
     receipt: null,
   };
@@ -77,12 +73,7 @@ export const createTxFromPlaidTx = (
     plaidId: plaidTx.transaction_id,
     userId: userId,
     accountId: plaidTx.account_id,
-    catArray: [
-      createNewCat({
-        nameArray: plaidTx.category,
-        amount: plaidTx.amount,
-      }),
-    ],
+    catArray: [],
     splitArray: [createNewSplit(userId, plaidTx.amount, "")],
     receipt: null,
   };
@@ -215,7 +206,7 @@ export const txTypeArray: ["spending", "received", "transfers"] = [
 export type TxType = (typeof txTypeArray)[number];
 
 export const useTxGetAll = () => {
-  const { appUser } = getAppUser();
+  const { appUser } = useAppUser();
   const datetime = useStore((store) => store.datetime);
 
   const txArray = trpc.tx.getAll.useQuery(

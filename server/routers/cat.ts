@@ -1,22 +1,21 @@
 import { CatClientSideSchema } from "@/types/cat";
 import db from "@/util/db";
 import type { Cat } from "@prisma/client";
-import { z } from "zod";
 import {
-  CatOptionalDefaultsSchema,
-  CatSchema,
-  CatSettingsOptionalDefaultsSchema,
-} from "../../prisma/generated/zod";
+  CatModelSchema,
+  CatSettingsUncheckedCreateInputObjectSchema,
+  CatSettingsUncheckedUpdateInputObjectSchema,
+  CatUncheckedUpdateInputObjectSchema,
+} from "prisma/generated/schemas";
+import { z } from "zod";
 import { procedure, router } from "../trpc";
 
 const catRouter = router({
-  create: procedure
-    .input(CatOptionalDefaultsSchema)
-    .mutation(async ({ input }) => {
-      return await db.cat.create({
-        data: input,
-      });
-    }),
+  create: procedure.input(CatClientSideSchema).mutation(async ({ input }) => {
+    return await db.cat.create({
+      data: input,
+    });
+  }),
 
   upsertMany: procedure
     .input(
@@ -66,7 +65,7 @@ const catRouter = router({
   deleteMany: procedure
     .input(
       z.object({
-        catArray: z.array(CatSchema),
+        catArray: z.array(CatModelSchema),
       }),
     )
     .mutation(async ({ input }) => {
@@ -86,12 +85,18 @@ const catRouter = router({
   }),
 
   upsertSettings: procedure
-    .input(CatSettingsOptionalDefaultsSchema)
+    .input(
+      z.union([
+        CatSettingsUncheckedUpdateInputObjectSchema,
+        CatSettingsUncheckedCreateInputObjectSchema,
+      ]),
+    )
     .mutation(async ({ input }) => {
       const upsertedSettings = await db.catSettings.upsert({
-        where: { id: input.id || "" },
-        update: input,
-        create: input,
+        where: { id: z.string().parse(input.id) },
+
+        update: CatUncheckedUpdateInputObjectSchema.parse(input),
+        create: CatSettingsUncheckedCreateInputObjectSchema.parse(input),
       });
 
       return upsertedSettings;

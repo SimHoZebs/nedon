@@ -1,7 +1,7 @@
 import { useLocalStore, useLocalStoreDelay } from "@/util/store";
 import { trpc } from "./trpc";
 
-const getAppUser = () => {
+const useAppUser = () => {
   const userId = useLocalStoreDelay(useLocalStore, (state) => state.userId);
 
   const user = trpc.user.get.useQuery(userId || "", {
@@ -17,4 +17,4 @@ const getAppUser = () => {
   return { appUser, allUsers };
 };
 
-export default getAppUser;
+export default useAppUser;

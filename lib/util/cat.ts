@@ -10,8 +10,8 @@ export const createNewCat = ({
   nameArray,
   amount = 0,
 }: {
-  txId?: string;
-  nameArray: string[] | null;
+  txId: string;
+  nameArray: string[] | null | undefined;
   amount: number;
 }): CatClientSide => {
   return {
@@ -46,7 +46,8 @@ export const fillArrayByCat = (
 ): TreedCatWithTx[] => {
   const nameArray = cat.nameArray;
 
-  if (!nameArray || !nameArray.length) return resultArray;
+  if (!nameArray || !Array.isArray(nameArray) || !nameArray.length)
+    return resultArray;
 
   const firstCatName = nameArray[0];
 

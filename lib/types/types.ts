@@ -1,7 +1,7 @@
 import type { Group, User } from "@prisma/client";
 import type { Transaction } from "plaid";
+import { UserModelSchema } from "prisma/generated/schemas";
 import { z } from "zod";
-import { UserSchema } from "../../prisma/generated/zod";
 
 declare global {
   namespace PrismaJson {
@@ -13,7 +13,7 @@ export type UserClientSide = Omit<User, "ACCESS_TOKEN"> & {
   hasAccessToken: boolean;
   myConnectionArray?: User[]; //user loaded from connections
 };
-export const UserClientSideSchema = UserSchema.extend({
+export const UserClientSideSchema = UserModelSchema.extend({
   ACCESS_TOKEN: z.string().optional(),
 });
 

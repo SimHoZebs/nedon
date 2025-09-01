@@ -14,11 +14,9 @@ generator json {
 }
 
 generator zod {
-  provider                         = "prisma-zod-generator"
-  createOptionalDefaultValuesTypes = true
-  useTypeAssertions                = true
-  createInputTypes                 = false
-  createRelationValuesTypes        = true
+  provider                   = "prisma-zod-generator"
+  exportZodSchemas           = false
+  pureModelsIncludeRelations = true
 }
 
 datasource db {

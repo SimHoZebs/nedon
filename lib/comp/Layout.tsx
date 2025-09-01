@@ -1,4 +1,4 @@
-import getAppUser from "@/util/getAppUser";
+import useAppUser from "@/util/getAppUser";
 import { useLocalStore, useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime, useTxGetAll } from "@/util/tx";
@@ -16,7 +16,7 @@ const customFont = Space_Grotesk({
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
-  const { appUser, allUsers } = getAppUser();
+  const { appUser, allUsers } = useAppUser();
 
   const txGetAllRetryCount = useRef(0);
   const setUserId = useLocalStore((state) => state.setUserId);
@@ -37,7 +37,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   useEffect(() => {
     const createUserWithPlaid = async () => {
-      const user = await createUser.mutateAsync();
+      const user = await createUser.mutateAsync({});
       setUserId(user.id);
       await updateUser.mutateAsync({ ...user, name: user.id.slice(0, 8) });
 

@@ -1,11 +1,11 @@
 import { ActionBtn, Button } from "@/comp/Button";
 import Input from "@/comp/Input";
-import getAppUser from "@/util/getAppUser";
+import useAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import React, { useEffect, useState } from "react";
 
 const Profile = () => {
-  const { appUser } = getAppUser();
+  const { appUser } = useAppUser();
   const updateProfile = trpc.user.update.useMutation();
   const [unsavedUser, setUnsavedUser] = useState(appUser);
 

@@ -1,4 +1,4 @@
-import getAppUser from "@/util/getAppUser";
+import useAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
 import type React from "react";
 import { useState } from "react";
@@ -10,7 +10,7 @@ interface Props {
   oweUser: { id: string; amount: number } | undefined;
 }
 const SettleModal = (props: Props) => {
-  const { appUser } = getAppUser();
+  const { appUser } = useAppUser();
 
   const [settleAmount, setSettleAmount] = useState(0);
   const [appUserGiving, setAppUserGiving] = useState(true);

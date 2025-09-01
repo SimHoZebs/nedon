@@ -1,10 +1,10 @@
 import {
   type PureReceiptWithChildren,
   PureReceiptWithChildrenSchema,
-  ReceiptOptionalDefaultsWithChildrenSchema,
 } from "@/types/receipt";
 import { createStructuredResponse } from "@/types/types";
 import db from "@/util/db";
+import { ReceiptCreateInputObjectSchema } from "prisma/generated/schemas";
 import { imgAnnotator } from "server/gcloudClient";
 import openai from "server/openaiClient";
 import { z } from "zod";
@@ -15,11 +15,15 @@ const receiptRouter = router({
     .input(
       z.object({
         id: z.string(),
-        receipt: ReceiptOptionalDefaultsWithChildrenSchema,
+        receipt: ReceiptCreateInputObjectSchema,
       }),
     )
     .mutation(async ({ input }) => {
       const { items, id, ...receiptWithoutItems } = input.receipt;
+
+      if (!items) {
+        throw new Error("No items in receipt");
+      }
 
       const updatedTx = await db.tx.update({
         where: {
@@ -29,9 +33,7 @@ const receiptRouter = router({
           receipt: {
             create: {
               ...receiptWithoutItems,
-              items: {
-                createMany: { data: items },
-              },
+              items: items,
             },
           },
         },

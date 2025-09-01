@@ -17,7 +17,6 @@ import {
 import { z } from "zod";
 import { procedure, router } from "../trpc";
 import { client, createCatInput, createTxInDBInput, txInclude } from "../util";
-import catRouter from "./cat";
 
 const txSync = async (user: User) => {
   if (!user.ACCESS_TOKEN) {

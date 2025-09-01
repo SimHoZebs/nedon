@@ -1,18 +1,17 @@
 import { ActionBtn, Button } from "@/comp/Button";
 import { H2 } from "@/comp/Heading";
-import CreateUserBtn from "@/comp/user/CreateuserBtn";
-import getAppUser from "@/util/getAppUser";
+import CreateUserBtn from "@/comp/user/CreateUserBtn";
+import useAppUser from "@/util/getAppUser";
 import { useLocalStore, useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useRouter } from "next/router";
-import React from "react";
 
 const Settings = () => {
   const router = useRouter();
   const verticalCatPicker = useStore((state) => state.verticalCatPicker);
   const setVerticalCatPicker = useStore((state) => state.setVerticalCatPicker);
 
-  const { appUser, allUsers } = getAppUser();
+  const { appUser, allUsers } = useAppUser();
   const deleteAll = trpc.user.deleteAll.useMutation();
   const deleteUser = trpc.user.delete.useMutation();
   const addConnection = trpc.user.addConnection.useMutation();

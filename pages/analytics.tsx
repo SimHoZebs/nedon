@@ -6,7 +6,7 @@ import { Button } from "@/comp/Button";
 import DateRangePicker from "@/comp/DateRangePicker";
 import type { TreedCatWithTx } from "@/types/cat";
 import { calcCatTypeTotal, subCatTotal } from "@/util/cat";
-import getAppUser from "@/util/getAppUser";
+import useAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import type { TxType } from "@/util/tx";
@@ -17,22 +17,25 @@ import {
   useTxGetAll,
 } from "@/util/tx";
 import useDateRange from "@/util/useDateRange";
+import type { CatSettings } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
-import type { CatSettings } from "prisma/generated/zod";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const Page = () => {
-  const { appUser } = getAppUser();
+  const { appUser } = useAppUser();
   const txOragnizedByTimeArray = useStore(
     (store) => store.txOragnizedByTimeArray,
   );
   const [YMD, setYMD] = useState<[number, number, number]>([-1, -1, -1]);
 
   const txArray = useTxGetAll();
-  const catAllSettings = trpc.cat.getAllSettings.useQuery(appUser?.id || "", {
-    enabled: !!appUser,
-  });
+  const catAllSettings = trpc.cat.getAllSettings.useQuery(
+    { userId: appUser?.id || "" },
+    {
+      enabled: !!appUser,
+    },
+  );
 
   const [txType, setTxType] = useState<TxType>("spending");
   const [showModal, setShowModal] = useState(false);

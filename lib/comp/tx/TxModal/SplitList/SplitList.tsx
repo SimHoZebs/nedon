@@ -1,7 +1,7 @@
 import { ActionBtn, Button } from "@/comp/Button";
 import { H3 } from "@/comp/Heading";
 import { isUnsavedTxInDB } from "@/types/tx";
-import getAppUser from "@/util/getAppUser";
+import useAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
@@ -25,7 +25,7 @@ const SplitList = (props: Props) => {
   const queryClient = trpc.useUtils();
   const revertToTxInDB = useTxStore((state) => state.revertToTxInDB);
 
-  const { appUser } = getAppUser();
+  const { appUser } = useAppUser();
   const isEditingSplit = useTxStore((state) => state.isEditingSplit);
   const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
   const tx = useTxStore((state) => state.txOnModal);

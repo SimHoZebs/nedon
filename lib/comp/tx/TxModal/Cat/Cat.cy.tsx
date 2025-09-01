@@ -1,7 +1,8 @@
-import { trpc } from "@/util/trpc";
-import React from "react";
+import { mount } from "cypress/react";
+import "styles/globals.css";
 
-import "../../../../../styles/globals.css";
+import { trpc } from "@/util/trpc";
+
 import Cat from "./Cat";
 
 describe("<Cat />", () => {
@@ -10,6 +11,6 @@ describe("<Cat />", () => {
     //
     const Test = trpc.withTRPC(Cat);
 
-    cy.mount(<Test />);
+    mount(<Test />);
   });
 });

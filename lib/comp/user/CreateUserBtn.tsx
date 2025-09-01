@@ -19,7 +19,7 @@ const CreateUserBtn = () => {
       onClickAsync={async (e) => {
         setLoading(true);
         e.stopPropagation();
-        const user = await createUser.mutateAsync();
+        const user = await createUser.mutateAsync({});
         await updateUser.mutateAsync({ ...user, name: user.id.slice(0, 8) });
 
         const publicToken = await sandboxPublicToken.refetch();

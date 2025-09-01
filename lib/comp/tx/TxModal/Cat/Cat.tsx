@@ -3,7 +3,7 @@ import type { CatClientSide } from "@/types/cat";
 import { createNewCat } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import CatChip from "./CatChip";
 import CatPicker from "./CatPicker";
 
@@ -73,7 +73,7 @@ const Cat = () => {
 
               //add a new cat
               tmpCatArray.push(
-                createNewCat({ amount: 0, txId: tx?.id, nameArray: [] }),
+                createNewCat({ amount: 0, txId: tx?.id || "", nameArray: [] }),
               );
 
               setCatArray(tmpCatArray);

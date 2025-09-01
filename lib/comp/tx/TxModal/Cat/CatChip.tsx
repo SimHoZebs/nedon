@@ -83,7 +83,7 @@ const CatChip = (props: Props) => {
                     queryClient.tx.invalidate();
                   }}
                 >
-                  <span className="icon-[iconamoon--close-fill] hidden h-4 w-4 rounded-full text-zinc-400 outline outline-1 group-hover:block hover:text-pink-400" />
+                  <span className="icon-[iconamoon--close-fill] hidden h-4 w-4 rounded-full text-zinc-400 outline-1 group-hover:block hover:text-pink-400" />
                 </button>
               )
             }

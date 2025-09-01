@@ -7,7 +7,7 @@ import AccountModal from "@/comp/home/AccountModal";
 import CsvUploadPreviewModal from "@/comp/home/CsvUploadPreviewModal";
 import TxModalAndCalculator from "@/comp/tx/TxModalAndCalculator";
 import { ChaseCSVTxSchema, type UnsavedTx } from "@/types/tx";
-import getAppUser from "@/util/getAppUser";
+import useAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { createTxFromChaseCSV, getScopeIndex, useTxGetAll } from "@/util/tx";
@@ -29,7 +29,7 @@ const Home: NextPage = () => {
   const [csvTxArray, setCsvTxArray] = React.useState<UnsavedTx[]>([]);
   const csvInputRef = React.useRef<HTMLInputElement>(null);
 
-  const { appUser } = getAppUser();
+  const { appUser } = useAppUser();
   const { date, setDate, rangeFormat, setRangeFormat } = useDateRange();
 
   const auth = trpc.auth.useQuery(

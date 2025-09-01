@@ -1,12 +1,11 @@
 import { Button } from "@/comp/Button";
 import type { SplitClientSide } from "@/types/split";
-import getAppUser from "@/util/getAppUser";
+import useAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { useTxStore } from "@/util/txStore";
-import React from "react";
 
 const SplitUserOptionList = () => {
-  const { appUser } = getAppUser();
+  const { appUser } = useAppUser();
 
   const setSplitArray = useTxStore((state) => state.setSplitArray);
   const setUnsavedCatArray = useTxStore((state) => state.setCatArray);
@@ -76,8 +75,7 @@ const SplitUserOptionList = () => {
                   //add new split
                   updatedSplitArray.push({
                     id: undefined,
-                    txId: null,
-                    originTxId: undefined,
+                    originTxId: "",
                     amount: parseMoney(
                       txOnModal.amount / (splitArray.length + 1),
                     ),

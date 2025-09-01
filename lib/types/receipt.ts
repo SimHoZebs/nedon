@@ -1,24 +1,22 @@
-import { z } from "zod";
 import {
-  type ReceiptItem,
-  ReceiptItemOptionalDefaultsSchema,
-  ReceiptOptionalDefaultsSchema,
-} from "../../prisma/generated/zod";
+  type ReceiptItemModelType,
+  ReceiptModelSchema,
+  ReceiptItemCreateInputObjectSchema,
+} from "prisma/generated/schemas";
+import { z } from "zod";
 
 //"Pure" types are types without considering the database schema.
-export const PureReceiptItemSchema = ReceiptItemOptionalDefaultsSchema.omit({
+export const PureReceiptItemSchema = ReceiptModelSchema.omit({
   receiptId: true,
   id: true,
 });
 
 export type PureReceiptItem = z.infer<typeof PureReceiptItemSchema>;
 
-export const PureReceiptWithChildrenSchema = ReceiptOptionalDefaultsSchema.omit(
-  {
-    txId: true,
-    id: true,
-  },
-).merge(z.object({ items: z.array(PureReceiptItemSchema) }));
+export const PureReceiptWithChildrenSchema = ReceiptModelSchema.omit({
+  txId: true,
+  id: true,
+}).extend({ items: z.array(PureReceiptItemSchema) });
 
 export type PureReceiptWithChildren = z.infer<
   typeof PureReceiptWithChildrenSchema
@@ -26,21 +24,15 @@ export type PureReceiptWithChildren = z.infer<
 
 // Unlike "WithRelations", WithChildren" omits parent relations.
 export const ReceiptOptionalDefaultsWithChildrenSchema =
-  ReceiptOptionalDefaultsSchema.merge(
-    z.object({
-      txId: z.string().optional(),
-      items: z.array(
-        ReceiptItemOptionalDefaultsSchema.merge(
-          z.object({ receiptId: z.string().optional() }),
-        ),
-      ),
-    }),
-  );
+  ReceiptModelSchema.extend({
+    txId: z.string().optional(),
+    items: z.array(ReceiptItemCreateInputObjectSchema),
+  });
 
 export type ReceiptOptionalDefaultsWithChildren = z.infer<
   typeof ReceiptOptionalDefaultsWithChildrenSchema
 >;
 
 export type ReceiptOptionalDefaultsRelations = {
-  items: ReceiptItem[];
+  items: ReceiptItemModelType[];
 };

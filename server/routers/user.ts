@@ -1,9 +1,9 @@
-import { type UserClientSide, UserClientSideSchema } from "@/types/types";
+import { type UserClientSide } from "@/types/types";
 import db from "@/util/db";
 import { stripUserSecrets } from "@/util/user";
 import type { User } from "@prisma/client";
+import { UserCreateInputObjectSchema } from "prisma/generated/schemas";
 import { z } from "zod";
-import { UserSchema } from "../../prisma/generated/zod";
 import { procedure, router } from "../trpc";
 import { PLAID_PRODUCTS } from "../util";
 
@@ -43,21 +43,23 @@ const userRouter = router({
     return clientSideUserArray.filter((user) => !!user) as UserClientSide[];
   }),
 
-  update: procedure.input(UserClientSideSchema).mutation(async ({ input }) => {
-    const user = await db.user.update({
-      where: {
-        id: input.id,
-      },
-      data: {
-        name: input.name,
-      },
-    });
+  update: procedure
+    .input(z.object({ id: z.string(), name: z.string() }))
+    .mutation(async ({ input }) => {
+      const user = await db.user.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          name: input.name,
+        },
+      });
 
-    return stripUserSecrets(user);
-  }),
+      return stripUserSecrets(user);
+    }),
 
   create: procedure
-    .input(z.optional(UserSchema.partial()))
+    .input(z.optional(UserCreateInputObjectSchema))
     .mutation(async () => {
       const user = await db.user.create({
         data: {},

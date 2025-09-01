@@ -2,7 +2,7 @@ import { ActionBtn, CloseBtn, SecondaryBtn } from "@/comp/Button";
 import { H1 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
 import { isTxInDB } from "@/types/tx";
-import getAppUser from "@/util/getAppUser";
+import useAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
@@ -31,7 +31,7 @@ const TxModal = (props: Props) => {
   const txOragnizedByTimeArray = useStore(
     (store) => store.txOragnizedByTimeArray,
   );
-  const { appUser } = getAppUser();
+  const { appUser } = useAppUser();
   const auth = trpc.auth.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },

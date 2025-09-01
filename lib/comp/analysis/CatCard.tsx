@@ -2,7 +2,7 @@ import type { TreedCatWithTx } from "@/types/cat";
 import { getCatStyle, subCatTotal } from "@/util/cat";
 import parseMoney from "@/util/parseMoney";
 import type { TxType } from "@/util/tx";
-import type { CatSettings } from "prisma/generated/zod";
+import type { CatSettings } from "@prisma/client";
 import { H3 } from "../Heading";
 
 interface Props {
@@ -24,7 +24,7 @@ const CatCard = (props: Props) => {
   return (
     <div
       key={props.cat.name}
-      className="flex cursor-pointer flex-col p-3 outline outline-1 outline-white hover:bg-zinc-700"
+      className="flex cursor-pointer flex-col p-3 outline-1 outline-white hover:bg-zinc-700"
       onKeyDown={() => props.showModal()}
       onClick={() => props.showModal()}
     >

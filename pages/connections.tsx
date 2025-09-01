@@ -1,6 +1,6 @@
 import SettleModal from "@/comp/analysis/SettleModal";
 import { ActionBtn, Button } from "@/comp/Button";
-import getAppUser from "@/util/getAppUser";
+import useAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import React, { useMemo, useState } from "react";
@@ -12,7 +12,7 @@ const Connections = () => {
   const [showModal, setShowModal] = useState(false);
   const [oweUser, setOweUser] = useState<{ id: string; amount: number }>();
 
-  const { appUser } = getAppUser();
+  const { appUser } = useAppUser();
 
   const removeConnection = trpc.user.removeConnection.useMutation();
   const associatedTxArray = trpc.tx.getAllAssociated.useQuery(

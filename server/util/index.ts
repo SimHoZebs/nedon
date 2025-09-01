@@ -6,7 +6,7 @@ import {
   PlaidEnvironments,
   Products,
 } from "plaid";
-import type { CatOptionalDefaults } from "prisma/generated/zod";
+import { CatModelType } from "prisma/generated/schemas";
 
 const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
@@ -54,7 +54,7 @@ const configuration = new Configuration({
 
 export const client = new PlaidApi(configuration);
 
-export const createCatInput = (cat: CatOptionalDefaults) => {
+export const createCatInput = (cat: CatModelType) => {
   return { name: cat.name, nameArray: cat.nameArray, amount: cat.amount };
 };
 
