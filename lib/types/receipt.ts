@@ -1,7 +1,7 @@
 import {
+  ReceiptItemCreateInputObjectSchema,
   type ReceiptItemModelType,
   ReceiptModelSchema,
-  ReceiptItemCreateInputObjectSchema,
 } from "prisma/generated/schemas";
 import { z } from "zod";
 
