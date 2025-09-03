@@ -1,7 +1,8 @@
-import type React from "react";
-import { date, z } from "zod";
 import { Button } from "./Button";
-import { H1, H2, H3 } from "./Heading";
+import { H2 } from "./Heading";
+
+import type React from "react";
+import { date } from "zod";
 
 interface Props {
   date: Date;

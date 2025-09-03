@@ -1,6 +1,7 @@
-import type { TxInDB } from "@/types/tx";
 import { getCatStyle } from "@/util/cat";
 import useAppUser from "@/util/useAppUser";
+
+import type { TxInDB } from "@/types/tx";
 
 interface Props {
   onInteraction: () => void;
@@ -20,12 +21,12 @@ const TxCard = (props: Props) => {
       onClick={props.onInteraction}
     >
       <section className="flex w-full justify-between gap-x-3 truncate">
-        <div className="flex-start flex h-full justify-center gap-x-2 truncate">
+        <div className="flex h-full flex-start justify-center gap-x-2 truncate">
           <p className="truncate text-base sm:text-lg">{props.tx.name}</p>
         </div>
 
         <div
-          className={`flex items-center gap-x-1 text-base font-light sm:text-lg ${
+          className={`flex items-center gap-x-1 font-light text-base sm:text-lg ${
             props.tx.amount > 0 ? "" : "text-green-300"
           }`}
         >
@@ -38,7 +39,7 @@ const TxCard = (props: Props) => {
       </section>
 
       <section className="flex h-fit w-full justify-between gap-x-1">
-        <p className="text-xs font-light text-zinc-400">
+        <p className="font-light text-xs text-zinc-400">
           {props.tx.authorizedDatetime.toLocaleTimeString()}
         </p>
 
@@ -57,7 +58,7 @@ const TxCard = (props: Props) => {
               <span
                 className={`${getCatStyle(cat.nameArray).icon} ${getCatStyle(cat.nameArray).textColor} w-4`}
               />
-              <p className="text-xs font-light">{cat.name.at(-1)}</p>
+              <p className="font-light text-xs">{cat.name.at(-1)}</p>
             </div>
           ))}
         </div>

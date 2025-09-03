@@ -1,14 +1,17 @@
-import { TxInDBSchema, UnsavedTxInDBSchema, UnsavedTxSchema } from "@/types/tx";
 import db from "@/util/db";
 import { resetTx } from "@/util/tx";
+
+import { TxInDBSchema, UnsavedTxInDBSchema, UnsavedTxSchema } from "@/types/tx";
+
+import { procedure, router } from "../trpc";
+import { createCatInput, getPlaidTxSyncData } from "../util/plaid";
+
 import {
   createTxInDBInput,
   mergePlaidTxWithTxArray,
   txInclude,
 } from "server/util/tx";
 import { z } from "zod";
-import { procedure, router } from "../trpc";
-import { createCatInput, getPlaidTxSyncData } from "../util/plaid";
 
 const txRouter = router({
   getWithoutPlaid: procedure

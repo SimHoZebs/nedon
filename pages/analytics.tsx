@@ -4,7 +4,7 @@ import CatModal from "@/comp/analysis/CatModal";
 import LineGraph from "@/comp/analysis/LineGraph";
 import { Button } from "@/comp/Button";
 import DateRangePicker from "@/comp/DateRangePicker";
-import type { TreedCatWithTx } from "@/types/cat";
+
 import { calcCatTypeTotal, subCatTotal } from "@/util/cat";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
@@ -17,6 +17,9 @@ import {
 } from "@/util/tx";
 import useAppUser from "@/util/useAppUser";
 import useDateRange from "@/util/useDateRange";
+
+import type { TreedCatWithTx } from "@/types/cat";
+
 import type { CatSettings } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
 import type React from "react";
@@ -68,7 +71,7 @@ const Page = () => {
   }, [date, rangeFormat, txArray.data, txArray.status, txOragnizedByTimeArray]);
 
   const treedCatWithTxArray = useMemo(() => {
-    const [y, m, d] = YMD;
+    const [y, m, _d] = YMD;
 
     if (y === -1 || !txOragnizedByTimeArray[y][m]) return [];
 
@@ -107,7 +110,7 @@ const Page = () => {
     <section className="flex flex-col items-center gap-y-4">
       {showModal && (
         <motion.div
-          className="bg-opacity-70 absolute top-0 left-0 z-10 h-full w-full overflow-hidden bg-zinc-950 backdrop-blur-sm sm:justify-center"
+          className="absolute top-0 left-0 z-10 h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
           onMouseDown={(e) => {
             e.stopPropagation();
             setShowModal(false);
@@ -134,7 +137,7 @@ const Page = () => {
                 key={type}
                 className={`px-3 text-sm ${
                   txType === type
-                    ? "bg-opacity-20 bg-indigo-200 text-indigo-200"
+                    ? "bg-indigo-200 bg-opacity-20 text-indigo-200"
                     : ""
                 } rounded-md`}
                 onClick={() => setTxType(type)}

@@ -1,9 +1,11 @@
-import type { CatClientSide, TreedCat } from "@/types/cat";
 import { createNewCat } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
+
+import type { CatClientSide, TreedCat } from "@/types/cat";
+
 import { type ForwardedRef, forwardRef, useEffect, useState } from "react";
 
 interface Props {
@@ -178,7 +180,7 @@ const CatPicker = forwardRef(
         <div className="grid w-full auto-cols-fr grid-cols-3 overflow-x-hidden overflow-y-scroll bg-zinc-800 pb-1 pl-2 text-xs">
           {currentOptionArray.map((cat) => (
             <button
-              className="group my-1 mr-2 flex aspect-square flex-col items-center justify-center gap-y-1 rounded-lg border border-zinc-400 text-center hyphens-auto hover:bg-zinc-700 hover:text-zinc-200"
+              className="group my-1 mr-2 flex aspect-square flex-col items-center justify-center gap-y-1 hyphens-auto rounded-lg border border-zinc-400 text-center hover:bg-zinc-700 hover:text-zinc-200"
               type="button"
               onClick={async () => {
                 if (cat.subCatArray.length === 0) {

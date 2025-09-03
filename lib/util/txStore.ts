@@ -1,9 +1,11 @@
 import type { CatClientSide } from "@/types/cat";
 import type { SplitClientSide } from "@/types/split";
-import type { TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
+import type { baseTx, TxInDB, UnsavedTxInDB } from "@/types/tx";
+
+import { useStore } from "./store";
+
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { useStore } from "./store";
 
 /**
  * Tx depends on three forms of data:
@@ -17,8 +19,8 @@ interface Store {
   txOnModalIndex: number[] | null;
   setTxOnModalIndex: (index: number[] | null) => void;
 
-  txOnModal: UnsavedTx | UnsavedTxInDB | TxInDB | null;
-  setTxOnModal: (tx: UnsavedTx | TxInDB) => void;
+  txOnModal: baseTx | UnsavedTxInDB | TxInDB | null;
+  setTxOnModal: (tx: baseTx | TxInDB) => void;
 
   setSplitArray: (splitArray: SplitClientSide[]) => void;
   setCatArray: (catArray: CatClientSide[]) => void;

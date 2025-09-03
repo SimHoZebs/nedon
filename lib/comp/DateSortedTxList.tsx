@@ -1,9 +1,12 @@
-import type { TxInDB } from "@/types/tx";
 import { useTxGetAll } from "@/util/tx";
 import { useTxStore } from "@/util/txStore";
-import type React from "react";
+
+import type { TxInDB } from "@/types/tx";
+
 import { H2, H3 } from "./Heading";
 import TxCard from "./tx/TxCard";
+
+import type React from "react";
 
 interface Props {
   sortedTxArray: TxInDB[][][][];

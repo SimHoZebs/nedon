@@ -1,13 +1,17 @@
 import { ActionBtn, Button } from "@/comp/Button";
 import { H3 } from "@/comp/Heading";
-import { isUnsavedTxInDB } from "@/types/tx";
+
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 import useAppUser from "@/util/useAppUser";
-import type React from "react";
+
+import { isUnsavedTxInDB } from "@/types/tx";
+
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
+
+import type React from "react";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   onAmountChange: (index: number, splitAmount: string) => void;

@@ -1,9 +1,11 @@
 import { trpc } from "@/util/trpc";
 import useAppUser from "@/util/useAppUser";
-import type React from "react";
-import { useState } from "react";
+
 import { ActionBtn } from "../Button";
 import Modal from "../Modal";
+
+import type React from "react";
+import { useState } from "react";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;

@@ -1,11 +1,14 @@
-import type { SplitClientSide } from "@/types/split";
 import parseMoney from "@/util/parseMoney";
 import { useStore } from "@/util/store";
 import { useTxStore } from "@/util/txStore";
-import { motion } from "framer-motion";
-import React, { useEffect } from "react";
+
+import type { SplitClientSide } from "@/types/split";
+
 import Calculator from "./TxModal/SplitList/Calculator";
 import TxModal from "./TxModal/TxModal";
+
+import { motion } from "framer-motion";
+import React, { useEffect } from "react";
 
 interface Props {
   onClose: () => void;
@@ -105,7 +108,7 @@ const TxModalAndCalculator = (props: Props) => {
           dragMomentum={false}
         >
           <button
-            className="z-20 w-full rounded-md rounded-b-none border border-b-0 border-zinc-700 bg-zinc-800 shadow-md"
+            className="z-20 w-full rounded-md rounded-b-none border border-zinc-700 border-b-0 bg-zinc-800 shadow-md"
             type="button"
             onClick={() => setIsCalcHidden(!isCalcHidden)}
           >

@@ -1,7 +1,9 @@
-import { type CatClientSide, isCatArrayInDB } from "@/types/cat";
 import { getCatStyle } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
+
+import { type CatClientSide, isCatArrayInDB } from "@/types/cat";
+
 import type React from "react";
 
 type Props = {
@@ -83,7 +85,7 @@ const CatChip = (props: Props) => {
                     queryClient.tx.invalidate();
                   }}
                 >
-                  <span className="icon-[iconamoon--close-fill] hidden h-4 w-4 rounded-full text-zinc-400 outline-1 group-hover:block hover:text-pink-400" />
+                  <span className="icon-[iconamoon--close-fill] hidden h-4 w-4 rounded-full text-zinc-400 outline-1 hover:text-pink-400 group-hover:block" />
                 </button>
               )
             }

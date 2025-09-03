@@ -14,9 +14,10 @@ generator json {
 }
 
 generator zod {
-  provider                   = "prisma-zod-generator"
-  exportZodSchemas           = false
-  pureModelsIncludeRelations = true
+  provider                    = "zod-prisma-types"
+  createOptionalDefaultValues = true
+  useTypeAssertions           = true
+  createInputTypes            = true
 }
 
 enum MdsType {

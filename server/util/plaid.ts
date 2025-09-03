@@ -1,4 +1,4 @@
-import type { User } from "@prisma/client";
+import type { Cat, User } from "@prisma/client";
 import {
   Configuration,
   PlaidApi,
@@ -8,7 +8,6 @@ import {
   type Transaction,
   type TransactionsSyncRequest,
 } from "plaid";
-import type { CatModelType } from "prisma/generated/schemas";
 import { PLAID_CLIENT_ID, PLAID_ENV, PLAID_SECRET } from "server/constants";
 
 // Initialize the Plaid client
@@ -26,7 +25,7 @@ const configuration = new Configuration({
 
 export const client = new PlaidApi(configuration);
 
-export const createCatInput = (cat: CatModelType) => {
+export const createCatInput = (cat: Cat) => {
   return { name: cat.name, nameArray: cat.nameArray, amount: cat.amount };
 };
 
@@ -35,7 +34,7 @@ export const createCatInput = (cat: CatModelType) => {
  * returns null if there was an error.
  */
 export const getPlaidTxSyncData = async (user: User) => {
-  if (!user.ACCESS_TOKEN) {
+  if (!user.accessToken) {
     console.log("No access token for user");
     return null;
   }
@@ -51,7 +50,7 @@ export const getPlaidTxSyncData = async (user: User) => {
 
   while (hasMore && totalCount > 0) {
     const request: TransactionsSyncRequest = {
-      access_token: user.ACCESS_TOKEN,
+      access_token: user.accessToken,
       cursor: cursor,
       count: totalCount,
     };

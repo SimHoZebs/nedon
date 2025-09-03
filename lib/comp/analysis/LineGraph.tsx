@@ -1,21 +1,18 @@
-import type { TxInDB } from "@/types/tx";
 import parseMoney from "@/util/parseMoney";
 import { useStore } from "@/util/store";
 import type { TxType } from "@/util/tx";
+
+import type { TxInDB } from "@/types/tx";
+
 import { useEffect, useState } from "react";
 import {
   Line,
   LineChart,
   ResponsiveContainer,
   Tooltip,
-  type TooltipProps,
   XAxis,
   YAxis,
 } from "recharts";
-import type {
-  NameType,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent";
 
 interface Props {
   date: Date;
@@ -41,7 +38,7 @@ const LineGraph = (props: Props) => {
       );
       setDailyTxSumArray(sum);
     } else {
-      const [y, m, d] = props.YMD;
+      const [y, m, _d] = props.YMD;
 
       if (y === -1 || m === -1) {
         setDailyTxSumArray([]);

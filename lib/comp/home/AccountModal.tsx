@@ -1,11 +1,14 @@
 import Modal from "@/comp/Modal";
+
 import { organizeTxByTime, useTxGetAll } from "@/util/tx";
-import type { AccountBase } from "plaid";
-import type React from "react";
-import { useMemo } from "react";
+
 import { CloseBtn } from "../Button";
 import DateSortedTxList from "../DateSortedTxList";
 import { H1, H2, H3 } from "../Heading";
+
+import type { AccountBase } from "plaid";
+import type React from "react";
+import { useMemo } from "react";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;

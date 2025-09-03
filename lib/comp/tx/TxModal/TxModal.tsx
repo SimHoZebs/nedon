@@ -1,17 +1,21 @@
 import { ActionBtn, CloseBtn, SecondaryBtn } from "@/comp/Button";
 import { H1 } from "@/comp/Heading";
 import Modal from "@/comp/Modal";
-import { isTxInDB } from "@/types/tx";
+
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 import useAppUser from "@/util/useAppUser";
-import Image from "next/image";
-import type { AuthGetResponse } from "plaid";
-import React, { useEffect } from "react";
+
+import { isTxInDB } from "@/types/tx";
+
 import Cat from "./Cat/Cat";
 import Receipt from "./Receipt";
 import SplitList from "./SplitList/SplitList";
+
+import Image from "next/image";
+import type { AuthGetResponse } from "plaid";
+import { useEffect } from "react";
 
 interface Props {
   onClose: () => void;
@@ -82,7 +86,7 @@ const TxModal = (props: Props) => {
 
   const AccountName = ({ desktop }: { desktop: boolean }) => (
     <p
-      className={`${desktop ? "hidden lg:block" : "lg:hidden"} h-6 w-40 text-xs font-light text-zinc-400 md:text-sm ${
+      className={`${desktop ? "hidden lg:block" : "lg:hidden"} h-6 w-40 font-light text-xs text-zinc-400 md:text-sm ${
         auth.isLoading && "animate-pulse rounded-lg bg-zinc-700"
       } `}
     >
@@ -125,7 +129,7 @@ const TxModal = (props: Props) => {
               <AccountName desktop={true} />
             </div>
 
-            <div className="flex w-full flex-col items-start text-xs font-light text-zinc-400 md:text-sm lg:w-auto lg:items-end">
+            <div className="flex w-full flex-col items-start font-light text-xs text-zinc-400 md:text-sm lg:w-auto lg:items-end">
               <CloseBtn
                 isForDesktop
                 onClose={() => {

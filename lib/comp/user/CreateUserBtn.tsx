@@ -1,10 +1,12 @@
 import { trpc } from "@/util/trpc";
-import { useState } from "react";
+
 import { ActionBtn } from "../Button";
+
+import { useState } from "react";
 
 const CreateUserBtn = () => {
   const createUser = trpc.user.create.useMutation();
-  const updateUser = trpc.user.update.useMutation();
+  const updateUser = trpc.user.updateName.useMutation();
   const queryClient = trpc.useUtils();
 
   const sandboxPublicToken = trpc.sandBoxAccess.useQuery(

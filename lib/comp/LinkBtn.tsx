@@ -1,9 +1,11 @@
 import { trpc } from "@/util/trpc";
 import useAppUser from "@/util/useAppUser";
+
+import { ActionBtn } from "./Button";
+
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { usePlaidLink } from "react-plaid-link";
-import { ActionBtn } from "./Button";
 
 const LinkBtn = () => {
   const { appUser } = useAppUser();

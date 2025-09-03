@@ -1,5 +1,4 @@
 import parseMoney from "@/util/parseMoney";
-import React from "react";
 
 interface Props {
   value: string;
@@ -32,7 +31,7 @@ const Calculator = (props: Props) => {
           if (typeof evaluation === "number") {
             evaluation = parseMoney(evaluation).toString();
           }
-        } catch (e) {
+        } catch (_e) {
           evaluation = Number.parseFloat(props.value).toString();
         }
         props.setValue(evaluation);

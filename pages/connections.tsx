@@ -1,9 +1,11 @@
 import SettleModal from "@/comp/analysis/SettleModal";
 import { ActionBtn, Button } from "@/comp/Button";
+
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import useAppUser from "@/util/useAppUser";
-import React, { useMemo, useState } from "react";
+
+import { useMemo, useState } from "react";
 
 /**
  * Page to show all of user's connections and the amount owed by either party.
@@ -21,7 +23,7 @@ const Connections = () => {
   );
   const queryClient = trpc.useUtils();
 
-  const calcOweAmount = (userId: string) => {};
+  const _calcOweAmount = (_userId: string) => {};
 
   const calcOweGroup = useMemo(() => {
     if (!associatedTxArray.data) {

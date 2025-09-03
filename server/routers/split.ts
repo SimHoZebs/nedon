@@ -1,12 +1,15 @@
-import { isSplitArrayInDB } from "@/types/split";
 import db from "@/util/db";
-import { z } from "zod";
+
+import { isSplitArrayInDB } from "@/types/split";
+
 import {
   type Split,
   SplitOptionalDefaultsSchema,
   SplitSchema,
 } from "../../prisma/generated/zod";
 import { procedure, router } from "../trpc";
+
+import { z } from "zod";
 
 const splitRouter = router({
   create: procedure

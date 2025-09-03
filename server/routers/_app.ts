@@ -1,6 +1,15 @@
 import { convertPlaidCatsToHierarchicalArray } from "@/util/cat";
 import db from "@/util/db";
 import { stripUserSecrets } from "@/util/user";
+
+import { procedure, router } from "../trpc";
+import { client, PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "../util/plaid";
+import catRouter from "./cat";
+import receiptRouter from "./receipt";
+import splitRouter from "./split";
+import txRouter from "./tx";
+import userRouter from "./user";
+
 import type { User } from "@prisma/client";
 import {
   ACHClass,
@@ -10,13 +19,6 @@ import {
   TransferType,
 } from "plaid";
 import { z } from "zod";
-import { procedure, router } from "../trpc";
-import { client, PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "../util/plaid";
-import catRouter from "./cat";
-import receiptRouter from "./receipt";
-import splitRouter from "./split";
-import txRouter from "./tx";
-import userRouter from "./user";
 
 const setAccessToken = async ({
   publicToken,

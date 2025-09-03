@@ -1,49 +1,52 @@
-import type { UserClientSide } from "@/types/user";
 import db from "@/util/db";
-import type { User } from "@prisma/client";
-import { UserCreateInputObjectSchema } from "prisma/generated/schemas";
-import { z } from "zod";
+
 import { PLAID_PRODUCTS } from "../constants";
 import { procedure, router } from "../trpc";
-import { stripUserSecrets } from "../util/user";
+
+import { z } from "zod";
+
+// Define the reusable selection pattern
+const WITH_CONNECTIONS_OMIT_ACCESS_TOKEN = {
+  include: {
+    myConnectionArray: {
+      omit: { accessToken: true },
+    },
+  },
+  omit: { accessToken: true },
+};
 
 const userRouter = router({
-  get: procedure.input(z.string()).query(async ({ input }) => {
-    const user = await db.user.findFirst({
-      where: {
-        id: input,
-      },
-      include: {
-        myConnectionArray: true,
-      },
-    });
+  create: procedure
+    .input(z.object({ name: z.string() }).optional())
+    .mutation(async ({ input }) => {
+      const user = await db.user.create({
+        data: {
+          name: input?.name || "",
+        },
+        ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
+      });
 
-    if (!user) return null;
+      console.log("created user", user);
 
-    return {
-      products: PLAID_PRODUCTS,
-      ...stripUserSecrets(user),
-    };
-  }),
+      return user;
+    }),
 
-  getAll: procedure.input(z.undefined()).query(async () => {
-    let userArray: ((User & { myConnectionArray: User[] }) | null)[] = [];
+  get: procedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const user = await db.user.findFirst({
+        where: { id: input.id },
+        ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
+      });
+      if (!user) return null;
 
-    //developers get to see all accounts
-    userArray = await db.user.findMany({
-      include: {
-        myConnectionArray: true,
-      },
-    });
+      return {
+        products: PLAID_PRODUCTS,
+        ...user,
+      };
+    }),
 
-    const clientSideUserArray = userArray.map(
-      (user) => user && stripUserSecrets(user),
-    );
-
-    return clientSideUserArray.filter((user) => !!user) as UserClientSide[];
-  }),
-
-  update: procedure
+  updateName: procedure
     .input(z.object({ id: z.string(), name: z.string() }))
     .mutation(async ({ input }) => {
       const user = await db.user.update({
@@ -53,23 +56,10 @@ const userRouter = router({
         data: {
           name: input.name,
         },
+        ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
       });
 
-      return stripUserSecrets(user);
-    }),
-
-  create: procedure
-    .input(z.optional(UserCreateInputObjectSchema))
-    .mutation(async () => {
-      const user = await db.user.create({
-        data: {},
-        include: {
-          groupArray: true,
-        },
-      });
-      console.log("created user", user);
-
-      return stripUserSecrets(user);
+      return user;
     }),
 
   delete: procedure.input(z.string()).mutation(async ({ input }) => {
@@ -77,15 +67,10 @@ const userRouter = router({
       where: {
         id: input,
       },
+      ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
     });
 
     return user;
-  }),
-
-  deleteAll: procedure.input(z.undefined()).mutation(async () => {
-    const user = await db.user.deleteMany({});
-
-    return user.count;
   }),
 
   addConnection: procedure
@@ -102,6 +87,7 @@ const userRouter = router({
             },
           },
         },
+        ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
       });
 
       await db.user.update({
@@ -134,6 +120,7 @@ const userRouter = router({
             },
           },
         },
+        ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
       });
 
       await db.user.update({

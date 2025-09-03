@@ -1,43 +1,47 @@
-import type { Tx } from "@prisma/client";
-import {
-  CatModelSchema,
-  SplitModelSchema,
-  TxModelSchema,
-} from "prisma/generated/schemas";
-import { z } from "zod";
-import { CatClientSideSchema } from "./cat";
+import { type CatClientSide, CatClientSideSchema } from "./cat";
 import { plaidTxSchema } from "./plaid";
-import { ReceiptOptionalDefaultsWithChildrenSchema } from "./receipt";
-import { SplitClientSideSchema } from "./split";
+import { ReceiptWithChildrenSchema } from "./receipt";
+
+import type { Prisma, Receipt, Tx } from "@prisma/client";
+import { CatSchema, TxSchema } from "prisma/generated/zod";
+import { z } from "zod";
+
+export type baseTx = Prisma.TxGetPayload<{
+  include: { catArray: true; receipt: true };
+}>;
+
+export type unsavedTx = Omit<baseTx, "id" | "catArray" | "receipt"> & {
+  id?: string;
+  catArray: CatClientSide[];
+  receipt?: Receipt;
+  plaidTx?: z.infer<typeof plaidTxSchema> | null;
+};
 
 //Although cat and split fields are created when a tx is created, they can exist without id when it's being created on the client side.
-export const UnsavedTxSchema = TxModelSchema.extend({
+export const unsavedTxSchema = TxSchema.extend({
   id: z.string().optional(),
   catArray: z.array(CatClientSideSchema),
-  splitArray: z.array(SplitClientSideSchema),
-  receipt: ReceiptOptionalDefaultsWithChildrenSchema.nullable(),
+  receipt: ReceiptWithChildrenSchema.nullable(),
   plaidTx: plaidTxSchema.nullable(),
-}).omit({ user: true, originTx: true, refSplit: true, splitTxArray: true });
-
-export type UnsavedTx = z.infer<typeof UnsavedTxSchema>;
+}) satisfies z.ZodType<unsavedTx>;
 
 //TxInDB refers to a tx that has an id and is stored in the database, but may have unsaved cat and split.
-export const UnsavedTxInDBSchema = TxModelSchema.extend({
-  catArray: z.array(z.union([CatClientSideSchema, CatModelSchema])),
-  splitArray: z.array(z.union([SplitClientSideSchema, SplitModelSchema])),
-  receipt: ReceiptOptionalDefaultsWithChildrenSchema.nullable(),
+export const TxInDBClientSideSchema = TxSchema.extend({
+  catArray: z.array(z.union([CatClientSideSchema, CatSchema])),
+  receipt: ReceiptWithChildrenSchema.nullable(),
   plaidTx: plaidTxSchema.nullable(),
 });
 
-export interface UnsavedTxInDB extends z.infer<typeof UnsavedTxInDBSchema> {}
+export interface TxInDBClientSide
+  extends z.infer<typeof TxInDBClientSideSchema> {}
 
-export function isUnsavedTxInDB(tx: unknown): tx is UnsavedTxInDB {
+export function isTxInDBClientSide(tx: unknown): tx is TxInDBClientSide {
   return (tx as Tx).id !== undefined;
 }
 
-export const TxInDBSchema = UnsavedTxInDBSchema.extend({
-  catArray: z.array(CatModelSchema),
-  splitArray: z.array(SplitModelSchema),
+export const TxInDBSchema = TxInDBClientSideSchema.extend({
+  catArray: z.array(CatSchema),
+  splitArray: z.array(CatSchema),
   plaidTx: plaidTxSchema.nullable(),
 });
 

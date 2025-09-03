@@ -1,6 +1,7 @@
 import type { GroupClientSide } from "@/types/group";
 import type { TxInDB } from "@/types/tx";
 import type { UserClientSide } from "@/types/user";
+
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 

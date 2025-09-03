@@ -1,11 +1,13 @@
 import type { TreedCatWithTx } from "@/types/cat";
-import type { ChaseCSVTx, TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
-import type { Transaction } from "plaid";
+import type { baseTx, ChaseCSVTx, TxInDB, UnsavedTxInDB } from "@/types/tx";
+
 import { createNewCat, fillArrayByCat } from "./cat";
 import { createNewSplit } from "./split";
 import { useStore } from "./store";
 import { trpc } from "./trpc";
 import useAppUser from "./useAppUser";
+
+import type { Transaction } from "plaid";
 
 export const resetTx = (tx: TxInDB): UnsavedTxInDB => ({
   ...tx,
@@ -34,7 +36,7 @@ export const mergePlaidTxWithTx = (
 export const createTxFromChaseCSV = (
   chaseCSVTx: ChaseCSVTx,
   userId: string,
-): UnsavedTx => {
+): baseTx => {
   return {
     id: undefined,
     plaidTx: null,
@@ -58,7 +60,7 @@ export const createTxFromChaseCSV = (
 export const createTxFromPlaidTx = (
   userId: string,
   plaidTx: Transaction,
-): UnsavedTx => {
+): baseTx => {
   return {
     id: undefined,
     plaidTx: plaidTx,

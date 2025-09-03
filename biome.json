@@ -3,7 +3,10 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "nursery": {
+        "useSortedClasses": "error"
+      }
     }
   },
   "vcs": {
@@ -21,7 +24,17 @@
         "organizeImports": {
           "level": "on",
           "options": {
-            "groups": [":NODE:", ":ALIAS:", ":PACKAGE:"]
+            "groups": [
+              ["@/comp", "@/comp/**"],
+              ":BLANK_LINE:",
+              ["@/util", "@/util/**"],
+              ":BLANK_LINE:",
+              ["@/**"],
+              ":BLANK_LINE:",
+              ":PATH:",
+              ":BLANK_LINE:",
+              [":NODE:", ":PACKAGE:"]
+            ]
           }
         }
       }

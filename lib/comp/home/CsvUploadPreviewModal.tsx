@@ -1,10 +1,12 @@
-import type { UnsavedTx } from "@/types/tx";
 import { trpc } from "@/util/trpc";
+
+import type { baseTx } from "@/types/tx";
+
 import { ActionBtn } from "../Button";
 import Modal from "../Modal";
 
 interface Props {
-  unsavedTxArray: UnsavedTx[];
+  unsavedTxArray: baseTx[];
 }
 
 const CsvUploadPreviewModal = (props: Props) => {

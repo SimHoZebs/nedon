@@ -1,6 +1,8 @@
 import Input from "@/comp/Input";
+
 import parseMoney from "@/util/parseMoney";
 import { useTxStore } from "@/util/txStore";
+
 import type React from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -76,7 +78,7 @@ const SplitUser = (props: Props) => {
 
         <div className="flex w-full flex-col">
           <div className="flex w-full justify-between gap-x-2">
-            <div className="flex items-center justify-between gap-x-2 text-2xl font-light">
+            <div className="flex items-center justify-between gap-x-2 font-light text-2xl">
               <label htmlFor="amount">$</label>
               <Input
                 className={twMerge(
@@ -115,7 +117,7 @@ const SplitUser = (props: Props) => {
               />
             </div>
 
-            <div className="flex items-center text-xl font-light">
+            <div className="flex items-center font-light text-xl">
               <Input
                 className="sm:w-16 lg:w-16"
                 title="ratio"
@@ -158,7 +160,7 @@ const SplitUser = (props: Props) => {
             </div>
           </div>
 
-          <p className="text-xs font-light text-zinc-400">
+          <p className="font-light text-xs text-zinc-400">
             {split.userId?.slice(0, 8)}
           </p>
         </div>

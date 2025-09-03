@@ -1,17 +1,20 @@
-import type { TreedCatWithTx } from "@/types/cat";
 import { subCatTotal } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime } from "@/util/tx";
 import useAppUser from "@/util/useAppUser";
-import type { CatSettings, Prisma } from "@prisma/client";
-import { useEffect, useState } from "react";
+
+import type { TreedCatWithTx } from "@/types/cat";
+
 import { Button, CloseBtn } from "../Button";
 import DateSortedTxList from "../DateSortedTxList";
 import { H1, H2 } from "../Heading";
 import Input from "../Input";
 import Modal from "../Modal";
+
+import type { CatSettings, Prisma } from "@prisma/client";
+import { useEffect, useState } from "react";
 
 interface Props {
   setShowModal: (show: boolean) => void;

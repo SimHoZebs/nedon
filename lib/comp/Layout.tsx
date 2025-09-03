@@ -1,12 +1,15 @@
-import { useLocalStore, useStore } from "@/util/store";
+import { useLocalStore } from "@/util/localStore";
+import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime, useTxGetAll } from "@/util/tx";
 import useAppUser from "@/util/useAppUser";
+
+import { NavBtn } from "./Button";
+
 import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/router";
 import type React from "react";
 import { useEffect, useRef } from "react";
-import { NavBtn } from "./Button";
 
 const customFont = Space_Grotesk({
   subsets: ["latin"],
@@ -27,7 +30,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const txArray = useTxGetAll();
 
   const createUser = trpc.user.create.useMutation();
-  const updateUser = trpc.user.update.useMutation();
+  const updateUser = trpc.user.updateName.useMutation();
   const sandboxPublicToken = trpc.sandBoxAccess.useQuery(
     { instituteID: undefined },
     { staleTime: 360000, enabled: false },
@@ -37,7 +40,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   useEffect(() => {
     const createUserWithPlaid = async () => {
-      const user = await createUser.mutateAsync({});
+      const user = await createUser.mutateAsync();
       setUserId(user.id);
       await updateUser.mutateAsync({ ...user, name: user.id.slice(0, 8) });
 
@@ -149,7 +152,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       <main className="no-scrollbar h-full w-full overflow-auto px-5 py-3">
         {props.children}
       </main>
-      <nav className="flex h-20 w-full gap-y-2 border-l border-zinc-400 bg-zinc-900 p-5 sm:h-full sm:w-56 sm:flex-col sm:justify-between sm:px-0">
+      <nav className="flex h-20 w-full gap-y-2 border-zinc-400 border-l bg-zinc-900 p-5 sm:h-full sm:w-56 sm:flex-col sm:justify-between sm:px-0">
         <div className="flex w-full items-center justify-center sm:flex-col">
           <NavBtn
             router={router}

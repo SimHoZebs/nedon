@@ -7,7 +7,7 @@ const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => {
   return (
     <input
       className={twMerge(
-        "h-7 w-20 border-b-2 border-zinc-800 bg-zinc-900 p-1 hover:border-zinc-500 sm:w-36",
+        "h-7 w-20 border-zinc-800 border-b-2 bg-zinc-900 p-1 hover:border-zinc-500 sm:w-36",
         className,
       )}
       {...rest}

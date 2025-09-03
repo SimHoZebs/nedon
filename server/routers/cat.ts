@@ -1,5 +1,9 @@
-import { CatClientSideSchema } from "@/types/cat";
 import db from "@/util/db";
+
+import { CatClientSideSchema } from "@/types/cat";
+
+import { procedure, router } from "../trpc";
+
 import type { Cat } from "@prisma/client";
 import {
   CatModelSchema,
@@ -8,7 +12,6 @@ import {
   CatUncheckedUpdateInputObjectSchema,
 } from "prisma/generated/schemas";
 import { z } from "zod";
-import { procedure, router } from "../trpc";
 
 const catRouter = router({
   create: procedure.input(CatClientSideSchema).mutation(async ({ input }) => {

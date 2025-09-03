@@ -1,11 +1,15 @@
 import { ActionBtn, Button } from "@/comp/Button";
-import type { CatClientSide } from "@/types/cat";
+
 import { createNewCat } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import { useRef, useState } from "react";
+
+import type { CatClientSide } from "@/types/cat";
+
 import CatChip from "./CatChip";
 import CatPicker from "./CatPicker";
+
+import { useRef, useState } from "react";
 
 const OFFSCREEN = { x: -800, y: -800 };
 
