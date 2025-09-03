@@ -1,40 +1,8 @@
+import type { GroupClientSide } from "@/types/group";
 import type { TxInDB } from "@/types/tx";
-import type { GroupClientSide, UserClientSide } from "@/types/types";
-import { useEffect, useState } from "react";
+import type { UserClientSide } from "@/types/user";
 import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
-
-export const useLocalStoreDelay = <T, F>(
-  store: (callback: (state: T) => unknown) => unknown,
-  callback: (state: T) => F,
-) => {
-  const result = store(callback) as F;
-  const [data, setData] = useState<F>();
-
-  useEffect(() => {
-    setData(result);
-  }, [result]);
-
-  return data;
-};
-
-interface LocalStore {
-  userId: string | null;
-  setUserId: (userId: string) => void;
-}
-
-export const useLocalStore = create<LocalStore>()(
-  devtools(
-    persist(
-      (set) => ({
-        userId: null,
-        setUserId: (userId: string) => set({ userId }),
-      }),
-
-      { name: "local-storage" },
-    ),
-  ),
-);
+import { devtools } from "zustand/middleware";
 
 interface Store {
   linkToken: string | null;

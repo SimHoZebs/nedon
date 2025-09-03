@@ -1,4 +1,4 @@
-import { useLocalStore, useLocalStoreDelay } from "@/util/store";
+import { useLocalStore, useLocalStoreDelay } from "@/util/localStore";
 import { trpc } from "./trpc";
 
 const useAppUser = () => {
