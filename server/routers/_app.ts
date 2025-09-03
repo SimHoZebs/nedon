@@ -11,7 +11,7 @@ import {
 } from "plaid";
 import { z } from "zod";
 import { procedure, router } from "../trpc";
-import { client, PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "../util";
+import { client, PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "../util/plaid";
 import catRouter from "./cat";
 import receiptRouter from "./receipt";
 import splitRouter from "./split";
