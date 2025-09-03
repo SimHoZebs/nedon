@@ -1,8 +1,8 @@
 import SettleModal from "@/comp/analysis/SettleModal";
 import { ActionBtn, Button } from "@/comp/Button";
-import useAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
+import useAppUser from "@/util/useAppUser";
 import React, { useMemo, useState } from "react";
 
 /**

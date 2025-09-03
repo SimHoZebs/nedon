@@ -1,7 +1,7 @@
-import useAppUser from "@/util/getAppUser";
 import { useLocalStore, useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime, useTxGetAll } from "@/util/tx";
+import useAppUser from "@/util/useAppUser";
 import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/router";
 import type React from "react";

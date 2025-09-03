@@ -1,10 +1,10 @@
 import type { TreedCatWithTx } from "@/types/cat";
 import { subCatTotal } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
-import useAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime } from "@/util/tx";
+import useAppUser from "@/util/useAppUser";
 import type { CatSettings, Prisma } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { Button, CloseBtn } from "../Button";

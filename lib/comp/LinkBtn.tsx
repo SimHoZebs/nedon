@@ -1,5 +1,5 @@
-import useAppUser from "@/util/getAppUser";
 import { trpc } from "@/util/trpc";
+import useAppUser from "@/util/useAppUser";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { usePlaidLink } from "react-plaid-link";

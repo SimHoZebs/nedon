@@ -2,10 +2,10 @@ import type { TreedCatWithTx } from "@/types/cat";
 import type { ChaseCSVTx, TxInDB, UnsavedTx, UnsavedTxInDB } from "@/types/tx";
 import type { Transaction } from "plaid";
 import { createNewCat, fillArrayByCat } from "./cat";
-import useAppUser from "./getAppUser";
 import { createNewSplit } from "./split";
 import { useStore } from "./store";
 import { trpc } from "./trpc";
+import useAppUser from "./useAppUser";
 
 export const resetTx = (tx: TxInDB): UnsavedTxInDB => ({
   ...tx,

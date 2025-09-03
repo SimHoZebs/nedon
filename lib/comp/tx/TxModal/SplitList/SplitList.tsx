@@ -1,10 +1,10 @@
 import { ActionBtn, Button } from "@/comp/Button";
 import { H3 } from "@/comp/Heading";
 import { isUnsavedTxInDB } from "@/types/tx";
-import useAppUser from "@/util/getAppUser";
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
+import useAppUser from "@/util/useAppUser";
 import type React from "react";
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";

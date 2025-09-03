@@ -6,7 +6,6 @@ import { Button } from "@/comp/Button";
 import DateRangePicker from "@/comp/DateRangePicker";
 import type { TreedCatWithTx } from "@/types/cat";
 import { calcCatTypeTotal, subCatTotal } from "@/util/cat";
-import useAppUser from "@/util/getAppUser";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import type { TxType } from "@/util/tx";
@@ -16,6 +15,7 @@ import {
   txTypeArray as txTypes,
   useTxGetAll,
 } from "@/util/tx";
+import useAppUser from "@/util/useAppUser";
 import useDateRange from "@/util/useDateRange";
 import type { CatSettings } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";

@@ -1,6 +1,6 @@
 import type { TxInDB } from "@/types/tx";
 import { getCatStyle } from "@/util/cat";
-import useAppUser from "@/util/getAppUser";
+import useAppUser from "@/util/useAppUser";
 
 interface Props {
   onInteraction: () => void;
