@@ -1,11 +1,11 @@
 import type { UserClientSide } from "@/types/user";
 import db from "@/util/db";
-import { stripUserSecrets } from "@/util/user";
 import type { User } from "@prisma/client";
 import { UserCreateInputObjectSchema } from "prisma/generated/schemas";
 import { z } from "zod";
+import { PLAID_PRODUCTS } from "../constants";
 import { procedure, router } from "../trpc";
-import { PLAID_PRODUCTS } from "../util/plaid";
+import { stripUserSecrets } from "../util/user";
 
 const userRouter = router({
   get: procedure.input(z.string()).query(async ({ input }) => {

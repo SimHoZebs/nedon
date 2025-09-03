@@ -1,5 +1,4 @@
-import type { GroupClientSide, UserClientSide } from "@/types/types";
-import type { Group, User } from "@prisma/client";
+import type { UserClientSide } from "@/types/user";
 
 export const emptyUser: UserClientSide = {
   id: "",
@@ -12,28 +11,6 @@ export const emptyUser: UserClientSide = {
   TRANSFER_ID: null,
   // The payment_id is only relevant for the UK/EU Payment Initiation product.
   PAYMENT_ID: null,
-};
-
-export function stripUserSecrets({
-  ACCESS_TOKEN,
-  ...rest
-}: User & {
-  myConnectionArray?: User[];
-}): UserClientSide {
-  return { ...rest, hasAccessToken: !!ACCESS_TOKEN };
-}
-
-export const stripUserSecretsFromGroup = (
-  group: Group & { userArray: User[] },
-): GroupClientSide => {
-  const userClientSideArray: UserClientSide[] = group.userArray.map((user) =>
-    stripUserSecrets(user),
-  );
-
-  const groupClientSide: GroupClientSide = {
-    ...group,
-    userArray: userClientSideArray,
-  };
-
-  return groupClientSide;
+  ownedTxArray: [],
+  connectedWithArray: [],
 };

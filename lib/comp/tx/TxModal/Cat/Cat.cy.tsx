@@ -2,7 +2,6 @@ import { mount } from "cypress/react";
 import "styles/globals.css";
 
 import { trpc } from "@/util/trpc";
-
 import Cat from "./Cat";
 
 describe("<Cat />", () => {
