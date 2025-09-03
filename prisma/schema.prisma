@@ -19,6 +19,13 @@ generator zod {
   pureModelsIncludeRelations = true
 }
 
+enum MdsType {
+  UNDETERMINED  @map("-1")
+  MANDATORY
+  DISCRETIONARY
+  SAVING
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -26,71 +33,65 @@ datasource db {
 }
 
 model Group {
-  id String @id @default(cuid())
+  id String @id @default(cuid(2))
 
   ownerId    String
   groupOwner User   @relation("mygroup", fields: [ownerId], references: [id], onDelete: Cascade)
-  userArray  User[]
+  userArray  User[] @relation("groupMembers")
 }
 
 model User {
-  id           String  @id @default(cuid())
-  name         String  @default("")
-  ACCESS_TOKEN String?
-  PUBLIC_TOKEN String?
-  ITEM_ID      String?
-  TRANSFER_ID  String? // The transfer_id is only relevant for Transfer ACH product.
-  PAYMENT_ID   String? // The payment_id is only relevant for the UK/EU Payment Initiation product.
+  id          String  @id @default(cuid(2))
+  name        String  @default("")
+  accessToken String? // Private: Do not expose to client
+  publicToken String? // Private: Do not expose to client
+  itemId      String? // Private: Do not expose to client
+  transferId  String? // Private: Do not expose to client. The transfer_id is only relevant for Transfer ACH product.
 
   cursor String? //tracker for transaction updates
 
   ownedTxArray Tx[] //transactions I own
-  splitTxArray Split[] @relation("splitUserArray") //Splits I am included in
+  splitTxs     Tx[] @relation("txSplits") //transactions I was split into
 
-  //Why is this not just a many-to-many relationship?
   myGroup    Group[] @relation("mygroup") //groups I own
-  groupArray Group[] //array of groups this user is included in
+  groupArray Group[] @relation("groupMembers") //groups I am a member of
 
-  myConnectionArray  User[] @relation("connection") //users I connected to
-  connectedWithArray User[] @relation("connection") //users that connected to me
+  myConnectionArray  User[] @relation("UserConnections") //users I connected to
+  connectedWithArray User[] @relation("UserConnections") //users connected to me
 
-  CatSettings CatSettings[]
+  settings UserSettings?
 }
 
 //Created when a transaction is saved to the database from category modification
 //or split.
 //Also created when a user accepts a split from another user.
 model Tx {
-  id String @id @default(cuid())
+  id String @id @default(cuid(2))
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  //For tracking splits. Can be less than tx.amount, but is target total of catArray.amount
-  userTotal Float @default(0)
-  catArray  Cat[]
-
-  splitTxArray Tx[] @relation("originTx") //transactions that were split from this tx
-
-  //If this tx was created from a split, this is the split id
-  refSplit Split? @relation("refSplit")
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   //the original transaction this tx was split from. null if this is the original tx
   originTxId String?
   originTx   Tx?     @relation("originTx", fields: [originTxId], references: [id], onDelete: Cascade)
 
-  splitArray Split[] //Splits that were created from this tx
+  splitTxArray Tx[]   @relation("originTx") // Txs created from splits
+  splitUsers   User[] @relation("txSplits") // Users this tx was split with
+
+  //For tracking splits. Can be less than tx.amount, but is target total of catArray.amount
+  userTotal Decimal @default(0) @db.Money
+  catArray  Cat[]
 
   receipt Receipt?
 
   recurring Boolean @default(false)
-  MDS       Int //-1 = undetermined, 0 = Mandatory, 1 = Discretionary, 2 = Saving
+  mds       MdsType @default(UNDETERMINED)
 
   //duplicate fields from plaidTx because these are important enough to manipulate
   //eventually, all plaidTx fields will be moved here
   plaidId            String?   @unique //plaid tranasction_id
   name               String
-  amount             Float
+  amount             Decimal   @db.Money
   datetime           DateTime? //datetime of when tx was posted
   authorizedDatetime DateTime //datetime of when tx was authorized by user
   accountId          String?
@@ -99,59 +100,48 @@ model Tx {
   plaidTx Json?
 }
 
-//Created for Bob when Alice splits their transaction with Bob.
-//Bob can accept this split to create a new tx with the same amount as the split.
-model Split {
-  id String @id @default(cuid())
-
-  userId String
-  user   User   @relation("splitUserArray", fields: [userId], references: [id], onDelete: Cascade)
-
-  amount Float
-
-  //transaction associated with this split
-  txId String? @unique
-  tx   Tx?     @relation("refSplit", fields: [txId], references: [id], onDelete: Cascade)
-
-  //transaction this split comes from
-  originTxId String
-  originTx   Tx     @relation(fields: [originTxId], references: [id], onDelete: Cascade)
-}
-
 model Cat {
-  id        String   @id @default(cuid())
+  id        String   @id @default(cuid(2))
   name      String
-  amount    Float
+  amount    Decimal  @db.Money
   nameArray String[]
   tx        Tx       @relation(fields: [txId], references: [id], onDelete: Cascade)
   txId      String
 }
 
+model UserSettings {
+  id     String @id @default(cuid(2))
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  catSettings CatSettings[]
+}
+
 model CatSettings {
-  id     String @id @default(cuid())
-  name   String
-  budget Float
+  id             String  @id @default(cuid(2))
+  name           String
+  budget         Decimal @db.Money
+  userSettingsId String
 
-  parent   CatSettings?  @relation("SubCategory", fields: [parentId], references: [id], onDelete: Cascade)
+  parent   CatSettings?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
   parentId String?
-  children CatSettings[] @relation("SubCategory")
+  children CatSettings[] @relation("CategoryHierarchy")
 
-  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
+  userSettings UserSettings @relation(fields: [userSettingsId], references: [id], onDelete: Cascade)
 }
 
 model Receipt {
-  id             String        @id @default(cuid())
+  id             String        @id @default(cuid(2))
   is_receipt     Boolean
   transaction_id String
-  date           String
+  date           DateTime
   merchant       String
   items          ReceiptItem[]
-  subtotal       Float
+  subtotal       Decimal       @db.Money
   currency       String
-  tax            Float
-  tip            Float
-  grand_total    Float
+  tax            Decimal       @db.Money
+  tip            Decimal       @db.Money
+  grand_total    Decimal       @db.Money
   payment_method String
   online_link    String
   location       String
@@ -161,12 +151,12 @@ model Receipt {
 }
 
 model ReceiptItem {
-  id          String @id @default(cuid())
+  id          String  @id @default(cuid(2))
   name        String
   description String
   quantity    Int
-  unit_price  Float
-  MDS         Int //-1 = undetermined, 0 = Mandatory, 1 = Discretionary, 2 = Saving
+  unit_price  Decimal @db.Money
+  mds         MdsType @default(UNDETERMINED)
 
   receipt   Receipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
   receiptId String
