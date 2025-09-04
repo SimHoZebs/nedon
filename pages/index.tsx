@@ -13,7 +13,7 @@ import { createTxFromChaseCSV, getScopeIndex, useTxGetAll } from "@/util/tx";
 import useAppUser from "@/util/useAppUser";
 import useDateRange from "@/util/useDateRange";
 
-import { type baseTx, ChaseCSVTxSchema } from "@/types/tx";
+import { type BaseTx, ChaseCSVTxSchema } from "@/types/tx";
 
 import { AnimatePresence, motion } from "framer-motion";
 import type { NextPage } from "next";
@@ -29,7 +29,7 @@ const Home: NextPage = () => {
     useState(false);
   const [clickedAccount, setClickedAccount] = useState<AccountBase>();
   const [YMD, setYMD] = useState([-1, -1, -1]);
-  const [csvTxArray, setCsvTxArray] = React.useState<baseTx[]>([]);
+  const [csvTxArray, setCsvTxArray] = React.useState<BaseTx[]>([]);
   const csvInputRef = React.useRef<HTMLInputElement>(null);
 
   const { appUser } = useAppUser();

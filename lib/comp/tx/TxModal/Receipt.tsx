@@ -7,7 +7,7 @@ import { createStructuredResponse } from "@/util/structuredResponse";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import type { PureReceiptWithChildren } from "@/types/receipt";
+import type { UnsavedReceipt } from "@/types/receipt";
 import { isTxInDB } from "@/types/tx";
 
 import Image from "next/image";
@@ -29,7 +29,7 @@ const Receipt = () => {
 
   // returns boolean based on success
   const uploadAndProcess = async () => {
-    const sr = createStructuredResponse<PureReceiptWithChildren>({
+    const sr = createStructuredResponse<UnsavedReceipt>({
       success: false,
       data: undefined,
       clientMsg: "Error uploading receipt",

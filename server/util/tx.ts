@@ -1,7 +1,7 @@
 import db from "@/util/db";
 import { createTxFromPlaidTx } from "@/util/tx";
 
-import type { baseTx, TxInDB } from "@/types/tx";
+import type { BaseTx, TxInDB } from "@/types/tx";
 
 import type { User } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
@@ -25,7 +25,7 @@ export const txInclude = {
   splitTxArray: true,
 };
 
-export const createTxInDBInput = (txClientSide: baseTx) => {
+export const createTxInDBInput = (txClientSide: BaseTx) => {
   return {
     data: {
       ...txClientSide,

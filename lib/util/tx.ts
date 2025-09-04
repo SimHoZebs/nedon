@@ -1,5 +1,5 @@
 import type { TreedCatWithTx } from "@/types/cat";
-import type { baseTx, ChaseCSVTx, TxInDB, UnsavedTxInDB } from "@/types/tx";
+import type { BaseTx, ChaseCSVTx, TxInDB, UnsavedTxInDB } from "@/types/tx";
 
 import { createNewCat, fillArrayByCat } from "./cat";
 import { createNewSplit } from "./split";
@@ -36,7 +36,7 @@ export const mergePlaidTxWithTx = (
 export const createTxFromChaseCSV = (
   chaseCSVTx: ChaseCSVTx,
   userId: string,
-): baseTx => {
+): BaseTx => {
   return {
     id: undefined,
     plaidTx: null,
@@ -60,7 +60,7 @@ export const createTxFromChaseCSV = (
 export const createTxFromPlaidTx = (
   userId: string,
   plaidTx: Transaction,
-): baseTx => {
+): BaseTx => {
   return {
     id: undefined,
     plaidTx: plaidTx,

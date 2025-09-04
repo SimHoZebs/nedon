@@ -1,6 +1,6 @@
 import { PureReceiptItemSchema } from "./receiptItem";
 
-import type { Prisma, ReceiptItem } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { ReceiptItemSchema, ReceiptSchema } from "prisma/generated/zod";
 import z from "zod";
 
@@ -12,25 +12,13 @@ export const BaseReceiptSchema = ReceiptSchema.extend({
   items: ReceiptItemSchema.array(),
 }) satisfies z.ZodType<BaseReceipt>;
 
-export const PureReceiptWithChildrenSchema = BaseReceiptSchema.omit({
+export const UnsavedReceiptSchema = BaseReceiptSchema.omit({
   txId: true,
   id: true,
-}).extend({ items: z.array(PureReceiptItemSchema) });
-
-export type PureReceiptWithChildren = z.infer<
-  typeof PureReceiptWithChildrenSchema
->;
-
-// Unlike "WithRelations", WithChildren" omits parent relations.
-export const ReceiptWithChildrenSchema = BaseReceiptSchema.extend({
-  txId: z.string().optional(),
-  items: z.array(ReceiptItemSchema),
+  items: true,
+}).extend({
+  id: z.string().optional(),
+  items: z.array(PureReceiptItemSchema),
 });
 
-export type ReceiptOptionalDefaultsWithChildren = z.infer<
-  typeof ReceiptWithChildrenSchema
->;
-
-export type ReceiptOptionalDefaultsRelations = {
-  items: ReceiptItem[];
-};
+export type UnsavedReceipt = z.infer<typeof UnsavedReceiptSchema>;

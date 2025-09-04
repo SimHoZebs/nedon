@@ -1,10 +1,7 @@
 import db from "@/util/db";
 import { createStructuredResponse } from "@/util/structuredResponse";
 
-import {
-  type PureReceiptWithChildren,
-  PureReceiptWithChildrenSchema,
-} from "@/types/receipt";
+import { type UnsavedReceipt, UnsavedReceiptSchema } from "@/types/receipt";
 
 import { procedure, router } from "../trpc";
 
@@ -55,7 +52,7 @@ const receiptRouter = router({
   process: procedure
     .input(z.object({ signedUrl: z.string() }))
     .mutation(async ({ input }) => {
-      const sr = createStructuredResponse<PureReceiptWithChildren>({
+      const sr = createStructuredResponse<UnsavedReceipt>({
         success: false,
         data: undefined,
         clientMsg:
@@ -114,8 +111,7 @@ const receiptRouter = router({
         try {
           const receipt = JSON.parse(message.content[0].text.value);
 
-          const parsedReceipt =
-            PureReceiptWithChildrenSchema.safeParse(receipt);
+          const parsedReceipt = UnsavedReceiptSchema.safeParse(receipt);
 
           if (parsedReceipt.success) {
             sr.success = true;
@@ -128,7 +124,7 @@ const receiptRouter = router({
           //Rarely, the receipt is in a different shape.
           if ("properties" in receipt) {
             sr.success = true;
-            sr.data = receipt.properties as PureReceiptWithChildren;
+            sr.data = receipt.properties as UnsavedReceipt;
             sr.clientMsg = "Receipt processed successfully.";
             sr.devMsg = "";
             return sr;

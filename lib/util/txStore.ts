@@ -1,6 +1,5 @@
-import type { CatClientSide } from "@/types/cat";
-import type { SplitClientSide } from "@/types/split";
-import type { baseTx, TxInDB, UnsavedTxInDB } from "@/types/tx";
+import type { UnsavedCat } from "@/types/cat";
+import type { BaseTx, TxInDB, UnsavedTxInDB } from "@/types/tx";
 
 import { useStore } from "./store";
 
@@ -19,11 +18,11 @@ interface Store {
   txOnModalIndex: number[] | null;
   setTxOnModalIndex: (index: number[] | null) => void;
 
-  txOnModal: baseTx | UnsavedTxInDB | TxInDB | null;
-  setTxOnModal: (tx: baseTx | TxInDB) => void;
+  txOnModal: BaseTx | UnsavedTxInDB | TxInDB | null;
+  setTxOnModal: (tx: BaseTx | TxInDB) => void;
 
   setSplitArray: (splitArray: SplitClientSide[]) => void;
-  setCatArray: (catArray: CatClientSide[]) => void;
+  setCatArray: (catArray: UnsavedCat[]) => void;
 
   /**
    * Only use this function when new data is expected from the database.
