@@ -9,6 +9,9 @@
       }
     }
   },
+  "files": {
+    "includes": ["**", "!package.json", "!pnpm-lock.yaml"]
+  },
   "vcs": {
     "enabled": true,
     "clientKind": "git",

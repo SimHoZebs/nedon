@@ -2,7 +2,8 @@ import { ActionBtn, Button } from "@/comp/Button";
 import { H2 } from "@/comp/Heading";
 import CreateUserBtn from "@/comp/user/CreateUserBtn";
 
-import { useLocalStore, useStore } from "@/util/store";
+import { useLocalStore } from "@/util/localStore";
+import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import useAppUser from "@/util/useAppUser";
 
@@ -14,7 +15,7 @@ const Settings = () => {
   const setVerticalCatPicker = useStore((state) => state.setVerticalCatPicker);
 
   const { appUser, allUsers } = useAppUser();
-  const deleteAll = trpc.user.deleteAll.useMutation();
+  const deleteAll = trpc.dev.deleteAll.useMutation();
   const deleteUser = trpc.user.delete.useMutation();
   const addConnection = trpc.user.addConnection.useMutation();
   const removeConnection = trpc.user.removeConnection.useMutation();

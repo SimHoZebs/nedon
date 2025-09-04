@@ -1,20 +1,13 @@
 import db from "@/util/db";
 
-import { CatClientSideSchema } from "@/types/cat";
+import { type BaseCat, BaseCatSchema, UnsavedCat } from "@/types/cat";
 
 import { procedure, router } from "../trpc";
 
-import type { Cat } from "@prisma/client";
-import {
-  CatModelSchema,
-  CatSettingsUncheckedCreateInputObjectSchema,
-  CatSettingsUncheckedUpdateInputObjectSchema,
-  CatUncheckedUpdateInputObjectSchema,
-} from "prisma/generated/schemas";
 import { z } from "zod";
 
 const catRouter = router({
-  create: procedure.input(CatClientSideSchema).mutation(async ({ input }) => {
+  create: procedure.input(UnsavedCat).mutation(async ({ input }) => {
     return await db.cat.create({
       data: input,
     });
@@ -24,11 +17,13 @@ const catRouter = router({
     .input(
       z.object({
         txId: z.string(),
-        catArray: z.array(CatClientSideSchema),
+        catArray: z.array(UnsavedCat),
       }),
     )
     .mutation(async ({ input }) => {
-      const catToUpdateArray = input.catArray.filter((cat) => cat.id) as Cat[];
+      const catToUpdateArray = input.catArray.filter(
+        (cat) => cat.id,
+      ) as BaseCat[];
       const catToCreateArray = input.catArray.filter((cat) => !cat.id);
 
       const upsertedTx = await db.tx.update({
@@ -68,7 +63,7 @@ const catRouter = router({
   deleteMany: procedure
     .input(
       z.object({
-        catArray: z.array(CatModelSchema),
+        catArray: BaseCatSchema.array(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -79,30 +74,6 @@ const catRouter = router({
       });
 
       return deletedCatArray;
-    }),
-
-  getAllSettings: procedure.input(z.string()).query(async ({ input }) => {
-    return await db.catSettings.findMany({
-      where: { userId: input },
-    });
-  }),
-
-  upsertSettings: procedure
-    .input(
-      z.union([
-        CatSettingsUncheckedUpdateInputObjectSchema,
-        CatSettingsUncheckedCreateInputObjectSchema,
-      ]),
-    )
-    .mutation(async ({ input }) => {
-      const upsertedSettings = await db.catSettings.upsert({
-        where: { id: z.string().parse(input.id) },
-
-        update: CatUncheckedUpdateInputObjectSchema.parse(input),
-        create: CatSettingsUncheckedCreateInputObjectSchema.parse(input),
-      });
-
-      return upsertedSettings;
     }),
 });
 

@@ -1,7 +1,7 @@
 import db from "@/util/db";
 import { resetTx } from "@/util/tx";
 
-import { TxInDBSchema, UnsavedTxInDBSchema, UnsavedTxSchema } from "@/types/tx";
+import { TxInDBSchema } from "@/types/tx";
 
 import { procedure, router } from "../trpc";
 import { createCatInput, getPlaidTxSyncData } from "../util/plaid";

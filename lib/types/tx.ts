@@ -1,33 +1,46 @@
-import { type CatClientSide, CatClientSideSchema } from "./cat";
+import { type CatClientSide, UnsavedCat } from "./cat";
 import { plaidTxSchema } from "./plaid";
-import { ReceiptWithChildrenSchema } from "./receipt";
+import { BaseReceiptSchema, ReceiptWithChildrenSchema } from "./receipt";
 
 import type { Prisma, Receipt, Tx } from "@prisma/client";
 import { CatSchema, TxSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 export type baseTx = Prisma.TxGetPayload<{
-  include: { catArray: true; receipt: true };
+  include: { catArray: true; receipt: { include: { items: true } } };
 }>;
+
+export const BaseTxSchema = TxSchema.omit({ plaidTx: true })
+  .extend({
+    catArray: CatSchema.array(),
+    receipt: BaseReceiptSchema.nullable(),
+    plaidTx: plaidTxSchema.nullable(),
+  })
+  .strict() satisfies z.ZodType<baseTx>;
+
+//Although cat and split fields are created when a tx is created, they can exist without id when it's being created on the client side.
 
 export type unsavedTx = Omit<baseTx, "id" | "catArray" | "receipt"> & {
   id?: string;
   catArray: CatClientSide[];
   receipt?: Receipt;
-  plaidTx?: z.infer<typeof plaidTxSchema> | null;
 };
 
-//Although cat and split fields are created when a tx is created, they can exist without id when it's being created on the client side.
-export const unsavedTxSchema = TxSchema.extend({
-  id: z.string().optional(),
-  catArray: z.array(CatClientSideSchema),
-  receipt: ReceiptWithChildrenSchema.nullable(),
-  plaidTx: plaidTxSchema.nullable(),
-}) satisfies z.ZodType<unsavedTx>;
+export const unsavedTxSchema = BaseTxSchema.omit({
+  id: true,
+  catArray: true,
+  receipt: true,
+})
+  .extend({
+    id: z.string().optional(),
+    catArray: z.array(UnsavedCat),
+    receipt: BaseReceiptSchema.optional(),
+  })
+  .strict() satisfies z.ZodType<unsavedTx>;
 
 //TxInDB refers to a tx that has an id and is stored in the database, but may have unsaved cat and split.
 export const TxInDBClientSideSchema = TxSchema.extend({
-  catArray: z.array(z.union([CatClientSideSchema, CatSchema])),
+  catArray: z.array(z.union([UnsavedCat, CatSchema])),
   receipt: ReceiptWithChildrenSchema.nullable(),
   plaidTx: plaidTxSchema.nullable(),
 });

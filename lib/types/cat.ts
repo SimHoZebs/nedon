@@ -1,6 +1,6 @@
 import type { TxInDB } from "./tx";
 
-import type { Cat } from "@prisma/client";
+import type { Cat, Prisma } from "@prisma/client";
 import { CatSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
@@ -18,17 +18,27 @@ export type TreedCatWithTx = {
   subCatArray: TreedCatWithTx[];
 };
 
+export type BaseCat = Prisma.CatGetPayload<undefined>;
+
+export const BaseCatSchema = CatSchema.strict() satisfies z.ZodType<BaseCat>;
+
 /* Considering making txId optional? Ask yourself:
  * - Should a cat exist without being associated with a transaction?
  * - can we create a uuid for txId on the client side?
  * */
-export const CatClientSideSchema = CatSchema.extend({
-  id: z.string().optional(),
-});
+export type UnsavedCat = Prisma.CatGetPayload<{
+  omit: { id: true };
+}> & {
+  id?: string;
+};
 
-export type CatClientSide = z.infer<typeof CatClientSideSchema>;
+export const UnsavedCat = CatSchema.omit({ id: true })
+  .extend({
+    id: z.string().optional(),
+  })
+  .strict() satisfies z.ZodType<UnsavedCat>;
 
-export const isCatInDB = (cat: CatClientSide): cat is Cat => {
+export const isCatInDB = (cat: UnsavedCat): cat is Cat => {
   return cat.id !== undefined;
 };
 
