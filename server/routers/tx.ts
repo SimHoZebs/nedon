@@ -41,13 +41,20 @@ const txRouter = router({
           console.log("No user found with id: ", input.id);
           return null;
         }
+        if (!user.accessToken) {
+          console.log("No access token for user: ", input.id);
+          return null;
+        }
 
-        const txSyncResponse = await getPlaidTxSyncData(user);
+        const txSyncResponse = await getPlaidTxSyncData(
+          user.accessToken,
+          user.cursor || undefined,
+        );
         if (!txSyncResponse) return null;
 
         const res = await mergePlaidTxWithTxArray(
           txSyncResponse,
-          user,
+          user.id,
           input.date,
         );
         if (!res) return null;
@@ -64,8 +71,8 @@ const txRouter = router({
         console.log("returning txArray", txArray.length);
         return txArray;
       } catch (error) {
-        console.log(error);
-        console.log("Input: ", input);
+        console.error(error);
+        console.error("Input: ", input);
         return null;
       }
     }),
@@ -99,7 +106,7 @@ const txRouter = router({
 
   update: procedure.input(SavedTxSchema).mutation(async ({ input }) => {
     const { catArray, ...rest } = input;
-    const { receipt, plaidTx, ...useful } = rest;
+    const { receipt: _receipt, plaidTx: _plaidTx, ...useful } = rest;
     const catToCreate = catArray.filter((cat) => !cat.id);
     const catToUpdate = catArray.filter((cat) => cat.id);
     console.log("input", input);
@@ -153,7 +160,7 @@ const txRouter = router({
       },
     });
 
-    const createCat = db.cat.create({
+    await db.cat.create({
       data: {
         name: newTx.catArray[0].name,
         nameArray: newTx.catArray[0].nameArray,
@@ -161,8 +168,6 @@ const txRouter = router({
         txId: input.id,
       },
     });
-
-    await db.$transaction([createCat]);
 
     return await db.tx.findUnique({
       where: {

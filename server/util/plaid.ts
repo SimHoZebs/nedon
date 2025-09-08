@@ -1,4 +1,4 @@
-import type { Cat, User } from "@prisma/client";
+import type { Cat } from "@prisma/client";
 import {
   Configuration,
   PlaidApi,
@@ -33,24 +33,21 @@ export const createCatInput = (cat: Cat) => {
  * Fetches new and updated transactions from Plaid since the last cursor.
  * returns null if there was an error.
  */
-export const getPlaidTxSyncData = async (user: User) => {
-  if (!user.accessToken) {
-    console.log("No access token for user");
-    return null;
-  }
-
+export const getPlaidTxSyncData = async (
+  accessToken: string,
+  cursor?: string,
+) => {
   // New tx updates since "cursor"
   let added: Transaction[] = [];
   let modified: Transaction[] = [];
   // Removed tx ids
   let removed: RemovedTransaction[] = [];
-  let cursor = user.cursor || undefined;
   let totalCount = 100;
   let hasMore = true;
 
   while (hasMore && totalCount > 0) {
     const request: TransactionsSyncRequest = {
-      access_token: user.accessToken,
+      access_token: accessToken,
       cursor: cursor,
       count: totalCount,
     };
@@ -81,12 +78,12 @@ export const getPlaidTxSyncData = async (user: User) => {
         (error as any).response.data.error_type ===
         PlaidErrorType.TransactionError
       ) {
-        console.log(
+        console.error(
           `${PlaidErrorType.TransactionError}, Resetting sync cursor`,
         );
-        cursor = user.cursor || undefined;
+        cursor = cursor || undefined;
       } else {
-        console.log("Error in transactionsSync: ", error);
+        console.error("Error in transactionsSync: ", error);
         return null;
       }
     }

@@ -3,7 +3,7 @@ import { createTxFromPlaidTx } from "@/util/tx";
 
 import type { SavedTx, UnsavedTx } from "@/types/tx";
 
-import type { Prisma, User } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { RemovedTransaction, Transaction } from "plaid";
 
@@ -57,7 +57,7 @@ export const mergePlaidTxWithTxArray = async (
     removed: RemovedTransaction[];
     cursor?: string;
   },
-  user: User,
+  userId: string,
   dateString: string,
 ) => {
   const { added, modified, removed, cursor } = txSyncResponse;
@@ -69,7 +69,7 @@ export const mergePlaidTxWithTxArray = async (
   // newly added txs gets created
   //FUTURE: make this somehow asynchoronous so users don't have to wait for all txs to be added to see their existing tx
   const txCreateQueryArray = added.map((plaidTx) => {
-    const newTx = createTxFromPlaidTx(user.id, plaidTx);
+    const newTx = createTxFromPlaidTx(userId, plaidTx);
     return db.tx.create(createTxInput(newTx));
   });
 
@@ -96,10 +96,10 @@ export const mergePlaidTxWithTxArray = async (
   const txArray: SavedTx[] = await db.tx.findMany({
     where: {
       OR: [
-        { ownerId: user.id },
+        { ownerId: userId },
         {
           recurring: true,
-          ownerId: user.id,
+          ownerId: userId,
           authorizedDatetime: {
             gte: firstDayThisMonth.toISOString(),
             lte: lastDayThisMonth.toISOString(),
