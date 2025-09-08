@@ -8,7 +8,7 @@ import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
 import type { UnsavedReceipt } from "@/types/receipt";
-import { isTxInDB } from "@/types/tx";
+import { isSavedTx } from "@/types/tx";
 
 import Image from "next/image";
 import React from "react";
@@ -88,7 +88,7 @@ const Receipt = () => {
 
     setProgressMsg("Adding receipt to transaction...");
 
-    if (!isTxInDB(latestTx)) {
+    if (!isSavedTx(latestTx)) {
       sr.devMsg = "latestTx is not FullTxInDB";
       return sr;
     }

@@ -2,7 +2,7 @@ import parseMoney from "@/util/parseMoney";
 import { useStore } from "@/util/store";
 import type { TxType } from "@/util/tx";
 
-import type { TxInDB } from "@/types/tx";
+import type { SavedTx } from "@/types/tx";
 
 import { useEffect, useState } from "react";
 import {
@@ -90,7 +90,7 @@ const LineGraph = (props: Props) => {
 
 // txArray is a sorted array of FullTx of a single month, starting with latest date
 const generateDailyTxSumArray = (
-  txArray: TxInDB[][],
+  txArray: SavedTx[][],
   txType: TxType,
   dateLen: number,
 ) => {

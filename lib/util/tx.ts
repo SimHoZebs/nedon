@@ -1,18 +1,17 @@
 import type { TreedCatWithTx } from "@/types/cat";
-import type { BaseTx, ChaseCSVTx, TxInDB, UnsavedTxInDB } from "@/types/tx";
+import type { ChaseCSVTx, SavedTx, UnsavedTx } from "@/types/tx";
 
 import { createNewCat, fillArrayByCat } from "./cat";
-import { createNewSplit } from "./split";
 import { useStore } from "./store";
 import { trpc } from "./trpc";
 import useAppUser from "./useAppUser";
 
+import { MdsType, Prisma } from "@prisma/client";
 import type { Transaction } from "plaid";
 
-export const resetTx = (tx: TxInDB): UnsavedTxInDB => ({
+export const resetTx = (tx: SavedTx) => ({
   ...tx,
   plaidTx: tx.plaidTx,
-  splitArray: [createNewSplit(tx.userId, tx.amount, tx.id)],
   catArray: [
     createNewCat({
       txId: tx.id,
@@ -24,9 +23,9 @@ export const resetTx = (tx: TxInDB): UnsavedTxInDB => ({
 });
 
 export const mergePlaidTxWithTx = (
-  tx: TxInDB,
+  tx: SavedTx,
   plaidTx: Transaction,
-): TxInDB => {
+): SavedTx => {
   return {
     ...tx,
     plaidTx: plaidTx,
@@ -36,52 +35,50 @@ export const mergePlaidTxWithTx = (
 export const createTxFromChaseCSV = (
   chaseCSVTx: ChaseCSVTx,
   userId: string,
-): BaseTx => {
+): UnsavedTx => {
   return {
     id: undefined,
     plaidTx: null,
     name: chaseCSVTx.Description,
-    amount: Number.parseFloat(chaseCSVTx.Amount),
+    amount: Prisma.Decimal(chaseCSVTx.Amount),
     recurring: false,
-    MDS: -1,
+    mds: MdsType.UNDETERMINED,
     datetime: new Date(chaseCSVTx.PostingDate),
     authorizedDatetime: new Date(chaseCSVTx.PostingDate),
-    userTotal: 0,
+    userTotal: Prisma.Decimal(0),
     originTxId: null,
     plaidId: null,
-    userId,
+    ownerId: userId,
     accountId: null,
     catArray: [],
-    splitArray: [createNewSplit(userId, Number.parseFloat(chaseCSVTx.Amount))],
-    receipt: null,
+    receipt: undefined,
   };
 };
 
 export const createTxFromPlaidTx = (
   userId: string,
   plaidTx: Transaction,
-): BaseTx => {
+): UnsavedTx => {
   return {
     id: undefined,
     plaidTx: plaidTx,
     name: plaidTx.name,
-    amount: plaidTx.amount,
+    amount: Prisma.Decimal(plaidTx.amount),
     recurring: false,
-    MDS: -1,
-    userTotal: 0,
+    mds: MdsType.UNDETERMINED,
+    userTotal: Prisma.Decimal(0),
     originTxId: null,
     datetime: plaidTx.datetime ? new Date(plaidTx.datetime) : null,
     authorizedDatetime: new Date(plaidTx.authorized_date || 0),
     plaidId: plaidTx.transaction_id,
-    userId: userId,
+    ownerId: userId,
     accountId: plaidTx.account_id,
     catArray: [],
-    splitArray: [createNewSplit(userId, plaidTx.amount, "")],
-    receipt: null,
+    receipt: undefined,
   };
 };
 
-export const organizeTxByCat = (txArray: TxInDB[]) => {
+export const organizeTxByCat = (txArray: SavedTx[]) => {
   const catArray: TreedCatWithTx[] = [];
 
   for (const tx of txArray) {
@@ -95,11 +92,11 @@ export const organizeTxByCat = (txArray: TxInDB[]) => {
   return catArray;
 };
 
-export const organizeTxByTime = (txArray: TxInDB[]) => {
+export const organizeTxByTime = (txArray: SavedTx[]) => {
   const txSortedByTimeArray = txArray.sort(
     (a, b) => b.authorizedDatetime.getTime() - a.authorizedDatetime.getTime(),
   );
-  const txOrganizedByTimeArray: TxInDB[][][][] = [[[[]]]];
+  const txOrganizedByTimeArray: SavedTx[][][][] = [[[[]]]];
 
   let lastDate: Date | undefined;
   let yearIndex = -1;
@@ -153,7 +150,7 @@ export const organizeTxByTime = (txArray: TxInDB[]) => {
 };
 
 export const getScopeIndex = (
-  txOragnizedByTimeArray: TxInDB[][][][],
+  txOragnizedByTimeArray: SavedTx[][][][],
   date: Date,
   rangeFormat: "year" | "month" | "date",
 ): [number, number, number] => {

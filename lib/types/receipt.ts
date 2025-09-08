@@ -16,9 +16,12 @@ export const UnsavedReceiptSchema = BaseReceiptSchema.omit({
   txId: true,
   id: true,
   items: true,
-}).extend({
-  id: z.string().optional(),
-  items: z.array(PureReceiptItemSchema),
-});
+})
+  .extend({
+    id: z.undefined(),
+    txId: z.undefined(),
+    items: z.array(PureReceiptItemSchema),
+  })
+  .strict();
 
 export type UnsavedReceipt = z.infer<typeof UnsavedReceiptSchema>;

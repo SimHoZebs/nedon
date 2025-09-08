@@ -1,13 +1,13 @@
 import db from "@/util/db";
 import { resetTx } from "@/util/tx";
 
-import { TxInDBSchema } from "@/types/tx";
+import { SavedTxSchema, UnsavedTxSchema } from "@/types/tx";
 
 import { procedure, router } from "../trpc";
 import { createCatInput, getPlaidTxSyncData } from "../util/plaid";
 
 import {
-  createTxInDBInput,
+  createTxInput,
   mergePlaidTxWithTxArray,
   txInclude,
 } from "server/util/tx";
@@ -76,13 +76,7 @@ const txRouter = router({
     .query(async ({ input }) => {
       return db.tx.findMany({
         where: {
-          splitArray: {
-            //TODO: is some correct? or every?
-            some: {
-              userId: input.id,
-            },
-          },
-          userId: input.id,
+          ownerId: input.id,
         },
 
         include: txInclude,
@@ -90,26 +84,24 @@ const txRouter = router({
     }),
 
   create: procedure.input(UnsavedTxSchema).mutation(async ({ input }) => {
-    return await db.tx.create(createTxInDBInput(input));
+    return await db.tx.create(createTxInput(input));
   }),
 
   createMany: procedure
     .input(z.array(UnsavedTxSchema))
     .mutation(async ({ input }) => {
       const txCreateQueryArray = input.map((tx) => {
-        return db.tx.create(createTxInDBInput(tx));
+        return db.tx.create(createTxInput(tx));
       });
 
       return await db.$transaction(txCreateQueryArray);
     }),
 
-  update: procedure.input(UnsavedTxInDBSchema).mutation(async ({ input }) => {
-    const { catArray, splitArray, ...rest } = input;
+  update: procedure.input(SavedTxSchema).mutation(async ({ input }) => {
+    const { catArray, ...rest } = input;
     const { receipt, plaidTx, ...useful } = rest;
     const catToCreate = catArray.filter((cat) => !cat.id);
     const catToUpdate = catArray.filter((cat) => cat.id);
-    const splitToCreate = splitArray.filter((split) => !split.id);
-    const splitToUpdate = splitArray.filter((split) => split.id);
     console.log("input", input);
 
     const tx = await db.tx.update({
@@ -134,22 +126,6 @@ const txRouter = router({
             },
           })),
         },
-
-        splitArray: {
-          createMany: {
-            data: splitToCreate.map((split) => ({
-              userId: split.userId,
-              amount: split.amount,
-            })),
-          },
-          updateMany: splitToUpdate.map((split) => ({
-            where: { id: split.id },
-            data: {
-              userId: split.userId,
-              amount: split.amount,
-            },
-          })),
-        },
       },
       include: txInclude,
     });
@@ -157,7 +133,7 @@ const txRouter = router({
     return tx;
   }),
 
-  reset: procedure.input(TxInDBSchema).mutation(async ({ input }) => {
+  reset: procedure.input(SavedTxSchema).mutation(async ({ input }) => {
     const newTx = resetTx(input);
 
     await db.tx.update({
@@ -167,9 +143,6 @@ const txRouter = router({
       data: {
         plaidId: newTx.plaidId || undefined,
         catArray: {
-          deleteMany: {},
-        },
-        splitArray: {
           deleteMany: {},
         },
         receipt: input.receipt
@@ -189,16 +162,7 @@ const txRouter = router({
       },
     });
 
-    const createSplit = db.split.create({
-      data: {
-        userId: newTx.splitArray[0].userId,
-        amount: newTx.splitArray[0].amount,
-        txId: input.id,
-        originTxId: input.id,
-      },
-    });
-
-    await db.$transaction([createCat, createSplit]);
+    await db.$transaction([createCat]);
 
     return await db.tx.findUnique({
       where: {
@@ -223,7 +187,7 @@ const txRouter = router({
     .mutation(async ({ input }) => {
       await db.tx.deleteMany({
         where: {
-          userId: input.id,
+          ownerId: input.id,
         },
       });
     }),

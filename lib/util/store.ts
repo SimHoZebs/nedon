@@ -1,5 +1,5 @@
 import type { GroupClientSide } from "@/types/group";
-import type { TxInDB } from "@/types/tx";
+import type { SavedTx } from "@/types/tx";
 import type { UserClientSide } from "@/types/user";
 
 import { create } from "zustand";
@@ -24,8 +24,8 @@ interface Store {
   verticalCatPicker: boolean;
   setVerticalCatPicker: (verticalCatPicker: boolean) => void;
 
-  txOragnizedByTimeArray: TxInDB[][][][];
-  setTxOragnizedByTimeArray: (txOragnizedByTimeArray: TxInDB[][][][]) => void;
+  txOragnizedByTimeArray: SavedTx[][][][];
+  setTxOragnizedByTimeArray: (txOragnizedByTimeArray: SavedTx[][][][]) => void;
 }
 
 export const useStore = create<Store>()(

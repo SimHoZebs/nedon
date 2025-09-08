@@ -7,7 +7,7 @@ import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 import useAppUser from "@/util/useAppUser";
 
-import { isTxInDB } from "@/types/tx";
+import { isSavedTx } from "@/types/tx";
 
 import Cat from "./Cat/Cat";
 import Receipt from "./Receipt";
@@ -199,7 +199,7 @@ const TxModal = (props: Props) => {
             <div className="flex flex-col items-start gap-y-3">
               <ActionBtn
                 onClickAsync={async () => {
-                  if (!isTxInDB(tx)) {
+                  if (!isSavedTx(tx)) {
                     return;
                   }
 

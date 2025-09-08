@@ -1,11 +1,11 @@
 import { getCatStyle } from "@/util/cat";
 import useAppUser from "@/util/useAppUser";
 
-import type { TxInDB } from "@/types/tx";
+import type { SavedTx } from "@/types/tx";
 
 interface Props {
   onInteraction: () => void;
-  tx: TxInDB;
+  tx: SavedTx;
 }
 const TxCard = (props: Props) => {
   const { appUser } = useAppUser();

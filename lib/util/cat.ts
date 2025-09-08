@@ -1,10 +1,11 @@
 import type { CatClientSide, TreedCat, TreedCatWithTx } from "@/types/cat";
-import type { TxInDB } from "@/types/tx";
+import type { SavedTx } from "@/types/tx";
 
 import catStyleArray from "./catStyle";
 import parseMoney from "./parseMoney";
 import type { TxType } from "./tx";
 
+import type { Prisma } from "@prisma/client";
 import type { Category as PlaidCat } from "plaid";
 
 export const createNewCat = ({
@@ -14,7 +15,7 @@ export const createNewCat = ({
 }: {
   txId: string;
   nameArray: string[] | null | undefined;
-  amount: number;
+  amount: Prisma.Decimal;
 }): CatClientSide => {
   return {
     id: undefined,
@@ -43,7 +44,7 @@ export const convertPlaidCatsToHierarchicalArray = (
 
 export const fillArrayByCat = (
   resultArray: TreedCatWithTx[],
-  tx: TxInDB,
+  tx: SavedTx,
   cat: CatClientSide,
 ): TreedCatWithTx[] => {
   const nameArray = cat.nameArray;

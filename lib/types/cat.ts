@@ -1,4 +1,4 @@
-import type { TxInDB } from "./tx";
+import type { SavedTx } from "./tx";
 
 import type { Cat, Prisma } from "@prisma/client";
 import { CatSchema } from "prisma/generated/zod";
@@ -14,7 +14,7 @@ export type TreedCatWithTx = {
   budget: number;
   spending: number;
   received: number;
-  txArray: TxInDB[];
+  txArray: SavedTx[];
   subCatArray: TreedCatWithTx[];
 };
 

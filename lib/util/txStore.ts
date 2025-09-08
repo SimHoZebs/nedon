@@ -1,5 +1,5 @@
 import type { UnsavedCat } from "@/types/cat";
-import type { BaseTx, TxInDB, UnsavedTxInDB } from "@/types/tx";
+import type { BaseTx, SavedTx, UnsavedTxInDB } from "@/types/tx";
 
 import { useStore } from "./store";
 
@@ -18,8 +18,8 @@ interface Store {
   txOnModalIndex: number[] | null;
   setTxOnModalIndex: (index: number[] | null) => void;
 
-  txOnModal: BaseTx | UnsavedTxInDB | TxInDB | null;
-  setTxOnModal: (tx: BaseTx | TxInDB) => void;
+  txOnModal: BaseTx | UnsavedTxInDB | SavedTx | null;
+  setTxOnModal: (tx: BaseTx | SavedTx) => void;
 
   setSplitArray: (splitArray: SplitClientSide[]) => void;
   setCatArray: (catArray: UnsavedCat[]) => void;

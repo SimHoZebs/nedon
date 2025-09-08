@@ -1,19 +1,14 @@
 import db from "@/util/db";
 import { createTxFromPlaidTx } from "@/util/tx";
 
-import type { BaseTx, TxInDB } from "@/types/tx";
+import type { SavedTx, UnsavedTx } from "@/types/tx";
 
-import type { User } from "@prisma/client";
+import type { Prisma, User } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { RemovedTransaction, Transaction } from "plaid";
 
 export const txInclude = {
   catArray: true,
-  splitArray: {
-    include: {
-      user: true,
-    },
-  },
   receipt: {
     include: {
       items: true,
@@ -25,7 +20,7 @@ export const txInclude = {
   splitTxArray: true,
 };
 
-export const createTxInDBInput = (txClientSide: BaseTx) => {
+export const createTxInput = (txClientSide: UnsavedTx): Prisma.TxCreateArgs => {
   return {
     data: {
       ...txClientSide,
@@ -41,11 +36,6 @@ export const createTxInDBInput = (txClientSide: BaseTx) => {
             },
           }
         : undefined,
-      splitArray: {
-        create: txClientSide.splitArray.map(({ originTxId, ...split }) => ({
-          ...split,
-        })),
-      },
       catArray: {
         create: txClientSide.catArray.map(({ txId, ...cat }) => ({
           ...cat,
@@ -80,8 +70,9 @@ export const mergePlaidTxWithTxArray = async (
   //FUTURE: make this somehow asynchoronous so users don't have to wait for all txs to be added to see their existing tx
   const txCreateQueryArray = added.map((plaidTx) => {
     const newTx = createTxFromPlaidTx(user.id, plaidTx);
-    return db.tx.create(createTxInDBInput(newTx));
+    return db.tx.create(createTxInput(newTx));
   });
+
   try {
     await db.$transaction(txCreateQueryArray);
   } catch (error) {
@@ -102,14 +93,13 @@ export const mergePlaidTxWithTxArray = async (
   const firstDayThisMonth = new Date(date.getFullYear(), date.getMonth(), 1);
   const lastDayThisMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-  const txArray: TxInDB[] = await db.tx.findMany({
+  const txArray: SavedTx[] = await db.tx.findMany({
     where: {
       OR: [
-        { userId: user.id },
-        { splitArray: { some: { userId: user.id } } },
+        { ownerId: user.id },
         {
           recurring: true,
-          userId: user.id,
+          ownerId: user.id,
           authorizedDatetime: {
             gte: firstDayThisMonth.toISOString(),
             lte: lastDayThisMonth.toISOString(),
@@ -143,12 +133,6 @@ export const mergePlaidTxWithTxArray = async (
             name: cat.name,
             nameArray: cat.nameArray,
             amount: cat.amount,
-          })),
-        },
-        splitArray: {
-          create: matchingTx.splitArray.map((split) => ({
-            userId: split.userId,
-            amount: split.amount,
           })),
         },
       },
