@@ -25,42 +25,40 @@ const SplitList = (props: Props) => {
       console.log("tx.getAll invalidated");
     },
   });
-  const deleteSplit = trpc.split.delete.useMutation();
   const queryClient = trpc.useUtils();
   const revertToTxInDB = useTxStore((state) => state.revertToTxInDB);
 
   const appUser = useAppUser();
-  const isEditingSplit = useTxStore((state) => state.isEditingSplit);
-  const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
+  const isEditingSplitTx = useTxStore((state) => state.isEditingSplitTx);
+  const setIsEditingSplitTx = useTxStore((state) => state.setIsEditingSplitTx);
   const tx = useTxStore((state) => state.txOnModal);
   const setCatArray = useTxStore((state) => state.setCatArray);
-  const splitAmountDisplayArray = useTxStore(
-    (state) => state.splitAmountDisplayArray,
+  const splitTxAmountDisplayArray = useTxStore(
+    (state) => state.splitTxAmountDisplayArray,
   );
-  const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
-  const setFocusedSplitIndex = useTxStore(
-    (state) => state.setFocusedSplitIndex,
+  const focusedSplitTxIndex = useTxStore((state) => state.focusedSplitTxIndex);
+  const setFocusedSplitTxIndex = useTxStore(
+    (state) => state.setFocusedSplitTxIndex,
   );
-  const setSplitAmountDisplayArray = useTxStore(
-    (state) => state.setSplitAmountDisplayArray,
+  const setSplitTxAmountDisplayArray = useTxStore(
+    (state) => state.setSplitTxAmountDisplayArray,
   );
-  const setFocusedIndex = useTxStore((state) => state.setFocusedSplitIndex);
-  const editedSplitIndexArray = useTxStore(
-    (state) => state.editedSplitIndexArray,
+  const editedSplitTxIndexArray = useTxStore(
+    (state) => state.editedSplitTxIndexArray,
   );
-  const setEditedSplitIndexArray = useTxStore(
-    (state) => state.setEditedSplitIndexArray,
+  const setEditedSplitTxIndexArray = useTxStore(
+    (state) => state.setEditedSplitTxIndexArray,
   );
 
   const txAmount = tx?.amount || 0;
 
-  const splitArray = tx?.splitArray || [];
+  const splitTxArray = tx?.splitTxArray || [];
 
   const updatedSplitAmount = parseMoney(
-    splitArray.reduce((amount, split) => amount + split.amount, 0),
+    splitTxArray.reduce((amount, split) => amount + split.amount, 0),
   );
 
-  const isWrongSplit = updatedSplitAmount !== txAmount && splitArray.length > 0;
+  const isWrongSplit = updatedSplitAmount !== txAmount && splitTxArray.length > 0;
 
   const syncSplit = async () => {
     if (!appUser || !tx) {
@@ -68,16 +66,16 @@ const SplitList = (props: Props) => {
       return;
     }
 
-    //delete splits that are not in splitArray
-    for (const split of tx.splitArray) {
+    //delete splits that are not in splitTxArray
+    for (const split of tx.splitTxArray) {
       if (
         split.id &&
-        !splitArray.find((unsavedSplit) => unsavedSplit.id === split.id)
+        !splitTxArray.find((unsavedSplit) => unsavedSplit.id === split.id)
       )
-        await deleteSplit.mutateAsync({ splitId: split.id });
+        console.log("delete split", split.id);
     }
 
-    tx.splitArray = splitArray;
+    tx.splitTxArray = splitTxArray;
 
     if (!isUnsavedTxInDB(tx)) {
       console.error("Can't update Tx if tx doesn't exist in db", tx);
@@ -88,19 +86,19 @@ const SplitList = (props: Props) => {
   };
 
   const resetEditingSplit = () => {
-    setIsEditingSplit(false);
-    setEditedSplitIndexArray([]);
-    setFocusedSplitIndex(undefined);
+    setIsEditingSplitTx(false);
+    setEditedSplitTxIndexArray([]);
+    setFocusedSplitTxIndex(undefined);
   };
 
   return (
     <div className="flex w-full flex-col gap-y-3">
-      {(splitArray.length > 0 || focusedIndex !== undefined) && (
+      {(splitTxArray.length > 0 || focusedSplitTxIndex !== undefined) && (
         <div className="flex flex-col gap-y-1">
           <div className="flex w-full gap-x-2 px-3">
             <H3>Split</H3>
 
-            {isEditingSplit ? (
+            {isEditingSplitTx ? (
               <div className="flex gap-x-2">
                 <ActionBtn
                   disabled={isWrongSplit}
@@ -117,15 +115,15 @@ const SplitList = (props: Props) => {
                   onClick={() => {
                     resetEditingSplit();
                     if (!tx) {
-                      console.error("Can't reset splitArray. tx is undefined");
+                      console.error("Can't reset splitTxArray. tx is undefined");
                       return;
                     }
                     revertToTxInDB();
                     setCatArray(tx.catArray);
-                    const splitAmountArray = tx.splitArray.map((split) =>
+                    const splitAmountArray = tx.splitTxArray.map((split) =>
                       split.amount.toString(),
                     );
-                    setSplitAmountDisplayArray(splitAmountArray);
+                    setSplitTxAmountDisplayArray(splitAmountArray);
                   }}
                 >
                   Cancel
@@ -134,7 +132,7 @@ const SplitList = (props: Props) => {
             ) : (
               <Button
                 className="flex gap-x-2 rounded-lg bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200"
-                onClick={() => setIsEditingSplit(true)}
+                onClick={() => setIsEditingSplitTx(true)}
               >
                 <span className="icon-[mdi--edit]" />
                 Manage
@@ -144,7 +142,7 @@ const SplitList = (props: Props) => {
 
           <p
             className={`h-5 text-red-800 ${
-              updatedSplitAmount !== txAmount && splitArray.length > 0
+              updatedSplitAmount !== txAmount && splitTxArray.length > 0
                 ? ""
                 : "hidden"
             }`}
@@ -156,21 +154,21 @@ const SplitList = (props: Props) => {
           </p>
 
           <div className="flex flex-col gap-y-1 px-3 md:w-fit">
-            {splitArray.map((split, i) => (
+            {splitTxArray.map((split, i) => (
               <div
                 key={split.id}
                 className="flex w-full items-center gap-x-2 sm:gap-x-3"
               >
                 <SplitUser
                   onAmountChange={(updatedAmount) => {
-                    setEditedSplitIndexArray((prev) => [...prev, i]);
+                    setEditedSplitTxIndexArray((prev) => [...prev, i]);
                     props.onAmountChange(i, updatedAmount);
                   }}
-                  splitAmount={splitAmountDisplayArray[i]}
-                  editedIndexArray={editedSplitIndexArray}
+                  splitAmount={splitTxAmountDisplayArray[i]}
+                  editedIndexArray={editedSplitTxIndexArray}
                   onFocus={() => {
-                    setFocusedIndex(i);
-                    setIsEditingSplit(true);
+                    setFocusedSplitTxIndex(i);
+                    setIsEditingSplitTx(true);
                   }}
                   index={i}
                 >
@@ -182,7 +180,7 @@ const SplitList = (props: Props) => {
             ))}
           </div>
 
-          {focusedIndex !== undefined && splitArray.length > 1 && (
+          {focusedSplitTxIndex !== undefined && splitTxArray.length > 1 && (
             <div className="flex items-center gap-x-4 px-2">
               <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
                 split evenly
@@ -195,7 +193,7 @@ const SplitList = (props: Props) => {
         </div>
       )}
 
-      {focusedIndex !== undefined && <SplitUserOptionList />}
+      {focusedSplitTxIndex !== undefined && <SplitUserOptionList />}
     </div>
   );
 };

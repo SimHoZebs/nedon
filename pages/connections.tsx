@@ -42,10 +42,10 @@ const Connections = () => {
     }
 
     for (const tx of associatedTxArray.data) {
-      for (const split of tx.splitArray) {
+      for (const split of tx.splitTxArray) {
         const splitAmount = split.amount;
 
-        if (tx.userId === appUser.id) {
+        if (tx.ownerId === appUser.id) {
           if (split.userId === appUser.id) continue;
 
           //amount others owe appUser
@@ -55,8 +55,8 @@ const Connections = () => {
         } else {
           if (split.userId === appUser.id) {
             //amount appUser owe others subtracted from total owe
-            oweGroup[tx.userId] = oweGroup[tx.userId]
-              ? oweGroup[tx.userId] - splitAmount
+            oweGroup[tx.ownerId] = oweGroup[tx.ownerId]
+              ? oweGroup[tx.ownerId] - splitAmount
               : -splitAmount;
           }
         }

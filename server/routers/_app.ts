@@ -7,7 +7,6 @@ import devRouter from "./dev";
 import plaidRouter from "./plaid";
 import receiptRouter from "./receipt";
 import settingsRouter from "./settings";
-import splitRouter from "./split";
 import txRouter from "./tx";
 import userRouter from "./user";
 
@@ -17,7 +16,6 @@ export const appRouter = router({
   user: userRouter,
   tx: txRouter,
   cat: catRouter,
-  split: splitRouter,
   receipt: receiptRouter,
   dev: devRouter,
   settings: settingsRouter,

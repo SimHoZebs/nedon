@@ -142,7 +142,7 @@ const Cat = () => {
               onClick={() => {
                 setIsManaging(false);
                 if (!tx) {
-                  console.error("Can't reset splitArray. tx is undefined");
+                  console.error("Can't reset splitTxArray. tx is undefined");
                   return;
                 }
                 setCatArray(tx.catArray);

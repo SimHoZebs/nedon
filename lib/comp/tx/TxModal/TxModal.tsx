@@ -41,14 +41,14 @@ const TxModal = (props: Props) => {
     { staleTime: 3600000, enabled: !!appUser },
   );
   const queryClient = trpc.useUtils();
-  const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
+  const focusedSplitTxIndex = useTxStore((state) => state.focusedSplitTxIndex);
 
   const resetTxOnModal = useTxStore((state) => state.revertToTxInDB);
-  const setSplitAmountDisplayArray = useTxStore(
-    (state) => state.setSplitAmountDisplayArray,
+  const setSplitTxAmountDisplayArray = useTxStore(
+    (state) => state.setSplitTxAmountDisplayArray,
   );
-  const setFocusedSplitIndex = useTxStore((s) => s.setFocusedSplitIndex);
-  const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
+  const setFocusedSplitTxIndex = useTxStore((s) => s.setFocusedSplitTxIndex);
+  const setIsEditingSplitTx = useTxStore((state) => state.setIsEditingSplitTx);
   const YMD = useTxStore((state) => state.txOnModalIndex);
 
   const amount = tx ? tx.amount : 0;
@@ -57,10 +57,10 @@ const TxModal = (props: Props) => {
     if (!tx) {
       return;
     }
-    setSplitAmountDisplayArray(
-      tx.splitArray.map((split) => split.amount.toString()),
+    setSplitTxAmountDisplayArray(
+      tx.splitTxArray.map((split) => split.amount.toString()),
     );
-  }, [setSplitAmountDisplayArray, tx]);
+  }, [setSplitTxAmountDisplayArray, tx]);
 
   useEffect(() => {
     if (txOragnizedByTimeArray.length === 0) return;
@@ -73,9 +73,9 @@ const TxModal = (props: Props) => {
 
   const onClose = () => {
     resetTxOnModal();
-    setSplitAmountDisplayArray([]);
-    setFocusedSplitIndex(undefined);
-    setIsEditingSplit(false);
+    setSplitTxAmountDisplayArray([]);
+    setFocusedSplitTxIndex(undefined);
+    setIsEditingSplitTx(false);
   };
 
   const accountName = auth.isLoading
@@ -170,9 +170,9 @@ const TxModal = (props: Props) => {
                   <H1>${amount * -1}</H1>
                   {appUser?.myConnectionArray &&
                     appUser.myConnectionArray.length > 0 &&
-                    focusedIndex === undefined &&
-                    tx.splitArray.length < 2 && (
-                      <SecondaryBtn onClick={() => setFocusedSplitIndex(0)}>
+                    focusedSplitTxIndex === undefined &&
+                    tx.splitTxArray.length < 2 && (
+                      <SecondaryBtn onClick={() => setFocusedSplitTxIndex(0)}>
                         <span className="icon-[lucide--split] m-1 h-4 w-4" />
                         Split
                       </SecondaryBtn>

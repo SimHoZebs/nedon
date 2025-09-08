@@ -164,7 +164,7 @@ const CatPicker = forwardRef(
                 e.stopPropagation();
                 if (!tx)
                   return console.error(
-                    "Can't reset splitArray. tx is undefined.",
+                    "Can't reset splitTxArray. tx is undefined.",
                   );
                 resetPicker();
                 props.closePicker();

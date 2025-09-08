@@ -22,6 +22,7 @@ interface Store {
   setTxOnModal: (tx: BaseTx | SavedTx) => void;
 
   setCatArray: (catArray: UnsavedCat[]) => void;
+  setSplitTxArray: (splitTxArray: any[]) => void;
 
   /**
    * Only use this function when new data is expected from the database.
@@ -33,19 +34,19 @@ interface Store {
   hasEditedCatArray: boolean;
   setHasEditedCatArray: (hasEditedCatArray: boolean) => void;
 
-  isEditingSplit: boolean;
-  setIsEditingSplit: (isEditingSplit: boolean) => void;
+  isEditingSplitTx: boolean;
+  setIsEditingSplitTx: (isEditingSplitTx: boolean) => void;
 
-  focusedSplitIndex: number | undefined;
-  setFocusedSplitIndex: (index: number | undefined) => void;
+  focusedSplitTxIndex: number | undefined;
+  setFocusedSplitTxIndex: (index: number | undefined) => void;
 
-  editedSplitIndexArray: number[];
-  setEditedSplitIndexArray: (
+  editedSplitTxIndexArray: number[];
+  setEditedSplitTxIndexArray: (
     input: number[] | ((prev: number[]) => number[]),
   ) => void;
 
-  splitAmountDisplayArray: string[];
-  setSplitAmountDisplayArray: (splitAmountDisplayArray: string[]) => void;
+  splitTxAmountDisplayArray: string[];
+  setSplitTxAmountDisplayArray: (splitTxAmountDisplayArray: string[]) => void;
 }
 
 export const useTxStore = create<Store>()(
@@ -72,6 +73,21 @@ export const useTxStore = create<Store>()(
         });
       },
 
+      setSplitTxArray: (splitTxArray) => {
+        set((store) => {
+          if (!store.txOnModal) return store;
+
+          const clone = structuredClone(store.txOnModal);
+
+          return {
+            txOnModal: {
+              ...clone,
+              splitTxArray: splitTxArray,
+            },
+          };
+        });
+      },
+
       revertToTxInDB: () =>
         set((store) => {
           if (!store.txOnModalIndex) return store;
@@ -90,33 +106,33 @@ export const useTxStore = create<Store>()(
       setHasEditedCatArray: (hasEditedCatArray: boolean) =>
         set({ hasEditedCatArray: hasEditedCatArray }),
 
-      editedSplitIndexArray: [],
-      setEditedSplitIndexArray: (
+      editedSplitTxIndexArray: [],
+      setEditedSplitTxIndexArray: (
         input: number[] | ((prev: number[]) => number[]),
       ) => {
         set((store) => {
           if (typeof input === "function") {
             return {
-              editedSplitIndexArray: input(store.editedSplitIndexArray),
+              editedSplitTxIndexArray: input(store.editedSplitTxIndexArray),
             };
           }
-          return { editedSplitIndexArray: input };
+          return { editedSplitTxIndexArray: input };
         });
       },
 
-      isEditingSplit: false,
-      setIsEditingSplit: (isEditingSplit: boolean) =>
-        set({ isEditingSplit: isEditingSplit }),
+      isEditingSplitTx: false,
+      setIsEditingSplitTx: (isEditingSplitTx: boolean) =>
+        set({ isEditingSplitTx: isEditingSplitTx }),
 
-      focusedSplitIndex: undefined,
-      setFocusedSplitIndex: (index: number | undefined) =>
-        set({ focusedSplitIndex: index }),
+      focusedSplitTxIndex: undefined,
+      setFocusedSplitTxIndex: (index: number | undefined) =>
+        set({ focusedSplitTxIndex: index }),
 
       //sum of category amount
       //string instead of number to temporarily store arithmetic
-      splitAmountDisplayArray: [],
-      setSplitAmountDisplayArray: (splitAmountDisplayArray: string[]) =>
-        set({ splitAmountDisplayArray: splitAmountDisplayArray }),
+      splitTxAmountDisplayArray: [],
+      setSplitTxAmountDisplayArray: (splitTxAmountDisplayArray: string[]) =>
+        set({ splitTxAmountDisplayArray: splitTxAmountDisplayArray }),
     }),
     { name: "txStore" },
   ),

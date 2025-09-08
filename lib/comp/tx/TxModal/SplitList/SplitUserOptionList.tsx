@@ -4,17 +4,15 @@ import parseMoney from "@/util/parseMoney";
 import { useTxStore } from "@/util/txStore";
 import useAppUser from "@/util/useAppUser";
 
-import type { SplitClientSide } from "@/types/split";
-
 const SplitUserOptionList = () => {
   const appUser = useAppUser();
 
-  const setSplitArray = useTxStore((state) => state.setSplitArray);
+  const setSplitTxArray = useTxStore((state) => state.setSplitTxArray);
   const setUnsavedCatArray = useTxStore((state) => state.setCatArray);
-  const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
+  const setIsEditingSplitTx = useTxStore((state) => state.setIsEditingSplitTx);
   const txOnModal = useTxStore((state) => state.txOnModal);
   const catArray = txOnModal?.catArray || [];
-  const splitArray = txOnModal?.splitArray || [];
+  const splitTxArray = txOnModal?.splitTxArray || [];
 
   return (
     <div className="no-scrollbar flex h-fit w-full flex-col gap-y-2 overflow-y-scroll">
@@ -32,7 +30,7 @@ const SplitUserOptionList = () => {
         ))
       ) : appUser.myConnectionArray ? (
         appUser.myConnectionArray.map((user) =>
-          splitArray.find((split) => split.userId === user.id) ||
+          splitTxArray.find((split) => split.userId === user.id) ||
           user.id === appUser?.id ? null : (
             <div key={user.id} className="flex items-center gap-x-2 p-2 px-1">
               <div className="flex items-center gap-x-2 rounded-full border-2 border-zinc-400">
@@ -54,13 +52,13 @@ const SplitUserOptionList = () => {
 
                   //evenly reduce amount from all splits to assign to new
                   //split
-                  const updatedSplitArray: SplitClientSide[] = structuredClone(
-                    splitArray,
+                  const updatedSplitTxArray: any[] = structuredClone(
+                    splitTxArray,
                   ).map((split) => ({
                     ...split,
                     //1 for new split
                     amount: parseMoney(
-                      txOnModal.amount / (splitArray.length + 1),
+                      txOnModal.amount / (splitTxArray.length + 1),
                     ),
                   }));
 
@@ -69,24 +67,24 @@ const SplitUserOptionList = () => {
                     (cat) => ({
                       ...cat,
                       amount: parseMoney(
-                        txOnModal.amount / (splitArray.length + 1),
+                        txOnModal.amount / (splitTxArray.length + 1),
                       ),
                     }),
                   );
 
                   //add new split
-                  updatedSplitArray.push({
+                  updatedSplitTxArray.push({
                     id: undefined,
                     originTxId: "",
                     amount: parseMoney(
-                      txOnModal.amount / (splitArray.length + 1),
+                      txOnModal.amount / (splitTxArray.length + 1),
                     ),
                     userId: user.id,
                   });
 
-                  setSplitArray(updatedSplitArray);
+                  setSplitTxArray(updatedSplitTxArray);
                   setUnsavedCatArray(updatedCatArray);
-                  setIsEditingSplit(true);
+                  setIsEditingSplitTx(true);
                 }}
               >
                 Split

@@ -2,8 +2,6 @@ import parseMoney from "@/util/parseMoney";
 import { useStore } from "@/util/store";
 import { useTxStore } from "@/util/txStore";
 
-import type { SplitClientSide } from "@/types/split";
-
 import Calculator from "./TxModal/SplitList/Calculator";
 import TxModal from "./TxModal/TxModal";
 
@@ -15,40 +13,40 @@ interface Props {
 }
 
 const TxModalAndCalculator = (props: Props) => {
-  const setSplitArray = useTxStore((s) => s.setSplitArray);
-  const splitAmountDisplayArray = useTxStore((s) => s.splitAmountDisplayArray);
-  const setSpiltAmountDisplayArray = useTxStore(
-    (s) => s.setSplitAmountDisplayArray,
+  const setSplitTxArray = useTxStore((s) => s.setSplitTxArray);
+  const splitTxAmountDisplayArray = useTxStore((s) => s.splitTxAmountDisplayArray);
+  const setSplitTxAmountDisplayArray = useTxStore(
+    (s) => s.setSplitTxAmountDisplayArray,
   );
-  const isEditingSplit = useTxStore((s) => s.isEditingSplit);
-  const editedSplitIndexArray = useTxStore((s) => s.editedSplitIndexArray);
+  const isEditingSplitTx = useTxStore((s) => s.isEditingSplitTx);
+  const editedSplitTxIndexArray = useTxStore((s) => s.editedSplitTxIndexArray);
   const hasEditedCatArray = useTxStore((s) => s.hasEditedCatArray);
-  const focusedSplitIndex = useTxStore((state) => state.focusedSplitIndex);
+  const focusedSplitTxIndex = useTxStore((state) => state.focusedSplitTxIndex);
   const tx = useTxStore((state) => state.txOnModal);
   const txAmount = tx?.amount || 0;
   const catArray = tx?.catArray || [];
-  const splitArray = tx?.splitArray || [];
+  const splitTxArray = tx?.splitTxArray || [];
   const [isCalcHidden, setIsCalcHidden] = React.useState(false);
   const screenType = useStore((s) => s.screenType);
 
   //Changes a user's split amount and balances
   const changeSplitAmount = (index: number, newAmount: number) => {
-    const updatedSplitArray = structuredClone(splitArray);
+    const updatedSplitTxArray = structuredClone(splitTxArray);
 
     const newAmountFloored = Math.max(Math.min(newAmount, txAmount), 0);
 
-    updatedSplitArray[index].amount = newAmountFloored;
+    updatedSplitTxArray[index].amount = newAmountFloored;
 
-    const uneditedSplitArray: SplitClientSide[] = [];
+    const uneditedSplitArray: any[] = [];
 
     // Calculate the total amount of the splits that hasn't been edited
     let editedSplitAmountTotal = 0;
-    const len = updatedSplitArray.length;
+    const len = updatedSplitTxArray.length;
     for (let i = 0; i < len; i++) {
-      const split = updatedSplitArray[i];
+      const split = updatedSplitTxArray[i];
       //if was edited and isn't a split being changed
       if (
-        editedSplitIndexArray.find((editedIndex) => editedIndex === i) !==
+        editedSplitTxIndexArray.find((editedIndex) => editedIndex === i) !==
           undefined ||
         i === index
       ) {
@@ -78,19 +76,19 @@ const TxModalAndCalculator = (props: Props) => {
       }
     });
 
-    setSplitArray(updatedSplitArray);
-    const updatedSplitAmountDisplayArray = updatedSplitArray.map((split) =>
+    setSplitTxArray(updatedSplitTxArray);
+    const updatedSplitAmountDisplayArray = updatedSplitTxArray.map((split) =>
       split.amount.toString(),
     );
 
-    setSpiltAmountDisplayArray(updatedSplitAmountDisplayArray);
+    setSplitTxAmountDisplayArray(updatedSplitAmountDisplayArray);
   };
 
   useEffect(() => {
-    if (focusedSplitIndex !== undefined) {
+    if (focusedSplitTxIndex !== undefined) {
       setIsCalcHidden(false);
     }
-  }, [focusedSplitIndex]);
+  }, [focusedSplitTxIndex]);
 
   return (
     <div className="pointer-events-none absolute top-0 left-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
@@ -101,7 +99,7 @@ const TxModalAndCalculator = (props: Props) => {
         }}
       />
 
-      {isEditingSplit && focusedSplitIndex !== undefined && (
+      {isEditingSplitTx && focusedSplitTxIndex !== undefined && (
         <motion.div
           className="pointer-events-auto z-20 flex w-full flex-col lg:absolute lg:w-3/12 lg:justify-center"
           drag={screenType === "desktop"}
@@ -122,21 +120,21 @@ const TxModalAndCalculator = (props: Props) => {
             exit={{ height: 0 }}
           >
             <Calculator
-              value={splitAmountDisplayArray[focusedSplitIndex]}
+              value={splitTxAmountDisplayArray[focusedSplitTxIndex]}
               setValue={(value: string) => {
-                const copy = [...splitAmountDisplayArray];
-                copy[focusedSplitIndex] = value;
+                const copy = [...splitTxAmountDisplayArray];
+                copy[focusedSplitTxIndex] = value;
 
                 //removes anything after arithmetic
                 const onlyNumber = Number.parseFloat(value).toString();
                 //if the change was purely numeric, balance the split
                 if (onlyNumber === value) {
                   changeSplitAmount(
-                    focusedSplitIndex,
+                    focusedSplitTxIndex,
                     Number.parseFloat(value),
                   );
                 } else {
-                  setSpiltAmountDisplayArray(copy);
+                  setSplitTxAmountDisplayArray(copy);
                 }
               }}
             />

@@ -36,7 +36,7 @@ const CatModal = (props: Props) => {
     }
   }, [settings]);
 
-  const upsertSettings = trpc.cat.upsertSettings.useMutation();
+  const upsertSettings = trpc.settings.upsert.useMutation();
   const queryClient = trpc.useUtils();
 
   const subCatTotalAmount = Math.abs(
@@ -74,9 +74,11 @@ const CatModal = (props: Props) => {
             <p>
               {props.modalData.settings?.budget && (
                 <p className="text-sm text-zinc-400">
-                  {parseMoney(
-                    (subCatTotalAmount / props.modalData.settings.budget) * 100,
-                  )}
+                  {Prisma.Decimal.div(
+                    subCatTotalAmount / props.modalData.settings.budget,
+                  )
+                    .mul(100)
+                    .toNumber()}
                   % of ${props.modalData.settings.budget}
                 </p>
               )}
@@ -86,10 +88,8 @@ const CatModal = (props: Props) => {
           <div>
             <p>Budget</p>
             <Input
-              value={budget}
-              onChange={(e) =>
-                setBudget(parseMoney(Number.parseFloat(e.target.value)))
-              }
+              value={budget.toNumber()}
+              onChange={(e) => setBudget(Prisma.Decimal(e.target.value))}
               className="rounded-md border border-zinc-700"
               type="number"
             />

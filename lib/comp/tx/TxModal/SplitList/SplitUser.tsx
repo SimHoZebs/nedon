@@ -9,7 +9,7 @@ import { twMerge } from "tailwind-merge";
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   index: number;
 
-  //splitAmount could be inferred from unsavedSplitArray[props.index] instead, but that would repeat calculation done in SplitList
+  //splitAmount could be inferred from unsavedSplitTxArray[props.index] instead, but that would repeat calculation done in SplitList
   splitAmount: string;
   editedIndexArray: number[];
   onAmountChange: (splitAmount: string) => void;
@@ -17,18 +17,18 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 
 const SplitUser = (props: Props) => {
   const tx = useTxStore((state) => state.txOnModal);
-  const splitArray = tx?.splitArray || [];
-  const setSplitArray = useTxStore((s) => s.setSplitArray);
-  const amountDisplayArray = useTxStore((s) => s.splitAmountDisplayArray);
-  const focusedIndex = useTxStore((state) => state.focusedSplitIndex);
-  const amountDisplay = amountDisplayArray[props.index];
+  const splitTxArray = tx?.splitTxArray || [];
+  const setSplitTxArray = useTxStore((s) => s.setSplitTxArray);
+  const splitTxAmountDisplayArray = useTxStore((s) => s.splitTxAmountDisplayArray);
+  const focusedSplitTxIndex = useTxStore((state) => state.focusedSplitTxIndex);
+  const amountDisplay = splitTxAmountDisplayArray[props.index];
   const amount = Number.parseFloat(amountDisplay);
   const catArray = tx?.catArray || [];
   const setCatArray = useTxStore((s) => s.setCatArray);
-  const setEditedIndexArray = useTxStore((s) => s.setEditedSplitIndexArray);
-  const isEditingSplit = useTxStore((state) => state.isEditingSplit);
+  const setEditedSplitTxIndexArray = useTxStore((s) => s.setEditedSplitTxIndexArray);
+  const isEditingSplitTx = useTxStore((state) => state.isEditingSplitTx);
 
-  const split = splitArray[props.index];
+  const split = splitTxArray[props.index];
   const txAmount = tx ? tx.amount : 0;
   const isModified =
     props.editedIndexArray.find(
@@ -37,11 +37,11 @@ const SplitUser = (props: Props) => {
 
   const removeUser = () => {
     const updatedCatArray = structuredClone(catArray);
-    const updatedSplitArray = structuredClone(splitArray);
+    const updatedSplitTxArray = structuredClone(splitTxArray);
 
-    //remove split from splitArray
-    updatedSplitArray.splice(props.index, 1);
-    setSplitArray(updatedSplitArray);
+    //remove split from splitTxArray
+    updatedSplitTxArray.splice(props.index, 1);
+    setSplitTxArray(updatedSplitTxArray);
 
     //add split amount back to unassigned category
     const unassignedCat = updatedCatArray.findIndex(
@@ -60,10 +60,10 @@ const SplitUser = (props: Props) => {
   return (
     <div className="flex w-full flex-col gap-y-1 rounded-lg lg:w-fit">
       <div className="flex w-full items-center justify-start gap-x-2">
-        {focusedIndex !== undefined ? (
+        {focusedSplitTxIndex !== undefined ? (
           <div className="aspect-square w-5" />
         ) : (
-          isEditingSplit && (
+          isEditingSplitTx && (
             <button
               type="button"
               title="Remove user from split"
@@ -103,7 +103,7 @@ const SplitUser = (props: Props) => {
                         props.editedIndexArray,
                       );
                       updatedArray.push(props.index);
-                      setEditedIndexArray(updatedArray);
+                      setEditedSplitTxIndexArray(updatedArray);
                     }
                     const newValue = Math.min(
                       Number.parseFloat(e.target.value),
@@ -130,7 +130,7 @@ const SplitUser = (props: Props) => {
                 value={parseMoney((amount / txAmount) * 100)}
                 onFocus={props.onFocus}
                 onChange={(e) => {
-                  setEditedIndexArray((prev) => [...prev, props.index]);
+                  setEditedSplitTxIndexArray((prev) => [...prev, props.index]);
                   const prevPercentage = parseMoney((amount / txAmount) * 100);
                   const updatedPercentage = Math.min(
                     Number.parseFloat(e.target.value),
