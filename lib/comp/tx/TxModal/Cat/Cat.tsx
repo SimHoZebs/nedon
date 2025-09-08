@@ -10,6 +10,7 @@ import CatChip from "./CatChip";
 import CatPicker from "./CatPicker";
 
 import { useRef, useState } from "react";
+import { Prisma } from "@prisma/client";
 
 const OFFSCREEN = { x: -800, y: -800 };
 
@@ -73,11 +74,15 @@ const Cat = () => {
               setIsManaging(true);
 
               //create a copy
-              const tmpCatArray: CatClientSide[] = structuredClone(catArray);
+              const tmpCatArray: UnsavedCat[] = structuredClone(catArray);
 
               //add a new cat
               tmpCatArray.push(
-                createNewCat({ amount: 0, txId: tx?.id || "", nameArray: [] }),
+                createNewCat({
+                  amount: Prisma.Decimal(0),
+                  txId: tx?.id || "",
+                  nameArray: [],
+                }),
               );
 
               setCatArray(tmpCatArray);

@@ -35,7 +35,7 @@ const TxModal = (props: Props) => {
   const txOragnizedByTimeArray = useStore(
     (store) => store.txOragnizedByTimeArray,
   );
-  const { appUser } = useAppUser();
+  const appUser = useAppUser();
   const auth = trpc.auth.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },

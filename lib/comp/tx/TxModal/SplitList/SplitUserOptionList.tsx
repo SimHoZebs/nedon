@@ -7,7 +7,7 @@ import useAppUser from "@/util/useAppUser";
 import type { SplitClientSide } from "@/types/split";
 
 const SplitUserOptionList = () => {
-  const { appUser } = useAppUser();
+  const appUser = useAppUser();
 
   const setSplitArray = useTxStore((state) => state.setSplitArray);
   const setUnsavedCatArray = useTxStore((state) => state.setCatArray);

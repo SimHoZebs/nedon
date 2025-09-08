@@ -12,7 +12,7 @@ interface Props {
   oweUser: { id: string; amount: number } | undefined;
 }
 const SettleModal = (props: Props) => {
-  const { appUser } = useAppUser();
+  const appUser = useAppUser();
 
   const [settleAmount, setSettleAmount] = useState(0);
   const [appUserGiving, setAppUserGiving] = useState(true);

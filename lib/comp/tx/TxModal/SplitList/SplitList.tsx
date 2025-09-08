@@ -29,7 +29,7 @@ const SplitList = (props: Props) => {
   const queryClient = trpc.useUtils();
   const revertToTxInDB = useTxStore((state) => state.revertToTxInDB);
 
-  const { appUser } = useAppUser();
+  const appUser = useAppUser();
   const isEditingSplit = useTxStore((state) => state.isEditingSplit);
   const setIsEditingSplit = useTxStore((state) => state.setIsEditingSplit);
   const tx = useTxStore((state) => state.txOnModal);

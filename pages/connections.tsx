@@ -14,7 +14,7 @@ const Connections = () => {
   const [showModal, setShowModal] = useState(false);
   const [oweUser, setOweUser] = useState<{ id: string; amount: number }>();
 
-  const { appUser } = useAppUser();
+  const appUser = useAppUser();
 
   const removeConnection = trpc.user.removeConnection.useMutation();
   const associatedTxArray = trpc.tx.getAllAssociated.useQuery(

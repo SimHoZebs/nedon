@@ -7,7 +7,7 @@ import useAppUser from "@/util/useAppUser";
 import { useEffect, useState } from "react";
 
 const Profile = () => {
-  const { appUser } = useAppUser();
+  const appUser = useAppUser();
   const updateProfile = trpc.user.updateName.useMutation();
   const [unsavedUser, setUnsavedUser] = useState(appUser);
 

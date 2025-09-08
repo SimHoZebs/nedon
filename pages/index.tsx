@@ -32,7 +32,7 @@ const Home: NextPage = () => {
   const [csvTxArray, setCsvTxArray] = React.useState<UnsavedTx[]>([]);
   const csvInputRef = React.useRef<HTMLInputElement>(null);
 
-  const { appUser } = useAppUser();
+  const appUser = useAppUser();
   const { date, setDate, rangeFormat, setRangeFormat } = useDateRange();
 
   const auth = trpc.plaid.auth.useQuery(

@@ -19,7 +19,7 @@ const customFont = Space_Grotesk({
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
-  const { appUser, allUsers } = useAppUser();
+  const appUser = useAppUser();
 
   const txGetAllRetryCount = useRef(0);
   const setUserId = useLocalStore((state) => state.setUserId);
@@ -57,12 +57,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       console.log("User created with Plaid");
     };
 
-    if (
-      !appUser &&
-      !allUsers.isFetching &&
-      !sandboxPublicToken.isFetching &&
-      createUser.isIdle
-    ) {
+    if (!appUser && !sandboxPublicToken.isFetching && createUser.isIdle) {
       console.log(
         "There are no users in db and none are being created at the moment; creating one...",
       );
@@ -70,7 +65,6 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
     }
   }, [
     setUserId,
-    allUsers.isFetching,
     appUser,
     createUser,
     queryClient.user,

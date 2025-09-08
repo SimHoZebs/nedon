@@ -8,7 +8,7 @@ interface Props {
   tx: SavedTx;
 }
 const TxCard = (props: Props) => {
-  const { appUser } = useAppUser();
+  const appUser = useAppUser();
 
   const splitAmount = props.tx.splitArray.find(
     (split) => split.userId === appUser?.id,

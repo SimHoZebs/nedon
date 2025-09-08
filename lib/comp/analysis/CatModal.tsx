@@ -13,7 +13,7 @@ import { H1, H2 } from "../Heading";
 import Input from "../Input";
 import Modal from "../Modal";
 
-import type { CatSettings, Prisma } from "@prisma/client";
+import { type CatSettings, Prisma } from "@prisma/client";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -24,13 +24,11 @@ interface Props {
   };
 }
 
-type test = Prisma.CatSettingsUncheckedCreateInput;
-
 const CatModal = (props: Props) => {
   const { settings, data } = props.modalData;
-  const { appUser } = useAppUser();
+  const appUser = useAppUser();
 
-  const [budget, setBudget] = useState(0);
+  const [budget, setBudget] = useState<Prisma.Decimal>(Prisma.Decimal(0));
 
   useEffect(() => {
     if (settings) {
