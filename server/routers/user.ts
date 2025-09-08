@@ -1,5 +1,8 @@
 import db from "@/util/db";
 
+import { exact } from "@/types/types";
+import { type UserClientSide, UserClientSideSchema } from "@/types/user";
+
 import { PLAID_PRODUCTS } from "../constants";
 import { procedure, router } from "../trpc";
 
@@ -12,12 +15,12 @@ const WITH_CONNECTIONS_OMIT_ACCESS_TOKEN = {
       omit: { accessToken: true },
     },
   },
-  omit: { accessToken: true },
 };
 
 const userRouter = router({
   create: procedure
     .input(z.object({ name: z.string() }).optional())
+    .output(UserClientSideSchema)
     .mutation(async ({ input }) => {
       const user = await db.user.create({
         data: {
@@ -28,11 +31,17 @@ const userRouter = router({
 
       console.log("created user", user);
 
-      return user;
+      const { accessToken, ...userWithoutAccessToken } = user;
+
+      return exact<UserClientSide>()({
+        ...userWithoutAccessToken,
+        hasAccessToken: !!accessToken,
+      });
     }),
 
   get: procedure
     .input(z.object({ id: z.string() }))
+    .output(UserClientSideSchema.nullable())
     .query(async ({ input }) => {
       const user = await db.user.findFirst({
         where: { id: input.id },
@@ -42,6 +51,7 @@ const userRouter = router({
 
       return {
         products: PLAID_PRODUCTS,
+        hasAccessToken: !!user.accessToken,
         ...user,
       };
     }),

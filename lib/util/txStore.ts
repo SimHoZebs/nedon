@@ -1,5 +1,5 @@
 import type { UnsavedCat } from "@/types/cat";
-import type { BaseTx, SavedTx, UnsavedTxInDB } from "@/types/tx";
+import type { BaseTx, SavedTx, SavedTxWithUnsavedContent } from "@/types/tx";
 
 import { useStore } from "./store";
 
@@ -18,10 +18,9 @@ interface Store {
   txOnModalIndex: number[] | null;
   setTxOnModalIndex: (index: number[] | null) => void;
 
-  txOnModal: BaseTx | UnsavedTxInDB | SavedTx | null;
+  txOnModal: BaseTx | SavedTxWithUnsavedContent | SavedTx | null;
   setTxOnModal: (tx: BaseTx | SavedTx) => void;
 
-  setSplitArray: (splitArray: SplitClientSide[]) => void;
   setCatArray: (catArray: UnsavedCat[]) => void;
 
   /**
@@ -57,21 +56,6 @@ export const useTxStore = create<Store>()(
 
       txOnModal: null,
       setTxOnModal: (tx) => set({ txOnModal: tx }),
-
-      setSplitArray: (splitArray) => {
-        set((store) => {
-          if (!store.txOnModal) return store;
-
-          const clone = structuredClone(store.txOnModal);
-
-          return {
-            txOnModal: {
-              ...clone,
-              splitArray: splitArray,
-            },
-          };
-        });
-      },
 
       setCatArray: (catArray) => {
         set((store) => {

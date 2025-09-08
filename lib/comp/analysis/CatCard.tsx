@@ -6,7 +6,7 @@ import type { TreedCatWithTx } from "@/types/cat";
 
 import { H3 } from "../Heading";
 
-import type { CatSettings } from "@prisma/client";
+import { type CatSettings, Prisma } from "@prisma/client";
 
 interface Props {
   txType: TxType;
@@ -25,7 +25,8 @@ const CatCard = (props: Props) => {
   console.log("subCatTotalAmount", subCatTotalAmount);
 
   return (
-    <div
+    <button
+      type="button"
       key={props.cat.name}
       className="flex cursor-pointer flex-col p-3 outline-1 outline-white hover:bg-zinc-700"
       onKeyDown={() => props.showModal()}
@@ -60,8 +61,10 @@ const CatCard = (props: Props) => {
           </div>
           {props.catSettings && (
             <p className="text-sm text-zinc-400">
-              {parseMoney((subCatTotalAmount / props.catSettings.budget) * 100)}
-              % of ${props.catSettings.budget}
+              {Prisma.Decimal.div(subCatTotalAmount, props.catSettings.budget)
+                .mul(100)
+                .toNumber()}
+              % of ${props.catSettings.budget.toNumber()}
             </p>
           )}
         </div>
@@ -75,7 +78,7 @@ const CatCard = (props: Props) => {
               <SpendingByCatList hierarchicalCatArray={cat.subCatArray} />
             </details>
           )*/}
-    </div>
+    </button>
   );
 };
 

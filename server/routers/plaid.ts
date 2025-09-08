@@ -8,6 +8,8 @@ import type { User } from "@prisma/client";
 import { ACHClass, Products, TransferNetwork, TransferType } from "plaid";
 import { router } from "server/trpc";
 import z from "zod";
+import { exact } from "@/types/types";
+import { UserClientSide } from "@/types/user";
 
 const plaidRouter = router({
   sandBoxAccess: procedure
@@ -101,11 +103,15 @@ const setAccessToken = async ({
     include: {
       myConnectionArray: true,
     },
-    omit: { accessToken: true },
     data: userUpdateData,
   });
 
-  return user;
+  const { accessToken, ...userWithoutAccessToken } = user;
+
+  return exact<UserClientSide>()({
+    ...userWithoutAccessToken,
+    hasAccessToken: !!accessToken,
+  });
 };
 
 const authorizeAndCreateTransfer = async (accessToken: string) => {

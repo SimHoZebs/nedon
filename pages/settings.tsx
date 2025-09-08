@@ -14,8 +14,9 @@ const Settings = () => {
   const verticalCatPicker = useStore((state) => state.verticalCatPicker);
   const setVerticalCatPicker = useStore((state) => state.setVerticalCatPicker);
 
-  const { appUser, allUsers } = useAppUser();
-  const deleteAll = trpc.dev.deleteAll.useMutation();
+  const appUser = useAppUser();
+  const allUsers = trpc.dev.getAllUsers.useQuery();
+  const deleteAll = trpc.dev.deleteAllUsers.useMutation();
   const deleteUser = trpc.user.delete.useMutation();
   const addConnection = trpc.user.addConnection.useMutation();
   const removeConnection = trpc.user.removeConnection.useMutation();
@@ -97,8 +98,8 @@ const Settings = () => {
               <Button
                 onClick={async () => {
                   setUserId(user.id);
-                  queryClient.user.getAll.invalidate();
-                  queryClient.user.get.invalidate(user.id);
+                  queryClient.dev.getAllUsers.invalidate();
+                  queryClient.user.get.invalidate({ id: user.id });
                 }}
               >
                 Log in as this user
@@ -111,7 +112,7 @@ const Settings = () => {
               onClickAsync={async (e) => {
                 e.stopPropagation();
                 await deleteUser.mutateAsync(user.id);
-                queryClient.user.getAll.invalidate();
+                queryClient.dev.getAllUsers.invalidate();
               }}
             >
               <span className="icon-[mdi--delete-outline] h-5 w-5" />
@@ -123,7 +124,7 @@ const Settings = () => {
           variant="negative"
           onClickAsync={async () => {
             await deleteAll.mutateAsync();
-            queryClient.user.getAll.invalidate();
+            queryClient.dev.getAllUsers.invalidate();
             await queryClient.user.invalidate();
           }}
         >

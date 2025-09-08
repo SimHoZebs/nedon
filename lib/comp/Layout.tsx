@@ -31,11 +31,11 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   const createUser = trpc.user.create.useMutation();
   const updateUser = trpc.user.updateName.useMutation();
-  const sandboxPublicToken = trpc.sandBoxAccess.useQuery(
+  const sandboxPublicToken = trpc.plaid.sandBoxAccess.useQuery(
     { instituteID: undefined },
     { staleTime: 360000, enabled: false },
   );
-  const setAccessToken = trpc.setAccessToken.useMutation();
+  const setAccessToken = trpc.plaid.setAccessToken.useMutation();
   const queryClient = trpc.useUtils();
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       });
 
       await queryClient.user.invalidate();
-      await queryClient.auth.invalidate();
+      await queryClient.plaid.auth.invalidate();
       console.log("User created with Plaid");
     };
 
@@ -74,7 +74,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
     appUser,
     createUser,
     queryClient.user,
-    queryClient.auth,
+    queryClient.plaid.auth,
     sandboxPublicToken,
     setAccessToken,
     updateUser,

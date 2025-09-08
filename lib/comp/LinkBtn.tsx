@@ -8,9 +8,9 @@ import React, { useEffect } from "react";
 import { usePlaidLink } from "react-plaid-link";
 
 const LinkBtn = () => {
-  const { appUser } = useAppUser();
-  const setAccessToken = trpc.setAccessToken.useMutation();
-  const linkToken = trpc.createLinkToken.useQuery(undefined, {
+  const appUser = useAppUser();
+  const setAccessToken = trpc.plaid.setAccessToken.useMutation();
+  const linkToken = trpc.plaid.createLinkToken.useQuery(undefined, {
     staleTime: 360000,
   });
 
