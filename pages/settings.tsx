@@ -1,5 +1,3 @@
-import { ActionBtn, Button } from "@/comp/Button";
-import { H2 } from "@/comp/Heading";
 import CreateUserBtn from "@/comp/user/CreateUserBtn";
 
 import { useLocalStore } from "@/util/localStore";
@@ -7,7 +5,10 @@ import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import useAppUser from "@/util/useAppUser";
 
+import { ActionBtn, Button } from "lib/shared/Button";
+import { H2 } from "lib/shared/Heading";
 import { useRouter } from "next/router";
+import { useId } from "react";
 
 const Settings = () => {
   const router = useRouter();
@@ -22,6 +23,8 @@ const Settings = () => {
   const removeConnection = trpc.user.removeConnection.useMutation();
   const queryClient = trpc.useUtils();
   const setUserId = useLocalStore((state) => state.setUserId);
+
+  const verticalCatPickerId = useId();
 
   return (
     <section className="flex h-full w-full flex-col items-start gap-y-3">
@@ -39,13 +42,13 @@ const Settings = () => {
       <div className="flex gap-x-2">
         <input
           type="checkbox"
-          id="verticalCatPicker"
+          id={verticalCatPickerId}
           checked={verticalCatPicker}
           onChange={(e) => {
             setVerticalCatPicker(e.target.checked);
           }}
         />
-        <label htmlFor="verticalCatPicker">make cat picker vertical</label>
+        <label htmlFor={verticalCatPickerId}>make cat picker vertical</label>
       </div>
 
       <H2>DEBUG AREA</H2>

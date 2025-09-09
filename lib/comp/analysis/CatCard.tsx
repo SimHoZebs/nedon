@@ -4,7 +4,7 @@ import type { TxType } from "@/util/tx";
 
 import type { TreedCatWithTx } from "@/types/cat";
 
-import { H3 } from "../Heading";
+import { H3 } from "../../shared/Heading";
 
 import { type CatSettings, Prisma } from "@prisma/client";
 

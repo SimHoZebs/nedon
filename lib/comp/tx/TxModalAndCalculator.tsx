@@ -2,12 +2,16 @@ import parseMoney from "@/util/parseMoney";
 import { useStore } from "@/util/store";
 import { useTxStore } from "@/util/txStore";
 
+import type { SplitTx } from "@/types/tx";
+
 import Calculator from "./TxModal/SplitList/Calculator";
 import TxModal from "./TxModal/TxModal";
 
+import { Prisma } from "@prisma/client";
 import { motion } from "framer-motion";
 import React, { useEffect } from "react";
 
+// Define proper types for better type safety
 interface Props {
   onClose: () => void;
 }
@@ -25,56 +29,69 @@ const TxModalAndCalculator = (props: Props) => {
   const hasEditedCatArray = useTxStore((s) => s.hasEditedCatArray);
   const focusedSplitTxIndex = useTxStore((state) => state.focusedSplitTxIndex);
   const tx = useTxStore((state) => state.txOnModal);
-  const txAmount = tx?.amount || 0;
+  const txAmount: Prisma.Decimal = tx?.amount || new Prisma.Decimal(0);
   const catArray = tx?.catArray || [];
-  const splitTxArray = tx?.splitTxArray || [];
+  const splitTxArray: SplitTx[] = tx?.splitTxArray || [];
   const [isCalcHidden, setIsCalcHidden] = React.useState(false);
   const screenType = useStore((s) => s.screenType);
 
-  //Changes a user's split amount and balances
+  // Changes a user's split amount and balances
   const changeSplitAmount = (index: number, newAmount: number) => {
     const updatedSplitTxArray = structuredClone(splitTxArray);
 
-    const newAmountFloored = Math.max(Math.min(newAmount, txAmount), 0);
+    const newAmountFloored = Prisma.Decimal.max(
+      Prisma.Decimal.min(new Prisma.Decimal(newAmount), txAmount),
+      new Prisma.Decimal(0),
+    );
 
     updatedSplitTxArray[index].amount = newAmountFloored;
 
-    const uneditedSplitArray: any[] = [];
+    const uneditedSplitArray: SplitTx[] = [];
+    const editedIndices = new Set(editedSplitTxIndexArray); // Optimize lookup
 
     // Calculate the total amount of the splits that hasn't been edited
-    let editedSplitAmountTotal = 0;
+    let editedSplitAmountTotal = new Prisma.Decimal(0);
     const len = updatedSplitTxArray.length;
     for (let i = 0; i < len; i++) {
       const split = updatedSplitTxArray[i];
-      //if was edited and isn't a split being changed
-      if (
-        editedSplitTxIndexArray.find((editedIndex) => editedIndex === i) !==
-          undefined ||
-        i === index
-      ) {
-        editedSplitAmountTotal += split.amount;
+      if (editedIndices.has(i) || i === index) {
+        editedSplitAmountTotal = editedSplitAmountTotal.add(split.amount);
       } else {
         uneditedSplitArray.push(split);
       }
     }
 
-    // include tx.user's if needed
+    // Include tx.user's if needed
     if (hasEditedCatArray) {
-      editedSplitAmountTotal += catArray.reduce(
-        (acc, cat) => acc + cat.amount,
-        0,
+      editedSplitAmountTotal = editedSplitAmountTotal.add(
+        catArray.reduce(
+          (acc, cat) => acc.add(cat.amount),
+          new Prisma.Decimal(0),
+        ),
       );
     }
 
-    let remainder = txAmount - editedSplitAmountTotal;
-    uneditedSplitArray.forEach((split, index) => {
+    let remainder = txAmount.sub(editedSplitAmountTotal);
+
+    // Handle edge case: no unedited splits
+    if (uneditedSplitArray.length === 0) {
+      // Optionally log or handle remainder
+      console.warn(
+        "No unedited splits to distribute remainder:",
+        remainder.toNumber(),
+      );
+      return;
+    }
+
+    uneditedSplitArray.forEach((split, idx) => {
       if (uneditedSplitArray.length === 1) {
-        split.amount = parseMoney(remainder);
-      } else if (index === uneditedSplitArray.length - 1) {
-        split.amount = parseMoney(remainder);
+        split.amount = new Prisma.Decimal(parseMoney(remainder.toNumber()));
+      } else if (idx === uneditedSplitArray.length - 1) {
+        split.amount = new Prisma.Decimal(parseMoney(remainder.toNumber()));
       } else {
-        split.amount = parseMoney(remainder / uneditedSplitArray.length);
-        remainder = parseMoney(remainder - split.amount);
+        const portion = remainder.div(uneditedSplitArray.length);
+        split.amount = new Prisma.Decimal(parseMoney(portion.toNumber()));
+        remainder = remainder.sub(portion);
       }
     });
 
@@ -111,14 +128,15 @@ const TxModalAndCalculator = (props: Props) => {
             className="z-20 w-full rounded-md rounded-b-none border border-zinc-700 border-b-0 bg-zinc-800 shadow-md"
             type="button"
             onClick={() => setIsCalcHidden(!isCalcHidden)}
+            aria-label={isCalcHidden ? "Show calculator" : "Hide calculator"} // Added for accessibility
           >
-            hide
+            {isCalcHidden ? "Show" : "Hide"}
           </button>
 
           <motion.div
             className={"flex w-full lg:max-w-max"}
             initial={{ height: 0 }}
-            animate={{ height: isCalcHidden ? 0 : "" }}
+            animate={{ height: isCalcHidden ? 0 : "auto" }}
             exit={{ height: 0 }}
           >
             <Calculator
@@ -127,9 +145,9 @@ const TxModalAndCalculator = (props: Props) => {
                 const copy = [...splitTxAmountDisplayArray];
                 copy[focusedSplitTxIndex] = value;
 
-                //removes anything after arithmetic
+                // Removes anything after arithmetic
                 const onlyNumber = Number.parseFloat(value).toString();
-                //if the change was purely numeric, balance the split
+                // If the change was purely numeric, balance the split
                 if (onlyNumber === value) {
                   changeSplitAmount(
                     focusedSplitTxIndex,

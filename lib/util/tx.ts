@@ -37,8 +37,8 @@ export const createTxFromChaseCSV = (
   userId: string,
 ): UnsavedTx => {
   return {
-    id: undefined,
     plaidTx: null,
+    splitTxArray: [],
     name: chaseCSVTx.Description,
     amount: Prisma.Decimal(chaseCSVTx.Amount),
     recurring: false,
@@ -51,7 +51,7 @@ export const createTxFromChaseCSV = (
     ownerId: userId,
     accountId: null,
     catArray: [],
-    receipt: undefined,
+    receipt: null,
   };
 };
 
@@ -60,9 +60,9 @@ export const createTxFromPlaidTx = (
   plaidTx: Transaction,
 ): UnsavedTx => {
   return {
-    id: undefined,
     plaidTx: plaidTx,
     name: plaidTx.name,
+    splitTxArray: [],
     amount: Prisma.Decimal(plaidTx.amount),
     recurring: false,
     mds: MdsType.UNDETERMINED,
@@ -74,7 +74,7 @@ export const createTxFromPlaidTx = (
     ownerId: userId,
     accountId: plaidTx.account_id,
     catArray: [],
-    receipt: undefined,
+    receipt: null,
   };
 };
 

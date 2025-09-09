@@ -1,7 +1,7 @@
 import db from "@/util/db";
 import { resetTx } from "@/util/tx";
 
-import { type SavedTx, SavedTxSchema, UnsavedTxSchema } from "@/types/tx";
+import { SavedTxSchema, UnsavedTxSchema } from "@/types/tx";
 
 import { procedure, router } from "../trpc";
 import { createCatInput, getPlaidTxSyncData } from "../util/plaid";
@@ -94,8 +94,7 @@ const txRouter = router({
     .input(UnsavedTxSchema)
     .output(SavedTxSchema)
     .mutation(async ({ input }) => {
-      const test: SavedTx = await db.tx.create(createTxInput(input));
-      return test;
+      return await db.tx.create(createTxInput(input));
     }),
 
   createMany: procedure
@@ -109,7 +108,7 @@ const txRouter = router({
     }),
 
   update: procedure.input(SavedTxSchema).mutation(async ({ input }) => {
-    const { catArray, ...rest } = input;
+    const { catArray, splitTxArray, ...rest } = input;
     const { receipt: _receipt, plaidTx: _plaidTx, ...useful } = rest;
     const catToCreate = catArray.filter((cat) => !cat.id);
     const catToUpdate = catArray.filter((cat) => cat.id);

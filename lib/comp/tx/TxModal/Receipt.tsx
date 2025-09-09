@@ -1,16 +1,19 @@
-import { ActionBtn } from "@/comp/Button";
-import { H3 } from "@/comp/Heading";
-import Input from "@/comp/Input";
-
 import { createStructuredResponse } from "@/util/structuredResponse";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import { isCatArrayInDB } from "@/types/cat";
 import type { UnsavedReceipt } from "@/types/receipt";
-import { isSavedTx, type SavedTx, type UnsavedTx } from "@/types/tx";
+import {
+  isSavedTx,
+  isUnsavedTx,
+  type SavedTx,
+  type UnsavedTx,
+} from "@/types/tx";
 
 import { Prisma } from "@prisma/client";
+import { ActionBtn } from "lib/shared/Button";
+import { H3 } from "lib/shared/Heading";
+import Input from "lib/shared/Input";
 import Image from "next/image";
 import React from "react";
 import supabase from "server/supabaseClient";
@@ -84,18 +87,13 @@ const Receipt = () => {
     console.log("receipt processed");
 
     let latestTx: SavedTx;
-    if (tx.id) {
-      if (!isSavedTx(tx)) {
-        sr.devMsg = "Trying to create a receipt for a tx with unsaved cats.";
-        return sr;
-      }
-      latestTx = tx;
-    } else {
+    if (isUnsavedTx(tx)) {
       const newTx: UnsavedTx = {
         ...tx,
-        id: undefined,
       };
       latestTx = await createTx.mutateAsync(newTx);
+    } else {
+      latestTx = tx;
     }
 
     if (!response.data) return response;

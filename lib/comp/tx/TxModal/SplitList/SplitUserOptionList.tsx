@@ -1,11 +1,11 @@
-import { Button } from "@/comp/Button";
-
 import { useTxStore } from "@/util/txStore";
 import useAppUser from "@/util/useAppUser";
 
-import type { SplitTx, UnsavedSplitTx } from "@/types/tx";
+import { isSavedTx, type SplitTx, type UnsavedSplitTx } from "@/types/tx";
 
 import { Prisma } from "@prisma/client";
+import { Button } from "lib/shared/Button";
+import { createId } from "@paralleldrive/cuid2";
 
 const SplitUserOptionList = () => {
   const appUser = useAppUser();
@@ -70,9 +70,11 @@ const SplitUserOptionList = () => {
                     }),
                   );
 
+                  const txId = isSavedTx(txOnModal) ? txOnModal.id : createId();
+
                   const newSplit: UnsavedSplitTx = {
                     ownerId: user.id,
-                    originTxId: txOnModal.id,
+                    originTxId: txId,
                     name: txOnModal.name,
                     amount: newAmount,
                     userTotal: new Prisma.Decimal(0),

@@ -3,7 +3,6 @@ import { createTxFromPlaidTx } from "@/util/tx";
 
 import type { SavedTx, UnsavedTx } from "@/types/tx";
 
-import type { Prisma } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { RemovedTransaction, Transaction } from "plaid";
 
@@ -14,13 +13,11 @@ export const txInclude = {
       items: true,
     },
   },
-  user: true,
   originTx: true,
-  refSplit: true,
   splitTxArray: true,
 };
 
-export const createTxInput = (txClientSide: UnsavedTx): Prisma.TxCreateArgs => {
+export const createTxInput = (txClientSide: UnsavedTx) => {
   const { catArray, receipt, splitTxArray, ...rest } = txClientSide;
   const receiptCreate = receipt
     ? {
@@ -33,31 +30,27 @@ export const createTxInput = (txClientSide: UnsavedTx): Prisma.TxCreateArgs => {
       }
     : undefined;
 
+  const catArrayCreate = {
+    create: catArray.map(({ txId, ...cat }) => ({ ...cat })),
+  };
+
   return {
     data: {
       ...rest,
       receipt: receiptCreate,
       plaidTx: rest.plaidTx || undefined,
-      catArray: {
-        create: catArray.map(({ txId, ...cat }) => ({
-          ...cat,
+      catArray: catArrayCreate,
+      splitTxArray: {
+        create: splitTxArray.map((split) => ({
+          ...split,
+          owner: { connect: { id: split.ownerId } },
+          plaidTx: split.plaidTx || undefined,
+          catArray: catArrayCreate,
+          receipt: receiptCreate,
         })),
       },
-      splitTxArray: {
-        create: splitTxArray.map((split) => {
-          const { catArray, ...rest } = split;
-          return {
-            ...rest,
-            owner: { connect: { id: split.ownerId } },
-            plaidTx: split.plaidTx || undefined,
-            catArray: {
-              create: catArray.map(({ txId, ...cat }) => cat),
-            },
-            receipt: receiptCreate,
-          };
-        }),
-      },
     },
+
     include: txInclude,
   };
 };
@@ -123,7 +116,16 @@ export const mergePlaidTxWithTxArray = async (
         },
       ],
     },
-    include: txInclude,
+    include: {
+      catArray: true,
+      receipt: {
+        include: {
+          items: true,
+        },
+      },
+      originTx: true,
+      splitTxArray: true,
+    },
   });
 
   // modified txs gets updated and removed txs gets deleted

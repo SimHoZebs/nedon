@@ -1,8 +1,7 @@
-import Input from "@/comp/Input";
-
 import { useTxStore } from "@/util/txStore";
 
 import { Prisma } from "@prisma/client";
+import Input from "lib/shared/Input";
 import type React from "react";
 import { twMerge } from "tailwind-merge";
 

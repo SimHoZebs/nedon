@@ -2,13 +2,13 @@ import { getCatStyle } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import { type UnsavedCatSchema, isCatArrayInDB } from "@/types/cat";
+import { isCatArrayInDB, type UnsavedCat } from "@/types/cat";
 
-import type React from "react";
 import { Prisma } from "@prisma/client";
+import type React from "react";
 
 type Props = {
-  cat: UnsavedCatSchema;
+  cat: UnsavedCat;
   index: number;
   onCatChipClick: (
     e:

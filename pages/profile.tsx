@@ -1,9 +1,8 @@
-import { ActionBtn, Button } from "@/comp/Button";
-import Input from "@/comp/Input";
-
 import { trpc } from "@/util/trpc";
 import useAppUser from "@/util/useAppUser";
 
+import { ActionBtn, Button } from "lib/shared/Button";
+import Input from "lib/shared/Input";
 import { useEffect, useState } from "react";
 
 const Profile = () => {

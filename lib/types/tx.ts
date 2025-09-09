@@ -49,7 +49,14 @@ export const UnsavedTxSchema = BaseTxSchema.omit({
   })
   .strict();
 
-export type UnsavedTx = z.infer<typeof UnsavedTxSchema>;
+export interface UnsavedTx extends z.infer<typeof UnsavedTxSchema> {}
+
+export const isUnsavedTx = (tx: unknown): tx is UnsavedTx => {
+  if (!tx || typeof tx !== "object" || "id" in tx) {
+    return false;
+  }
+  return "catArray" in tx && Array.isArray(tx.catArray);
+};
 
 //TxInDB refers to a tx that has an id and is stored in the database, but may have unsaved cat and split.
 export const SavedTxWithUnsavedContentSchema = BaseTxSchema.extend({

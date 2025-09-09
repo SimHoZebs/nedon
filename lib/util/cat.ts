@@ -1,22 +1,22 @@
-import type { CatClientSide, TreedCat, TreedCatWithTx } from "@/types/cat";
+import type { TreedCat, TreedCatWithTx, UnsavedCat } from "@/types/cat";
 import type { SavedTx } from "@/types/tx";
 
 import catStyleArray from "./catStyle";
 import parseMoney from "./parseMoney";
 import type { TxType } from "./tx";
 
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import type { Category as PlaidCat } from "plaid";
 
 export const createNewCat = ({
   txId,
   nameArray,
-  amount = 0,
+  amount = new Prisma.Decimal(0),
 }: {
   txId: string;
   nameArray: string[] | null | undefined;
   amount: Prisma.Decimal;
-}): CatClientSide => {
+}): UnsavedCat => {
   return {
     id: undefined,
     txId: txId,
@@ -45,7 +45,7 @@ export const convertPlaidCatsToHierarchicalArray = (
 export const fillArrayByCat = (
   resultArray: TreedCatWithTx[],
   tx: SavedTx,
-  cat: CatClientSide,
+  cat: UnsavedCat,
 ): TreedCatWithTx[] => {
   const nameArray = cat.nameArray;
 
@@ -60,15 +60,15 @@ export const fillArrayByCat = (
     name: firstCatName,
     received: 0,
     spending: 0,
-    budget: cat.amount || 0,
+    budget: cat.amount ? cat.amount.toNumber() : 0,
     txArray: [],
     subCatArray: [],
   };
 
-  if (tx.amount > 0) {
-    hierarchicalCat.spending += cat.amount;
+  if (tx.amount.toNumber() > 0) {
+    hierarchicalCat.spending += cat.amount.toNumber();
   } else {
-    hierarchicalCat.received += cat.amount;
+    hierarchicalCat.received += cat.amount.toNumber();
   }
 
   if (index === -1) {

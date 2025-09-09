@@ -109,7 +109,7 @@ interface SecondaryBtnProps
 }
 
 export const SecondaryBtn = (props: SecondaryBtnProps) => {
-  const { children, className, variant, ...rest } = props;
+  const { children, ...rest } = props;
 
   return (
     <Button
@@ -134,7 +134,7 @@ export const CloseBtn = (props: CloseBtnProps) => {
     <button
       type="button"
       aria-label="Close"
-      className={`m-1 flex h-6 w-6 rounded-full outline outline-1 outline-zinc-400 hover:outline-pink-400 ${
+      className={`m-1 flex h-6 w-6 rounded-full outline-1 outline-zinc-400 hover:outline-pink-400 ${
         props.isForMobile && "lg:hidden"
       } ${props.isForDesktop && "hidden lg:block"}`}
       onClick={props.onClose}
@@ -147,7 +147,7 @@ export const CloseBtn = (props: CloseBtnProps) => {
 type SplitBtnProps = ButtonProps & {};
 
 export const SplitBtn = (props: SplitBtnProps) => {
-  const { children, className, onClickAsync, ...rest } = props;
+  const { children, className, ...rest } = props;
   const [showOptions, setShowOptions] = React.useState(false);
 
   const childrenArray = React.Children.toArray(children);
@@ -172,7 +172,7 @@ export const SplitBtn = (props: SplitBtnProps) => {
 type SplitBtnOptionsProps = ButtonProps & {};
 
 export const SplitBtnOptions = (props: SplitBtnProps) => {
-  const { children, className, onClickAsync, ...rest } = props;
+  const { children } = props;
 
   return (
     <div className="absolute top-10 right-0 z-10 flex flex-col rounded-lg bg-zinc-800 p-1">

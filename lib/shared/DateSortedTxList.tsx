@@ -3,8 +3,8 @@ import { useTxStore } from "@/util/txStore";
 
 import type { SavedTx } from "@/types/tx";
 
+import TxCard from "../comp/tx/TxCard";
 import { H2, H3 } from "./Heading";
-import TxCard from "./tx/TxCard";
 
 import type React from "react";
 

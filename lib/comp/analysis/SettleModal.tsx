@@ -1,8 +1,8 @@
 import { trpc } from "@/util/trpc";
 import useAppUser from "@/util/useAppUser";
 
-import { ActionBtn } from "../Button";
-import Modal from "../Modal";
+import { ActionBtn } from "../../shared/Button";
+import Modal from "../../shared/Modal";
 
 import type { Prisma } from "@prisma/client";
 import type React from "react";

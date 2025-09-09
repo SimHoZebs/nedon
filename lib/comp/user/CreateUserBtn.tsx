@@ -1,6 +1,6 @@
 import { trpc } from "@/util/trpc";
 
-import { ActionBtn } from "../Button";
+import { ActionBtn } from "../../shared/Button";
 
 import { useState } from "react";
 
@@ -9,11 +9,11 @@ const CreateUserBtn = () => {
   const updateUser = trpc.user.updateName.useMutation();
   const queryClient = trpc.useUtils();
 
-  const sandboxPublicToken = trpc.sandBoxAccess.useQuery(
+  const sandboxPublicToken = trpc.plaid.sandBoxAccess.useQuery(
     { instituteID: undefined },
     { staleTime: 360000, enabled: false },
   );
-  const setAccessToken = trpc.setAccessToken.useMutation();
+  const setAccessToken = trpc.plaid.setAccessToken.useMutation();
   const [loading, setLoading] = useState(false);
 
   return (
@@ -21,7 +21,7 @@ const CreateUserBtn = () => {
       onClickAsync={async (e) => {
         setLoading(true);
         e.stopPropagation();
-        const user = await createUser.mutateAsync({});
+        const user = await createUser.mutateAsync();
         await updateUser.mutateAsync({ ...user, name: user.id.slice(0, 8) });
 
         const publicToken = await sandboxPublicToken.refetch();
@@ -32,7 +32,7 @@ const CreateUserBtn = () => {
           id: user.id,
         });
 
-        queryClient.user.getAll.invalidate();
+        queryClient.dev.getAllUsers.invalidate();
         setLoading(false);
       }}
     >

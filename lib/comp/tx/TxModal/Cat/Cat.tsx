@@ -1,15 +1,16 @@
-import { ActionBtn, Button } from "@/comp/Button";
-
 import { createNewCat } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import type { UnsavedCatSchema } from "@/types/cat";
+import type { UnsavedCat } from "@/types/cat";
+import { isUnsavedTx } from "@/types/tx";
 
 import CatChip from "./CatChip";
 import CatPicker from "./CatPicker";
 
+import { createId } from "@paralleldrive/cuid2";
 import { Prisma } from "@prisma/client";
+import { ActionBtn, Button } from "lib/shared/Button";
 import { useRef, useState } from "react";
 
 const OFFSCREEN = { x: -800, y: -800 };
@@ -74,13 +75,15 @@ const Cat = () => {
               setIsManaging(true);
 
               //create a copy
-              const tmpCatArray: UnsavedCatSchema[] = structuredClone(catArray);
+              const tmpCatArray: UnsavedCat[] = structuredClone(catArray);
+
+              const txId = !tx || isUnsavedTx(tx) ? createId() : tx.id;
 
               //add a new cat
               tmpCatArray.push(
                 createNewCat({
                   amount: Prisma.Decimal(0),
-                  txId: tx?.id || "",
+                  txId,
                   nameArray: [],
                 }),
               );
@@ -120,7 +123,7 @@ const Cat = () => {
               aria-label="Confirm adding category"
               //disabled={isWrongTotal}
               onClickAsync={async () => {
-                if (!tx || tx.id === undefined) {
+                if (!tx || isUnsavedTx(tx)) {
                   console.error("Can't upsert catArray. tx is undefined");
                   return;
                 }

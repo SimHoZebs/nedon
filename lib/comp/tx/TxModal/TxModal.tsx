@@ -1,7 +1,3 @@
-import { ActionBtn, CloseBtn, SecondaryBtn } from "@/comp/Button";
-import { H1 } from "@/comp/Heading";
-import Modal from "@/comp/Modal";
-
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
@@ -9,13 +5,18 @@ import useAppUser from "@/util/useAppUser";
 
 import { isSavedTx } from "@/types/tx";
 
+import AccountName from "./AccountName";
 import Cat from "./Cat/Cat";
 import Receipt from "./Receipt";
 import SplitList from "./SplitList/SplitList";
 
+import { Prisma } from "@prisma/client";
+import { ActionBtn, CloseBtn, SecondaryBtn } from "lib/shared/Button";
+import { H1 } from "lib/shared/Heading";
+import Modal from "lib/shared/Modal";
 import Image from "next/image";
 import type { AuthGetResponse } from "plaid";
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 
 interface Props {
   onClose: () => void;
@@ -36,7 +37,7 @@ const TxModal = (props: Props) => {
     (store) => store.txOrganizedByTimeArray,
   );
   const appUser = useAppUser();
-  const auth = trpc.auth.useQuery(
+  const auth = trpc.plaid.auth.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser },
   );
@@ -52,6 +53,7 @@ const TxModal = (props: Props) => {
   const YMD = useTxStore((state) => state.txOnModalIndex);
 
   const amount = tx ? tx.amount : 0;
+  const recurring = useId();
 
   useEffect(() => {
     if (!tx) {
@@ -83,16 +85,6 @@ const TxModal = (props: Props) => {
     : (auth.data as unknown as AuthGetResponse).accounts.find(
         (account) => account.account_id === tx?.accountId,
       )?.name || "";
-
-  const AccountName = ({ desktop }: { desktop: boolean }) => (
-    <p
-      className={`${desktop ? "hidden lg:block" : "lg:hidden"} h-6 w-40 font-light text-xs text-zinc-400 md:text-sm ${
-        auth.isLoading && "animate-pulse rounded-lg bg-zinc-700"
-      } `}
-    >
-      {accountName}
-    </p>
-  );
 
   return (
     tx && (
@@ -126,7 +118,11 @@ const TxModal = (props: Props) => {
                   }}
                 />
               </div>
-              <AccountName desktop={true} />
+              <AccountName
+                isDesktop={true}
+                isLoading={auth.isLoading}
+                accountName={accountName}
+              />
             </div>
 
             <div className="flex w-full flex-col items-start font-light text-xs text-zinc-400 md:text-sm lg:w-auto lg:items-end">
@@ -139,7 +135,11 @@ const TxModal = (props: Props) => {
               />
 
               <div className="flex w-full justify-between">
-                <AccountName desktop={false} />
+                <AccountName
+                  isDesktop={false}
+                  isLoading={auth.isLoading}
+                  accountName={accountName}
+                />
                 <div className="flex flex-col items-end">
                   <p>
                     Authorized at{" "}
@@ -167,7 +167,7 @@ const TxModal = (props: Props) => {
             <div className="flex flex-col gap-y-3">
               <div className="flex flex-col gap-x-3 gap-y-1 md:flex-row md:items-center md:justify-between">
                 <div className="flex">
-                  <H1>${amount * -1}</H1>
+                  <H1>${Prisma.Decimal.mul(amount, -1).toNumber()}</H1>
                   {appUser?.myConnectionArray &&
                     appUser.myConnectionArray.length > 0 &&
                     focusedSplitTxIndex === undefined &&
@@ -189,8 +189,8 @@ const TxModal = (props: Props) => {
                 />
 
                 <div className="flex items-center">
-                  <input type="checkbox" id="recurring" onChange={() => {}} />
-                  <label htmlFor="recurring">Recurring</label>
+                  <input type="checkbox" id={recurring} onChange={() => {}} />
+                  <label htmlFor={recurring}>Recurring</label>
                 </div>
                 <Receipt />
               </div>

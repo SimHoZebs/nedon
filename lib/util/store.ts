@@ -52,7 +52,7 @@ export const useStore = create<Store>()(
         set({ verticalCatPicker }),
 
       txOragnizedByTimeArray: [],
-      setTxOragnizedByTimeArray: (txOragnizedByTimeArray) =>
+      setTxOragnizedByTimeArray: (txOragnizedByTimeArray: SavedTx[][][][]) =>
         set({ txOrganizedByTimeArray: txOragnizedByTimeArray }),
     }),
 

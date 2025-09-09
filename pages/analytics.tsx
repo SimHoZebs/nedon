@@ -2,8 +2,6 @@ import AnalysisBar from "@/comp/analysis/AnalysisBar";
 import CatCard from "@/comp/analysis/CatCard";
 import CatModal from "@/comp/analysis/CatModal";
 import LineGraph from "@/comp/analysis/LineGraph";
-import { Button } from "@/comp/Button";
-import DateRangePicker from "@/comp/DateRangePicker";
 
 import { calcCatTypeTotal, subCatTotal } from "@/util/cat";
 import { useStore } from "@/util/store";
@@ -22,6 +20,8 @@ import type { TreedCatWithTx } from "@/types/cat";
 
 import type { CatSettings } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
+import { Button } from "lib/shared/Button";
+import DateRangePicker from "lib/shared/DateRangePicker";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 

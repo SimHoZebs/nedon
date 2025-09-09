@@ -4,14 +4,15 @@ import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import type { TreedCat, UnsavedCatSchema } from "@/types/cat";
-import type { UnsavedTx } from "@/types/tx";
+import type { TreedCat, UnsavedCat } from "@/types/cat";
+import { isUnsavedTx } from "@/types/tx";
 
+import { createId } from "@paralleldrive/cuid2";
 import { Prisma } from "@prisma/client";
 import { type ForwardedRef, forwardRef, useEffect, useState } from "react";
 
 interface Props {
-  appUserCatArray: UnsavedCatSchema[];
+  appUserCatArray: UnsavedCat[];
   editingCatIndex: number;
   closePicker: () => void;
   position: { x: number; y: number };
@@ -66,22 +67,19 @@ const CatPicker = forwardRef(
         tmpNameArray.push(clickedTreedCat.name);
       }
 
-      //The last element is the temporary category this update is for.
-      tmpCatArray[tmpCatArray.length - 1] = createNewCat({
-        txId: tmpTx.id || "",
-        nameArray: tmpNameArray,
-        amount: new Prisma.Decimal(0),
-      });
+      if (isUnsavedTx(tmpTx)) {
+        const txId = createId();
 
-      tmpTx.catArray = tmpCatArray;
+        tmpCatArray[tmpCatArray.length - 1] = createNewCat({
+          txId,
+          nameArray: tmpNameArray,
+          amount: new Prisma.Decimal(0),
+        });
 
-      if (!tmpTx.id) {
+        tmpTx.catArray = tmpCatArray;
+
         console.log("tx.id is undefined. Creating a new tx.", tmpTx);
-        const newTx: UnsavedTx = {
-          ...tmpTx,
-          id: undefined,
-        };
-        await createTx.mutateAsync(newTx);
+        await createTx.mutateAsync(tmpTx);
       } else {
         await upsertCatArray.mutateAsync({
           txId: tmpTx.id,

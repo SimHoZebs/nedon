@@ -2,8 +2,8 @@ import { trpc } from "@/util/trpc";
 
 import type { UnsavedTx } from "@/types/tx";
 
-import { ActionBtn } from "../Button";
-import Modal from "../Modal";
+import { ActionBtn } from "../../shared/Button";
+import Modal from "../../shared/Modal";
 
 interface Props {
   unsavedTxArray: UnsavedTx[];

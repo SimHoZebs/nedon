@@ -1,6 +1,3 @@
-import { ActionBtn, Button } from "@/comp/Button";
-import { H3 } from "@/comp/Heading";
-
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 import useAppUser from "@/util/useAppUser";
@@ -11,6 +8,8 @@ import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
 
 import { Prisma } from "@prisma/client";
+import { ActionBtn, Button } from "lib/shared/Button";
+import { H3 } from "lib/shared/Heading";
 import type React from "react";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {

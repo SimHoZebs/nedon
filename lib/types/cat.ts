@@ -26,7 +26,7 @@ export const BaseCatSchema = CatSchema.strict() satisfies z.ZodType<BaseCat>;
  * - Should a cat exist without being associated with a transaction?
  * - can we create a uuid for txId on the client side?
  * */
-export type UnsavedCatSchema = Prisma.CatGetPayload<{
+export type UnsavedCat = Prisma.CatGetPayload<{
   omit: { id: true };
 }> & {
   id?: string;
@@ -36,9 +36,9 @@ export const UnsavedCatSchema = CatSchema.omit({ id: true })
   .extend({
     id: z.string().optional(),
   })
-  .strict() satisfies z.ZodType<UnsavedCatSchema>;
+  .strict() satisfies z.ZodType<UnsavedCat>;
 
-export const isCatInDB = (cat: UnsavedCatSchema): cat is Cat => {
+export const isCatInDB = (cat: UnsavedCat): cat is Cat => {
   return cat.id !== undefined;
 };
 

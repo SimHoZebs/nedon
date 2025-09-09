@@ -1,7 +1,3 @@
-import { Button, SplitBtn, SplitBtnOptions } from "@/comp/Button";
-import DateRangePicker from "@/comp/DateRangePicker";
-import DateSortedTxList from "@/comp/DateSortedTxList";
-import { H2, H3 } from "@/comp/Heading";
 import AccountCard from "@/comp/home/AccountCard";
 import AccountModal from "@/comp/home/AccountModal";
 import CsvUploadPreviewModal from "@/comp/home/CsvUploadPreviewModal";
@@ -16,6 +12,10 @@ import useDateRange from "@/util/useDateRange";
 import { ChaseCSVTxSchema, type UnsavedTx } from "@/types/tx";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { Button, SplitBtn, SplitBtnOptions } from "lib/shared/Button";
+import DateRangePicker from "lib/shared/DateRangePicker";
+import DateSortedTxList from "lib/shared/DateSortedTxList";
+import { H2, H3 } from "lib/shared/Heading";
 import type { NextPage } from "next";
 import Papa from "papaparse";
 import type { AccountBase } from "plaid";

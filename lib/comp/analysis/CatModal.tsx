@@ -6,11 +6,11 @@ import useAppUser from "@/util/useAppUser";
 
 import type { TreedCatWithTx } from "@/types/cat";
 
-import { Button, CloseBtn } from "../Button";
-import DateSortedTxList from "../DateSortedTxList";
-import { H1, H2 } from "../Heading";
-import Input from "../Input";
-import Modal from "../Modal";
+import { Button, CloseBtn } from "../../shared/Button";
+import DateSortedTxList from "../../shared/DateSortedTxList";
+import { H1, H2 } from "../../shared/Heading";
+import Input from "../../shared/Input";
+import Modal from "../../shared/Modal";
 
 import { type CatSettings, Prisma } from "@prisma/client";
 import { useEffect, useState } from "react";
