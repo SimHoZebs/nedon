@@ -1,6 +1,6 @@
 import db from "@/util/db";
 
-import { BaseUserSchema } from "@/types/user";
+import { UnsavedCatSettingsSchema } from "@/types/catSettings";
 import { BaseUserSettingsSchema } from "@/types/userSettings";
 
 import { procedure, router } from "server/trpc";
@@ -23,23 +23,39 @@ const settingsRouter = router({
       const catSettingsToCreate = catSettings?.filter((cs) => !cs.id) || [];
       const catSettingsToUpdate = catSettings?.filter((cs) => cs.id) || [];
 
-      db.catSettings.upsert({
-        where: { userSettingsId: id },
-        createMany: { data: catSettingsToCreate },
-        updateMany: { data: catSettingsToUpdate },
-      });
-
       return await db.userSettings.upsert({
         where: { id: id },
         create: {
           ...rest,
-          catSettings: { createMany: { data: catSettingsToCreate } },
+          catSettings: {
+            create: catSettingsToCreate.map(({ id, ...cs }) => cs),
+          },
         },
         update: {
           ...rest,
-          catSettings: { updateMany: { data: catSettingsToUpdate } },
+          catSettings: {
+            deleteMany: {
+              id: { notIn: catSettingsToUpdate.map((cs) => cs.id) },
+            },
+            create: catSettingsToCreate.map(({ id, ...cs }) => cs),
+            update: catSettingsToUpdate.map((cs) => ({
+              where: { id: cs.id },
+              data: cs,
+            })),
+          },
         },
         include: { catSettings: true },
+      });
+    }),
+
+  upsertCatSetting: procedure
+    .input(UnsavedCatSettingsSchema)
+    .mutation(async ({ input }) => {
+      const { id, ...rest } = input;
+      return await db.catSettings.upsert({
+        where: { id: id || "" },
+        create: rest,
+        update: rest,
       });
     }),
 });

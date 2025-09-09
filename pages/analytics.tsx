@@ -28,7 +28,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 const Page = () => {
   const appUser = useAppUser();
   const txOragnizedByTimeArray = useStore(
-    (store) => store.txOragnizedByTimeArray,
+    (store) => store.txOrganizedByTimeArray,
   );
   const [YMD, setYMD] = useState<[number, number, number]>([-1, -1, -1]);
 

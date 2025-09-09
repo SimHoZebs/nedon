@@ -1,8 +1,11 @@
 import { Button } from "@/comp/Button";
 
-import parseMoney from "@/util/parseMoney";
 import { useTxStore } from "@/util/txStore";
 import useAppUser from "@/util/useAppUser";
+
+import type { SplitTx, UnsavedSplitTx } from "@/types/tx";
+
+import { Prisma } from "@prisma/client";
 
 const SplitUserOptionList = () => {
   const appUser = useAppUser();
@@ -30,7 +33,7 @@ const SplitUserOptionList = () => {
         ))
       ) : appUser.myConnectionArray ? (
         appUser.myConnectionArray.map((user) =>
-          splitTxArray.find((split) => split.userId === user.id) ||
+          splitTxArray.find((split) => split.ownerId === user.id) ||
           user.id === appUser?.id ? null : (
             <div key={user.id} className="flex items-center gap-x-2 p-2 px-1">
               <div className="flex items-center gap-x-2 rounded-full border-2 border-zinc-400">
@@ -50,37 +53,39 @@ const SplitUserOptionList = () => {
                     return;
                   }
 
-                  //evenly reduce amount from all splits to assign to new
-                  //split
-                  const updatedSplitTxArray: any[] = structuredClone(
-                    splitTxArray,
-                  ).map((split) => ({
-                    ...split,
-                    //1 for new split
-                    amount: parseMoney(
-                      txOnModal.amount / (splitTxArray.length + 1),
-                    ),
-                  }));
+                  const newAmount = txOnModal.amount.div(
+                    splitTxArray.length + 1,
+                  );
 
-                  //reduce for tx.user as well
+                  const updatedSplitTxArray: (UnsavedSplitTx | SplitTx)[] =
+                    structuredClone(splitTxArray).map((split) => ({
+                      ...split,
+                      amount: newAmount,
+                    }));
+
                   const updatedCatArray = structuredClone(catArray).map(
                     (cat) => ({
                       ...cat,
-                      amount: parseMoney(
-                        txOnModal.amount / (splitTxArray.length + 1),
-                      ),
+                      amount: newAmount,
                     }),
                   );
 
-                  //add new split
-                  updatedSplitTxArray.push({
-                    id: undefined,
-                    originTxId: "",
-                    amount: parseMoney(
-                      txOnModal.amount / (splitTxArray.length + 1),
-                    ),
-                    userId: user.id,
-                  });
+                  const newSplit: UnsavedSplitTx = {
+                    ownerId: user.id,
+                    originTxId: txOnModal.id,
+                    name: txOnModal.name,
+                    amount: newAmount,
+                    userTotal: new Prisma.Decimal(0),
+                    recurring: txOnModal.recurring,
+                    mds: txOnModal.mds,
+                    plaidId: null,
+                    plaidTx: null,
+                    datetime: txOnModal.datetime,
+                    authorizedDatetime: txOnModal.authorizedDatetime,
+                    accountId: txOnModal.accountId,
+                  };
+
+                  updatedSplitTxArray.push(newSplit);
 
                   setSplitTxArray(updatedSplitTxArray);
                   setUnsavedCatArray(updatedCatArray);

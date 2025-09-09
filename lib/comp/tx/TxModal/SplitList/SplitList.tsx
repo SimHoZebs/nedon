@@ -1,14 +1,16 @@
 import { ActionBtn, Button } from "@/comp/Button";
 import { H3 } from "@/comp/Heading";
 
-import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 import useAppUser from "@/util/useAppUser";
 
+import { isSavedTx } from "@/types/tx";
+
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
 
+import { Prisma } from "@prisma/client";
 import type React from "react";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
@@ -48,16 +50,17 @@ const SplitList = (props: Props) => {
     (state) => state.setEditedSplitTxIndexArray,
   );
 
-  const txAmount = tx?.amount || 0;
+  const txAmount = tx?.amount || new Prisma.Decimal(0);
 
   const splitTxArray = tx?.splitTxArray || [];
 
-  const updatedSplitAmount = parseMoney(
-    splitTxArray.reduce((amount, split) => amount + split.amount, 0),
+  const updatedSplitAmount = splitTxArray.reduce(
+    (amount, split) => amount.add(split.amount),
+    new Prisma.Decimal(0),
   );
 
   const isWrongSplit =
-    updatedSplitAmount !== txAmount && splitTxArray.length > 0;
+    !updatedSplitAmount.equals(txAmount) && splitTxArray.length > 0;
 
   const syncSplit = async () => {
     if (!appUser || !tx) {
@@ -76,7 +79,7 @@ const SplitList = (props: Props) => {
 
     tx.splitTxArray = splitTxArray;
 
-    if (!isUnsavedTxInDB(tx)) {
+    if (!isSavedTx(tx)) {
       console.error("Can't update Tx if tx doesn't exist in db", tx);
       return;
     }
@@ -122,7 +125,7 @@ const SplitList = (props: Props) => {
                     revertToTxInDB();
                     setCatArray(tx.catArray);
                     const splitAmountArray = tx.splitTxArray.map((split) =>
-                      split.amount.toString(),
+                      split.amount.toNumber().toString(),
                     );
                     setSplitTxAmountDisplayArray(splitAmountArray);
                   }}
@@ -143,15 +146,17 @@ const SplitList = (props: Props) => {
 
           <p
             className={`h-5 text-red-800 ${
-              updatedSplitAmount !== txAmount && splitTxArray.length > 0
+              !updatedSplitAmount.equals(txAmount) && splitTxArray.length > 0
                 ? ""
                 : "hidden"
             }`}
           >
-            {`Current split total is $${updatedSplitAmount}; ${parseMoney(
-              Math.abs(txAmount - updatedSplitAmount),
-            )} ${updatedSplitAmount > txAmount ? "over " : "under "}
-          the total`}
+            {`Current split total is $${updatedSplitAmount.toString()}; ${txAmount
+              .sub(updatedSplitAmount)
+              .abs()
+              .toString()} ${
+              updatedSplitAmount.greaterThan(txAmount) ? "over " : "under "
+            }the total`}
           </p>
 
           <div className="flex flex-col gap-y-1 px-3 md:w-fit">
@@ -183,10 +188,10 @@ const SplitList = (props: Props) => {
 
           {focusedSplitTxIndex !== undefined && splitTxArray.length > 1 && (
             <div className="flex items-center gap-x-4 px-2">
-              <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
+              <Button className="rounded-lg px-3 text-xs text-zinc-400 outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
                 split evenly
               </Button>
-              <Button className="rounded-lg px-3 text-xs text-zinc-400 outline outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
+              <Button className="rounded-lg px-3 text-xs text-zinc-400 outline-1 outline-zinc-700 hover:bg-zinc-700 hover:text-zinc-300">
                 Remove all
               </Button>
             </div>

@@ -4,7 +4,7 @@ import { createNewCat } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import type { UnsavedCat } from "@/types/cat";
+import type { UnsavedCatSchema } from "@/types/cat";
 
 import CatChip from "./CatChip";
 import CatPicker from "./CatPicker";
@@ -74,7 +74,7 @@ const Cat = () => {
               setIsManaging(true);
 
               //create a copy
-              const tmpCatArray: UnsavedCat[] = structuredClone(catArray);
+              const tmpCatArray: UnsavedCatSchema[] = structuredClone(catArray);
 
               //add a new cat
               tmpCatArray.push(

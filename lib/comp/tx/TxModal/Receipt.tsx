@@ -2,13 +2,13 @@ import { ActionBtn } from "@/comp/Button";
 import { H3 } from "@/comp/Heading";
 import Input from "@/comp/Input";
 
-import parseMoney from "@/util/parseMoney";
 import { createStructuredResponse } from "@/util/structuredResponse";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
+import { isCatArrayInDB } from "@/types/cat";
 import type { UnsavedReceipt } from "@/types/receipt";
-import { isSavedTx } from "@/types/tx";
+import { isSavedTx, type SavedTx, type UnsavedTx } from "@/types/tx";
 
 import { Prisma } from "@prisma/client";
 import Image from "next/image";
@@ -83,7 +83,20 @@ const Receipt = () => {
 
     console.log("receipt processed");
 
-    const latestTx = tx.id ? tx : await createTx.mutateAsync(tx);
+    let latestTx: SavedTx;
+    if (tx.id) {
+      if (!isSavedTx(tx)) {
+        sr.devMsg = "Trying to create a receipt for a tx with unsaved cats.";
+        return sr;
+      }
+      latestTx = tx;
+    } else {
+      const newTx: UnsavedTx = {
+        ...tx,
+        id: undefined,
+      };
+      latestTx = await createTx.mutateAsync(newTx);
+    }
 
     if (!response.data) return response;
 

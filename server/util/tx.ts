@@ -21,25 +21,41 @@ export const txInclude = {
 };
 
 export const createTxInput = (txClientSide: UnsavedTx): Prisma.TxCreateArgs => {
+  const { catArray, receipt, splitTxArray, ...rest } = txClientSide;
+  const receiptCreate = receipt
+    ? {
+        create: {
+          ...receipt,
+          items: {
+            createMany: { data: receipt.items },
+          },
+        },
+      }
+    : undefined;
+
   return {
     data: {
-      ...txClientSide,
-      originTxId: txClientSide.originTxId || undefined,
-      plaidTx: txClientSide.plaidTx || undefined,
-      receipt: txClientSide.receipt
-        ? {
-            create: {
-              ...txClientSide.receipt,
-              items: {
-                createMany: { data: txClientSide.receipt.items },
-              },
-            },
-          }
-        : undefined,
+      ...rest,
+      receipt: receiptCreate,
+      plaidTx: rest.plaidTx || undefined,
       catArray: {
-        create: txClientSide.catArray.map(({ txId, ...cat }) => ({
+        create: catArray.map(({ txId, ...cat }) => ({
           ...cat,
         })),
+      },
+      splitTxArray: {
+        create: splitTxArray.map((split) => {
+          const { catArray, ...rest } = split;
+          return {
+            ...rest,
+            owner: { connect: { id: split.ownerId } },
+            plaidTx: split.plaidTx || undefined,
+            catArray: {
+              create: catArray.map(({ txId, ...cat }) => cat),
+            },
+            receipt: receiptCreate,
+          };
+        }),
       },
     },
     include: txInclude,

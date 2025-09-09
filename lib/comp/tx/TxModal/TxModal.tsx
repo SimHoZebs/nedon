@@ -33,7 +33,7 @@ const TxModal = (props: Props) => {
   });
 
   const txOragnizedByTimeArray = useStore(
-    (store) => store.txOragnizedByTimeArray,
+    (store) => store.txOrganizedByTimeArray,
   );
   const appUser = useAppUser();
   const auth = trpc.auth.useQuery(

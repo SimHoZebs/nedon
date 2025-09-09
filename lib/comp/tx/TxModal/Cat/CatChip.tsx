@@ -2,12 +2,13 @@ import { getCatStyle } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import { type CatClientSide, isCatArrayInDB } from "@/types/cat";
+import { type UnsavedCatSchema, isCatArrayInDB } from "@/types/cat";
 
 import type React from "react";
+import { Prisma } from "@prisma/client";
 
 type Props = {
-  cat: CatClientSide;
+  cat: UnsavedCatSchema;
   index: number;
   onCatChipClick: (
     e:
@@ -102,7 +103,7 @@ const CatChip = (props: Props) => {
                 type="number"
                 min={0}
                 step={0.01}
-                value={props.cat.amount}
+                value={props.cat.amount.toNumber()}
                 onFocus={() => props.setIsManaging(true)}
                 onChange={(e) => {
                   if (!tx) {
@@ -112,11 +113,13 @@ const CatChip = (props: Props) => {
 
                   const valueToNum = Number.parseFloat(e.target.value) || 0;
                   const flooredAmount = Math.min(
-                    tx.amount,
+                    tx.amount.toNumber(),
                     Math.max(0, valueToNum),
                   );
                   const tmpCatArray = structuredClone(catArray);
-                  tmpCatArray[props.index].amount = flooredAmount;
+                  tmpCatArray[props.index].amount = new Prisma.Decimal(
+                    flooredAmount,
+                  );
                   setCatArray(tmpCatArray);
                 }}
               />

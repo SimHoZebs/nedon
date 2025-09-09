@@ -28,4 +28,6 @@ The application uses a PostgreSQL database with Prisma as the ORM. The frontend 
 *   **Code Style:** The project uses Biome for code formatting and linting. Run `pnpm format` to format the code.
 *   **API:** The API is built with tRPC. The main router is in `server/routers/_app.ts`, and individual routers are in the `server/routers` directory.
 *   **Database:** The database schema is defined in `prisma/schema.prisma`. Use `prisma migrate dev` to create and apply migrations.
+*   **Input Validation:** Zod schemas are used for type-safe input validation in tRPC routers. These schemas are often generated from the Prisma schema.
+*   **Code Generation:** The project uses `zod-prisma-types` to generate Zod schemas from the Prisma schema. Look for these in `prisma/generated/zod`.
 *   **Testing:** The project uses Vitest for unit tests and Cypress for end-to-end tests. Cypress tests are in the `cypress/e2e` directory.

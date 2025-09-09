@@ -1,13 +1,13 @@
 import db from "@/util/db";
 
-import { type BaseCat, BaseCatSchema, UnsavedCat } from "@/types/cat";
+import { type BaseCat, BaseCatSchema, UnsavedCatSchema } from "@/types/cat";
 
 import { procedure, router } from "../trpc";
 
 import { z } from "zod";
 
 const catRouter = router({
-  create: procedure.input(UnsavedCat).mutation(async ({ input }) => {
+  create: procedure.input(UnsavedCatSchema).mutation(async ({ input }) => {
     return await db.cat.create({
       data: input,
     });
@@ -17,7 +17,7 @@ const catRouter = router({
     .input(
       z.object({
         txId: z.string(),
-        catArray: z.array(UnsavedCat),
+        catArray: z.array(UnsavedCatSchema),
       }),
     )
     .mutation(async ({ input }) => {

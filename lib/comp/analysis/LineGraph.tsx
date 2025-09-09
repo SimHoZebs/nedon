@@ -1,4 +1,3 @@
-import parseMoney from "@/util/parseMoney";
 import { useStore } from "@/util/store";
 import type { TxType } from "@/util/tx";
 
@@ -24,7 +23,7 @@ interface Props {
 
 const LineGraph = (props: Props) => {
   const txOragnizedByTimeArray = useStore(
-    (store) => store.txOragnizedByTimeArray,
+    (store) => store.txOrganizedByTimeArray,
   );
   const [dailyTxSumArray, setDailyTxSumArray] = useState<
     { date: number; amount: Prisma.Decimal }[]

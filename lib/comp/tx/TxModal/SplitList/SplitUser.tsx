@@ -1,8 +1,8 @@
 import Input from "@/comp/Input";
 
-import parseMoney from "@/util/parseMoney";
 import { useTxStore } from "@/util/txStore";
 
+import { Prisma } from "@prisma/client";
 import type React from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -24,7 +24,7 @@ const SplitUser = (props: Props) => {
   );
   const focusedSplitTxIndex = useTxStore((state) => state.focusedSplitTxIndex);
   const amountDisplay = splitTxAmountDisplayArray[props.index];
-  const amount = Number.parseFloat(amountDisplay);
+  const amount = new Prisma.Decimal(amountDisplay || "0");
   const catArray = tx?.catArray || [];
   const setCatArray = useTxStore((s) => s.setCatArray);
   const setEditedSplitTxIndexArray = useTxStore(
@@ -33,7 +33,7 @@ const SplitUser = (props: Props) => {
   const isEditingSplitTx = useTxStore((state) => state.isEditingSplitTx);
 
   const split = splitTxArray[props.index];
-  const txAmount = tx ? tx.amount : 0;
+  const txAmount = tx ? tx.amount : new Prisma.Decimal(0);
   const isModified =
     props.editedIndexArray.find(
       (modifiedIndex) => modifiedIndex === props.index,
@@ -57,7 +57,8 @@ const SplitUser = (props: Props) => {
       return;
     }
 
-    updatedCatArray[unassignedCat].amount += amount;
+    updatedCatArray[unassignedCat].amount =
+      updatedCatArray[unassignedCat].amount.add(amount);
     setCatArray(updatedCatArray);
   };
 
@@ -87,14 +88,14 @@ const SplitUser = (props: Props) => {
               <Input
                 className={twMerge(
                   "w-full sm:w-20",
-                  isModified ? "outline outline-2 outline-zinc-700" : "",
+                  isModified ? "outline-2 outline-zinc-700" : "",
                 )}
                 id="amount"
                 type="text"
                 min={0}
-                max={txAmount}
+                max={txAmount.toNumber()}
                 onFocus={props.onFocus}
-                value={props.splitAmount || 0}
+                value={props.splitAmount || "0"}
                 step={0.01}
                 onChange={(e) => {
                   //value can have arithmetic operators. Differentiate between
@@ -111,7 +112,7 @@ const SplitUser = (props: Props) => {
                     }
                     const newValue = Math.min(
                       Number.parseFloat(e.target.value),
-                      txAmount,
+                      txAmount.toNumber(),
                     );
 
                     props.onAmountChange(newValue.toString());
@@ -131,28 +132,27 @@ const SplitUser = (props: Props) => {
                 max={100}
                 //0.01 does the same thing 0.01 $ steps
                 step={1}
-                value={parseMoney((amount / txAmount) * 100)}
+                value={amount.div(txAmount).mul(100).toString()}
                 onFocus={props.onFocus}
                 onChange={(e) => {
                   setEditedSplitTxIndexArray((prev) => [...prev, props.index]);
-                  const prevPercentage = parseMoney((amount / txAmount) * 100);
-                  const updatedPercentage = Math.min(
-                    Number.parseFloat(e.target.value),
-                    100,
+                  const prevPercentage = amount.div(txAmount).mul(100);
+                  const updatedPercentage = new Prisma.Decimal(
+                    Math.min(Number.parseFloat(e.target.value), 100),
                   );
 
-                  let updatedSplitAmount = parseMoney(
-                    (updatedPercentage / 100) * txAmount,
-                  );
+                  let updatedSplitAmount = updatedPercentage
+                    .div(100)
+                    .mul(txAmount);
 
-                  if (amount === updatedSplitAmount) {
-                    if (prevPercentage < updatedPercentage) {
-                      updatedSplitAmount = parseMoney(
-                        updatedSplitAmount + 0.01,
+                  if (amount.equals(updatedSplitAmount)) {
+                    if (prevPercentage.lessThan(updatedPercentage)) {
+                      updatedSplitAmount = updatedSplitAmount.add(
+                        new Prisma.Decimal(0.01),
                       );
                     } else {
-                      updatedSplitAmount = parseMoney(
-                        updatedSplitAmount - 0.01,
+                      updatedSplitAmount = updatedSplitAmount.sub(
+                        new Prisma.Decimal(0.01),
                       );
                     }
                   }
@@ -165,7 +165,7 @@ const SplitUser = (props: Props) => {
           </div>
 
           <p className="font-light text-xs text-zinc-400">
-            {split.userId?.slice(0, 8)}
+            {split.ownerId?.slice(0, 8)}
           </p>
         </div>
       </div>

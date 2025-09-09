@@ -4,12 +4,14 @@ import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import type { CatClientSide, TreedCat } from "@/types/cat";
+import type { TreedCat, UnsavedCatSchema } from "@/types/cat";
+import type { UnsavedTx } from "@/types/tx";
 
+import { Prisma } from "@prisma/client";
 import { type ForwardedRef, forwardRef, useEffect, useState } from "react";
 
 interface Props {
-  appUserCatArray: CatClientSide[];
+  appUserCatArray: UnsavedCatSchema[];
   editingCatIndex: number;
   closePicker: () => void;
   position: { x: number; y: number };
@@ -68,14 +70,18 @@ const CatPicker = forwardRef(
       tmpCatArray[tmpCatArray.length - 1] = createNewCat({
         txId: tmpTx.id || "",
         nameArray: tmpNameArray,
-        amount: 0,
+        amount: new Prisma.Decimal(0),
       });
 
       tmpTx.catArray = tmpCatArray;
 
       if (!tmpTx.id) {
         console.log("tx.id is undefined. Creating a new tx.", tmpTx);
-        await createTx.mutateAsync(tmpTx);
+        const newTx: UnsavedTx = {
+          ...tmpTx,
+          id: undefined,
+        };
+        await createTx.mutateAsync(newTx);
       } else {
         await upsertCatArray.mutateAsync({
           txId: tmpTx.id,

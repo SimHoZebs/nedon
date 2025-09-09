@@ -24,8 +24,8 @@ interface Store {
   verticalCatPicker: boolean;
   setVerticalCatPicker: (verticalCatPicker: boolean) => void;
 
-  txOragnizedByTimeArray: SavedTx[][][][];
-  setTxOragnizedByTimeArray: (txOragnizedByTimeArray: SavedTx[][][][]) => void;
+  txOrganizedByTimeArray: SavedTx[][][][];
+  setTxOrganizedByTimeArray: (txOrganizedByTimeArray: SavedTx[][][][]) => void;
 }
 
 export const useStore = create<Store>()(
@@ -53,7 +53,7 @@ export const useStore = create<Store>()(
 
       txOragnizedByTimeArray: [],
       setTxOragnizedByTimeArray: (txOragnizedByTimeArray) =>
-        set({ txOragnizedByTimeArray }),
+        set({ txOrganizedByTimeArray: txOragnizedByTimeArray }),
     }),
 
     { name: "global-store" },

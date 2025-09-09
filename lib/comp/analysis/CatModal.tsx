@@ -1,6 +1,5 @@
 import { subCatTotal } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
-import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime } from "@/util/tx";
 import useAppUser from "@/util/useAppUser";
@@ -27,8 +26,12 @@ interface Props {
 const CatModal = (props: Props) => {
   const { settings, data } = props.modalData;
   const appUser = useAppUser();
+  const { data: userSettings } = trpc.settings.get.useQuery(
+    { userId: appUser?.id || "" },
+    { enabled: !!appUser },
+  );
 
-  const [budget, setBudget] = useState<Prisma.Decimal>(Prisma.Decimal(0));
+  const [budget, setBudget] = useState<Prisma.Decimal>(new Prisma.Decimal(0));
 
   useEffect(() => {
     if (settings) {
@@ -36,7 +39,7 @@ const CatModal = (props: Props) => {
     }
   }, [settings]);
 
-  const upsertSettings = trpc.settings.upsert.useMutation();
+  const upsertCatSetting = trpc.settings.upsertCatSetting.useMutation();
   const queryClient = trpc.useUtils();
 
   const subCatTotalAmount = Math.abs(
@@ -75,11 +78,12 @@ const CatModal = (props: Props) => {
               {props.modalData.settings?.budget && (
                 <p className="text-sm text-zinc-400">
                   {Prisma.Decimal.div(
-                    subCatTotalAmount / props.modalData.settings.budget,
+                    subCatTotalAmount,
+                    props.modalData.settings.budget,
                   )
                     .mul(100)
                     .toNumber()}
-                  % of ${props.modalData.settings.budget}
+                  % of ${props.modalData.settings.budget.toNumber()}
                 </p>
               )}
             </p>
@@ -89,27 +93,26 @@ const CatModal = (props: Props) => {
             <p>Budget</p>
             <Input
               value={budget.toNumber()}
-              onChange={(e) => setBudget(Prisma.Decimal(e.target.value))}
+              onChange={(e) => setBudget(new Prisma.Decimal(e.target.value))}
               className="rounded-md border border-zinc-700"
               type="number"
             />
             <Button
               onClick={async () => {
-                if (!appUser) {
-                  console.error("no appUser");
+                if (!appUser || !userSettings) {
+                  console.error("no appUser or userSettings");
                   return;
                 }
 
-                const updatedSettings = settings
-                  ? { ...settings, budget: budget }
-                  : {
-                      name: data.name,
-                      budget: budget,
-                      parentId: null,
-                      userId: appUser.id,
-                    };
+                const upsertData = {
+                  id: settings?.id,
+                  name: data.name,
+                  budget: budget,
+                  parentId: null,
+                  userSettingsId: userSettings.id,
+                };
 
-                await upsertSettings.mutateAsync(updatedSettings);
+                await upsertCatSetting.mutateAsync(upsertData);
                 await queryClient.cat.invalidate();
               }}
             >

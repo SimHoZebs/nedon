@@ -11,7 +11,7 @@ const TxCard = (props: Props) => {
   const appUser = useAppUser();
 
   const splitAmount = props.tx.splitTxArray.find(
-    (split) => split.userId === appUser?.id,
+    (split) => split.ownerId === appUser?.id,
   )?.amount;
 
   return (
@@ -27,13 +27,17 @@ const TxCard = (props: Props) => {
 
         <div
           className={`flex items-center gap-x-1 font-light text-base sm:text-lg ${
-            props.tx.amount > 0 ? "" : "text-green-300"
+            props.tx.amount.greaterThan(0) ? "" : "text-green-300"
           }`}
         >
-          {props.tx.splitArray.length > 1 && (
+          {props.tx.splitTxArray.length > 1 && (
             <span className="icon-[lucide--split] h-4 w-4 text-zinc-400" />
           )}
-          <div>{splitAmount ? splitAmount * -1 : props.tx.amount * -1}</div>
+          <div>
+            {splitAmount
+              ? splitAmount.mul(-1).toNumber()
+              : props.tx.amount.mul(-1).toNumber()}
+          </div>
           <div>{props.tx.plaidTx?.iso_currency_code || "US"}</div>
         </div>
       </section>

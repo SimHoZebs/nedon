@@ -42,7 +42,7 @@ const Home: NextPage = () => {
 
   const txArray = useTxGetAll();
   const txOragnizedByTimeArray = useStore(
-    (store) => store.txOragnizedByTimeArray,
+    (store) => store.txOrganizedByTimeArray,
   );
 
   const loading = useRef(

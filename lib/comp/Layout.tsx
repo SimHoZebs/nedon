@@ -25,7 +25,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const setUserId = useLocalStore((state) => state.setUserId);
   const setScreenType = useStore((state) => state.setScreenType);
   const setTxOragnizedByTimeArray = useStore(
-    (state) => state.setTxOragnizedByTimeArray,
+    (state) => state.setTxOrganizedByTimeArray,
   );
   const txArray = useTxGetAll();
 
