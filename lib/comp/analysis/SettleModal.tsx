@@ -4,12 +4,13 @@ import useAppUser from "@/util/useAppUser";
 import { ActionBtn } from "../Button";
 import Modal from "../Modal";
 
+import type { Prisma } from "@prisma/client";
 import type React from "react";
 import { useState } from "react";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
-  oweUser: { id: string; amount: number } | undefined;
+  oweUser: { id: string; amount: Prisma.Decimal } | undefined;
 }
 const SettleModal = (props: Props) => {
   const appUser = useAppUser();
@@ -25,7 +26,7 @@ const SettleModal = (props: Props) => {
   return appUser && props.oweUser ? (
     <Modal>
       <p>{props.oweUser.id}</p>
-      <p>{props.oweUser.amount}</p>
+      <p>{props.oweUser.amount.toString()}</p>
       <div className="flex flex-col justify-center">
         <div className="flex justify-center gap-x-3">
           {appUser?.id.slice(0, 8)}

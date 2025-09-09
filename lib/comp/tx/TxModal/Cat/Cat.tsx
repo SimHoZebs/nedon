@@ -9,8 +9,8 @@ import type { UnsavedCat } from "@/types/cat";
 import CatChip from "./CatChip";
 import CatPicker from "./CatPicker";
 
-import { useRef, useState } from "react";
 import { Prisma } from "@prisma/client";
+import { useRef, useState } from "react";
 
 const OFFSCREEN = { x: -800, y: -800 };
 

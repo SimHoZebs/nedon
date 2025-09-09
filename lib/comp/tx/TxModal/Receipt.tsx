@@ -10,6 +10,7 @@ import { useTxStore } from "@/util/txStore";
 import type { UnsavedReceipt } from "@/types/receipt";
 import { isSavedTx } from "@/types/tx";
 
+import { Prisma } from "@prisma/client";
 import Image from "next/image";
 import React from "react";
 import supabase from "server/supabaseClient";
@@ -107,16 +108,15 @@ const Receipt = () => {
     return sr;
   };
 
-  const receiptSum = parseMoney(
-    tx?.receipt
-      ? (tx.receipt.items.reduce(
-          (sum, item) => sum + item.unit_price * item.quantity,
-          0,
-        ) || 0) +
-          tx.receipt.tip +
-          tx.receipt.tax
-      : 0,
-  );
+  const receiptSum = tx?.receipt
+    ? tx.receipt.items
+        .reduce(
+          (sum, item) => sum.add(item.unit_price.mul(item.quantity)),
+          new Prisma.Decimal(0),
+        )
+        .add(tx.receipt.tip)
+        .add(tx.receipt.tax)
+    : new Prisma.Decimal(0);
 
   return (
     <div>
@@ -183,7 +183,7 @@ const Receipt = () => {
                 <Input
                   className="w-20 sm:w-20"
                   type="number"
-                  value={item.unit_price}
+                  value={item.unit_price.toString()}
                 />
               </td>
               <td>
@@ -194,7 +194,7 @@ const Receipt = () => {
                 />
               </td>
               <td>
-                <p>${item.unit_price * item.quantity}</p>
+                <p>${item.unit_price.mul(item.quantity).toString()}</p>
               </td>
             </tr>
           ))}
@@ -212,9 +212,11 @@ const Receipt = () => {
               <Input
                 className="w-12 sm:w-12"
                 type="number"
-                value={tx.receipt.tip}
+                value={tx.receipt.tip.toString()}
               />
-              <p className="text-xs">({(tx.receipt.tip * 100) / tx.amount}%)</p>
+              <p className="text-xs">
+                ({tx.receipt.tip.mul(100).div(tx.amount).toString()}%)
+              </p>
             </td>
           </tr>
           <tr>
@@ -228,7 +230,7 @@ const Receipt = () => {
               <Input
                 className="w-12 sm:w-12"
                 type="number"
-                value={tx.receipt.tax}
+                value={tx.receipt.tax.toString()}
               />
             </td>
           </tr>
@@ -238,11 +240,11 @@ const Receipt = () => {
       {tx?.amount && tx.receipt && (
         <p
           className={`h-5 text-pink-500 ${
-            receiptSum !== tx.amount ? "" : "hidden"
+            !receiptSum.equals(tx.amount) ? "" : "hidden"
           }`}
         >
-          Receipt total is <b>${receiptSum}</b>, which is{" "}
-          <b>${parseMoney(tx.amount - receiptSum)}</b> off from this
+          Receipt total is <b>${receiptSum.toString()}</b>, which is{" "}
+          <b>${tx.amount.sub(receiptSum).toString()}</b> off from this
           transaction. Adjust your receipt to match the amount.
         </p>
       )}

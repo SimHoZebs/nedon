@@ -1,6 +1,7 @@
-import { Prisma } from "@prisma/client";
-import { UserSettingsSchema } from "prisma/generated/zod";
 import { BaseCatSchema } from "./cat";
+
+import type { Prisma } from "@prisma/client";
+import { UserSettingsSchema } from "prisma/generated/zod";
 import z from "zod";
 
 export type BaseUserSettings = Prisma.UserSettingsGetPayload<{

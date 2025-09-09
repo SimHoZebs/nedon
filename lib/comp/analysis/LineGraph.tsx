@@ -4,6 +4,7 @@ import type { TxType } from "@/util/tx";
 
 import type { SavedTx } from "@/types/tx";
 
+import { Prisma } from "@prisma/client";
 import { useEffect, useState } from "react";
 import {
   Line,
@@ -25,9 +26,9 @@ const LineGraph = (props: Props) => {
   const txOragnizedByTimeArray = useStore(
     (store) => store.txOragnizedByTimeArray,
   );
-  const [dailyTxSumArray, setDailyTxSumArray] = useState([
-    { date: 0, amount: 0 },
-  ]);
+  const [dailyTxSumArray, setDailyTxSumArray] = useState<
+    { date: number; amount: Prisma.Decimal }[]
+  >([{ date: 0, amount: new Prisma.Decimal(0) }]);
 
   useEffect(() => {
     if (props.rangeFormat === "all") {
@@ -94,8 +95,8 @@ const generateDailyTxSumArray = (
   txType: TxType,
   dateLen: number,
 ) => {
-  const result: { date: number; amount: number }[] = [];
-  let amountSum = 0;
+  const result: { date: number; amount: Prisma.Decimal }[] = [];
+  let amountSum = new Prisma.Decimal(0);
   let txIndex = txArray.length - 1;
 
   // Loop through the days of the month and generate empty sums for days with
@@ -111,22 +112,26 @@ const generateDailyTxSumArray = (
     }
     //if the date is the same as this transaction's date
     else if (txArray[txIndex][0]?.authorizedDatetime.getDate() === i) {
-      amountSum += txArray[txIndex].reduce((acc, curr) => {
-        switch (txType) {
-          case "spending":
-            return curr.amount > 0 ? acc + curr.amount : acc;
-          case "received":
-            return curr.amount < 0 ? acc - curr.amount : acc;
-          default:
-            return acc;
-        }
-      }, 0);
+      amountSum = amountSum.add(
+        txArray[txIndex].reduce((acc, curr) => {
+          switch (txType) {
+            case "spending":
+              return curr.amount.isPositive() ? acc.add(curr.amount) : acc;
+            case "received":
+              return curr.amount.isNegative()
+                ? acc.sub(curr.amount.negated())
+                : acc;
+            default:
+              return acc;
+          }
+        }, new Prisma.Decimal(0)),
+      );
       txIndex--;
     }
 
     result.push({
       date: i,
-      amount: parseMoney(amountSum),
+      amount: amountSum,
     });
   }
 

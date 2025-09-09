@@ -1,4 +1,7 @@
 import db from "@/util/db";
+import { exact } from "@/util/type";
+
+import type { UserClientSide } from "@/types/user";
 
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "../constants";
 import { procedure } from "../trpc";
@@ -8,8 +11,6 @@ import type { User } from "@prisma/client";
 import { ACHClass, Products, TransferNetwork, TransferType } from "plaid";
 import { router } from "server/trpc";
 import z from "zod";
-import { exact } from "@/types/types";
-import { UserClientSide } from "@/types/user";
 
 const plaidRouter = router({
   sandBoxAccess: procedure

@@ -6,20 +6,28 @@ import type { Prisma } from "@prisma/client";
 import { CatSchema, TxSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
-export type BaseTx = Prisma.TxGetPayload<{
-  include: { catArray: true; receipt: { include: { items: true } } };
+type BaseTxWithoutSplitTxArray = Prisma.TxGetPayload<{
+  include: {
+    catArray: true;
+    receipt: { include: { items: true } };
+  };
 }>;
 
-export const BaseTxSchema = TxSchema.omit({ plaidTx: true })
+const BaseTxSchemaWithoutSplitTxArray = TxSchema.omit({ plaidTx: true })
   .extend({
+    plaidTx: plaidTxSchema.nullable(),
     catArray: CatSchema.array(),
     receipt: BaseReceiptSchema.nullable(),
-    plaidTx: plaidTxSchema.nullable(),
   })
-  .strict() satisfies z.ZodType<BaseTx>;
+  .strict() satisfies z.ZodType<BaseTxWithoutSplitTxArray>;
 
-//Although cat and split fields are created when a tx is created, they can exist without id when it's being created on the client side.
+const BaseTxSchema = BaseTxSchemaWithoutSplitTxArray.extend({
+  splitTxArray: BaseTxSchemaWithoutSplitTxArray.array(),
+}).strict();
 
+// ------------------------- End of BaseTx ------------------------- //
+
+//Although cat fields are created when a tx is created, new ones can exist without id on the clientside.
 export const UnsavedTxSchema = BaseTxSchema.omit({
   id: true,
   catArray: true,
@@ -28,16 +36,16 @@ export const UnsavedTxSchema = BaseTxSchema.omit({
   .extend({
     id: z.undefined(),
     catArray: z.array(UnsavedCat),
-    receipt: UnsavedReceiptSchema.optional(),
+    receipt: UnsavedReceiptSchema.nullable(),
   })
   .strict();
 
 export type UnsavedTx = z.infer<typeof UnsavedTxSchema>;
 
 //TxInDB refers to a tx that has an id and is stored in the database, but may have unsaved cat and split.
-export const SavedTxWithUnsavedContentSchema = TxSchema.extend({
+export const SavedTxWithUnsavedContentSchema = BaseTxSchema.extend({
   catArray: z.array(z.union([UnsavedCat, CatSchema])),
-  receipt: UnsavedReceiptSchema.optional(),
+  receipt: UnsavedReceiptSchema.nullable(),
   plaidTx: plaidTxSchema.nullable(),
 }).strict();
 

@@ -1,6 +1,6 @@
 import db from "@/util/db";
+import { exact } from "@/util/type";
 
-import { exact } from "@/types/types";
 import { type UserClientSide, UserClientSideSchema } from "@/types/user";
 
 import { PLAID_PRODUCTS } from "../constants";

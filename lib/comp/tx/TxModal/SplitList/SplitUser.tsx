@@ -19,13 +19,17 @@ const SplitUser = (props: Props) => {
   const tx = useTxStore((state) => state.txOnModal);
   const splitTxArray = tx?.splitTxArray || [];
   const setSplitTxArray = useTxStore((s) => s.setSplitTxArray);
-  const splitTxAmountDisplayArray = useTxStore((s) => s.splitTxAmountDisplayArray);
+  const splitTxAmountDisplayArray = useTxStore(
+    (s) => s.splitTxAmountDisplayArray,
+  );
   const focusedSplitTxIndex = useTxStore((state) => state.focusedSplitTxIndex);
   const amountDisplay = splitTxAmountDisplayArray[props.index];
   const amount = Number.parseFloat(amountDisplay);
   const catArray = tx?.catArray || [];
   const setCatArray = useTxStore((s) => s.setCatArray);
-  const setEditedSplitTxIndexArray = useTxStore((s) => s.setEditedSplitTxIndexArray);
+  const setEditedSplitTxIndexArray = useTxStore(
+    (s) => s.setEditedSplitTxIndexArray,
+  );
   const isEditingSplitTx = useTxStore((state) => state.isEditingSplitTx);
 
   const split = splitTxArray[props.index];

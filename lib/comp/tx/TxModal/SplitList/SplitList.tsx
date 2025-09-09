@@ -6,8 +6,6 @@ import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 import useAppUser from "@/util/useAppUser";
 
-import { isUnsavedTxInDB } from "@/types/tx";
-
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
 
@@ -58,7 +56,8 @@ const SplitList = (props: Props) => {
     splitTxArray.reduce((amount, split) => amount + split.amount, 0),
   );
 
-  const isWrongSplit = updatedSplitAmount !== txAmount && splitTxArray.length > 0;
+  const isWrongSplit =
+    updatedSplitAmount !== txAmount && splitTxArray.length > 0;
 
   const syncSplit = async () => {
     if (!appUser || !tx) {
@@ -115,7 +114,9 @@ const SplitList = (props: Props) => {
                   onClick={() => {
                     resetEditingSplit();
                     if (!tx) {
-                      console.error("Can't reset splitTxArray. tx is undefined");
+                      console.error(
+                        "Can't reset splitTxArray. tx is undefined",
+                      );
                       return;
                     }
                     revertToTxInDB();

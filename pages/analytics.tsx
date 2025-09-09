@@ -33,7 +33,7 @@ const Page = () => {
   const [YMD, setYMD] = useState<[number, number, number]>([-1, -1, -1]);
 
   const txArray = useTxGetAll();
-  const catAllSettings = trpc.cat.getAllSettings.useQuery(
+  const settings = trpc.settings.get.useQuery(
     { userId: appUser?.id || "" },
     {
       enabled: !!appUser,
@@ -174,12 +174,12 @@ const Page = () => {
                 key={cat.name}
                 cat={cat}
                 txType={txType}
-                catSettings={catAllSettings.data?.find(
+                catSettings={settings.data?.catSettings.find(
                   (catSettings) => catSettings.name === cat.name,
                 )}
                 showModal={() => {
-                  if (!catAllSettings.data) return;
-                  const selectedSettings = catAllSettings.data.find(
+                  if (!settings.data) return;
+                  const selectedSettings = settings.data.catSettings.find(
                     (catSettings) => catSettings.name === cat.name,
                   );
 

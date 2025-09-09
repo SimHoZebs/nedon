@@ -14,7 +14,9 @@ interface Props {
 
 const TxModalAndCalculator = (props: Props) => {
   const setSplitTxArray = useTxStore((s) => s.setSplitTxArray);
-  const splitTxAmountDisplayArray = useTxStore((s) => s.splitTxAmountDisplayArray);
+  const splitTxAmountDisplayArray = useTxStore(
+    (s) => s.splitTxAmountDisplayArray,
+  );
   const setSplitTxAmountDisplayArray = useTxStore(
     (s) => s.setSplitTxAmountDisplayArray,
   );

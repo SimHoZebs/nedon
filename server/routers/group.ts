@@ -1,5 +1,4 @@
 import db from "@/util/db";
-import { stripUserSecretsFromGroup } from "@/util/user";
 
 import { procedure, router } from "../trpc";
 
@@ -14,12 +13,14 @@ export const groupRouter = router({
           id: input.id,
         },
         include: {
-          userArray: true,
+          userArray: {
+            omit: { accessToken: true },
+          },
         },
       });
 
       if (!group) return null;
-      return stripUserSecretsFromGroup(group);
+      return group;
     }),
 
   create: procedure
@@ -39,11 +40,11 @@ export const groupRouter = router({
           },
         },
         include: {
-          userArray: true,
+          userArray: { omit: { accessToken: true } },
         },
       });
 
-      return stripUserSecretsFromGroup(group);
+      return group;
     }),
 
   delete: procedure
@@ -73,11 +74,11 @@ export const groupRouter = router({
           },
         },
         include: {
-          userArray: true,
+          userArray: { omit: { accessToken: true } },
         },
       });
 
-      return stripUserSecretsFromGroup(group);
+      return group;
     }),
 
   removeUser: procedure
@@ -95,10 +96,10 @@ export const groupRouter = router({
           },
         },
         include: {
-          userArray: true,
+          userArray: { omit: { accessToken: true } },
         },
       });
 
-      return stripUserSecretsFromGroup(group);
+      return group;
     }),
 });

@@ -5,6 +5,7 @@ import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 import useAppUser from "@/util/useAppUser";
 
+import { Prisma } from "@prisma/client";
 import { useMemo, useState } from "react";
 
 /**
@@ -12,7 +13,10 @@ import { useMemo, useState } from "react";
  * */
 const Connections = () => {
   const [showModal, setShowModal] = useState(false);
-  const [oweUser, setOweUser] = useState<{ id: string; amount: number }>();
+  const [oweUser, setOweUser] = useState<{
+    id: string;
+    amount: Prisma.Decimal;
+  }>();
 
   const appUser = useAppUser();
 
@@ -23,8 +27,6 @@ const Connections = () => {
   );
   const queryClient = trpc.useUtils();
 
-  const _calcOweAmount = (_userId: string) => {};
-
   const calcOweGroup = useMemo(() => {
     if (!associatedTxArray.data) {
       associatedTxArray.status === "pending"
@@ -34,7 +36,7 @@ const Connections = () => {
           );
       return;
     }
-    const oweGroup: { [userId: string]: number } = {};
+    const oweGroup: { [userId: string]: Prisma.Decimal } = {};
 
     if (!appUser) {
       console.error("appUser not found");
@@ -46,18 +48,18 @@ const Connections = () => {
         const splitAmount = split.amount;
 
         if (tx.ownerId === appUser.id) {
-          if (split.userId === appUser.id) continue;
+          if (split.ownerId === appUser.id) continue;
 
           //amount others owe appUser
-          oweGroup[split.userId] = oweGroup[split.userId]
-            ? oweGroup[split.userId] + splitAmount
+          oweGroup[split.ownerId] = oweGroup[split.ownerId]
+            ? oweGroup[split.ownerId].add(splitAmount)
             : splitAmount;
         } else {
-          if (split.userId === appUser.id) {
+          if (split.ownerId === appUser.id) {
             //amount appUser owe others subtracted from total owe
             oweGroup[tx.ownerId] = oweGroup[tx.ownerId]
-              ? oweGroup[tx.ownerId] - splitAmount
-              : -splitAmount;
+              ? oweGroup[tx.ownerId].sub(splitAmount)
+              : splitAmount.negated();
           }
         }
       }
@@ -75,7 +77,7 @@ const Connections = () => {
       <div className="flex max-w-xl flex-col gap-4">
         {appUser?.myConnectionArray?.map((user) => (
           <div
-            className="flex h-fit w-full items-center justify-between gap-x-4 gap-y-1 rounded-xl bg-zinc-800 px-3 py-2 text-start outline outline-1 outline-zinc-700"
+            className="flex h-fit w-full items-center justify-between gap-x-4 gap-y-1 rounded-xl bg-zinc-800 px-3 py-2 text-start outline-1 outline-zinc-700"
             key={user.id}
           >
             <div className="flex flex-col items-center justify-center">
@@ -88,8 +90,8 @@ const Connections = () => {
               <div className="flex flex-col items-start gap-2">
                 <p>
                   {`${
-                    calcOweGroup[user.id] < 0 ? "You" : "They"
-                  } owe: $${Math.abs(parseMoney(calcOweGroup[user.id]))}`}
+                    calcOweGroup[user.id].isNegative() ? "You" : "They"
+                  } owe: $${Math.abs(parseMoney(calcOweGroup[user.id].toNumber()))}`}
                 </p>
 
                 <ActionBtn
@@ -97,7 +99,7 @@ const Connections = () => {
                     setShowModal(true);
                     setOweUser({
                       id: user.id,
-                      amount: parseMoney(calcOweGroup?.[user.id] || 0 * 100),
+                      amount: calcOweGroup?.[user.id] || new Prisma.Decimal(0),
                     });
                   }}
                 >
@@ -118,7 +120,7 @@ const Connections = () => {
                   connectionId: user.id,
                 });
 
-                await queryClient.user.getAll.invalidate();
+                await queryClient.dev.getAllUsers.invalidate();
               }}
             >
               <span className="icon-[mdi--user-remove-outline] h-5 w-5" />
