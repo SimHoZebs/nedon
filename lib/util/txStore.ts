@@ -1,8 +1,8 @@
 import type { Cat, UnsavedCat } from "@/types/cat";
 import type {
+  SplitTx,
   Tx,
   TxWithUnsavedContent,
-  SplitTx,
   UnsavedSplitTx,
   UnsavedTx,
 } from "@/types/tx";

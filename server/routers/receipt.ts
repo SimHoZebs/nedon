@@ -7,6 +7,7 @@ import { procedure, router } from "../trpc";
 
 import { imgAnnotator } from "server/gcloudClient";
 import openai from "server/openaiClient";
+import supabase from "server/supabaseClient";
 import { z } from "zod";
 
 const receiptRouter = router({
@@ -52,8 +53,20 @@ const receiptRouter = router({
       return updatedTx.receipt;
     }),
 
+  getSignedUploadUrl: procedure
+    .input(z.object({ path: z.string() }))
+    .mutation(async ({ input }) => {
+      const { data, error } = await supabase.storage
+        .from("receipts")
+        .createSignedUploadUrl(input.path);
+      if (error) {
+        throw new Error(`Failed to create signed upload URL: ${error.message}`);
+      }
+      return data;
+    }),
+
   process: procedure
-    .input(z.object({ signedUrl: z.string() }))
+    .input(z.object({ path: z.string() }))
     .mutation(async ({ input }) => {
       const sr = createStructuredResponse<UnsavedReceipt>({
         success: false,
@@ -64,7 +77,20 @@ const receiptRouter = router({
       });
 
       try {
-        const [result] = await imgAnnotator.textDetection(input.signedUrl);
+        const { data: signedUrlData, error: signedUrlError } =
+          await supabase.storage
+            .from("receipts")
+            .createSignedUrl(input.path, 60);
+
+        if (signedUrlError) {
+          throw new Error(
+            `Failed to create signed download URL: ${signedUrlError.message}`,
+          );
+        }
+
+        const [result] = await imgAnnotator.textDetection(
+          signedUrlData.signedUrl,
+        );
 
         const textAnnotationArray = result.textAnnotations;
         if (!textAnnotationArray || textAnnotationArray.length < 0) {
@@ -134,13 +160,21 @@ const receiptRouter = router({
           }
 
           if (parsedReceipt.error) {
-            sr.devMsg = `Receipt parsing failed ${JSON.stringify(parsedReceipt.error, null, 2)}`;
+            sr.devMsg = `Receipt parsing failed ${JSON.stringify(
+              parsedReceipt.error,
+              null,
+              2,
+            )}`;
             console.error(sr);
             return sr;
           }
 
           //Hopefully this never happens
-          sr.devMsg = `Unrecognized JSON shape: ${JSON.stringify(receipt, null, 2)}`;
+          sr.devMsg = `Unrecognized JSON shape: ${JSON.stringify(
+            receipt,
+            null,
+            2,
+          )}`;
           console.error(sr);
           return sr;
         } catch (e) {

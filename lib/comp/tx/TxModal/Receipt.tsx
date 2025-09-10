@@ -11,7 +11,6 @@ import { H3 } from "lib/shared/Heading";
 import Input from "lib/shared/Input";
 import Image from "next/image";
 import React from "react";
-import supabase from "server/supabaseClient";
 
 const Receipt = () => {
   const tx = useTxStore((state) => state.txOnModal);
@@ -19,6 +18,7 @@ const Receipt = () => {
   const createTx = trpc.tx.create.useMutation();
   const processReceipt = trpc.receipt.process.useMutation();
   const createReceipt = trpc.receipt.create.useMutation();
+  const getSignedUploadUrl = trpc.receipt.getSignedUploadUrl.useMutation();
   const queryClient = trpc.useUtils();
 
   const [receiptImg, setReceiptImg] = React.useState<File>();
@@ -40,33 +40,36 @@ const Receipt = () => {
       return sr;
     }
 
-    setProgressMsg("Uploading receipt...");
-    const uploadResponse = await supabase.storage
-      .from("receipts")
-      .upload(tx.name, receiptImg, { upsert: true });
-    console.log("receipt uploaded");
+    const path = tx.name;
 
-    if (uploadResponse.error) {
-      console.error("Error uploading image", uploadResponse.error);
-      sr.clientMsg = `Error uploading image: ${uploadResponse.error}`;
+    setProgressMsg("Getting upload URL...");
+    const signedUrlResult = await getSignedUploadUrl.mutateAsync({ path });
+
+    if (!signedUrlResult?.signedUrl) {
+      sr.devMsg = "Could not get signed upload URL";
+      return sr;
+    }
+
+    setProgressMsg("Uploading receipt...");
+    const uploadResponse = await fetch(signedUrlResult.signedUrl, {
+      method: "PUT",
+      body: receiptImg,
+      headers: {
+        "Content-Type": receiptImg.type,
+      },
+    });
+
+    if (!uploadResponse.ok) {
+      console.error("Error uploading image", uploadResponse);
+      sr.clientMsg = `Error uploading image: ${uploadResponse.statusText}`;
       sr.devMsg = "Error uploading image";
       return sr;
     }
-
-    setProgressMsg("Getting signed URL...");
-    const signedUrlResponse = await supabase.storage
-      .from("receipts")
-      .createSignedUrl(tx.name, 60);
-    console.log("signed URL received");
-
-    if (signedUrlResponse.error || !signedUrlResponse.data.signedUrl) {
-      sr.devMsg = "Error getting signed URL";
-      return sr;
-    }
+    console.log("receipt uploaded");
 
     setProgressMsg("Processing receipt...");
     const response = await processReceipt.mutateAsync({
-      signedUrl: signedUrlResponse.data.signedUrl,
+      path,
     });
 
     if (
