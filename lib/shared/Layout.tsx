@@ -32,7 +32,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const createUser = trpc.user.create.useMutation();
   const updateUser = trpc.user.updateName.useMutation();
   const sandboxPublicToken = trpc.plaid.sandBoxAccess.useQuery(
-    { instituteID: undefined },
+    { instituteID: "ins_1" },
     { staleTime: 360000, enabled: false },
   );
   const setAccessToken = trpc.plaid.setAccessToken.useMutation();

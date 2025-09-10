@@ -31,3 +31,10 @@ The application uses a PostgreSQL database with Prisma as the ORM. The frontend 
 *   **Input Validation:** Zod schemas are used for type-safe input validation in tRPC routers. These schemas are often generated from the Prisma schema.
 *   **Code Generation:** The project uses `zod-prisma-types` to generate Zod schemas from the Prisma schema. Look for these in `prisma/generated/zod`.
 *   **Testing:** The project uses Vitest for unit tests and Cypress for end-to-end tests. Cypress tests are in the `cypress/e2e` directory.
+
+## Documentation
+
+Architectural decisions are documented in the `/docs` directory. Please follow these conventions:
+*   **Location:** Key decisions are stored in `docs/architecture.md`.
+*   **Format:** Use a concise, question-and-answer (FAQ) format.
+*   **Focus:** Prioritize explaining the "why" behind a decision, not just the "what".
