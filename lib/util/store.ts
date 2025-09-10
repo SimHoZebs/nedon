@@ -1,6 +1,6 @@
 import type { GroupClientSide } from "@/types/group";
 import type { Tx } from "@/types/tx";
-import type { UserClientSide } from "@/types/user";
+import type { unAuthUserClientSide } from "@/types/user";
 
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
@@ -9,8 +9,8 @@ interface Store {
   linkToken: string | null;
   setLinkToken: (linkToken: string | null) => void;
 
-  appUser?: UserClientSide;
-  setAppUser: (user: UserClientSide | undefined) => void;
+  appUser?: unAuthUserClientSide;
+  setAppUser: (user: unAuthUserClientSide | undefined) => void;
 
   appGroup?: GroupClientSide;
   setAppGroup: (group: GroupClientSide | undefined) => void;
@@ -35,7 +35,8 @@ export const useStore = create<Store>()(
       setLinkToken: (linkToken: string | null) => set({ linkToken }),
 
       appUser: undefined,
-      setAppUser: (appUser: UserClientSide | undefined) => set({ appUser }),
+      setAppUser: (appUser: unAuthUserClientSide | undefined) =>
+        set({ appUser }),
 
       appGroup: undefined,
       setAppGroup: (appGroup: GroupClientSide | undefined) => set({ appGroup }),

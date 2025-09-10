@@ -9,7 +9,6 @@ import { usePlaidLink } from "react-plaid-link";
 
 const LinkBtn = () => {
   const appUser = useAppUser();
-  const setAccessToken = trpc.plaid.setAccessToken.useMutation();
   const linkToken = trpc.plaid.createLinkToken.useQuery(undefined, {
     staleTime: 360000,
   });
@@ -23,22 +22,13 @@ const LinkBtn = () => {
           console.error("appUser is undefined.");
           return;
         }
-
-        const user = await setAccessToken.mutateAsync({
-          publicToken: public_token,
-          id: appUser.id,
-        });
-
-        if (!user.hasAccessToken) {
-          console.error("unable to set access token from server");
-        }
       };
 
       getUserAccessToken();
 
       router.push("/home");
     },
-    [appUser, router, setAccessToken],
+    [appUser, router],
   );
 
   let isOauth = false;

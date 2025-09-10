@@ -22,7 +22,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const appUser = useAppUser();
 
   const txGetAllRetryCount = useRef(0);
-  const setUserId = useLocalStore((state) => state.setUserId);
+  const saveUserIdOnLocalStorage = useLocalStore((state) => state.setUserId);
   const setScreenType = useStore((state) => state.setScreenType);
   const setTxOragnizedByTimeArray = useStore(
     (state) => state.setTxOrganizedByTimeArray,
@@ -30,49 +30,32 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const txArray = useTxGetAll();
 
   const createUser = trpc.user.create.useMutation();
-  const updateUser = trpc.user.updateName.useMutation();
-  const sandboxPublicToken = trpc.plaid.createSandboxPublicToken.useQuery(
-    { instituteID: "ins_1" },
-    { staleTime: 360000, enabled: false },
-  );
-  const setAccessToken = trpc.plaid.setAccessToken.useMutation();
   const queryClient = trpc.useUtils();
 
   useEffect(() => {
-    const createUserWithPlaid = async () => {
-      const user = await createUser.mutateAsync();
-      setUserId(user.id);
-      await updateUser.mutateAsync({ ...user, name: user.id.slice(0, 8) });
+    const autoCreateUsers = async () => {
+      const createUserResponse = await createUser.mutateAsync();
+      if (!createUserResponse.ok) {
+        console.error("Failed to create user:", createUserResponse.error);
+        return;
+      }
+      const user = createUserResponse.value;
 
-      const publicToken = await sandboxPublicToken.refetch();
-      if (!publicToken.data) throw new Error("no public token");
-
-      await setAccessToken.mutateAsync({
-        publicToken: publicToken.data,
-        id: user.id,
-      });
+      saveUserIdOnLocalStorage(user.id);
 
       await queryClient.user.invalidate();
-      await queryClient.plaid.auth.invalidate();
       console.log("User created with Plaid");
     };
 
-    if (!appUser && !sandboxPublicToken.isFetching && createUser.isIdle) {
+    if (!appUser && createUser.isIdle) {
       console.log(
         "There are no users in db and none are being created at the moment; creating one...",
       );
-      createUserWithPlaid();
+      autoCreateUsers();
+    } else {
+      console.log("appUser exists, no need to create user");
     }
-  }, [
-    setUserId,
-    appUser,
-    createUser,
-    queryClient.user,
-    queryClient.plaid.auth,
-    sandboxPublicToken,
-    setAccessToken,
-    updateUser,
-  ]);
+  }, [saveUserIdOnLocalStorage, appUser, createUser, queryClient.user]);
 
   useEffect(() => {
     const yeet = async () => {

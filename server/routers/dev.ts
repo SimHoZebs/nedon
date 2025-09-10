@@ -1,7 +1,7 @@
 import db from "@/util/db";
-import { exact } from "@/util/type";
+import { exact, type Result } from "@/util/type";
 
-import { type UserClientSide, UserClientSideSchema } from "@/types/user";
+import type { unAuthUserClientSide } from "@/types/user";
 
 import { procedure, router } from "server/trpc";
 import { z } from "zod";
@@ -24,10 +24,9 @@ const devRouter = router({
     return userArray;
   }),
 
-  getFirstUser: procedure
-    .input(z.undefined())
-    .output(UserClientSideSchema.nullable())
-    .query(async () => {
+  getFirstUser: procedure.input(z.undefined()).query(async () => {
+    let result: Result<unAuthUserClientSide | null, unknown>;
+    try {
       const user = await db.user.findFirst({
         include: {
           myConnectionArray: { omit: { accessToken: true } },
@@ -38,11 +37,23 @@ const devRouter = router({
 
       const { accessToken, ...userWithoutAccessToken } = user;
 
-      return exact<UserClientSide>()({
-        ...userWithoutAccessToken,
-        hasAccessToken: !!accessToken,
-      });
-    }),
+      result = {
+        ok: true,
+        value: exact<unAuthUserClientSide>()({
+          ...userWithoutAccessToken,
+          hasAccessToken: !!accessToken,
+        }),
+      };
+    } catch (e) {
+      console.error("Error fetching first user:", e);
+      result = {
+        ok: false,
+        error: e,
+      };
+    }
+
+    return result;
+  }),
 });
 
 export default devRouter;

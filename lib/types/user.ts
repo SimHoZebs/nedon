@@ -72,3 +72,7 @@ export const UserSchemaClientSide = unAuthUserClientSideSchema
   .strict();
 
 export type UserClientSide = z.infer<typeof UserSchemaClientSide>;
+
+export const isUserClientSide = (user: unknown): user is UserClientSide => {
+  return (user as UserClientSide).itemId !== undefined;
+};
