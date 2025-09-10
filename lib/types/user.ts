@@ -1,17 +1,9 @@
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 
-export type BaseUser = Prisma.UserGetPayload<{
-  include: {
-    myConnectionArray: {
-      omit: {
-        accessToken: true;
-      };
-    };
-  };
-}>;
+type PureUser = Prisma.UserGetPayload<undefined>;
 
-const UserSchema = z
+const PureUserSchema = z
   .object({
     id: z.string(),
     name: z.string(),
@@ -21,15 +13,25 @@ const UserSchema = z
     transferId: z.string().nullable(),
     cursor: z.string().nullable(),
   })
-  .strict();
+  .strict() satisfies z.ZodType<PureUser>;
 
-export const BaseUserSchema = UserSchema.extend({
-  myConnectionArray: z.array(UserSchema.omit({ accessToken: true })),
-}).strict() satisfies z.ZodType<BaseUser>;
+export type User = Prisma.UserGetPayload<{
+  include: {
+    myConnectionArray: {
+      omit: {
+        accessToken: true;
+      };
+    };
+  };
+}>;
+
+export const UserSchema = PureUserSchema.extend({
+  myConnectionArray: z.array(PureUserSchema.omit({ accessToken: true })),
+}).strict() satisfies z.ZodType<User>;
 
 // ---
 
-export const UserClientSideSchema = BaseUserSchema.omit({
+export const UserClientSideSchema = UserSchema.omit({
   accessToken: true,
 })
   .extend({

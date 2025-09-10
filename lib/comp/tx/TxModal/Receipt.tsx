@@ -3,12 +3,7 @@ import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
 import type { UnsavedReceipt } from "@/types/receipt";
-import {
-  isSavedTx,
-  isUnsavedTx,
-  type SavedTx,
-  type UnsavedTx,
-} from "@/types/tx";
+import { isTx, isUnsavedTx, type Tx, type UnsavedTx } from "@/types/tx";
 
 import { Prisma } from "@prisma/client";
 import { ActionBtn } from "lib/shared/Button";
@@ -86,7 +81,7 @@ const Receipt = () => {
 
     console.log("receipt processed");
 
-    let latestTx: SavedTx;
+    let latestTx: Tx;
     if (isUnsavedTx(tx)) {
       const newTx: UnsavedTx = {
         ...tx,
@@ -100,7 +95,7 @@ const Receipt = () => {
 
     setProgressMsg("Adding receipt to transaction...");
 
-    if (!isSavedTx(latestTx)) {
+    if (!isTx(latestTx)) {
       sr.devMsg = "latestTx is not FullTxInDB";
       return sr;
     }

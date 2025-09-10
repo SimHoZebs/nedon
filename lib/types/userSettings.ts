@@ -1,21 +1,23 @@
-import { SavedCatSettingsSchema } from "./catSettings";
+import { CatSettingsSchema } from "./catSettings";
 
 import type { Prisma } from "@prisma/client";
 import z from "zod";
 
-export type BaseUserSettings = Prisma.UserSettingsGetPayload<{
+type PureUserSettings = Prisma.UserSettingsGetPayload<undefined>;
+
+const PureUserSettingsSchema = z
+  .object({
+    id: z.string(),
+    userId: z.string(),
+  })
+  .strict() satisfies z.ZodType<PureUserSettings>;
+
+export type UserSettings = Prisma.UserSettingsGetPayload<{
   include: {
     catSettings: true;
   };
 }>;
 
-const UserSettingsSchema = z
-  .object({
-    id: z.string(),
-    userId: z.string(),
-  })
-  .strict();
-
-export const BaseUserSettingsSchema = UserSettingsSchema.extend({
-  catSettings: z.array(SavedCatSettingsSchema),
-}).strict() satisfies z.ZodType<BaseUserSettings>;
+export const UserSettingsSchema = PureUserSettingsSchema.extend({
+  catSettings: z.array(CatSettingsSchema),
+}).strict() satisfies z.ZodType<UserSettings>;

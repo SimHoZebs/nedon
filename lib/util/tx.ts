@@ -1,5 +1,5 @@
 import type { TreedCatWithTx } from "@/types/cat";
-import type { ChaseCSVTx, SavedTx, UnsavedTx } from "@/types/tx";
+import type { ChaseCSVTx, Tx, UnsavedTx } from "@/types/tx";
 
 import { createNewCat, fillArrayByCat } from "./cat";
 import { useStore } from "./store";
@@ -9,7 +9,7 @@ import useAppUser from "./useAppUser";
 import { MdsType, Prisma } from "@prisma/client";
 import type { Transaction } from "plaid";
 
-export const resetTx = (tx: SavedTx) => ({
+export const resetTx = (tx: Tx) => ({
   ...tx,
   plaidTx: tx.plaidTx,
   catArray: [
@@ -22,10 +22,7 @@ export const resetTx = (tx: SavedTx) => ({
   receipt: null,
 });
 
-export const mergePlaidTxWithTx = (
-  tx: SavedTx,
-  plaidTx: Transaction,
-): SavedTx => {
+export const mergePlaidTxWithTx = (tx: Tx, plaidTx: Transaction): Tx => {
   return {
     ...tx,
     plaidTx: plaidTx,
@@ -78,7 +75,7 @@ export const createTxFromPlaidTx = (
   };
 };
 
-export const organizeTxByCat = (txArray: SavedTx[]) => {
+export const organizeTxByCat = (txArray: Tx[]) => {
   const catArray: TreedCatWithTx[] = [];
 
   for (const tx of txArray) {
@@ -92,11 +89,11 @@ export const organizeTxByCat = (txArray: SavedTx[]) => {
   return catArray;
 };
 
-export const organizeTxByTime = (txArray: SavedTx[]) => {
+export const organizeTxByTime = (txArray: Tx[]) => {
   const txSortedByTimeArray = txArray.sort(
     (a, b) => b.authorizedDatetime.getTime() - a.authorizedDatetime.getTime(),
   );
-  const txOrganizedByTimeArray: SavedTx[][][][] = [[[[]]]];
+  const txOrganizedByTimeArray: Tx[][][][] = [[[[]]]];
 
   let lastDate: Date | undefined;
   let yearIndex = -1;
@@ -150,7 +147,7 @@ export const organizeTxByTime = (txArray: SavedTx[]) => {
 };
 
 export const getScopeIndex = (
-  txOragnizedByTimeArray: SavedTx[][][][],
+  txOragnizedByTimeArray: Tx[][][][],
   date: Date,
   rangeFormat: "year" | "month" | "date",
 ): [number, number, number] => {

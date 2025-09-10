@@ -1,7 +1,7 @@
-import type { BaseCat, UnsavedCat } from "@/types/cat";
+import type { Cat, UnsavedCat } from "@/types/cat";
 import type {
-  SavedTx,
-  SavedTxWithUnsavedContent,
+  Tx,
+  TxWithUnsavedContent,
   SplitTx,
   UnsavedSplitTx,
   UnsavedTx,
@@ -11,8 +11,8 @@ import { useStore } from "./store";
 
 // Type guard to check if a transaction can accept unsaved content updates
 function canUpdateWithUnsavedContent(
-  tx: UnsavedTx | SavedTxWithUnsavedContent | SavedTx | null,
-): tx is SavedTxWithUnsavedContent {
+  tx: UnsavedTx | TxWithUnsavedContent | Tx | null,
+): tx is TxWithUnsavedContent {
   if (!tx) return false;
   // Check if transaction already has unsaved content or if we're adding unsaved content
   return "catArray" in tx && Array.isArray(tx.catArray);
@@ -33,9 +33,9 @@ interface Store {
   txOnModalIndex: number[] | null;
   setTxOnModalIndex: (index: number[] | null) => void;
 
-  txOnModal: UnsavedTx | SavedTxWithUnsavedContent | SavedTx | null;
-  setTxOnModal: (tx: SavedTx) => void;
-  setCatArray: (catArray: (UnsavedCat | BaseCat)[]) => void;
+  txOnModal: UnsavedTx | TxWithUnsavedContent | Tx | null;
+  setTxOnModal: (tx: Tx) => void;
+  setCatArray: (catArray: (UnsavedCat | Cat)[]) => void;
   setSplitTxArray: (splitTxArray: (UnsavedSplitTx | SplitTx)[]) => void;
 
   /**
@@ -72,7 +72,7 @@ export const useTxStore = create<Store>()(
       txOnModal: null,
       setTxOnModal: (tx) => set({ txOnModal: tx }),
 
-      setCatArray: (catArray: (UnsavedCat | BaseCat)[]) => {
+      setCatArray: (catArray: (UnsavedCat | Cat)[]) => {
         set((store) => {
           if (!store.txOnModal) return store;
 
@@ -86,7 +86,7 @@ export const useTxStore = create<Store>()(
             txOnModal: {
               ...store.txOnModal,
               catArray,
-            } as SavedTxWithUnsavedContent,
+            } as TxWithUnsavedContent,
           };
         });
       },
@@ -107,7 +107,7 @@ export const useTxStore = create<Store>()(
             txOnModal: {
               ...store.txOnModal,
               splitTxArray,
-            } as SavedTxWithUnsavedContent,
+            } as TxWithUnsavedContent,
           };
         });
       },

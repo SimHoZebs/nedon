@@ -3,11 +3,9 @@ import { PureReceiptItemSchema, ReceiptItemSchema } from "./receiptItem";
 import { Prisma } from "@prisma/client";
 import z from "zod";
 
-export type BaseReceipt = Prisma.ReceiptGetPayload<{
-  include: { items: true };
-}>;
+type PureReceipt = Prisma.ReceiptGetPayload<undefined>;
 
-const ReceiptSchema = z
+const PureReceiptSchema = z
   .object({
     id: z.string(),
     is_receipt: z.boolean(),
@@ -24,13 +22,17 @@ const ReceiptSchema = z
     location: z.string(),
     txId: z.string(),
   })
-  .strict();
+  .strict() satisfies z.ZodType<PureReceipt>;
 
-export const BaseReceiptSchema = ReceiptSchema.extend({
+export type Receipt = Prisma.ReceiptGetPayload<{
+  include: { items: true };
+}>;
+
+export const ReceiptSchema = PureReceiptSchema.extend({
   items: ReceiptItemSchema.array(),
-}) satisfies z.ZodType<BaseReceipt>;
+}) satisfies z.ZodType<Receipt>;
 
-export const UnsavedReceiptSchema = BaseReceiptSchema.omit({
+export const UnsavedReceiptSchema = ReceiptSchema.omit({
   txId: true,
   id: true,
   items: true,

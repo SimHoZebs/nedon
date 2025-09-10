@@ -1,5 +1,5 @@
 import type { TreedCat, TreedCatWithTx, UnsavedCat } from "@/types/cat";
-import type { SavedTx } from "@/types/tx";
+import type { Tx } from "@/types/tx";
 
 import catStyleArray from "./catStyle";
 import parseMoney from "./parseMoney";
@@ -44,7 +44,7 @@ export const convertPlaidCatsToHierarchicalArray = (
 
 export const fillArrayByCat = (
   resultArray: TreedCatWithTx[],
-  tx: SavedTx,
+  tx: Tx,
   cat: UnsavedCat,
 ): TreedCatWithTx[] => {
   const nameArray = cat.nameArray;

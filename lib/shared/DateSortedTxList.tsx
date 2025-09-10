@@ -1,7 +1,7 @@
 import { useTxGetAll } from "@/util/tx";
 import { useTxStore } from "@/util/txStore";
 
-import type { SavedTx } from "@/types/tx";
+import type { Tx } from "@/types/tx";
 
 import TxCard from "../comp/tx/TxCard";
 import { H2, H3 } from "./Heading";
@@ -9,7 +9,7 @@ import { H2, H3 } from "./Heading";
 import type React from "react";
 
 interface Props {
-  sortedTxArray: SavedTx[][][][];
+  sortedTxArray: Tx[][][][];
   setShowModal?: React.Dispatch<React.SetStateAction<boolean>>;
   YMD?: number[];
   rangeFormat?: "year" | "month" | "date" | "all";
@@ -20,7 +20,7 @@ const DateSortedTxList = (props: Props) => {
   const setTxOnModal = useTxStore((state) => state.setTxOnModal);
   const setTxOnModalIndex = useTxStore((state) => state.setTxOnModalIndex);
 
-  const onInteraction = (tx: SavedTx, index: number[]) => {
+  const onInteraction = (tx: Tx, index: number[]) => {
     if (!props.setShowModal) {
       console.log("props.setShowModal not implemented");
       return;

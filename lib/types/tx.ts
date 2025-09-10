@@ -1,13 +1,13 @@
 import { CatSchema, isSavedCatArray, UnsavedCatSchema } from "./cat";
 import { plaidTxSchema } from "./plaid";
-import { BaseReceiptSchema, UnsavedReceiptSchema } from "./receipt";
+import { ReceiptSchema, UnsavedReceiptSchema } from "./receipt";
 
 import { MdsType, Prisma } from "@prisma/client";
 import { z } from "zod";
 
 export type SplitTx = Prisma.TxGetPayload<undefined>;
 
-const TxSchema = z
+const SplitTx = z
   .object({
     id: z.string(),
     ownerId: z.string(),
@@ -21,46 +21,43 @@ const TxSchema = z
     datetime: z.date().nullable(),
     authorizedDatetime: z.date(),
     accountId: z.string().nullable(),
-    plaidTx: z.any().nullable(),
-  })
-  .strict();
-
-export const SplitTxSchema = TxSchema.omit({
-  plaidTx: true,
-})
-  .extend({
     plaidTx: plaidTxSchema.nullable(),
   })
   .strict() satisfies z.ZodType<SplitTx>;
 
-export const UnsavedSplitTxSchema = SplitTxSchema.omit({
+export const UnsavedSplitTxSchema = SplitTx.omit({
   id: true,
-}).strict();
+})
+  .extend({
+    id: z.string().optional(),
+  })
+  .strict();
 
 export type UnsavedSplitTx = z.infer<typeof UnsavedSplitTxSchema>;
 
-export type BaseTx = Prisma.TxGetPayload<{
+export type Tx = Prisma.TxGetPayload<{
   include: {
     splitTxArray: true;
-    receipt: true;
+    receipt: { include: { items: true } };
     catArray: true;
   };
 }>;
 
-export const BaseTxSchema = TxSchema.extend({
-  splitTxArray: z.array(SplitTxSchema),
-  receipt: BaseReceiptSchema.nullable(),
+export const TxSchema = SplitTx.extend({
+  splitTxArray: z.array(SplitTx),
+  receipt: ReceiptSchema.nullable(),
   catArray: z.array(CatSchema),
   plaidTx: plaidTxSchema.nullable(),
-}).strict() satisfies z.ZodType<BaseTx>;
+}).strict() satisfies z.ZodType<Tx>;
 
 //Although cat fields are created when a tx is created, new ones can exist without id on the clientside.
-export const UnsavedTxSchema = BaseTxSchema.omit({
+export const UnsavedTxSchema = TxSchema.omit({
   id: true,
   catArray: true,
   receipt: true,
 })
   .extend({
+    id: z.string().optional(),
     catArray: z.array(UnsavedCatSchema),
     receipt: UnsavedReceiptSchema.nullable(),
   })
@@ -76,34 +73,25 @@ export const isUnsavedTx = (tx: unknown): tx is UnsavedTx => {
 };
 
 //TxInDB refers to a tx that has an id and is stored in the database, but may have unsaved cat and split.
-export const SavedTxWithUnsavedContentSchema = BaseTxSchema.extend({
+export const TxWithUnsavedContentSchema = TxSchema.extend({
   catArray: z.array(z.union([UnsavedCatSchema, CatSchema])),
   receipt: UnsavedReceiptSchema.nullable(),
   plaidTx: plaidTxSchema.nullable(),
 }).strict();
 
-export interface SavedTxWithUnsavedContent
-  extends z.infer<typeof SavedTxWithUnsavedContentSchema> {}
+export interface TxWithUnsavedContent
+  extends z.infer<typeof TxWithUnsavedContentSchema> {}
 
-export function isSavedTxWithUnsavedContent(
+export function isTxWithUnsavedContent(
   tx: unknown,
-): tx is SavedTxWithUnsavedContent {
+): tx is TxWithUnsavedContent {
   if (!tx || typeof tx !== "object" || !("id" in tx)) {
     return false;
   }
   return true;
 }
 
-export const SavedTxSchema = SavedTxWithUnsavedContentSchema.extend({
-  catArray: z.array(CatSchema),
-  receipt: BaseReceiptSchema.nullable(),
-});
-
-export interface SavedTx extends z.infer<typeof SavedTxSchema> {}
-
-export type ClientSplit = SavedTx | UnsavedTx;
-
-export function isSavedTx(tx: unknown): tx is SavedTx {
+export function isTx(tx: unknown): tx is Tx {
   if (!tx || typeof tx !== "object" || !("id" in tx) || !("catArray" in tx)) {
     return false;
   }

@@ -1,6 +1,6 @@
 import db from "@/util/db";
 
-import { type BaseCat, BaseCatSchema, UnsavedCatSchema } from "@/types/cat";
+import { type Cat, CatSchema, UnsavedCatSchema } from "@/types/cat";
 
 import { procedure, router } from "../trpc";
 
@@ -21,9 +21,7 @@ const catRouter = router({
       }),
     )
     .mutation(async ({ input }) => {
-      const catToUpdateArray = input.catArray.filter(
-        (cat) => cat.id,
-      ) as BaseCat[];
+      const catToUpdateArray = input.catArray.filter((cat) => cat.id) as Cat[];
       const catToCreateArray = input.catArray.filter((cat) => !cat.id);
 
       const upsertedTx = await db.tx.update({
@@ -63,7 +61,7 @@ const catRouter = router({
   deleteMany: procedure
     .input(
       z.object({
-        catArray: BaseCatSchema.array(),
+        catArray: CatSchema.array(),
       }),
     )
     .mutation(async ({ input }) => {

@@ -3,7 +3,7 @@ import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 import useAppUser from "@/util/useAppUser";
 
-import { isSavedTx } from "@/types/tx";
+import { isTx } from "@/types/tx";
 
 import AccountName from "./AccountName";
 import Cat from "./Cat/Cat";
@@ -199,7 +199,7 @@ const TxModal = (props: Props) => {
             <div className="flex flex-col items-start gap-y-3">
               <ActionBtn
                 onClickAsync={async () => {
-                  if (!isSavedTx(tx)) {
+                  if (!isTx(tx)) {
                     return;
                   }
 

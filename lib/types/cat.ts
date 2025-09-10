@@ -1,4 +1,4 @@
-import type { SavedTx } from "./tx";
+import type { Tx } from "./tx";
 
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
@@ -13,11 +13,11 @@ export type TreedCatWithTx = {
   budget: number;
   spending: number;
   received: number;
-  txArray: SavedTx[];
+  txArray: Tx[];
   subCatArray: TreedCatWithTx[];
 };
 
-export type BaseCat = Prisma.CatGetPayload<undefined>;
+export type Cat = Prisma.CatGetPayload<undefined>;
 
 export const CatSchema = z
   .object({
@@ -27,9 +27,7 @@ export const CatSchema = z
     nameArray: z.array(z.string()),
     txId: z.string(),
   })
-  .strict();
-
-export const BaseCatSchema = CatSchema.strict() satisfies z.ZodType<BaseCat>;
+  .strict() satisfies z.ZodType<Cat>;
 
 /* Considering making txId optional? Ask yourself:
  * - Should a cat exist without being associated with a transaction?
@@ -47,10 +45,10 @@ export const UnsavedCatSchema = CatSchema.omit({ id: true })
   })
   .strict() satisfies z.ZodType<UnsavedCat>;
 
-export const isSavedCat = (cat: unknown): cat is BaseCat => {
-  return BaseCatSchema.safeParse(cat).success;
+export const isSavedCat = (cat: unknown): cat is Cat => {
+  return CatSchema.safeParse(cat).success;
 };
 
-export const isSavedCatArray = (obj: unknown): obj is BaseCat[] => {
-  return z.array(BaseCatSchema).safeParse(obj).success;
+export const isSavedCatArray = (obj: unknown): obj is Cat[] => {
+  return z.array(CatSchema).safeParse(obj).success;
 };

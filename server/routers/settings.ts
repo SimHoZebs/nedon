@@ -1,7 +1,7 @@
 import db from "@/util/db";
 
 import { UnsavedCatSettingsSchema } from "@/types/catSettings";
-import { BaseUserSettingsSchema } from "@/types/userSettings";
+import { UserSettingsSchema } from "@/types/userSettings";
 
 import { procedure, router } from "server/trpc";
 import z from "zod";
@@ -16,37 +16,35 @@ const settingsRouter = router({
       });
     }),
 
-  upsert: procedure
-    .input(BaseUserSettingsSchema)
-    .mutation(async ({ input }) => {
-      const { id, catSettings, ...rest } = input;
-      const catSettingsToCreate = catSettings?.filter((cs) => !cs.id) || [];
-      const catSettingsToUpdate = catSettings?.filter((cs) => cs.id) || [];
+  upsert: procedure.input(UserSettingsSchema).mutation(async ({ input }) => {
+    const { id, catSettings, ...rest } = input;
+    const catSettingsToCreate = catSettings?.filter((cs) => !cs.id) || [];
+    const catSettingsToUpdate = catSettings?.filter((cs) => cs.id) || [];
 
-      return await db.userSettings.upsert({
-        where: { id: id },
-        create: {
-          ...rest,
-          catSettings: {
-            create: catSettingsToCreate.map(({ id, ...cs }) => cs),
-          },
+    return await db.userSettings.upsert({
+      where: { id: id },
+      create: {
+        ...rest,
+        catSettings: {
+          create: catSettingsToCreate.map(({ id, ...cs }) => cs),
         },
-        update: {
-          ...rest,
-          catSettings: {
-            deleteMany: {
-              id: { notIn: catSettingsToUpdate.map((cs) => cs.id) },
-            },
-            create: catSettingsToCreate.map(({ id, ...cs }) => cs),
-            update: catSettingsToUpdate.map((cs) => ({
-              where: { id: cs.id },
-              data: cs,
-            })),
+      },
+      update: {
+        ...rest,
+        catSettings: {
+          deleteMany: {
+            id: { notIn: catSettingsToUpdate.map((cs) => cs.id) },
           },
+          create: catSettingsToCreate.map(({ id, ...cs }) => cs),
+          update: catSettingsToUpdate.map((cs) => ({
+            where: { id: cs.id },
+            data: cs,
+          })),
         },
-        include: { catSettings: true },
-      });
-    }),
+      },
+      include: { catSettings: true },
+    });
+  }),
 
   upsertCatSetting: procedure
     .input(UnsavedCatSettingsSchema)

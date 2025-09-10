@@ -1,5 +1,5 @@
 import type { GroupClientSide } from "@/types/group";
-import type { SavedTx } from "@/types/tx";
+import type { Tx } from "@/types/tx";
 import type { UserClientSide } from "@/types/user";
 
 import { create } from "zustand";
@@ -24,8 +24,8 @@ interface Store {
   verticalCatPicker: boolean;
   setVerticalCatPicker: (verticalCatPicker: boolean) => void;
 
-  txOrganizedByTimeArray: SavedTx[][][][];
-  setTxOrganizedByTimeArray: (txOrganizedByTimeArray: SavedTx[][][][]) => void;
+  txOrganizedByTimeArray: Tx[][][][];
+  setTxOrganizedByTimeArray: (txOrganizedByTimeArray: Tx[][][][]) => void;
 }
 
 export const useStore = create<Store>()(
@@ -52,7 +52,7 @@ export const useStore = create<Store>()(
         set({ verticalCatPicker }),
 
       txOragnizedByTimeArray: [],
-      setTxOragnizedByTimeArray: (txOragnizedByTimeArray: SavedTx[][][][]) =>
+      setTxOragnizedByTimeArray: (txOragnizedByTimeArray: Tx[][][][]) =>
         set({ txOrganizedByTimeArray: txOragnizedByTimeArray }),
     }),
 

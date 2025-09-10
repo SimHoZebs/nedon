@@ -1,7 +1,7 @@
 import db from "@/util/db";
 import { createTxFromPlaidTx } from "@/util/tx";
 
-import type { SavedTx, UnsavedTx } from "@/types/tx";
+import type { Tx, UnsavedTx } from "@/types/tx";
 
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { RemovedTransaction, Transaction } from "plaid";
@@ -102,7 +102,7 @@ export const mergePlaidTxWithTxArray = async (
   const firstDayThisMonth = new Date(date.getFullYear(), date.getMonth(), 1);
   const lastDayThisMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-  const txArray: SavedTx[] = await db.tx.findMany({
+  const txArray: Tx[] = await db.tx.findMany({
     where: {
       OR: [
         { ownerId: userId },

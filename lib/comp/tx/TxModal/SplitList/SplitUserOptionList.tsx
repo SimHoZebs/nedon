@@ -1,7 +1,7 @@
 import { useTxStore } from "@/util/txStore";
 import useAppUser from "@/util/useAppUser";
 
-import { isSavedTx, type SplitTx, type UnsavedSplitTx } from "@/types/tx";
+import { isTx, type SplitTx, type UnsavedSplitTx } from "@/types/tx";
 
 import { createId } from "@paralleldrive/cuid2";
 import { Prisma } from "@prisma/client";
@@ -70,7 +70,7 @@ const SplitUserOptionList = () => {
                     }),
                   );
 
-                  const txId = isSavedTx(txOnModal) ? txOnModal.id : createId();
+                  const txId = isTx(txOnModal) ? txOnModal.id : createId();
 
                   const newSplit: UnsavedSplitTx = {
                     ownerId: user.id,

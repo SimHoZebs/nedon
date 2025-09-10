@@ -2,7 +2,7 @@ import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 import useAppUser from "@/util/useAppUser";
 
-import { isSavedTx } from "@/types/tx";
+import { isTx } from "@/types/tx";
 
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
@@ -78,7 +78,7 @@ const SplitList = (props: Props) => {
 
     tx.splitTxArray = splitTxArray;
 
-    if (!isSavedTx(tx)) {
+    if (!isTx(tx)) {
       console.error("Can't update Tx if tx doesn't exist in db", tx);
       return;
     }

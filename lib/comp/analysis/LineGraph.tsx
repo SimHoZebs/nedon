@@ -1,7 +1,7 @@
 import { useStore } from "@/util/store";
 import type { TxType } from "@/util/tx";
 
-import type { SavedTx } from "@/types/tx";
+import type { Tx } from "@/types/tx";
 
 import { Prisma } from "@prisma/client";
 import { useEffect, useState } from "react";
@@ -90,7 +90,7 @@ const LineGraph = (props: Props) => {
 
 // txArray is a sorted array of FullTx of a single month, starting with latest date
 const generateDailyTxSumArray = (
-  txArray: SavedTx[][],
+  txArray: Tx[][],
   txType: TxType,
   dateLen: number,
 ) => {
