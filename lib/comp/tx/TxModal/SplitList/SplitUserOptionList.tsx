@@ -8,7 +8,7 @@ import useAppUser from "lib/hooks/useAppUser";
 import { Button } from "lib/shared/Button";
 
 const SplitUserOptionList = () => {
-  const appUser = useAppUser();
+  const { user: appUser, isLoading } = useAppUser();
 
   const setSplitTxArray = useTxStore((state) => state.setSplitTxArray);
   const setUnsavedCatArray = useTxStore((state) => state.setCatArray);

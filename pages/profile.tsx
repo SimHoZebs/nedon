@@ -6,13 +6,13 @@ import Input from "lib/shared/Input";
 import { useEffect, useState } from "react";
 
 const Profile = () => {
-  const appUser = useAppUser();
+  const { user: appUser, isLoading } = useAppUser();
   const updateProfile = trpc.user.updateName.useMutation();
   const [unsavedUser, setUnsavedUser] = useState(appUser);
 
   useEffect(() => {
-    setUnsavedUser(appUser);
-  }, [appUser]);
+    if (!isLoading) setUnsavedUser(appUser);
+  }, [appUser, isLoading]);
 
   return (
     unsavedUser && (

@@ -202,7 +202,7 @@ export const txTypeArray: ["spending", "received", "transfers"] = [
 export type TxType = (typeof txTypeArray)[number];
 
 export const useTxGetAll = () => {
-  const appUser = useAppUser();
+  const { user: appUser, isLoading: appUserIsLoading } = useAppUser();
   const datetime = useStore((store) => store.datetime);
 
   const txArray = trpc.tx.getAll.useQuery(
@@ -210,7 +210,10 @@ export const useTxGetAll = () => {
       id: appUser ? appUser.id : "",
       date: datetime || new Date(Date.now()).toString(),
     },
-    { staleTime: 3600000, enabled: appUser?.hasAccessToken && !!datetime },
+    {
+      staleTime: 3600000,
+      enabled: appUser?.hasAccessToken && !!datetime && !appUserIsLoading,
+    },
   );
   return txArray;
 };

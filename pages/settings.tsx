@@ -15,7 +15,7 @@ const Settings = () => {
   const verticalCatPicker = useStore((state) => state.verticalCatPicker);
   const setVerticalCatPicker = useStore((state) => state.setVerticalCatPicker);
 
-  const appUser = useAppUser();
+  const { user: appUser, isLoading: appUserIsLoading } = useAppUser();
   const allUsers = trpc.dev.getAllUsers.useQuery();
   const deleteAll = trpc.dev.deleteAllUsers.useMutation();
   const deleteUser = trpc.user.delete.useMutation();
@@ -71,7 +71,10 @@ const Settings = () => {
               }`}
               onClickAsync={async (e) => {
                 e.stopPropagation();
-                if (!appUser) return;
+                if (appUserIsLoading || !appUser) {
+                  console.error("No app user");
+                  return;
+                }
 
                 appUser.myConnectionArray?.find(
                   (connection) => connection.id === user.id,

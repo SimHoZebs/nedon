@@ -18,12 +18,12 @@ const Connections = () => {
     amount: Prisma.Decimal;
   }>();
 
-  const appUser = useAppUser();
+  const { user: appUser, isLoading } = useAppUser();
 
   const removeConnection = trpc.user.removeConnection.useMutation();
   const associatedTxArray = trpc.tx.getAllAssociated.useQuery(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: !!appUser },
+    { staleTime: 3600000, enabled: !!appUser && !isLoading },
   );
   const queryClient = trpc.useUtils();
 

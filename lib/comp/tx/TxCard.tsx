@@ -2,6 +2,7 @@ import { getCatStyle } from "@/util/cat";
 
 import type { Tx } from "@/types/tx";
 
+import { Prisma } from "@prisma/client";
 import useAppUser from "lib/hooks/useAppUser";
 
 interface Props {
@@ -9,11 +10,13 @@ interface Props {
   tx: Tx;
 }
 const TxCard = (props: Props) => {
-  const appUser = useAppUser();
+  const { user: appUser, isLoading } = useAppUser();
 
-  const splitAmount = props.tx.splitTxArray.find(
-    (split) => split.ownerId === appUser?.id,
-  )?.amount;
+  const splitAmount =
+    isLoading && appUser
+      ? props.tx.splitTxArray.find((split) => split.ownerId === appUser.id)
+          ?.amount
+      : new Prisma.Decimal(0);
 
   return (
     <section

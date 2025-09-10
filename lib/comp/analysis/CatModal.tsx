@@ -25,10 +25,10 @@ interface Props {
 
 const CatModal = (props: Props) => {
   const { settings, data } = props.modalData;
-  const appUser = useAppUser();
+  const { user: appUser, isLoading: appUserLoading } = useAppUser();
   const { data: userSettings } = trpc.settings.get.useQuery(
     { userId: appUser?.id || "" },
-    { enabled: !!appUser },
+    { enabled: !!appUser && !appUserLoading },
   );
 
   const [budget, setBudget] = useState<Prisma.Decimal>(new Prisma.Decimal(0));

@@ -13,14 +13,14 @@ interface Props {
   oweUser: { id: string; amount: Prisma.Decimal } | undefined;
 }
 const SettleModal = (props: Props) => {
-  const appUser = useAppUser();
+  const { user: appUser, isLoading } = useAppUser();
 
   const [settleAmount, setSettleAmount] = useState(0);
   const [appUserGiving, setAppUserGiving] = useState(true);
 
   const associatedTxArray = trpc.tx.getAllAssociated.useQuery(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: !!appUser },
+    { staleTime: 3600000, enabled: !!appUser && !isLoading },
   );
 
   return appUser && props.oweUser ? (

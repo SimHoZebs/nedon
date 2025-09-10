@@ -26,7 +26,7 @@ import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const Page = () => {
-  const appUser = useAppUser();
+  const { user: appUser, isLoading } = useAppUser();
   const txOragnizedByTimeArray = useStore(
     (store) => store.txOrganizedByTimeArray,
   );
@@ -36,7 +36,7 @@ const Page = () => {
   const settings = trpc.settings.get.useQuery(
     { userId: appUser?.id || "" },
     {
-      enabled: !!appUser,
+      enabled: !!appUser && !isLoading,
     },
   );
 

@@ -36,10 +36,10 @@ const TxModal = (props: Props) => {
   const txOragnizedByTimeArray = useStore(
     (store) => store.txOrganizedByTimeArray,
   );
-  const appUser = useAppUser();
+  const { user: appUser, isLoading: appUserIsLoading } = useAppUser();
   const auth = trpc.plaid.auth.useQuery(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: !!appUser },
+    { staleTime: 3600000, enabled: !!appUser && !appUserIsLoading },
   );
   const queryClient = trpc.useUtils();
   const focusedSplitTxIndex = useTxStore((state) => state.focusedSplitTxIndex);

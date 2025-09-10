@@ -32,12 +32,12 @@ const Home: NextPage = () => {
   const [csvTxArray, setCsvTxArray] = React.useState<UnsavedTx[]>([]);
   const csvInputRef = React.useRef<HTMLInputElement>(null);
 
-  const appUser = useAppUser();
+  const { user: appUser, isLoading } = useAppUser();
   const { date, setDate, rangeFormat, setRangeFormat } = useDateRange();
 
   const auth = trpc.plaid.auth.useQuery(
     { id: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: !!appUser },
+    { staleTime: 3600000, enabled: !!appUser && !isLoading },
   );
 
   const txArray = useTxGetAll();
