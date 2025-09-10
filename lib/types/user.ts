@@ -15,7 +15,25 @@ const PureUserSchema = z
   })
   .strict() satisfies z.ZodType<PureUser>;
 
-export type User = Prisma.UserGetPayload<{
+export type Connection = Prisma.UserGetPayload<{
+  omit: {
+    accessToken: true;
+    publicToken: true;
+    itemId: true;
+    transferId: true;
+    cursor: true;
+  };
+}>;
+
+export const ConnectionSchema = PureUserSchema.omit({
+  accessToken: true,
+  publicToken: true,
+  itemId: true,
+  transferId: true,
+  cursor: true,
+}).strict() satisfies z.ZodType<Connection>;
+
+export type unAuthUser = Prisma.UserGetPayload<{
   include: {
     myConnectionArray: {
       omit: {
@@ -25,18 +43,32 @@ export type User = Prisma.UserGetPayload<{
   };
 }>;
 
-export const UserSchema = PureUserSchema.extend({
+export const unAuthUserSchema = PureUserSchema.extend({
   myConnectionArray: z.array(PureUserSchema.omit({ accessToken: true })),
-}).strict() satisfies z.ZodType<User>;
+}).strict() satisfies z.ZodType<unAuthUser>;
 
-// ---
-
-export const UserClientSideSchema = UserSchema.omit({
-  accessToken: true,
-})
+export const unAuthUserClientSideSchema = unAuthUserSchema
+  .omit({
+    accessToken: true,
+  })
   .extend({
     hasAccessToken: z.boolean(),
   })
   .strict();
 
-export type UserClientSide = z.infer<typeof UserClientSideSchema>;
+export type unAuthUserClientSide = z.infer<typeof unAuthUserClientSideSchema>;
+
+export const UserSchemaClientSide = unAuthUserClientSideSchema
+  .omit({
+    publicToken: true,
+    itemId: true,
+    transferId: true,
+  })
+  .extend({
+    publicToken: z.string(),
+    itemId: z.string(),
+    transferId: z.string().nullable(),
+  })
+  .strict();
+
+export type UserClientSide = z.infer<typeof UserSchemaClientSide>;

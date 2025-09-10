@@ -1,6 +1,6 @@
-import type { UserClientSide } from "@/types/user";
+import type { unAuthUserClientSide } from "@/types/user";
 
-export const emptyUser: UserClientSide = {
+export const emptyUser: unAuthUserClientSide = {
   id: "",
   name: "",
   hasAccessToken: false,
