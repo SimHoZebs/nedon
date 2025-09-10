@@ -18,7 +18,7 @@ const Receipt = () => {
   const createTx = trpc.tx.create.useMutation();
   const processReceipt = trpc.receipt.process.useMutation();
   const createReceipt = trpc.receipt.create.useMutation();
-  const getSignedUploadUrl = trpc.receipt.getSignedUploadUrl.useMutation();
+  const getSignedUploadUrl = trpc.blobStorage.getSignedUploadUrl.useMutation();
   const queryClient = trpc.useUtils();
 
   const [receiptImg, setReceiptImg] = React.useState<File>();

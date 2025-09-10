@@ -1,4 +1,4 @@
-import { imgAnnotator } from "server/gcloudClient";
+import { imgAnnotator } from "server/clients/gcloudClient";
 
 export const getTextFromImage = async (imageUrl: string) => {
   const [result] = await imgAnnotator.textDetection(imageUrl);

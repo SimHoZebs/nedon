@@ -13,7 +13,7 @@ import { procedure, router } from "server/trpc";
 import { z } from "zod";
 
 const plaidRouter = router({
-  sandBoxAccess: procedure
+  createSandboxPublicToken: procedure
     .input(z.object({ instituteID: z.string() }))
     .query(async ({ input }) => {
       return await getSandboxPublicToken(input.instituteID);

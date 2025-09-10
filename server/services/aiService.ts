@@ -1,4 +1,4 @@
-import openai from "server/openaiClient";
+import openai from "server/clients/openaiClient";
 
 // This is the assistant ID for the receipt processing assistant.
 // It's better to have it here than hardcoded in the middle of logic.

@@ -4,8 +4,8 @@ import { createStructuredResponse } from "@/util/structuredResponse";
 import { type UnsavedReceipt, UnsavedReceiptSchema } from "@/types/receipt";
 
 import { extractReceiptData } from "./aiService";
-import * as imageAnnotatorService from "./gCloudImageAnnotatorService";
-import * as storageService from "./supabaseStorageService";
+import * as blobStorage from "./blobStorage";
+import * as ocr from "./OCR";
 
 export const createReceipt = async (input: {
   id: string;
@@ -45,7 +45,7 @@ export const createReceipt = async (input: {
   return updatedTx.receipt;
 };
 
-export const processReceipt = async (input: { path: string }) => {
+export const processReceipt = async (path: string) => {
   const sr = createStructuredResponse<UnsavedReceipt>({
     success: false,
     data: undefined,
@@ -55,9 +55,9 @@ export const processReceipt = async (input: { path: string }) => {
   });
 
   try {
-    const signedUrlData = await storageService.getSignedUrl(input.path, 60);
+    const signedUrlData = await blobStorage.getSignedUrl(path, 60);
 
-    const annotationResult = await imageAnnotatorService.getTextFromImage(
+    const annotationResult = await ocr.getTextFromImage(
       signedUrlData.signedUrl,
     );
 

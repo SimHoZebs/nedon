@@ -3,14 +3,15 @@ import { trpc } from "@/util/trpc";
 import { ActionBtn } from "../../shared/Button";
 
 import { useState } from "react";
+import { DEFAULT_PLAID_INSTITUTE } from "@/util/constants";
 
 const CreateUserBtn = () => {
   const createUser = trpc.user.create.useMutation();
   const updateUser = trpc.user.updateName.useMutation();
   const queryClient = trpc.useUtils();
 
-  const sandboxPublicToken = trpc.plaid.sandBoxAccess.useQuery(
-    { instituteID: undefined },
+  const sandboxPublicToken = trpc.plaid.createSandboxPublicToken.useQuery(
+    { instituteID: DEFAULT_PLAID_INSTITUTE },
     { staleTime: 360000, enabled: false },
   );
   const setAccessToken = trpc.plaid.setAccessToken.useMutation();

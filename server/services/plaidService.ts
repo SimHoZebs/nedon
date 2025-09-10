@@ -1,8 +1,9 @@
 import db from "@/util/db";
-import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "server/constants";
-import { client } from "server/util/plaid";
+
 import type { User } from "@prisma/client";
 import { ACHClass, Products, TransferNetwork, TransferType } from "plaid";
+import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "server/constants";
+import { client } from "server/util/plaid";
 
 /**
  * Creates a public token for a sandbox institution.

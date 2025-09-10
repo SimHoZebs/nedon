@@ -2,6 +2,7 @@ import { convertPlaidCatsToHierarchicalArray } from "@/util/cat";
 
 import { procedure, router } from "../trpc";
 import { client } from "../util/plaid";
+import blobStorageRouter from "./blobStorage";
 import catRouter from "./cat";
 import devRouter from "./dev";
 import plaidRouter from "./plaid";
@@ -20,6 +21,7 @@ export const appRouter = router({
   dev: devRouter,
   settings: settingsRouter,
   plaid: plaidRouter,
+  blobStorage: blobStorageRouter,
 
   getCatOptionArray: procedure.input(z.undefined()).query(async () => {
     const response = await client.categoriesGet({});

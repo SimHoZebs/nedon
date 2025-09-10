@@ -1,4 +1,4 @@
-import supabase from "server/supabaseClient";
+import supabase from "server/clients/supabaseClient";
 
 const BUCKET_NAME = "receipts";
 
