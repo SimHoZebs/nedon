@@ -1,10 +1,10 @@
-import { useLocalStore } from "@/util/localStore";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime, useTxGetAll } from "@/util/tx";
 
 import { NavBtn } from "./Button";
 
+import { useAutoCreateUser } from "lib/domains/dev";
 import useAppUser from "lib/hooks/useAppUser";
 import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/router";
@@ -22,55 +22,15 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const { user: appUser, isLoading: appUserIsLoading } = useAppUser();
 
   const txGetAllRetryCount = useRef(0);
-  const saveUserIdOnLocalStorage = useLocalStore((state) => state.setUserId);
   const setScreenType = useStore((state) => state.setScreenType);
   const setTxOragnizedByTimeArray = useStore(
     (state) => state.setTxOrganizedByTimeArray,
   );
   const txArray = useTxGetAll();
 
-  const createUser = trpc.user.create.useMutation();
   const queryClient = trpc.useUtils();
 
-  useEffect(() => {
-    const autoCreateUsers = async () => {
-      const createUserResponse = await createUser.mutateAsync();
-      if (!createUserResponse.ok) {
-        console.error("Failed to create user:", createUserResponse.error);
-        return;
-      }
-      const user = createUserResponse.value;
-
-      saveUserIdOnLocalStorage(user.id);
-
-      await queryClient.user.invalidate();
-      console.log("User created with Plaid");
-    };
-
-    if (!appUser && !appUserIsLoading && createUser.isIdle) {
-      console.log(
-        "There are no users in db and none are being created at the moment; creating one...",
-      );
-      autoCreateUsers();
-    } else {
-      if (appUserIsLoading) {
-        console.log("appUser is loading...");
-      }
-      if (createUser.isPending) {
-        console.log("appUser is being created...");
-      }
-      if (appUser) {
-        console.log("appUser found:", appUser);
-        saveUserIdOnLocalStorage(appUser.id);
-      }
-    }
-  }, [
-    saveUserIdOnLocalStorage,
-    appUser,
-    createUser,
-    queryClient.user,
-    appUserIsLoading,
-  ]);
+  useAutoCreateUser();
 
   useEffect(() => {
     const yeet = async () => {

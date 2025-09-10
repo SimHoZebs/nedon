@@ -20,11 +20,15 @@ const useAppUser = () => {
     { id: userIdFromLocalStorage || "" },
     {
       staleTime: Number.POSITIVE_INFINITY,
+      enabled: !!userIdFromLocalStorage,
     },
   );
 
   const getFirstUser = trpc.dev.getFirstUser.useQuery(undefined, {
     staleTime: Number.POSITIVE_INFINITY,
+    // Only run this query if we've confirmed there's no user ID in local storage
+    // (it's null, not undefined which means it's still loading).
+    enabled: userIdFromLocalStorage === null,
   });
 
   const user = getUser.data?.ok
@@ -33,7 +37,10 @@ const useAppUser = () => {
       ? getFirstUser.data.value
       : null;
 
-  const isLoading = getUser.isLoading || getFirstUser.isLoading;
+  const isLoading =
+    userIdFromLocalStorage === undefined ||
+    getUser.isLoading ||
+    getFirstUser.isLoading;
 
   return { user, isLoading };
 };
