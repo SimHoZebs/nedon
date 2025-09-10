@@ -16,7 +16,12 @@ import { z } from "zod";
 const WITH_CONNECTIONS_OMIT_ACCESS_TOKEN = {
   include: {
     myConnectionArray: {
-      omit: { accessToken: true },
+      omit: {
+        accessToken: true,
+        publicToken: true,
+        itemId: true,
+        transferId: true,
+      },
     },
   },
 };
@@ -33,16 +38,7 @@ const userRouter = router({
         }
 
         const user = await db.user.create({
-          include: {
-            myConnectionArray: {
-              omit: {
-                accessToken: true,
-                publicToken: true,
-                itemId: true,
-                transferId: true,
-              },
-            },
-          },
+          ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
           data: {
             ...userUpdateData.value,
             id: input?.id,
@@ -76,7 +72,7 @@ const userRouter = router({
   get: procedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
-      let result: Result<unAuthUserClientSide | null, unknown>;
+      let result: Result<unAuthUserClientSide | UserClientSide, unknown>;
       try {
         const user = await db.user.findFirst({
           where: { id: input.id },
@@ -104,17 +100,38 @@ const userRouter = router({
   updateName: procedure
     .input(z.object({ id: z.string(), name: z.string() }))
     .mutation(async ({ input }) => {
-      const user = await db.user.update({
-        where: {
-          id: input.id,
-        },
-        data: {
-          name: input.name,
-        },
-        ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
-      });
+      let result: Result<UserClientSide, unknown>;
 
-      return user;
+      try {
+        const user = await db.user.update({
+          where: {
+            id: input.id,
+          },
+          data: {
+            name: input.name,
+          },
+          ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
+        });
+
+        if (!isUserClientSide(user)) {
+          throw new Error("Updated user does not match UserClientSide schema");
+        }
+        const { accessToken, ...userWithoutAccessToken } = user;
+        result = {
+          ok: true,
+          value: exact<UserClientSide>()({
+            ...userWithoutAccessToken,
+            hasAccessToken: !!accessToken,
+          }),
+        };
+      } catch (e) {
+        console.error("Error updating user name:", e);
+        result = {
+          ok: false,
+          error: e,
+        };
+      }
+      return result;
     }),
 
   delete: procedure.input(z.string()).mutation(async ({ input }) => {

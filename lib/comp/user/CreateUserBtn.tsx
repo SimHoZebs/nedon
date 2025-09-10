@@ -6,7 +6,7 @@ import { useState } from "react";
 
 const CreateUserBtn = () => {
   const createUser = trpc.user.create.useMutation();
-  const updateUser = trpc.user.updateName.useMutation();
+  const updateName = trpc.user.updateName.useMutation();
   const queryClient = trpc.useUtils();
 
   const [loading, setLoading] = useState(false);
@@ -16,10 +16,18 @@ const CreateUserBtn = () => {
       onClickAsync={async (e) => {
         setLoading(true);
         e.stopPropagation();
-        const user = await createUser.mutateAsync();
-        await updateUser.mutateAsync({ ...user, name: user.id.slice(0, 8) });
+        const createUserResult = await createUser.mutateAsync();
+        if (!createUserResult.ok) {
+          setLoading(false);
+          return;
+        }
+        const user = createUserResult.value;
+        await updateName.mutateAsync({
+          id: user.id,
+          name: user.id.slice(0, 8),
+        });
 
-        queryClient.dev.getAllUsers.invalidate();
+        await queryClient.dev.getAllUsers.invalidate();
         setLoading(false);
       }}
     >

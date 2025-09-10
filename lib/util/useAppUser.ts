@@ -14,6 +14,8 @@ const useAppUser = () => {
     (state) => state.userId,
   );
 
+  console.debug("useAppUser - userIdFromLocalStorage:", userIdFromLocalStorage);
+
   const getUser = trpc.user.get.useQuery(
     { id: userIdFromLocalStorage || "" },
     {
@@ -25,13 +27,15 @@ const useAppUser = () => {
     staleTime: Number.POSITIVE_INFINITY,
   });
 
-  if (getUser.data?.ok) {
-    return getUser.data.value;
-  }
-  if (getFirstUser.data?.ok) {
-    return getFirstUser.data.value;
-  }
-  return null;
+  const user = getUser.data?.ok
+    ? getUser.data.value
+    : getFirstUser.data?.ok
+      ? getFirstUser.data.value
+      : null;
+
+  const isLoading = getUser.isLoading || getFirstUser.isLoading;
+
+  return { user, isLoading };
 };
 
 export default useAppUser;

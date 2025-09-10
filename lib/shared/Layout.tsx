@@ -19,7 +19,7 @@ const customFont = Space_Grotesk({
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
-  const appUser = useAppUser();
+  const { user: appUser, isLoading: appUserIsLoading } = useAppUser();
 
   const txGetAllRetryCount = useRef(0);
   const saveUserIdOnLocalStorage = useLocalStore((state) => state.setUserId);
@@ -47,15 +47,30 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       console.log("User created with Plaid");
     };
 
-    if (!appUser && createUser.isIdle) {
+    if (!appUser && !appUserIsLoading && createUser.isIdle) {
       console.log(
         "There are no users in db and none are being created at the moment; creating one...",
       );
       autoCreateUsers();
     } else {
-      console.log("appUser exists, no need to create user");
+      if (appUserIsLoading) {
+        console.log("appUser is loading...");
+      }
+      if (createUser.isPending) {
+        console.log("appUser is being created...");
+      }
+      if (appUser) {
+        console.log("appUser found:", appUser);
+        saveUserIdOnLocalStorage(appUser.id);
+      }
     }
-  }, [saveUserIdOnLocalStorage, appUser, createUser, queryClient.user]);
+  }, [
+    saveUserIdOnLocalStorage,
+    appUser,
+    createUser,
+    queryClient.user,
+    appUserIsLoading,
+  ]);
 
   useEffect(() => {
     const yeet = async () => {
