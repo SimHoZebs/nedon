@@ -13,13 +13,6 @@ generator json {
   // (./ -> relative to schema, or an importable path to require() it)
 }
 
-generator zod {
-  provider                    = "zod-prisma-types"
-  createOptionalDefaultValues = true
-  useTypeAssertions           = true
-  createInputTypes            = true
-}
-
 enum MdsType {
   UNDETERMINED  @map("-1")
   MANDATORY

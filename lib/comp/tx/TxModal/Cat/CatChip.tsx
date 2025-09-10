@@ -2,7 +2,7 @@ import { getCatStyle } from "@/util/cat";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
 
-import { isCatArrayInDB, type UnsavedCat } from "@/types/cat";
+import { isSavedCat, type UnsavedCat } from "@/types/cat";
 
 import { Prisma } from "@prisma/client";
 import type React from "react";
@@ -72,7 +72,7 @@ const CatChip = (props: Props) => {
                     const tmpCatArray = structuredClone(catArray);
                     tmpCatArray.splice(props.index, 1);
 
-                    if (!isCatArrayInDB(tmpCatArray)) {
+                    if (!isSavedCat(tmpCatArray)) {
                       console.error(
                         "Unable to delete cat; One or more cat in array are ClientSide.",
                         tmpCatArray,

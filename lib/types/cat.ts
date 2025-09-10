@@ -1,7 +1,6 @@
 import type { SavedTx } from "./tx";
 
-import type { Cat, Prisma } from "@prisma/client";
-import { CatSchema } from "prisma/generated/zod";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 export type TreedCat = {
@@ -19,6 +18,16 @@ export type TreedCatWithTx = {
 };
 
 export type BaseCat = Prisma.CatGetPayload<undefined>;
+
+export const CatSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    amount: z.instanceof(Prisma.Decimal),
+    nameArray: z.array(z.string()),
+    txId: z.string(),
+  })
+  .strict();
 
 export const BaseCatSchema = CatSchema.strict() satisfies z.ZodType<BaseCat>;
 
@@ -38,11 +47,10 @@ export const UnsavedCatSchema = CatSchema.omit({ id: true })
   })
   .strict() satisfies z.ZodType<UnsavedCat>;
 
-export const isCatInDB = (cat: UnsavedCat): cat is Cat => {
-  return cat.id !== undefined;
+export const isSavedCat = (cat: unknown): cat is BaseCat => {
+  return BaseCatSchema.safeParse(cat).success;
 };
 
-export const isCatArrayInDB = (obj: unknown): obj is Cat[] => {
-  if (!Array.isArray(obj)) return false;
-  return obj.every(isCatInDB);
+export const isSavedCatArray = (obj: unknown): obj is BaseCat[] => {
+  return z.array(BaseCatSchema).safeParse(obj).success;
 };

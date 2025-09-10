@@ -5,7 +5,6 @@ import { type UnsavedReceipt, UnsavedReceiptSchema } from "@/types/receipt";
 
 import { procedure, router } from "../trpc";
 
-import { ReceiptCreateInputObjectSchema } from "prisma/generated/schemas";
 import { imgAnnotator } from "server/gcloudClient";
 import openai from "server/openaiClient";
 import { z } from "zod";
@@ -15,7 +14,7 @@ const receiptRouter = router({
     .input(
       z.object({
         id: z.string(),
-        receipt: ReceiptCreateInputObjectSchema,
+        receipt: UnsavedReceiptSchema,
       }),
     )
     .mutation(async ({ input }) => {
@@ -33,7 +32,11 @@ const receiptRouter = router({
           receipt: {
             create: {
               ...receiptWithoutItems,
-              items: items,
+              items: {
+                createMany: {
+                  data: items,
+                },
+              },
             },
           },
         },

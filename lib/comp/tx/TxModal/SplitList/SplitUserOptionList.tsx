@@ -3,9 +3,9 @@ import useAppUser from "@/util/useAppUser";
 
 import { isSavedTx, type SplitTx, type UnsavedSplitTx } from "@/types/tx";
 
+import { createId } from "@paralleldrive/cuid2";
 import { Prisma } from "@prisma/client";
 import { Button } from "lib/shared/Button";
-import { createId } from "@paralleldrive/cuid2";
 
 const SplitUserOptionList = () => {
   const appUser = useAppUser();

@@ -1,6 +1,17 @@
-import type { Prisma } from "@prisma/client";
-import { ReceiptItemSchema } from "prisma/generated/zod";
+import { MdsType, Prisma } from "@prisma/client";
 import z from "zod";
+
+export const ReceiptItemSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    quantity: z.number(),
+    unit_price: z.instanceof(Prisma.Decimal),
+    mds: z.nativeEnum(MdsType),
+    receiptId: z.string(),
+  })
+  .strict();
 
 export type BaseReceiptItem = Prisma.ReceiptItemGetPayload<undefined>;
 

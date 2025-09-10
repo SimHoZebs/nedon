@@ -1,7 +1,6 @@
 import { type UserClientSide, UserClientSideSchema } from "./user";
 
 import type { Prisma } from "@prisma/client";
-import { GroupSchema } from "prisma/generated/zod";
 import z from "zod";
 
 export type GroupWithUserArray = Prisma.GroupGetPayload<{
@@ -11,6 +10,13 @@ export type GroupWithUserArray = Prisma.GroupGetPayload<{
 export type GroupClientSide = Omit<GroupWithUserArray, "userArray"> & {
   userArray: UserClientSide[];
 };
+
+const GroupSchema = z
+  .object({
+    id: z.string(),
+    ownerId: z.string(),
+  })
+  .strict();
 
 export const GroupClientSideSchema = GroupSchema.extend({
   userArray: z.array(UserClientSideSchema),

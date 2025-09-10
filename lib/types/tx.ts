@@ -1,12 +1,29 @@
-import { isCatArrayInDB, UnsavedCatSchema } from "./cat";
+import { CatSchema, isSavedCatArray, UnsavedCatSchema } from "./cat";
 import { plaidTxSchema } from "./plaid";
 import { BaseReceiptSchema, UnsavedReceiptSchema } from "./receipt";
 
-import type { Prisma } from "@prisma/client";
-import { CatSchema, TxSchema } from "prisma/generated/zod";
+import { MdsType, Prisma } from "@prisma/client";
 import { z } from "zod";
 
 export type SplitTx = Prisma.TxGetPayload<undefined>;
+
+const TxSchema = z
+  .object({
+    id: z.string(),
+    ownerId: z.string(),
+    originTxId: z.string().nullable(),
+    userTotal: z.instanceof(Prisma.Decimal),
+    recurring: z.boolean(),
+    mds: z.nativeEnum(MdsType),
+    plaidId: z.string().nullable(),
+    name: z.string(),
+    amount: z.instanceof(Prisma.Decimal),
+    datetime: z.date().nullable(),
+    authorizedDatetime: z.date(),
+    accountId: z.string().nullable(),
+    plaidTx: z.any().nullable(),
+  })
+  .strict();
 
 export const SplitTxSchema = TxSchema.omit({
   plaidTx: true,
@@ -90,7 +107,7 @@ export function isSavedTx(tx: unknown): tx is SavedTx {
   if (!tx || typeof tx !== "object" || !("id" in tx) || !("catArray" in tx)) {
     return false;
   }
-  return isCatArrayInDB(tx.catArray);
+  return isSavedCatArray(tx.catArray);
 }
 
 export const ChaseCSVTxSchema = z.object({

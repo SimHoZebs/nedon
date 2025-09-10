@@ -1,5 +1,4 @@
 import type { Prisma } from "@prisma/client";
-import { UserSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 export type BaseUser = Prisma.UserGetPayload<{
@@ -11,6 +10,18 @@ export type BaseUser = Prisma.UserGetPayload<{
     };
   };
 }>;
+
+const UserSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    accessToken: z.string().nullable(),
+    publicToken: z.string().nullable(),
+    itemId: z.string().nullable(),
+    transferId: z.string().nullable(),
+    cursor: z.string().nullable(),
+  })
+  .strict();
 
 export const BaseUserSchema = UserSchema.extend({
   myConnectionArray: z.array(UserSchema.omit({ accessToken: true })),
