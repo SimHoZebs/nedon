@@ -3,8 +3,8 @@ import CreateUserBtn from "@/comp/user/CreateUserBtn";
 import { useLocalStore } from "@/util/localStore";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
-import useAppUser from "@/util/useAppUser";
 
+import useAppUser from "lib/hooks/useAppUser";
 import { ActionBtn, Button } from "lib/shared/Button";
 import { H2 } from "lib/shared/Heading";
 import { useRouter } from "next/router";

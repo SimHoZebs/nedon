@@ -2,7 +2,6 @@ import { subCatTotal } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime } from "@/util/tx";
-import useAppUser from "@/util/useAppUser";
 
 import type { TreedCatWithTx } from "@/types/cat";
 
@@ -13,6 +12,7 @@ import Input from "../../shared/Input";
 import Modal from "../../shared/Modal";
 
 import { type CatSettings, Prisma } from "@prisma/client";
+import useAppUser from "lib/hooks/useAppUser";
 import { useEffect, useState } from "react";
 
 interface Props {

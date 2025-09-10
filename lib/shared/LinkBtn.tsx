@@ -1,8 +1,8 @@
 import { trpc } from "@/util/trpc";
-import useAppUser from "@/util/useAppUser";
 
 import { ActionBtn } from "./Button";
 
+import useAppUser from "lib/hooks/useAppUser";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { usePlaidLink } from "react-plaid-link";

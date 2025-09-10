@@ -1,10 +1,10 @@
 import type { TreedCatWithTx } from "@/types/cat";
 import type { ChaseCSVTx, Tx, UnsavedTx } from "@/types/tx";
 
+import useAppUser from "../hooks/useAppUser";
 import { createNewCat, fillArrayByCat } from "./cat";
 import { useStore } from "./store";
 import { trpc } from "./trpc";
-import useAppUser from "./useAppUser";
 
 import { MdsType, Prisma } from "@prisma/client";
 import type { Transaction } from "plaid";

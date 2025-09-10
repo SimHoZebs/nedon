@@ -2,9 +2,9 @@ import SettleModal from "@/comp/analysis/SettleModal";
 
 import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
-import useAppUser from "@/util/useAppUser";
 
 import { Prisma } from "@prisma/client";
+import useAppUser from "lib/hooks/useAppUser";
 import { ActionBtn, Button } from "lib/shared/Button";
 import { useMemo, useState } from "react";
 

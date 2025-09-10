@@ -1,7 +1,6 @@
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import useAppUser from "@/util/useAppUser";
 
 import { isTx } from "@/types/tx";
 
@@ -11,6 +10,7 @@ import Receipt from "./Receipt";
 import SplitList from "./SplitList/SplitList";
 
 import { Prisma } from "@prisma/client";
+import useAppUser from "lib/hooks/useAppUser";
 import { ActionBtn, CloseBtn, SecondaryBtn } from "lib/shared/Button";
 import { H1 } from "lib/shared/Heading";
 import Modal from "lib/shared/Modal";

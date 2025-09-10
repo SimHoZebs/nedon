@@ -1,7 +1,8 @@
 import { getCatStyle } from "@/util/cat";
-import useAppUser from "@/util/useAppUser";
 
 import type { Tx } from "@/types/tx";
+
+import useAppUser from "lib/hooks/useAppUser";
 
 interface Props {
   onInteraction: () => void;

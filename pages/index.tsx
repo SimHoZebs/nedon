@@ -6,12 +6,12 @@ import TxModalAndCalculator from "@/comp/tx/TxModalAndCalculator";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { createTxFromChaseCSV, getScopeIndex, useTxGetAll } from "@/util/tx";
-import useAppUser from "@/util/useAppUser";
-import useDateRange from "@/util/useDateRange";
 
 import { ChaseCSVTxSchema, type UnsavedTx } from "@/types/tx";
 
 import { AnimatePresence, motion } from "framer-motion";
+import useAppUser from "lib/hooks/useAppUser";
+import useDateRange from "lib/hooks/useDateRange";
 import { Button, SplitBtn, SplitBtnOptions } from "lib/shared/Button";
 import DateRangePicker from "lib/shared/DateRangePicker";
 import DateSortedTxList from "lib/shared/DateSortedTxList";

@@ -1,6 +1,5 @@
 import { trpc } from "@/util/trpc";
 import { useTxStore } from "@/util/txStore";
-import useAppUser from "@/util/useAppUser";
 
 import { isTx } from "@/types/tx";
 
@@ -8,6 +7,7 @@ import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
 
 import { Prisma } from "@prisma/client";
+import useAppUser from "lib/hooks/useAppUser";
 import { ActionBtn, Button } from "lib/shared/Button";
 import { H3 } from "lib/shared/Heading";
 import type React from "react";

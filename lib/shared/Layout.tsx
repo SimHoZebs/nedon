@@ -2,10 +2,10 @@ import { useLocalStore } from "@/util/localStore";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime, useTxGetAll } from "@/util/tx";
-import useAppUser from "@/util/useAppUser";
 
 import { NavBtn } from "./Button";
 
+import useAppUser from "lib/hooks/useAppUser";
 import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/router";
 import type React from "react";

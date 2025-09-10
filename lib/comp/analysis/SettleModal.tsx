@@ -1,10 +1,10 @@
 import { trpc } from "@/util/trpc";
-import useAppUser from "@/util/useAppUser";
 
 import { ActionBtn } from "../../shared/Button";
 import Modal from "../../shared/Modal";
 
 import type { Prisma } from "@prisma/client";
+import useAppUser from "lib/hooks/useAppUser";
 import type React from "react";
 import { useState } from "react";
 
