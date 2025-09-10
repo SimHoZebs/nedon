@@ -1,9 +1,8 @@
-import db from "@/util/db";
-
 import { UnsavedCatSettingsSchema } from "@/types/catSettings";
 import { UserSettingsSchema } from "@/types/userSettings";
 
 import { procedure, router } from "server/trpc";
+import db from "server/util/db";
 import z from "zod";
 
 const settingsRouter = router({

@@ -1,9 +1,9 @@
-import db from "@/util/db";
 import { exact, type Result } from "@/util/type";
 
 import type { unAuthUserClientSide } from "@/types/user";
 
 import { procedure, router } from "server/trpc";
+import db from "server/util/db";
 import { z } from "zod";
 
 const devRouter = router({

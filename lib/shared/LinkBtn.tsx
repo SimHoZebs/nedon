@@ -16,7 +16,7 @@ const LinkBtn = () => {
   const router = useRouter();
 
   const onSuccess = React.useCallback(
-    (public_token: string) => {
+    (_public_token: string) => {
       const getUserAccessToken = async () => {
         if (!appUser) {
           console.error("appUser is undefined.");

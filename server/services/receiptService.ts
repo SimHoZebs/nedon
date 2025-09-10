@@ -1,4 +1,3 @@
-import db from "@/util/db";
 import { createStructuredResponse } from "@/util/structuredResponse";
 
 import { type UnsavedReceipt, UnsavedReceiptSchema } from "@/types/receipt";
@@ -6,6 +5,8 @@ import { type UnsavedReceipt, UnsavedReceiptSchema } from "@/types/receipt";
 import { extractReceiptData } from "./aiService";
 import * as blobStorage from "./blobStorage";
 import * as ocr from "./OCR";
+
+import db from "server/util/db";
 
 export const createReceipt = async (input: {
   id: string;

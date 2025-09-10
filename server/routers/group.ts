@@ -1,7 +1,6 @@
-import db from "@/util/db";
-
 import { procedure, router } from "../trpc";
 
+import db from "server/util/db";
 import { z } from "zod";
 
 export const groupRouter = router({

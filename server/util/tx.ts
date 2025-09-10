@@ -1,10 +1,10 @@
-import db from "@/util/db";
 import { createTxFromPlaidTx } from "@/util/tx";
 
 import type { Tx, UnsavedTx } from "@/types/tx";
 
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { RemovedTransaction, Transaction } from "plaid";
+import db from "server/util/db";
 
 export const txInclude = {
   catArray: true,

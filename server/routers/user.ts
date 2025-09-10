@@ -1,4 +1,3 @@
-import db from "@/util/db";
 import { exact, type Result } from "@/util/type";
 
 import {
@@ -10,6 +9,7 @@ import {
 import { procedure, router } from "../trpc";
 
 import { getPlaidTokensAndIds as getPlaidAccessData } from "server/services/plaidService";
+import db from "server/util/db";
 import { z } from "zod";
 
 // Define the reusable selection pattern
@@ -82,7 +82,8 @@ const userRouter = router({
           where: { id: input.id },
           ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
         });
-        if (!user) return null;
+        if (!user) throw new Error(`User with id ${input.id} not found`);
+
         result = {
           ok: true,
           value: {

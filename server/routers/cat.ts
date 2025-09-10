@@ -1,9 +1,8 @@
-import db from "@/util/db";
-
 import { type Cat, CatSchema, UnsavedCatSchema } from "@/types/cat";
 
 import { procedure, router } from "../trpc";
 
+import db from "server/util/db";
 import { z } from "zod";
 
 const catRouter = router({
