@@ -8,6 +8,7 @@ import { trpc } from "./trpc";
 
 import { MdsType, Prisma } from "@prisma/client";
 import type { Transaction } from "plaid";
+import { Result } from "./type";
 
 export const resetTx = (tx: Tx) => ({
   ...tx,
@@ -205,15 +206,31 @@ export const useTxGetAll = () => {
   const { user: appUser, isLoading: appUserIsLoading } = useAutoLoadUser();
   const datetime = useStore((store) => store.datetime);
 
-  const txArray = trpc.tx.getAll.useQuery(
+  console.debug(
+    "useTxGetAll - appUser.hasAccessToken:",
+    appUser?.hasAccessToken,
+    "isLoading:",
+    appUserIsLoading,
+    "datetime:",
+    datetime,
+  );
+
+  console.debug(
+    "getAll?: ",
+    (appUser?.hasAccessToken && !!datetime && !appUserIsLoading) === true,
+  );
+
+  const txGetAllResult = trpc.tx.getAll.useQuery(
     {
-      id: appUser ? appUser.id : "",
+      id: appUser?.id || "",
       date: datetime || new Date(Date.now()).toString(),
     },
     {
       staleTime: 3600000,
-      enabled: appUser?.hasAccessToken && !!datetime && !appUserIsLoading,
+      enabled:
+        (appUser?.hasAccessToken && !!datetime && !appUserIsLoading) === true,
     },
   );
-  return txArray;
+
+  return txGetAllResult;
 };

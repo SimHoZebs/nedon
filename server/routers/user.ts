@@ -134,18 +134,32 @@ const userRouter = router({
           },
           ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
         });
-        if (!isUserClientSide(user)) {
+        const { accessToken, ...userWithoutAccessToken } = user;
+        const userClientSide = {
+          ...userWithoutAccessToken,
+          hasAccessToken: !!accessToken,
+        };
+
+        if (!isUserClientSide(userClientSide)) {
           throw new Error("Updated user does not match UserClientSide schema");
         }
-        const { accessToken, ...userWithoutAccessToken } = user;
         result = {
           ok: true,
-          value: exact<UserClientSide>()({
-            ...userWithoutAccessToken,
-            hasAccessToken: !!accessToken,
-          }),
+          value: userClientSide,
         };
       } catch (e) {
+        if (!(e instanceof Error)) {
+          console.error("Unknown error type:", e);
+          result = {
+            ok: false,
+            error: {
+              code: "INTERNAL_SERVER_ERROR",
+              message: "An unexpected error occurred.",
+            },
+          };
+          return result;
+        }
+
         if (
           e instanceof Prisma.PrismaClientKnownRequestError &&
           e.code === "P2025"

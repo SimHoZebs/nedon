@@ -19,7 +19,7 @@ const customFont = Space_Grotesk({
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
-  const { user: appUser, isLoading: appUserIsLoading } = useAutoLoadUser();
+  const { user: appUser } = useAutoLoadUser();
 
   const txGetAllRetryCount = useRef(0);
   const setScreenType = useStore((state) => state.setScreenType);
@@ -28,14 +28,52 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   );
   const txGetAll = useTxGetAll();
 
+  const connectToPlaid = trpc.user.connectToPlaid.useMutation();
   const queryClient = trpc.useUtils();
 
   useAutoCreateUser();
 
+  // Only for development, this should be a manual link flow in production
   useEffect(() => {
-    const yeet = async () => {
-      if (!appUser?.hasAccessToken) return;
-      if (!txGetAll.data?.ok) return;
+    const connectUnAuthUserToPlaid = async () => {
+      if (!appUser) return;
+      if (appUser.hasAccessToken) return;
+      console.log("User has no access token, connecting to Plaid...");
+
+      const connectToPlaidResult = await connectToPlaid.mutateAsync({
+        id: appUser.id,
+      });
+      if (!connectToPlaidResult.ok) {
+        console.error(
+          "Failed to connect to Plaid:",
+          connectToPlaidResult.error,
+        );
+        return;
+      }
+
+      console.log("Connected to Plaid successfully");
+      await queryClient.user.get.invalidate();
+      console.log("Invalidated user query");
+    };
+
+    connectUnAuthUserToPlaid();
+  }, [appUser, connectToPlaid.mutateAsync, queryClient.user.get.invalidate]);
+
+  useEffect(() => {
+    const loadTxArray = async () => {
+      if (!appUser?.hasAccessToken) {
+        console.log("No access token, skipping tx fetch");
+        return;
+      }
+      if (txGetAll.status !== "success") {
+        console.log("txGetAll not successful, skipping tx fetch");
+        return;
+      }
+      if (!txGetAll.data?.ok) {
+        console.log("txGetAll data not ok, skipping tx fetch");
+        return;
+      }
+
       const txArray = txGetAll.data.value;
 
       //undefined cursor should should give user txs for sandbox accounts
@@ -58,7 +96,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       }
     };
 
-    yeet();
+    loadTxArray();
   }, [
     appUser,
     queryClient.tx.getAll,
