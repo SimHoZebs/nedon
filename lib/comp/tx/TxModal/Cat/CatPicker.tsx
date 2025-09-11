@@ -1,14 +1,14 @@
-import { createNewCat } from "@/util/cat";
 import catStyleArray from "@/util/catStyle";
-import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
-import { useTxStore } from "@/util/txStore";
 
 import type { TreedCat, UnsavedCat } from "@/types/cat";
 import { isUnsavedTx } from "@/types/tx";
 
 import { createId } from "@paralleldrive/cuid2";
 import { Prisma } from "@prisma/client";
+import { createNewCat } from "lib/domain/cat";
+import { useStore } from "lib/store/store";
+import { useTxStore } from "lib/store/txStore";
 import { type ForwardedRef, forwardRef, useEffect, useState } from "react";
 
 interface Props {
@@ -22,7 +22,7 @@ const CatPicker = forwardRef(
   (props: Props, ref: ForwardedRef<HTMLDivElement>) => {
     const createTx = trpc.tx.create.useMutation();
     const upsertCatArray = trpc.cat.upsertMany.useMutation();
-    const catOptionArray = trpc.getCatOptionArray.useQuery(undefined, {
+    const catOptionArray = trpc.settings.getCatOptionArray.useQuery(undefined, {
       staleTime: Number.POSITIVE_INFINITY,
     });
     const queryClient = trpc.useUtils();

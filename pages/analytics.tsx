@@ -2,26 +2,26 @@ import AnalysisBar from "@/comp/analysis/AnalysisBar";
 import CatCard from "@/comp/analysis/CatCard";
 import CatModal from "@/comp/analysis/CatModal";
 import LineGraph from "@/comp/analysis/LineGraph";
+import { Button } from "@/comp/shared/Button";
+import DateRangePicker from "@/comp/shared/DateRangePicker";
 
-import { calcCatTypeTotal, subCatTotal } from "@/util/cat";
-import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
-import type { TxType } from "@/util/tx";
-import {
-  getScopeIndex,
-  organizeTxByCat,
-  txTypeArray as txTypes,
-  useTxGetAll,
-} from "@/util/tx";
 
 import type { TreedCatWithTx } from "@/types/cat";
 
 import type { CatSettings } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
+import { calcCatTypeTotal, subCatTotal } from "lib/domain/cat";
+import type { TxType } from "lib/domain/tx";
+import {
+  getScopeIndex,
+  organizeTxByCat,
+  txTypeArray as txTypes,
+  useTxGetAll,
+} from "lib/domain/tx";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import useDateRange from "lib/hooks/useDateRange";
-import { Button } from "lib/shared/Button";
-import DateRangePicker from "lib/shared/DateRangePicker";
+import { useStore } from "lib/store/store";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 

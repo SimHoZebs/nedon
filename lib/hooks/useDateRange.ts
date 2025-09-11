@@ -1,4 +1,4 @@
-import { useStore } from "../util/store";
+import { useStore } from "../store/store";
 
 import { useEffect, useState } from "react";
 

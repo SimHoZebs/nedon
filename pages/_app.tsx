@@ -1,7 +1,8 @@
+import Layout from "@/comp/global/Layout";
+
 import { trpc } from "@/util/trpc";
 
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import Layout from "lib/shared/Layout";
 import type { AppType } from "next/app";
 
 import "../styles/globals.css";

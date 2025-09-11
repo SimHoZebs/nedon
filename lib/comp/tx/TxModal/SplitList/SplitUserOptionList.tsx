@@ -1,11 +1,11 @@
-import { useTxStore } from "@/util/txStore";
+import { Button } from "@/comp/shared/Button";
 
 import { isTx, type SplitTx, type UnsavedSplitTx } from "@/types/tx";
 
 import { createId } from "@paralleldrive/cuid2";
 import { Prisma } from "@prisma/client";
 import useAppUser from "lib/hooks/useAutoLoadUser";
-import { Button } from "lib/shared/Button";
+import { useTxStore } from "lib/store/txStore";
 
 const SplitUserOptionList = () => {
   const { user: appUser, isLoading } = useAppUser();

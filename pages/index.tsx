@@ -1,21 +1,25 @@
 import AccountCard from "@/comp/home/AccountCard";
 import AccountModal from "@/comp/home/AccountModal";
 import CsvUploadPreviewModal from "@/comp/home/CsvUploadPreviewModal";
+import { Button, SplitBtn, SplitBtnOptions } from "@/comp/shared/Button";
+import DateRangePicker from "@/comp/shared/DateRangePicker";
+import DateSortedTxList from "@/comp/shared/DateSortedTxList";
+import { H2, H3 } from "@/comp/shared/Heading";
 import TxModalAndCalculator from "@/comp/tx/TxModalAndCalculator";
 
-import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
-import { createTxFromChaseCSV, getScopeIndex, useTxGetAll } from "@/util/tx";
 
 import { ChaseCSVTxSchema, type UnsavedTx } from "@/types/tx";
 
 import { AnimatePresence, motion } from "framer-motion";
+import {
+  createTxFromChaseCSV,
+  getScopeIndex,
+  useTxGetAll,
+} from "lib/domain/tx";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import useDateRange from "lib/hooks/useDateRange";
-import { Button, SplitBtn, SplitBtnOptions } from "lib/shared/Button";
-import DateRangePicker from "lib/shared/DateRangePicker";
-import DateSortedTxList from "lib/shared/DateSortedTxList";
-import { H2, H3 } from "lib/shared/Heading";
+import { useStore } from "lib/store/store";
 import type { NextPage } from "next";
 import Papa from "papaparse";
 import type { AccountBase } from "plaid";

@@ -2,7 +2,7 @@ import { createStructuredResponse } from "@/util/structuredResponse";
 
 import { type UnsavedReceipt, UnsavedReceiptSchema } from "@/types/receipt";
 
-import { extractReceiptData } from "./aiService";
+import { extractReceiptData } from "./ai";
 import * as blobStorage from "./blobStorage";
 import * as ocr from "./OCR";
 

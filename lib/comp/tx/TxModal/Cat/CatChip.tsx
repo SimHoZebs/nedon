@@ -1,10 +1,10 @@
-import { getCatStyle } from "@/util/cat";
 import { trpc } from "@/util/trpc";
-import { useTxStore } from "@/util/txStore";
 
 import { isSavedCat, type UnsavedCat } from "@/types/cat";
 
 import { Prisma } from "@prisma/client";
+import { getCatStyle } from "lib/domain/cat";
+import { useTxStore } from "lib/store/txStore";
 import type React from "react";
 
 type Props = {

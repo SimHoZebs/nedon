@@ -1,7 +1,7 @@
 import { trpc } from "@/util/trpc";
 
-import { ActionBtn } from "../../shared/Button";
-import Modal from "../../shared/Modal";
+import { ActionBtn } from "../shared/Button";
+import Modal from "../shared/Modal";
 
 import type { Prisma } from "@prisma/client";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";

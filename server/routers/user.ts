@@ -10,7 +10,7 @@ import { procedure, router } from "../trpc";
 import connectionRouter from "./connection";
 
 import { Prisma } from "@prisma/client";
-import { getPlaidTokensAndIds as getPlaidAccessData } from "server/services/plaidService";
+import { getPlaidTokensAndIds as getPlaidAccessData } from "server/domain/plaid";
 import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
 import { z } from "zod";

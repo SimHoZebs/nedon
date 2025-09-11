@@ -1,4 +1,4 @@
-import { createPlaidLinkToken, getAuth } from "../services/plaidService";
+import { createPlaidLinkToken, getAuth } from "../domain/plaid";
 
 import { procedure, router } from "server/trpc";
 import { z } from "zod";

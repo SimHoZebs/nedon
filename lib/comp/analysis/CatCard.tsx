@@ -1,12 +1,12 @@
-import { getCatStyle, subCatTotal } from "@/util/cat";
 import parseMoney from "@/util/parseMoney";
-import type { TxType } from "@/util/tx";
 
 import type { TreedCatWithTx } from "@/types/cat";
 
-import { H3 } from "../../shared/Heading";
+import { H3 } from "../shared/Heading";
 
 import { type CatSettings, Prisma } from "@prisma/client";
+import { getCatStyle, subCatTotal } from "lib/domain/cat";
+import type { TxType } from "lib/domain/tx";
 
 interface Props {
   txType: TxType;

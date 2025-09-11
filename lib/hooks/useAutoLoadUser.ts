@@ -1,9 +1,6 @@
-import { useLocalStore, useLocalStoreDelay } from "@/util/localStore";
-
-import type { UnAuthUserClientSide, UserClientSide } from "@/types/user";
-
 import { trpc } from "../util/trpc";
-import { useStore } from "@/util/store";
+
+import { useLocalStore, useLocalStoreDelay } from "lib/store/localStore";
 
 /**
  * FOR DEVELOPMENT PURPOSES ONLY

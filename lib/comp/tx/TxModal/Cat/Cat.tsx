@@ -1,6 +1,6 @@
-import { createNewCat } from "@/util/cat";
+import { ActionBtn, Button } from "@/comp/shared/Button";
+
 import { trpc } from "@/util/trpc";
-import { useTxStore } from "@/util/txStore";
 
 import type { UnsavedCat } from "@/types/cat";
 import { isUnsavedTx } from "@/types/tx";
@@ -10,7 +10,8 @@ import CatPicker from "./CatPicker";
 
 import { createId } from "@paralleldrive/cuid2";
 import { Prisma } from "@prisma/client";
-import { ActionBtn, Button } from "lib/shared/Button";
+import { createNewCat } from "lib/domain/cat";
+import { useTxStore } from "lib/store/txStore";
 import { useRef, useState } from "react";
 
 const OFFSCREEN = { x: -800, y: -800 };

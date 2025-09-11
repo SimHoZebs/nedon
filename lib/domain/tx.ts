@@ -2,13 +2,12 @@ import type { TreedCatWithTx } from "@/types/cat";
 import type { ChaseCSVTx, Tx, UnsavedTx } from "@/types/tx";
 
 import useAutoLoadUser from "../hooks/useAutoLoadUser";
+import { useStore } from "../store/store";
+import { trpc } from "../util/trpc";
 import { createNewCat, fillArrayByCat } from "./cat";
-import { useStore } from "./store";
-import { trpc } from "./trpc";
 
 import { MdsType, Prisma } from "@prisma/client";
 import type { Transaction } from "plaid";
-import { Result } from "./type";
 
 export const resetTx = (tx: Tx) => ({
   ...tx,

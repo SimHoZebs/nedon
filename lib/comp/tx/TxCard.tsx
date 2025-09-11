@@ -1,8 +1,7 @@
-import { getCatStyle } from "@/util/cat";
-
 import type { Tx } from "@/types/tx";
 
 import { Prisma } from "@prisma/client";
+import { getCatStyle } from "lib/domain/cat";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 
 interface Props {

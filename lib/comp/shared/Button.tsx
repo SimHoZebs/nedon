@@ -1,9 +1,8 @@
-import Link from "next/link";
-import type { NextRouter } from "next/router";
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   onClickAsync?: (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => Promise<void>;
@@ -70,36 +69,6 @@ export const ActionBtn = (props: ActionBtnProps) => {
     >
       {children}
     </Button>
-  );
-};
-
-interface NavBtnProps extends ButtonProps {
-  icon?: string;
-  router: NextRouter;
-  route: string;
-}
-
-export const NavBtn = (props: NavBtnProps) => {
-  return (
-    <Link
-      className={`group flex justify-center gap-x-2 p-3 text-sm transition-all hover:bg-indigo-200 hover:bg-opacity-5 hover:text-indigo-200 sm:w-full sm:justify-start ${
-        props.router.pathname === props.route
-          ? "bg-indigo-200 bg-opacity-20 text-indigo-200"
-          : "text-zinc-300"
-      }`}
-      href={props.route}
-    >
-      {props.icon && (
-        <span
-          className={`h-6 w-6 group-hover:text-indigo-200 ${
-            props.router.pathname === props.route
-              ? "text-indigo-200"
-              : "text-zinc-400"
-          } ${props.icon}`}
-        />
-      )}
-      <p className="hidden items-center sm:flex">{props.children}</p>
-    </Link>
   );
 };
 
@@ -171,7 +140,7 @@ export const SplitBtn = (props: SplitBtnProps) => {
 
 type SplitBtnOptionsProps = ButtonProps & {};
 
-export const SplitBtnOptions = (props: SplitBtnProps) => {
+export const SplitBtnOptions = (props: SplitBtnOptionsProps) => {
   const { children } = props;
 
   return (

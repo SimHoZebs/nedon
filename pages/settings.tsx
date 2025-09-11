@@ -1,12 +1,12 @@
+import { ActionBtn, Button } from "@/comp/shared/Button";
+import { H2 } from "@/comp/shared/Heading";
 import CreateUserBtn from "@/comp/user/CreateUserBtn";
 
-import { useLocalStore } from "@/util/localStore";
-import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
-import { ActionBtn, Button } from "lib/shared/Button";
-import { H2 } from "lib/shared/Heading";
+import { useLocalStore } from "lib/store/localStore";
+import { useStore } from "lib/store/store";
 import { useRouter } from "next/router";
 import { useId } from "react";
 

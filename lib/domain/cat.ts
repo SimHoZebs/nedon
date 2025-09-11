@@ -1,8 +1,8 @@
 import type { TreedCat, TreedCatWithTx, UnsavedCat } from "@/types/cat";
 import type { Tx } from "@/types/tx";
 
-import catStyleArray from "./catStyle";
-import parseMoney from "./parseMoney";
+import catStyleArray from "../util/catStyle";
+import parseMoney from "../util/parseMoney";
 import type { TxType } from "./tx";
 
 import { Prisma } from "@prisma/client";

@@ -1,8 +1,7 @@
-import { createTxFromPlaidTx } from "@/util/tx";
-
 import type { Tx, UnsavedTx } from "@/types/tx";
 
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { createTxFromPlaidTx } from "lib/domain/tx";
 import type { RemovedTransaction, Transaction } from "plaid";
 import db from "server/util/db";
 

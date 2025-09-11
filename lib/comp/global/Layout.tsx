@@ -1,11 +1,12 @@
-import { useStore } from "@/util/store";
+import SandboxLoginBtn from "@/comp/shared/SandboxLoginBtn";
+
 import { trpc } from "@/util/trpc";
-import { organizeTxByTime, useTxGetAll } from "@/util/tx";
 
-import { NavBtn } from "./Button";
+import { NavBtn } from "../shared/Button";
 
-import { SandboxLoginButton } from "lib/domains/dev";
+import { organizeTxByTime, useTxGetAll } from "lib/domain/tx";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
+import { useStore } from "lib/store/store";
 import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/router";
 import type React from "react";
@@ -156,7 +157,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             {appUser.name}
           </NavBtn>
         ) : (
-          <SandboxLoginButton />
+          <SandboxLoginBtn />
         )}
       </nav>
     </div>

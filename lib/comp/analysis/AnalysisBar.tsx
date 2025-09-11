@@ -1,6 +1,6 @@
-import { getCatStyle, subCatTotal } from "@/util/cat";
-
 import type { TreedCatWithTx } from "@/types/cat";
+
+import { getCatStyle, subCatTotal } from "lib/domain/cat";
 
 interface Props {
   organizedTxByCatArray: TreedCatWithTx[];

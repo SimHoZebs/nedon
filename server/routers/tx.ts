@@ -1,4 +1,3 @@
-import { resetTx } from "@/util/tx";
 import type { Result } from "@/util/type";
 
 import { type Tx, TxSchema, UnsavedTxSchema } from "@/types/tx";
@@ -6,6 +5,7 @@ import { type Tx, TxSchema, UnsavedTxSchema } from "@/types/tx";
 import { procedure, router } from "../trpc";
 import { createCatInput, getPlaidTxSyncData } from "../util/plaid";
 
+import { resetTx } from "lib/domain/tx";
 import db from "server/util/db";
 import {
   createTxInput,

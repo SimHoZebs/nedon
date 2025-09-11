@@ -1,6 +1,8 @@
-import { useStore } from "@/util/store";
+import { ActionBtn, CloseBtn, SecondaryBtn } from "@/comp/shared/Button";
+import { H1 } from "@/comp/shared/Heading";
+import Modal from "@/comp/shared/Modal";
+
 import { trpc } from "@/util/trpc";
-import { useTxStore } from "@/util/txStore";
 
 import { isTx } from "@/types/tx";
 
@@ -11,9 +13,8 @@ import SplitList from "./SplitList/SplitList";
 
 import { Prisma } from "@prisma/client";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
-import { ActionBtn, CloseBtn, SecondaryBtn } from "lib/shared/Button";
-import { H1 } from "lib/shared/Heading";
-import Modal from "lib/shared/Modal";
+import { useStore } from "lib/store/store";
+import { useTxStore } from "lib/store/txStore";
 import Image from "next/image";
 import type { AuthGetResponse } from "plaid";
 import { useEffect, useId } from "react";

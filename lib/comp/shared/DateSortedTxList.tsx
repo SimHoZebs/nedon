@@ -1,11 +1,10 @@
-import { useTxGetAll } from "@/util/tx";
-import { useTxStore } from "@/util/txStore";
-
 import type { Tx } from "@/types/tx";
 
-import TxCard from "../comp/tx/TxCard";
+import TxCard from "../tx/TxCard";
 import { H2, H3 } from "./Heading";
 
+import { useTxGetAll } from "lib/domain/tx";
+import { useTxStore } from "lib/store/txStore";
 import type React from "react";
 
 interface Props {

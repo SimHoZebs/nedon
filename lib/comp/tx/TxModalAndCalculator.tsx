@@ -1,6 +1,4 @@
 import parseMoney from "@/util/parseMoney";
-import { useStore } from "@/util/store";
-import { useTxStore } from "@/util/txStore";
 
 import type { SplitTx } from "@/types/tx";
 
@@ -9,6 +7,8 @@ import TxModal from "./TxModal/TxModal";
 
 import { Prisma } from "@prisma/client";
 import { motion } from "framer-motion";
+import { useStore } from "lib/store/store";
+import { useTxStore } from "lib/store/txStore";
 import React, { useEffect } from "react";
 
 // Define proper types for better type safety

@@ -1,10 +1,13 @@
-import { useLocalStore } from "@/util/localStore";
-import { Button } from "lib/shared/Button";
-import { trpc } from "@/util/trpc";
-import { createId } from "@paralleldrive/cuid2";
-import { UnAuthUserClientSide } from "@/types/user";
+import { Button } from "@/comp/shared/Button";
 
-export const SandboxLoginButton = () => {
+import { trpc } from "@/util/trpc";
+
+import type { UnAuthUserClientSide } from "@/types/user";
+
+import { createId } from "@paralleldrive/cuid2";
+import { useLocalStore } from "lib/store/localStore";
+
+const SandboxLoginBtn = () => {
   const saveUserIdOnLocalStorage = useLocalStore((state) => state.setUserId);
   const createUser = trpc.user.create.useMutation();
   const connectToPlaid = trpc.user.connectToPlaid.useMutation();
@@ -53,3 +56,4 @@ export const SandboxLoginButton = () => {
 
   return <Button onClickAsync={handleClick}>Connect to Plaid Sandbox</Button>;
 };
+export default SandboxLoginBtn;

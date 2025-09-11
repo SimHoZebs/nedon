@@ -1,6 +1,6 @@
 import { trpc } from "@/util/trpc";
 
-import { ActionBtn } from "../../shared/Button";
+import { ActionBtn } from "../shared/Button";
 
 import { useState } from "react";
 

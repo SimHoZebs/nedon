@@ -1,9 +1,8 @@
-import { useStore } from "@/util/store";
-import type { TxType } from "@/util/tx";
-
 import type { Tx } from "@/types/tx";
 
 import { Prisma } from "@prisma/client";
+import type { TxType } from "lib/domain/tx";
+import { useStore } from "lib/store/store";
 import { useEffect, useState } from "react";
 import {
   Line,
