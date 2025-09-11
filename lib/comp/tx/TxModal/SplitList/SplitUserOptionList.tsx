@@ -4,7 +4,7 @@ import { isTx, type SplitTx, type UnsavedSplitTx } from "@/types/tx";
 
 import { createId } from "@paralleldrive/cuid2";
 import { Prisma } from "@prisma/client";
-import useAppUser from "lib/hooks/useAppUser";
+import useAppUser from "lib/hooks/useAutoLoadUser";
 import { Button } from "lib/shared/Button";
 
 const SplitUserOptionList = () => {

@@ -3,14 +3,14 @@ import { getCatStyle } from "@/util/cat";
 import type { Tx } from "@/types/tx";
 
 import { Prisma } from "@prisma/client";
-import useAppUser from "lib/hooks/useAppUser";
+import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 
 interface Props {
   onInteraction: () => void;
   tx: Tx;
 }
 const TxCard = (props: Props) => {
-  const { user: appUser, isLoading } = useAppUser();
+  const { user: appUser, isLoading } = useAutoLoadUser();
 
   const splitAmount =
     isLoading && appUser

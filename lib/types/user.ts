@@ -56,7 +56,8 @@ export const unAuthUserClientSideSchema = unAuthUserSchema
   })
   .strict();
 
-export type unAuthUserClientSide = z.infer<typeof unAuthUserClientSideSchema>;
+export interface UnAuthUserClientSide
+  extends z.infer<typeof unAuthUserClientSideSchema> {}
 
 export const UserSchemaClientSide = unAuthUserClientSideSchema
   .omit({
@@ -71,7 +72,7 @@ export const UserSchemaClientSide = unAuthUserClientSideSchema
   })
   .strict();
 
-export type UserClientSide = z.infer<typeof UserSchemaClientSide>;
+export interface UserClientSide extends z.infer<typeof UserSchemaClientSide> {}
 
 export const isUserClientSide = (user: unknown): user is UserClientSide => {
   return (user as UserClientSide).itemId !== undefined;

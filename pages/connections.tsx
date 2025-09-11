@@ -4,7 +4,7 @@ import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 
 import { Prisma } from "@prisma/client";
-import useAppUser from "lib/hooks/useAppUser";
+import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { ActionBtn, Button } from "lib/shared/Button";
 import { useMemo, useState } from "react";
 
@@ -18,7 +18,7 @@ const Connections = () => {
     amount: Prisma.Decimal;
   }>();
 
-  const { user: appUser, isLoading } = useAppUser();
+  const { user: appUser, isLoading } = useAutoLoadUser();
 
   const removeConnection = trpc.user.removeConnection.useMutation();
   const associatedTxArray = trpc.tx.getAllAssociated.useQuery(

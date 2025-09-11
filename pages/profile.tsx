@@ -1,12 +1,12 @@
 import { trpc } from "@/util/trpc";
 
-import useAppUser from "lib/hooks/useAppUser";
+import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { ActionBtn, Button } from "lib/shared/Button";
 import Input from "lib/shared/Input";
 import { useEffect, useState } from "react";
 
 const Profile = () => {
-  const { user: appUser, isLoading } = useAppUser();
+  const { user: appUser, isLoading } = useAutoLoadUser();
   const updateProfile = trpc.user.updateName.useMutation();
   const [unsavedUser, setUnsavedUser] = useState(appUser);
 

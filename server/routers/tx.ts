@@ -1,6 +1,7 @@
 import { resetTx } from "@/util/tx";
+import type { Result } from "@/util/type";
 
-import { TxSchema, UnsavedTxSchema } from "@/types/tx";
+import { type Tx, TxSchema, UnsavedTxSchema } from "@/types/tx";
 
 import { procedure, router } from "../trpc";
 import { createCatInput, getPlaidTxSyncData } from "../util/plaid";
@@ -35,29 +36,31 @@ const txRouter = router({
   getAll: procedure
     .input(z.object({ id: z.string(), date: z.string() }))
     .query(async ({ input }) => {
+      let result: Result<Tx[] | null, unknown>;
       try {
         const user = await db.user.findFirst({ where: { id: input.id } });
+
         if (!user) {
-          console.log("No user found with id: ", input.id);
-          return null;
-        }
-        if (!user.accessToken) {
-          console.log("No access token for user: ", input.id);
-          return null;
+          console.error("No user found with id: ", input.id);
+          throw new Error("No user found");
+        } else if (!user.accessToken) {
+          console.error("No access token for user: ", input.id);
+          throw new Error("No access token for user");
         }
 
-        const txSyncResponse = await getPlaidTxSyncData(
+        const plaidSyncResponse = await getPlaidTxSyncData(
           user.accessToken,
           user.cursor || undefined,
         );
-        if (!txSyncResponse) return null;
+
+        if (!plaidSyncResponse) throw new Error("No Plaid sync response");
 
         const res = await mergePlaidTxWithTxArray(
-          txSyncResponse,
+          plaidSyncResponse,
           user.id,
           input.date,
         );
-        if (!res) return null;
+        if (!res) throw new Error("Merging Plaid tx with db tx failed");
         const { txArray, cursor } = res;
 
         // update cursor in db asynchonously
@@ -69,12 +72,13 @@ const txRouter = router({
           .then();
 
         console.log("returning txArray", txArray.length);
-        return txArray;
+        result = { ok: true, value: txArray };
       } catch (error) {
         console.error(error);
         console.error("Input: ", input);
-        return null;
+        result = { ok: false, error };
       }
+      return result;
     }),
 
   //all tx meta including the user

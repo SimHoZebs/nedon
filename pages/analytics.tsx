@@ -18,7 +18,7 @@ import type { TreedCatWithTx } from "@/types/cat";
 
 import type { CatSettings } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
-import useAppUser from "lib/hooks/useAppUser";
+import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import useDateRange from "lib/hooks/useDateRange";
 import { Button } from "lib/shared/Button";
 import DateRangePicker from "lib/shared/DateRangePicker";
@@ -26,7 +26,7 @@ import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const Page = () => {
-  const { user: appUser, isLoading } = useAppUser();
+  const { user: appUser, isLoading } = useAutoLoadUser();
   const txOragnizedByTimeArray = useStore(
     (store) => store.txOrganizedByTimeArray,
   );

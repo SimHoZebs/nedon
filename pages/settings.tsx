@@ -4,7 +4,7 @@ import { useLocalStore } from "@/util/localStore";
 import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 
-import useAppUser from "lib/hooks/useAppUser";
+import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { ActionBtn, Button } from "lib/shared/Button";
 import { H2 } from "lib/shared/Heading";
 import { useRouter } from "next/router";
@@ -15,7 +15,7 @@ const Settings = () => {
   const verticalCatPicker = useStore((state) => state.verticalCatPicker);
   const setVerticalCatPicker = useStore((state) => state.setVerticalCatPicker);
 
-  const { user: appUser, isLoading: appUserIsLoading } = useAppUser();
+  const { user: appUser, isLoading: appUserIsLoading } = useAutoLoadUser();
   const allUsers = trpc.dev.getAllUsers.useQuery();
   const deleteAll = trpc.dev.deleteAllUsers.useMutation();
   const deleteUser = trpc.user.delete.useMutation();

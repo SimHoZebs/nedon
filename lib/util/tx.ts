@@ -1,7 +1,7 @@
 import type { TreedCatWithTx } from "@/types/cat";
 import type { ChaseCSVTx, Tx, UnsavedTx } from "@/types/tx";
 
-import useAppUser from "../hooks/useAppUser";
+import useAutoLoadUser from "../hooks/useAutoLoadUser";
 import { createNewCat, fillArrayByCat } from "./cat";
 import { useStore } from "./store";
 import { trpc } from "./trpc";
@@ -202,7 +202,7 @@ export const txTypeArray: ["spending", "received", "transfers"] = [
 export type TxType = (typeof txTypeArray)[number];
 
 export const useTxGetAll = () => {
-  const { user: appUser, isLoading: appUserIsLoading } = useAppUser();
+  const { user: appUser, isLoading: appUserIsLoading } = useAutoLoadUser();
   const datetime = useStore((store) => store.datetime);
 
   const txArray = trpc.tx.getAll.useQuery(

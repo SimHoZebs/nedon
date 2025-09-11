@@ -24,7 +24,7 @@ export const useLocalStoreDelay = <T, F>(
 
 interface LocalStore {
   userId: string | null;
-  setUserId: (userId: string) => void;
+  setUserId: (userId: string | null) => void;
 }
 
 export const useLocalStore = create<LocalStore>()(
@@ -32,7 +32,7 @@ export const useLocalStore = create<LocalStore>()(
     persist(
       (set) => ({
         userId: null,
-        setUserId: (userId: string) => set({ userId }),
+        setUserId: (userId) => set({ userId }),
       }),
 
       { name: "local-storage" },

@@ -5,7 +5,7 @@ import { organizeTxByTime, useTxGetAll } from "@/util/tx";
 import { NavBtn } from "./Button";
 
 import { useAutoCreateUser } from "lib/domains/dev";
-import useAppUser from "lib/hooks/useAppUser";
+import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/router";
 import type React from "react";
@@ -19,14 +19,14 @@ const customFont = Space_Grotesk({
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
-  const { user: appUser, isLoading: appUserIsLoading } = useAppUser();
+  const { user: appUser, isLoading: appUserIsLoading } = useAutoLoadUser();
 
   const txGetAllRetryCount = useRef(0);
   const setScreenType = useStore((state) => state.setScreenType);
   const setTxOragnizedByTimeArray = useStore(
     (state) => state.setTxOrganizedByTimeArray,
   );
-  const txArray = useTxGetAll();
+  const txGetAll = useTxGetAll();
 
   const queryClient = trpc.useUtils();
 
@@ -35,12 +35,14 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   useEffect(() => {
     const yeet = async () => {
       if (!appUser?.hasAccessToken) return;
+      if (!txGetAll.data?.ok) return;
+      const txArray = txGetAll.data.value;
 
       //undefined cursor should should give user txs for sandbox accounts
       while (
         !appUser.cursor &&
         txGetAllRetryCount.current < 3 &&
-        ((txArray.data && txArray.data.length < 1) || txArray.data === null)
+        ((txArray && txArray.length < 1) || txArray === null)
       ) {
         console.log("No transactions found. Retrying...");
 
@@ -49,9 +51,9 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
         await queryClient.tx.getAll.invalidate();
       }
 
-      if (txArray.data) {
+      if (txArray) {
         console.log("updating txOragnizedByTimeArray");
-        const response = organizeTxByTime(txArray.data);
+        const response = organizeTxByTime(txArray);
         setTxOragnizedByTimeArray(response);
       }
     };
@@ -59,10 +61,10 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
     yeet();
   }, [
     appUser,
-    txArray.data,
     queryClient.tx.getAll,
     appUser?.cursor,
     setTxOragnizedByTimeArray,
+    txGetAll,
   ]);
 
   useEffect(() => {

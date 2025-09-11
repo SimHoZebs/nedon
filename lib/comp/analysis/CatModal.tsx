@@ -12,7 +12,7 @@ import Input from "../../shared/Input";
 import Modal from "../../shared/Modal";
 
 import { type CatSettings, Prisma } from "@prisma/client";
-import useAppUser from "lib/hooks/useAppUser";
+import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -25,7 +25,7 @@ interface Props {
 
 const CatModal = (props: Props) => {
   const { settings, data } = props.modalData;
-  const { user: appUser, isLoading: appUserLoading } = useAppUser();
+  const { user: appUser, isLoading: appUserLoading } = useAutoLoadUser();
   const { data: userSettings } = trpc.settings.get.useQuery(
     { userId: appUser?.id || "" },
     { enabled: !!appUser && !appUserLoading },

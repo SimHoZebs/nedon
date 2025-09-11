@@ -2,13 +2,13 @@ import { trpc } from "@/util/trpc";
 
 import { ActionBtn } from "./Button";
 
-import useAppUser from "lib/hooks/useAppUser";
+import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { usePlaidLink } from "react-plaid-link";
 
 const LinkBtn = () => {
-  const appUser = useAppUser();
+  const appUser = useAutoLoadUser();
   const linkToken = trpc.plaid.createLinkToken.useQuery(undefined, {
     staleTime: 360000,
   });

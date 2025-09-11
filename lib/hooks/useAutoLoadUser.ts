@@ -1,14 +1,18 @@
 import { useLocalStore, useLocalStoreDelay } from "@/util/localStore";
 
+import type { UnAuthUserClientSide, UserClientSide } from "@/types/user";
+
 import { trpc } from "../util/trpc";
 
 /**
+ * FOR DEVELOPMENT PURPOSES ONLY
+ *
  * Fetches the current application user. It first attempts to retrieve the user
  *  using the user ID stored in local storage. If no user ID is found or if the
  * user cannot be fetched, it falls back to fetching the first user in the
  * database (primarily for development purposes).
  */
-const useAppUser = () => {
+const useAutoLoadUser = () => {
   const userIdFromLocalStorage = useLocalStoreDelay(
     useLocalStore,
     (state) => state.userId,
@@ -31,7 +35,7 @@ const useAppUser = () => {
     enabled: userIdFromLocalStorage === null,
   });
 
-  const user = getUser.data?.ok
+  const user: UnAuthUserClientSide | UserClientSide | null = getUser.data?.ok
     ? getUser.data.value
     : getFirstUser.data?.ok
       ? getFirstUser.data.value
@@ -45,4 +49,4 @@ const useAppUser = () => {
   return { user, isLoading };
 };
 
-export default useAppUser;
+export default useAutoLoadUser;

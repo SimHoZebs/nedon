@@ -1,6 +1,10 @@
 import { exact, type Result } from "@/util/type";
 
-import type { unAuthUserClientSide } from "@/types/user";
+import {
+  isUserClientSide,
+  type UnAuthUserClientSide,
+  type UserClientSide,
+} from "@/types/user";
 
 import { procedure, router } from "server/trpc";
 import db from "server/util/db";
@@ -25,7 +29,7 @@ const devRouter = router({
   }),
 
   getFirstUser: procedure.input(z.undefined()).query(async () => {
-    let result: Result<unAuthUserClientSide | null, unknown>;
+    let result: Result<UnAuthUserClientSide | UserClientSide, unknown>;
     try {
       const user = await db.user.findFirst({
         include: {
@@ -33,17 +37,25 @@ const devRouter = router({
         },
       });
 
-      if (!user) return null;
+      if (!user) throw new Error("No users found in the database.");
 
       const { accessToken, ...userWithoutAccessToken } = user;
-
-      result = {
-        ok: true,
-        value: exact<unAuthUserClientSide>()({
-          ...userWithoutAccessToken,
-          hasAccessToken: !!accessToken,
-        }),
+      const userClientSide = {
+        ...userWithoutAccessToken,
+        hasAccessToken: !!accessToken,
       };
+
+      if (isUserClientSide(userClientSide)) {
+        result = {
+          ok: true,
+          value: exact<UserClientSide>()(userClientSide),
+        };
+      } else {
+        result = {
+          ok: true,
+          value: exact<UnAuthUserClientSide>()(userClientSide),
+        };
+      }
     } catch (e) {
       console.error("Error fetching first user:", e);
       result = {

@@ -10,7 +10,7 @@ import Receipt from "./Receipt";
 import SplitList from "./SplitList/SplitList";
 
 import { Prisma } from "@prisma/client";
-import useAppUser from "lib/hooks/useAppUser";
+import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { ActionBtn, CloseBtn, SecondaryBtn } from "lib/shared/Button";
 import { H1 } from "lib/shared/Heading";
 import Modal from "lib/shared/Modal";
@@ -36,7 +36,7 @@ const TxModal = (props: Props) => {
   const txOragnizedByTimeArray = useStore(
     (store) => store.txOrganizedByTimeArray,
   );
-  const { user: appUser, isLoading: appUserIsLoading } = useAppUser();
+  const { user: appUser, isLoading: appUserIsLoading } = useAutoLoadUser();
   const auth = trpc.plaid.auth.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser && !appUserIsLoading },

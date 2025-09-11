@@ -1,27 +1,34 @@
-import { trpc } from "@/util/trpc";
-import useAppUser from "lib/hooks/useAppUser";
 import { useLocalStore } from "@/util/localStore";
+import { trpc } from "@/util/trpc";
+
+import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useEffect } from "react";
 
 export const useAutoCreateUser = () => {
   const queryClient = trpc.useUtils();
-  const { user: appUser, isLoading: appUserIsLoading } = useAppUser();
+  const { user: appUser, isLoading: appUserIsLoading } = useAutoLoadUser();
   const saveUserIdOnLocalStorage = useLocalStore((state) => state.setUserId);
   const createUser = trpc.user.create.useMutation();
+  const connectToPlaid = trpc.user.connectToPlaid.useMutation();
 
   useEffect(() => {
     const autoCreateUsers = async () => {
-      const createUserResponse = await createUser.mutateAsync();
-      if (!createUserResponse.ok) {
-        console.error("Failed to create user:", createUserResponse.error);
-        return;
+      try {
+        const createUserResult = await createUser.mutateAsync();
+        if (!createUserResult.ok) {
+          throw new Error(JSON.stringify(createUserResult.error));
+        }
+        const user = createUserResult.value;
+
+        // for future sessions
+        saveUserIdOnLocalStorage(user.id);
+
+        await connectToPlaid.mutateAsync({ id: user.id });
+
+        await queryClient.user.invalidate();
+      } catch (error) {
+        console.error("Error during auto-creating user:", error);
       }
-      const user = createUserResponse.value;
-
-      saveUserIdOnLocalStorage(user.id);
-
-      await queryClient.user.invalidate();
-      console.log("User created with Plaid");
     };
 
     if (!appUser && !appUserIsLoading && createUser.isIdle) {
@@ -47,5 +54,6 @@ export const useAutoCreateUser = () => {
     createUser,
     queryClient.user,
     appUserIsLoading,
+    connectToPlaid,
   ]);
 };

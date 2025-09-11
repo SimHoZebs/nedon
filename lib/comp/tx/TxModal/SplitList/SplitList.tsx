@@ -7,7 +7,7 @@ import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
 
 import { Prisma } from "@prisma/client";
-import useAppUser from "lib/hooks/useAppUser";
+import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { ActionBtn, Button } from "lib/shared/Button";
 import { H3 } from "lib/shared/Heading";
 import type React from "react";
@@ -27,7 +27,7 @@ const SplitList = (props: Props) => {
   const queryClient = trpc.useUtils();
   const revertToTxInDB = useTxStore((state) => state.revertToTxInDB);
 
-  const appUser = useAppUser();
+  const appUser = useAutoLoadUser();
   const isEditingSplitTx = useTxStore((state) => state.isEditingSplitTx);
   const setIsEditingSplitTx = useTxStore((state) => state.setIsEditingSplitTx);
   const tx = useTxStore((state) => state.txOnModal);
