@@ -15,15 +15,17 @@ interface Props {
 }
 
 const AccountModal = (props: Props) => {
-  const txArray = useTxGetAll();
+  const txGetAll = useTxGetAll();
 
   const sortedTxArray = useMemo(() => {
-    if (!txArray.data) return [[[[]]]];
-    const filteredTxArray = txArray.data.filter(
+    if (!txGetAll.data || !txGetAll.data.ok) return [[[[]]]];
+    const txArray = txGetAll.data.value;
+    if (!txArray || txArray.length === 0) return [[[[]]]];
+    const filteredTxArray = txArray.filter(
       (tx) => tx.accountId === props.clickedAccount.account_id,
     );
     return organizeTxByTime(filteredTxArray);
-  }, [props.clickedAccount.account_id, txArray.data]);
+  }, [props.clickedAccount.account_id, txGetAll.data]);
 
   return (
     <div className="pointer-events-none absolute top-0 left-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">

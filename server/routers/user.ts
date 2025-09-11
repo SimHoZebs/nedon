@@ -2,13 +2,15 @@ import { exact, type Result } from "@/util/type";
 
 import {
   isUserClientSide,
+  type UnAuthUserClientSide,
   type UserClientSide,
-  type unAuthUserClientSide,
 } from "@/types/user";
 
 import { procedure, router } from "../trpc";
 
+import { Prisma } from "@prisma/client";
 import { getPlaidTokensAndIds as getPlaidAccessData } from "server/services/plaidService";
+import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
 import { z } from "zod";
 
@@ -30,35 +32,34 @@ const userRouter = router({
   create: procedure
     .input(z.object({ name: z.string(), id: z.cuid2().optional() }).optional())
     .mutation(async ({ input }) => {
-      let result: Result<UserClientSide, unknown>;
+      let result: Result<UnAuthUserClientSide | UserClientSide, unknown>;
       try {
-        const userUpdateData = await getPlaidAccessData();
-        if (!userUpdateData.ok) {
-          throw new Error("Failed to get Plaid access data");
-        }
-
         const user = await db.user.create({
           ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
           data: {
-            ...userUpdateData.value,
             id: input?.id,
           },
         });
-        console.log("created user", user);
-
-        if (!isUserClientSide(user)) {
-          throw new Error("Created user does not match UserClientSide schema");
-        }
+        console.log("Created user without Plaid data:", user);
 
         const { accessToken, ...userWithoutAccessToken } = user;
 
-        result = {
-          ok: true,
-          value: exact<UserClientSide>()({
-            ...userWithoutAccessToken,
-            hasAccessToken: !!accessToken,
-          }),
+        const userClientSide = {
+          ...userWithoutAccessToken,
+          hasAccessToken: !!accessToken,
         };
+
+        if (isUserClientSide(userClientSide)) {
+          result = {
+            ok: true,
+            value: exact<UserClientSide>()(userClientSide),
+          };
+        } else {
+          result = {
+            ok: true,
+            value: exact<UnAuthUserClientSide>()(userClientSide),
+          };
+        }
       } catch (e) {
         console.error("Error creating user:", e);
         result = {
@@ -72,13 +73,18 @@ const userRouter = router({
   get: procedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
-      let result: Result<unAuthUserClientSide | UserClientSide, unknown>;
+      let result: Result<
+        UnAuthUserClientSide | UserClientSide,
+        { code: string; message: string } | Error
+      >;
       try {
         const user = await db.user.findFirst({
           where: { id: input.id },
           ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
         });
-        if (!user) throw new Error(`User with id ${input.id} not found`);
+        if (!user) {
+          throw new UserNotFoundError(input.id);
+        }
 
         result = {
           ok: true,
@@ -88,11 +94,77 @@ const userRouter = router({
           },
         };
       } catch (e) {
-        console.error("Error fetching user:", e);
+        if (e instanceof UserNotFoundError) {
+          result = {
+            ok: false,
+            error: { code: e.code, message: e.message },
+          };
+        } else {
+          console.error("Error fetching user:", e);
+          result = {
+            ok: false,
+            error: {
+              code: "INTERNAL_SERVER_ERROR",
+              message: "An unexpected error occurred.",
+            },
+          };
+        }
+      }
+      return result;
+    }),
+
+  connectToPlaid: procedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      let result: Result<
+        UserClientSide,
+        { code: string; message: string } | Error
+      >;
+      try {
+        const plaidDataResult = await getPlaidAccessData();
+        if (!plaidDataResult.ok) {
+          throw new Error(
+            `Failed to get Plaid access data: ${plaidDataResult.error}`,
+          );
+        }
+        const user = await db.user.update({
+          where: { id: input.id },
+          data: {
+            ...plaidDataResult.value,
+          },
+          ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
+        });
+        if (!isUserClientSide(user)) {
+          throw new Error("Updated user does not match UserClientSide schema");
+        }
+        const { accessToken, ...userWithoutAccessToken } = user;
         result = {
-          ok: false,
-          error: e,
+          ok: true,
+          value: exact<UserClientSide>()({
+            ...userWithoutAccessToken,
+            hasAccessToken: !!accessToken,
+          }),
         };
+      } catch (e) {
+        if (
+          e instanceof Prisma.PrismaClientKnownRequestError &&
+          e.code === "P2025"
+        ) {
+          const err = new UserNotFoundError(input.id);
+          result = {
+            ok: false,
+            error: { code: err.code, message: err.message },
+          };
+        } else {
+          console.error("Error connecting user to Plaid:", e);
+          result = {
+            ok: false,
+            error: {
+              code: "INTERNAL_SERVER_ERROR",
+              message: "An unexpected error occurred.",
+            },
+          };
+        }
       }
       return result;
     }),
