@@ -14,8 +14,6 @@ import { useStore } from "@/util/store";
  * database (primarily for development purposes).
  */
 const useAutoLoadUser = () => {
-  const setAppUser = useStore((store) => store.setAppUser);
-
   const userIdFromLocalStorage = useLocalStoreDelay(
     useLocalStore,
     (state) => state.userId,

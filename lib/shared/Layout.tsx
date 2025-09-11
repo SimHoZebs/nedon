@@ -2,7 +2,7 @@ import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime, useTxGetAll } from "@/util/tx";
 
-import { NavBtn } from "./Button";
+import { Button, NavBtn } from "./Button";
 
 import { useAutoCreateUser } from "lib/domains/dev";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
@@ -179,10 +179,21 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
           </NavBtn>
         </div>
 
-        <NavBtn router={router} route="/profile">
-          <span className="icon-[mdi--account] mr-4 h-6 w-6" />
-          {appUser ? appUser.name : ""}
-        </NavBtn>
+        {appUser ? (
+          <NavBtn router={router} route="/profile">
+            <span className="icon-[mdi--account] mr-4 h-6 w-6" />
+            {appUser.name}
+          </NavBtn>
+        ) : (
+          <Button
+            onClick={() => {
+              router.push("/login");
+            }}
+            className="w-full"
+          >
+            Log In
+          </Button>
+        )}
       </nav>
     </div>
   );

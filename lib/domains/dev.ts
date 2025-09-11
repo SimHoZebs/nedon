@@ -1,5 +1,6 @@
 import { useLocalStore } from "@/util/localStore";
 import { trpc } from "@/util/trpc";
+import { createId } from "@paralleldrive/cuid2";
 
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useEffect } from "react";
@@ -14,7 +15,17 @@ export const useAutoCreateUser = () => {
   useEffect(() => {
     const autoCreateUsers = async () => {
       try {
-        const createUserResult = await createUser.mutateAsync();
+        const id = createId();
+        console.debug(
+          "Auto-creating user with id:",
+          id,
+          "and name:",
+          id.slice(0, 6),
+        );
+        const createUserResult = await createUser.mutateAsync({
+          name: id.slice(0, 6),
+          id,
+        });
         if (!createUserResult.ok) {
           throw new Error(JSON.stringify(createUserResult.error));
         }
@@ -25,7 +36,7 @@ export const useAutoCreateUser = () => {
 
         await connectToPlaid.mutateAsync({ id: user.id });
 
-        await queryClient.user.invalidate();
+        await queryClient.invalidate();
       } catch (error) {
         console.error("Error during auto-creating user:", error);
       }

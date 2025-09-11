@@ -7,6 +7,7 @@ import {
 } from "@/types/user";
 
 import { procedure, router } from "../trpc";
+import connectionRouter from "./connection";
 
 import { Prisma } from "@prisma/client";
 import { getPlaidTokensAndIds as getPlaidAccessData } from "server/services/plaidService";
@@ -30,7 +31,11 @@ const WITH_CONNECTIONS_OMIT_ACCESS_TOKEN = {
 
 const userRouter = router({
   create: procedure
-    .input(z.object({ name: z.string(), id: z.cuid2().optional() }).optional())
+    .input(
+      z
+        .object({ name: z.string().optional(), id: z.cuid2().optional() })
+        .optional(),
+    )
     .mutation(async ({ input }) => {
       let result: Result<UnAuthUserClientSide | UserClientSide, unknown>;
       try {
@@ -38,6 +43,7 @@ const userRouter = router({
           ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
           data: {
             id: input?.id,
+            name: input?.name,
           },
         });
         console.log("Created user without Plaid data:", user);
@@ -73,10 +79,7 @@ const userRouter = router({
   get: procedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
-      let result: Result<
-        UnAuthUserClientSide | UserClientSide,
-        { code: string; message: string } | Error
-      >;
+      let result: Result<UnAuthUserClientSide | UserClientSide, Error>;
       try {
         const user = await db.user.findFirst({
           where: { id: input.id },
@@ -97,16 +100,13 @@ const userRouter = router({
         if (e instanceof UserNotFoundError) {
           result = {
             ok: false,
-            error: { code: e.code, message: e.message },
+            error: e,
           };
         } else {
           console.error("Error fetching user:", e);
           result = {
             ok: false,
-            error: {
-              code: "INTERNAL_SERVER_ERROR",
-              message: "An unexpected error occurred.",
-            },
+            error: new Error("An unexpected error occurred."),
           };
         }
       }
@@ -231,70 +231,6 @@ const userRouter = router({
     return user;
   }),
 
-  addConnection: procedure
-    .input(z.object({ userId: z.string(), connectionId: z.string() }))
-    .mutation(async ({ input }) => {
-      const user = await db.user.update({
-        where: {
-          id: input.userId,
-        },
-        data: {
-          myConnectionArray: {
-            connect: {
-              id: input.connectionId,
-            },
-          },
-        },
-        ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
-      });
-
-      await db.user.update({
-        where: {
-          id: input.connectionId,
-        },
-        data: {
-          myConnectionArray: {
-            connect: {
-              id: input.userId,
-            },
-          },
-        },
-      });
-
-      return user;
-    }),
-
-  removeConnection: procedure
-    .input(z.object({ userId: z.string(), connectionId: z.string() }))
-    .mutation(async ({ input }) => {
-      const user = await db.user.update({
-        where: {
-          id: input.userId,
-        },
-        data: {
-          myConnectionArray: {
-            disconnect: {
-              id: input.connectionId,
-            },
-          },
-        },
-        ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
-      });
-
-      await db.user.update({
-        where: {
-          id: input.connectionId,
-        },
-        data: {
-          myConnectionArray: {
-            disconnect: {
-              id: input.userId,
-            },
-          },
-        },
-      });
-
-      return user;
-    }),
+  connection: connectionRouter,
 });
 export default userRouter;

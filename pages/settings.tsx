@@ -19,8 +19,8 @@ const Settings = () => {
   const allUsers = trpc.dev.getAllUsers.useQuery();
   const deleteAll = trpc.dev.deleteAllUsers.useMutation();
   const deleteUser = trpc.user.delete.useMutation();
-  const addConnection = trpc.user.addConnection.useMutation();
-  const removeConnection = trpc.user.removeConnection.useMutation();
+  const addConnection = trpc.user.connection.add.useMutation();
+  const removeConnection = trpc.user.connection.remove.useMutation();
   const queryClient = trpc.useUtils();
   const setUserId = useLocalStore((state) => state.setUserId);
 
@@ -129,9 +129,11 @@ const Settings = () => {
         <ActionBtn
           variant="negative"
           onClickAsync={async () => {
+            console.log("Deleting all users...");
             await deleteAll.mutateAsync();
-            queryClient.dev.getAllUsers.invalidate();
-            await queryClient.user.invalidate();
+            await queryClient.invalidate();
+            setUserId(null);
+            console.log("All users deleted.");
           }}
         >
           <span className="icon-[mdi--delete-outline] h-5 w-5" />
