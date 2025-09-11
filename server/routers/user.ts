@@ -37,7 +37,7 @@ const userRouter = router({
         .optional(),
     )
     .mutation(async ({ input }) => {
-      let result: Result<UnAuthUserClientSide | UserClientSide, unknown>;
+      let result: Result<UnAuthUserClientSide, unknown>;
       try {
         const user = await db.user.create({
           ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
@@ -50,22 +50,15 @@ const userRouter = router({
 
         const { accessToken, ...userWithoutAccessToken } = user;
 
-        const userClientSide = {
+        const userClientSide: UnAuthUserClientSide = {
           ...userWithoutAccessToken,
           hasAccessToken: !!accessToken,
         };
 
-        if (isUserClientSide(userClientSide)) {
-          result = {
-            ok: true,
-            value: exact<UserClientSide>()(userClientSide),
-          };
-        } else {
-          result = {
-            ok: true,
-            value: exact<UnAuthUserClientSide>()(userClientSide),
-          };
-        }
+        result = {
+          ok: true,
+          value: userClientSide,
+        };
       } catch (e) {
         console.error("Error creating user:", e);
         result = {

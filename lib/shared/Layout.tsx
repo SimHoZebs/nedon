@@ -2,9 +2,9 @@ import { useStore } from "@/util/store";
 import { trpc } from "@/util/trpc";
 import { organizeTxByTime, useTxGetAll } from "@/util/tx";
 
-import { Button, NavBtn } from "./Button";
+import { NavBtn } from "./Button";
 
-import { useAutoCreateUser } from "lib/domains/dev";
+import { SandboxLoginButton } from "lib/domains/dev";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/router";
@@ -28,36 +28,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   );
   const txGetAll = useTxGetAll();
 
-  const connectToPlaid = trpc.user.connectToPlaid.useMutation();
   const queryClient = trpc.useUtils();
-
-  useAutoCreateUser();
-
-  // Only for development, this should be a manual link flow in production
-  useEffect(() => {
-    const connectUnAuthUserToPlaid = async () => {
-      if (!appUser) return;
-      if (appUser.hasAccessToken) return;
-      console.log("User has no access token, connecting to Plaid...");
-
-      const connectToPlaidResult = await connectToPlaid.mutateAsync({
-        id: appUser.id,
-      });
-      if (!connectToPlaidResult.ok) {
-        console.error(
-          "Failed to connect to Plaid:",
-          connectToPlaidResult.error,
-        );
-        return;
-      }
-
-      console.log("Connected to Plaid successfully");
-      await queryClient.user.get.invalidate();
-      console.log("Invalidated user query");
-    };
-
-    connectUnAuthUserToPlaid();
-  }, [appUser, connectToPlaid.mutateAsync, queryClient.user.get.invalidate]);
 
   useEffect(() => {
     const loadTxArray = async () => {
@@ -185,14 +156,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             {appUser.name}
           </NavBtn>
         ) : (
-          <Button
-            onClick={() => {
-              router.push("/login");
-            }}
-            className="w-full"
-          >
-            Log In
-          </Button>
+          <SandboxLoginButton />
         )}
       </nav>
     </div>

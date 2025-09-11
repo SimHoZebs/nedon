@@ -20,7 +20,7 @@ const Connections = () => {
 
   const { user: appUser, isLoading } = useAutoLoadUser();
 
-  const removeConnection = trpc.user.removeConnection.useMutation();
+  const removeConnection = trpc.user.connection.remove.useMutation();
   const associatedTxArray = trpc.tx.getAllAssociated.useQuery(
     { id: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser && !isLoading },
