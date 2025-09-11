@@ -1,5 +1,3 @@
-import parseMoney from "@/util/parseMoney";
-
 import type { TreedCatWithTx } from "@/types/cat";
 
 import { H3 } from "../shared/Heading";
@@ -16,11 +14,11 @@ interface Props {
 }
 
 const CatCard = (props: Props) => {
-  const subCatTotalAmount = parseMoney(
+  const subCatTotalAmount = Number(
     Math.abs(
       subCatTotal(props.cat, props.txType) +
         (props.txType === "spending" ? props.cat.spending : props.cat.received),
-    ),
+    ).toFixed(2),
   );
   console.log("subCatTotalAmount", subCatTotalAmount);
 
@@ -43,15 +41,14 @@ const CatCard = (props: Props) => {
             <H3>{props.cat.name}</H3>
 
             <p className="text-sm text-zinc-400">
-              {`${parseMoney(
+              {`${(
                 ((props.cat.spending + subCatTotal(props.cat, "spending")) /
                   1000) *
-                  100,
-              ).toString()}%`}
+                  100
+              ).toFixed(2)}%`}
             </p>
           </div>
         </div>
-
         <div className="flex flex-col items-end">
           <div className="flex">
             <H3>${subCatTotalAmount}</H3>

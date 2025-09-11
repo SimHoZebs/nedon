@@ -1,5 +1,3 @@
-import parseMoney from "@/util/parseMoney";
-
 interface Props {
   value: string;
   setValue: (value: string) => void;
@@ -27,9 +25,10 @@ const Calculator = (props: Props) => {
       case "=": {
         let evaluation: string;
         try {
-          evaluation = eval(props.value);
+          const calculate = new Function(`return ${props.value}`);
+          evaluation = calculate();
           if (typeof evaluation === "number") {
-            evaluation = parseMoney(evaluation).toString();
+            evaluation = Number(evaluation.toFixed(2)).toString();
           }
         } catch (_e) {
           evaluation = Number.parseFloat(props.value).toString();

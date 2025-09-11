@@ -2,7 +2,6 @@ import type { TreedCat, TreedCatWithTx, UnsavedCat } from "@/types/cat";
 import type { Tx } from "@/types/tx";
 
 import catStyleArray from "../util/catStyle";
-import parseMoney from "../util/parseMoney";
 import type { TxType } from "./tx";
 
 import { Prisma } from "@prisma/client";
@@ -83,9 +82,13 @@ export const fillArrayByCat = (
   if (slicedNameArray.length === 0) {
     resultArray[index].txArray.push(tx);
     resultArray[index].spending += hierarchicalCat.spending;
-    resultArray[index].spending = parseMoney(resultArray[index].spending);
+    resultArray[index].spending = Number(
+      resultArray[index].spending.toFixed(2),
+    );
     resultArray[index].received += hierarchicalCat.received;
-    resultArray[index].received = parseMoney(resultArray[index].received);
+    resultArray[index].received = Number(
+      resultArray[index].received.toFixed(2),
+    );
   } else {
     const txCopy = structuredClone(tx);
     const newCat = structuredClone(cat);

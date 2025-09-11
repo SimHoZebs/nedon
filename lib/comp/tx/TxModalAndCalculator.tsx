@@ -1,5 +1,3 @@
-import parseMoney from "@/util/parseMoney";
-
 import type { SplitTx } from "@/types/tx";
 
 import Calculator from "./TxModal/SplitList/Calculator";
@@ -85,12 +83,12 @@ const TxModalAndCalculator = (props: Props) => {
 
     uneditedSplitArray.forEach((split, idx) => {
       if (uneditedSplitArray.length === 1) {
-        split.amount = new Prisma.Decimal(parseMoney(remainder.toNumber()));
+        split.amount = new Prisma.Decimal(remainder.toFixed(2));
       } else if (idx === uneditedSplitArray.length - 1) {
-        split.amount = new Prisma.Decimal(parseMoney(remainder.toNumber()));
+        split.amount = new Prisma.Decimal(remainder.toFixed(2));
       } else {
         const portion = remainder.div(uneditedSplitArray.length);
-        split.amount = new Prisma.Decimal(parseMoney(portion.toNumber()));
+        split.amount = new Prisma.Decimal(portion.toFixed(2));
         remainder = remainder.sub(portion);
       }
     });
