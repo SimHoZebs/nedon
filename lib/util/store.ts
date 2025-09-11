@@ -1,6 +1,6 @@
 import type { GroupClientSide } from "@/types/group";
 import type { Tx } from "@/types/tx";
-import type { UnAuthUserClientSide } from "@/types/user";
+import type { UnAuthUserClientSide, UserClientSide } from "@/types/user";
 
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
@@ -9,8 +9,8 @@ interface Store {
   linkToken: string | null;
   setLinkToken: (linkToken: string | null) => void;
 
-  appUser?: UnAuthUserClientSide;
-  setAppUser: (user: UnAuthUserClientSide | undefined) => void;
+  appUser: UnAuthUserClientSide | UserClientSide | null;
+  setAppUser: (user: UnAuthUserClientSide | UserClientSide | null) => void;
 
   appGroup?: GroupClientSide;
   setAppGroup: (group: GroupClientSide | undefined) => void;

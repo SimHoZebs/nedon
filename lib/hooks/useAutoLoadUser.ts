@@ -3,6 +3,7 @@ import { useLocalStore, useLocalStoreDelay } from "@/util/localStore";
 import type { UnAuthUserClientSide, UserClientSide } from "@/types/user";
 
 import { trpc } from "../util/trpc";
+import { useStore } from "@/util/store";
 
 /**
  * FOR DEVELOPMENT PURPOSES ONLY
@@ -13,6 +14,8 @@ import { trpc } from "../util/trpc";
  * database (primarily for development purposes).
  */
 const useAutoLoadUser = () => {
+  const setAppUser = useStore((store) => store.setAppUser);
+
   const userIdFromLocalStorage = useLocalStoreDelay(
     useLocalStore,
     (state) => state.userId,
@@ -35,7 +38,7 @@ const useAutoLoadUser = () => {
     enabled: userIdFromLocalStorage === null,
   });
 
-  const user: UnAuthUserClientSide | UserClientSide | null = getUser.data?.ok
+  const user = getUser.data?.ok
     ? getUser.data.value
     : getFirstUser.data?.ok
       ? getFirstUser.data.value
