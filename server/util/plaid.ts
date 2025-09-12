@@ -1,33 +1,10 @@
-import type { Cat } from "@prisma/client";
 import {
-  Configuration,
-  PlaidApi,
-  PlaidEnvironments,
   PlaidErrorType,
   type RemovedTransaction,
   type Transaction,
   type TransactionsSyncRequest,
 } from "plaid";
-import { PLAID_CLIENT_ID, PLAID_ENV, PLAID_SECRET } from "server/constants";
-
-// Initialize the Plaid client
-// Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
-const configuration = new Configuration({
-  basePath: PlaidEnvironments[PLAID_ENV],
-  baseOptions: {
-    headers: {
-      "PLAID-CLIENT-ID": PLAID_CLIENT_ID,
-      "PLAID-SECRET": PLAID_SECRET,
-      "Plaid-Version": "2020-09-14",
-    },
-  },
-});
-
-export const client = new PlaidApi(configuration);
-
-export const createCatInput = (cat: Cat) => {
-  return { name: cat.name, nameArray: cat.nameArray, amount: cat.amount };
-};
+import plaidClient from "server/clients/plaidClient";
 
 /**
  * Fetches new and updated transactions from Plaid since the last cursor.
@@ -56,7 +33,7 @@ export const getPlaidTxSyncData = async (
       console.log(
         `syncing ${request.count} transactions with cursor ${request.cursor} and accessToken ${request.access_token}`,
       );
-      const response = await client.transactionsSync(request);
+      const response = await plaidClient.transactionsSync(request);
       const data = response.data;
       // Add this page of results
       added = added.concat(data.added);

@@ -1,4 +1,4 @@
-import { getSignedUploadUrl } from "../domain/blobStorage";
+import { getSignedUploadUrl } from "../services/blobStorage";
 
 import { procedure, router } from "server/trpc";
 import { z } from "zod";

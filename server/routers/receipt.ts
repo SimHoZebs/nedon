@@ -1,6 +1,6 @@
 import { UnsavedReceiptSchema } from "@/types/receipt";
 
-import { createReceipt, processReceipt } from "../domain/receipt";
+import { createReceipt, processReceipt } from "../services/receipt";
 import { procedure, router } from "../trpc";
 
 import { z } from "zod";

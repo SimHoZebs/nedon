@@ -30,7 +30,12 @@ export const createTxInput = (txClientSide: UnsavedTx) => {
     : undefined;
 
   const catArrayCreate = {
-    create: catArray.map(({ txId, ...cat }) => ({ ...cat })),
+    create: catArray.map((cat) => ({
+      name: cat.name,
+      amount: cat.amount,
+      primary: cat.primary,
+      detailed: cat.detailed,
+    })),
   };
 
   return {
@@ -139,6 +144,11 @@ export const mergePlaidTxWithTxArray = async (
     }
     const matchingTx = txArray[matchingTxIndex];
 
+    const primary =
+      plaidTx.personal_finance_category?.primary || "Uncategorized";
+    const detailed =
+      plaidTx.personal_finance_category?.detailed || "Uncategorized";
+
     await db.tx.update({
       where: {
         id: matchingTx.id,
@@ -146,11 +156,13 @@ export const mergePlaidTxWithTxArray = async (
       data: {
         plaidId: matchingTx.plaidId || undefined,
         catArray: {
-          create: matchingTx.catArray.map((cat) => ({
-            name: cat.name,
-            nameArray: cat.nameArray,
-            amount: cat.amount,
-          })),
+          deleteMany: {},
+          create: {
+            name: detailed,
+            primary: primary,
+            detailed: detailed,
+            amount: matchingTx.amount,
+          },
         },
       },
     });
