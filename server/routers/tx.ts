@@ -3,16 +3,17 @@ import type { Result } from "@/util/type";
 import { type Tx, TxSchema, UnsavedTxSchema } from "@/types/tx";
 
 import { procedure, router } from "../trpc";
-import { createCatInput, getPlaidTxSyncData } from "../util/plaid";
+import { getPlaidTxSyncData } from "../util/plaid";
 
-import { resetTx } from "lib/domain/tx";
-import db from "server/util/db";
+import { convertPlaidCatToCat } from "lib/domain/cat";
 import {
   createTxInput,
   mergePlaidTxWithTxArray,
   txInclude,
-} from "server/util/tx";
+} from "server/domains/tx";
+import db from "server/util/db";
 import { z } from "zod";
+import { resetTxToPlaidTx } from "lib/domain/tx";
 
 const txRouter = router({
   getWithoutPlaid: procedure
@@ -112,11 +113,10 @@ const txRouter = router({
     }),
 
   update: procedure.input(TxSchema).mutation(async ({ input }) => {
-    const { catArray, splitTxArray, ...rest } = input;
+    const { catArray, splitTxArray: _splitTxArray, ...rest } = input;
     const { receipt: _receipt, plaidTx: _plaidTx, ...useful } = rest;
     const catToCreate = catArray.filter((cat) => !cat.id);
     const catToUpdate = catArray.filter((cat) => cat.id);
-    console.log("input", input);
 
     const tx = await db.tx.update({
       where: {
@@ -127,17 +127,11 @@ const txRouter = router({
         plaidId: input.plaidId || undefined,
         catArray: {
           createMany: {
-            data: catToCreate.map((cat) =>
-              createCatInput({ ...cat, txId: input.id }),
-            ),
+            data: catToCreate,
           },
-          updateMany: catToUpdate.map((cat) => ({
-            where: { id: cat.id },
-            data: {
-              name: cat.name,
-              nameArray: cat.nameArray,
-              amount: cat.amount,
-            },
+          updateMany: catToUpdate.map(({ id, ...catWithoutId }) => ({
+            where: { id: id },
+            data: catWithoutId,
           })),
         },
       },
@@ -148,31 +142,33 @@ const txRouter = router({
   }),
 
   reset: procedure.input(TxSchema).mutation(async ({ input }) => {
-    const newTx = resetTx(input);
+    const newTx = resetTxToPlaidTx(input);
 
     await db.tx.update({
       where: {
         id: input.id,
       },
       data: {
+        ...newTx,
+        plaidTx: newTx.plaidTx || undefined,
         plaidId: newTx.plaidId || undefined,
+        splitTxArray: {
+          deleteMany: {},
+        },
         catArray: {
           deleteMany: {},
+          create: newTx.plaidTx?.personal_finance_category
+            ? convertPlaidCatToCat(
+                newTx.plaidTx.personal_finance_category,
+                newTx.id,
+              )
+            : undefined,
         },
         receipt: input.receipt
           ? {
               delete: {},
             }
           : undefined,
-      },
-    });
-
-    await db.cat.create({
-      data: {
-        name: newTx.catArray[0].name,
-        nameArray: newTx.catArray[0].nameArray,
-        amount: newTx.catArray[0].amount,
-        txId: input.id,
       },
     });
 

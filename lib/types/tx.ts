@@ -5,7 +5,11 @@ import { ReceiptSchema, UnsavedReceiptSchema } from "./receipt";
 import { MdsType, Prisma } from "@prisma/client";
 import { z } from "zod";
 
-export type SplitTx = Prisma.TxGetPayload<undefined>;
+export type SplitTx = Prisma.TxGetPayload<{
+  omit: {
+    plaidTx: true;
+  };
+}>;
 
 const SplitTx = z
   .object({
@@ -21,7 +25,6 @@ const SplitTx = z
     datetime: z.date().nullable(),
     authorizedDatetime: z.date(),
     accountId: z.string().nullable(),
-    plaidTx: plaidTxSchema.nullable(),
   })
   .strict() satisfies z.ZodType<SplitTx>;
 
@@ -37,7 +40,7 @@ export type UnsavedSplitTx = z.infer<typeof UnsavedSplitTxSchema>;
 
 export type Tx = Prisma.TxGetPayload<{
   include: {
-    splitTxArray: true;
+    splitTxArray: { omit: { plaidTx: true } };
     receipt: { include: { items: true } };
     catArray: true;
   };
