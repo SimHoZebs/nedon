@@ -3,6 +3,7 @@ import { type Cat, CatSchema, UnsavedCatSchema } from "@/types/cat";
 import { procedure, router } from "../trpc";
 
 import db from "server/util/db";
+import { plaidCategories } from "server/util/plaidCategories";
 import { z } from "zod";
 
 const catRouter = router({
@@ -72,6 +73,10 @@ const catRouter = router({
 
       return deletedCatArray;
     }),
+
+  getPlaidCats: procedure.input(z.void()).query(async () => {
+    return plaidCategories;
+  }),
 });
 
 export default catRouter;

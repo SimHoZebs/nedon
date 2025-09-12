@@ -19,6 +19,7 @@ function parseCSVLine(line) {
 
 import fs from "fs";
 import https from "https";
+
 async function main() {
   const content = await new Promise((resolve, reject) => {
     https.get(
