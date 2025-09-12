@@ -1,8 +1,7 @@
-import SandboxLoginBtn from "@/comp/shared/SandboxLoginBtn";
-
 import { trpc } from "@/util/trpc";
 
-import { NavBtn } from "../shared/Button";
+import { Button } from "../shared/Button";
+import { NavBtn } from "./NavBtn";
 
 import { organizeTxByTime, useTxGetAll } from "lib/domain/tx";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
@@ -11,6 +10,7 @@ import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/router";
 import type React from "react";
 import { useEffect, useRef } from "react";
+import SandboxLoginBtn from "./SandboxLoginBtn";
 
 const customFont = Space_Grotesk({
   subsets: ["latin"],
@@ -119,32 +119,32 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
       <nav className="flex h-20 w-full gap-y-2 border-zinc-400 border-l bg-zinc-900 p-5 sm:h-full sm:w-56 sm:flex-col sm:justify-between sm:px-0">
         <div className="flex w-full items-center justify-center sm:flex-col">
           <NavBtn
-            router={router}
             route="/"
+            router={router}
             icon="icon-[mdi--home-variant-outline]"
           >
             Home
           </NavBtn>
 
           <NavBtn
-            router={router}
             route="/analytics"
+            router={router}
             icon="icon-[mdi--google-analytics]"
           >
             Analytics
           </NavBtn>
 
           <NavBtn
-            router={router}
             route="/connections"
+            router={router}
             icon="icon-[mdi--account-group-outline]"
           >
             Connections
           </NavBtn>
 
           <NavBtn
-            router={router}
             route="/settings"
+            router={router}
             icon="icon-[mdi--cog-outline]"
           >
             Settings
