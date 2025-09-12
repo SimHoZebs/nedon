@@ -5,6 +5,7 @@ export type PlaidCategory = {
     };
   };
 };
+
 export const plaidCategories: PlaidCategory = {
   INCOME: {
     INCOME_DIVIDENDS: {

@@ -86,52 +86,67 @@ export const createTxFromPlaidTx = (
   };
 };
 
-type CatWithTx = {
-  [primaryCat: string]: {
+export type NestedCatWithTx = {
+  primary: {
+    name: string;
     total: Prisma.Decimal;
     detailed: {
-      [detailedCat: string]: {
-        txs: Tx[];
-        total: Prisma.Decimal;
-      };
-    };
+      name: string;
+      txs: Tx[];
+      total: Prisma.Decimal;
+    }[];
   };
 };
 
-export const organizeTxByCat = (txArray: Tx[]) => {
-  const catWithTx: CatWithTx = {};
+export const convertTxArrayToNestedCatWithTxArray = (txArray: Tx[]) => {
+  const catWithTxArray: NestedCatWithTx[] = [];
 
   for (const tx of txArray) {
     for (const cat of tx.catArray) {
-      if (!catWithTx[cat.primary]) {
-        catWithTx[cat.primary] = {
-          total: Prisma.Decimal(0),
-          detailed: {},
-        };
-      }
-      const primaryTotal = catWithTx[cat.primary].total;
-      catWithTx[cat.primary].total = Prisma.Decimal.add(
-        primaryTotal,
-        cat.amount,
+      const catIndex = catWithTxArray.findIndex(
+        (c) => c.primary.name === cat.primary,
       );
 
-      if (!catWithTx[cat.primary].detailed[cat.detailed]) {
-        catWithTx[cat.primary].detailed[cat.detailed] = {
-          txs: [],
-          total: Prisma.Decimal(0),
-        };
+      if (catIndex === -1) {
+        catWithTxArray.push({
+          primary: {
+            name: cat.primary,
+            total: Prisma.Decimal(0),
+            detailed: [
+              {
+                name: cat.detailed,
+                txs: [tx],
+                total: tx.amount,
+              },
+            ],
+          },
+        });
+        continue;
       }
-      catWithTx[cat.primary].detailed[cat.detailed].txs.push(tx);
 
-      const detailedTotal = catWithTx[cat.primary].detailed[cat.detailed].total;
-      catWithTx[cat.primary].detailed[cat.detailed].total = Prisma.Decimal.add(
-        detailedTotal,
-        cat.amount,
+      const primaryCat = catWithTxArray[catIndex].primary;
+      const detailedCatIndex = primaryCat.detailed.findIndex(
+        (d) => d.name === cat.detailed,
       );
+
+      if (detailedCatIndex === -1) {
+        primaryCat.detailed.push({
+          name: cat.detailed,
+          txs: [tx],
+          total: tx.amount,
+        });
+        primaryCat.total = primaryCat.total.add(tx.amount);
+        continue;
+      }
+
+      const detailedCat = primaryCat.detailed[detailedCatIndex];
+      detailedCat.txs.push(tx);
+      detailedCat.total = detailedCat.total.add(tx.amount);
+      primaryCat.total = primaryCat.total.add(tx.amount);
     }
   }
 
-  return catWithTx;
+  return catWithTxArray;
 };
 
 export const txTypeArray: ["spending", "received", "transfers"] = [

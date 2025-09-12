@@ -1,7 +1,7 @@
 import { trpc } from "@/util/trpc";
 
-import { Button } from "../shared/Button";
 import { NavBtn } from "./NavBtn";
+import SandboxLoginBtn from "./SandboxLoginBtn";
 
 import { organizeTxByTime, useTxGetAll } from "lib/domain/tx";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
@@ -10,7 +10,6 @@ import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/router";
 import type React from "react";
 import { useEffect, useRef } from "react";
-import SandboxLoginBtn from "./SandboxLoginBtn";
 
 const customFont = Space_Grotesk({
   subsets: ["latin"],

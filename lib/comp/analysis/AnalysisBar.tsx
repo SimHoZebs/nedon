@@ -1,25 +1,23 @@
-import type { TreedCatWithTx } from "@/types/cat";
-
-import { getCatStyle, subCatTotal } from "lib/domain/cat";
+import { getCatStyle } from "lib/domain/cat";
+import type { NestedCatWithTx } from "lib/domain/tx";
+import { useId } from "react";
 
 interface Props {
-  organizedTxByCatArray: TreedCatWithTx[];
+  organizedTxByCatArray: NestedCatWithTx[];
   spendingTotal: number;
 }
 
 const AnalysisBar = (props: Props) => {
+  const id = useId();
+
   return (
     <div className="flex h-5 w-full gap-x-[3px] overflow-hidden bg-zinc-900">
       {props.organizedTxByCatArray.map((cat) => (
         <div
-          key={cat.name}
-          className={`+ h-full ${getCatStyle([cat.name]).bgColor}`}
+          key={id}
+          className={`+ h-full ${getCatStyle(cat.primary.name).bgColor}`}
           style={{
-            width: `${(
-              ((cat.spending + subCatTotal(cat, "spending")) /
-                props.spendingTotal) *
-                100
-            ).toString()}%`,
+            width: `${cat.primary.total.dividedBy(props.spendingTotal).mul(100).toFixed(2)}%`,
           }}
         />
       ))}

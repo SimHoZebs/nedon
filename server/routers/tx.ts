@@ -6,6 +6,7 @@ import { procedure, router } from "../trpc";
 import { getPlaidTxSyncData } from "../util/plaid";
 
 import { convertPlaidCatToCat } from "lib/domain/cat";
+import { resetTxToPlaidTx } from "lib/domain/tx";
 import {
   createTxInput,
   mergePlaidTxWithTxArray,
@@ -13,7 +14,6 @@ import {
 } from "server/domains/tx";
 import db from "server/util/db";
 import { z } from "zod";
-import { resetTxToPlaidTx } from "lib/domain/tx";
 
 const txRouter = router({
   getWithoutPlaid: procedure
