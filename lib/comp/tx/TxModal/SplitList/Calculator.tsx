@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 interface Props {
   value: string;
   setValue: (value: string) => void;
@@ -27,11 +29,10 @@ const Calculator = (props: Props) => {
         try {
           const calculate = new Function(`return ${props.value}`);
           evaluation = calculate();
-          if (typeof evaluation === "number") {
-            evaluation = Number(evaluation.toFixed(2)).toString();
-          }
-        } catch (_e) {
-          evaluation = Number.parseFloat(props.value).toString();
+          evaluation = Prisma.Decimal(evaluation).toFixed(2);
+        } catch (e) {
+          console.error(e);
+          evaluation = "ERROR";
         }
         props.setValue(evaluation);
         break;

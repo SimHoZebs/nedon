@@ -1,7 +1,6 @@
 import SettleModal from "@/comp/analysis/SettleModal";
 import { ActionBtn, Button } from "@/comp/shared/Button";
 
-import parseMoney from "@/util/parseMoney";
 import { trpc } from "@/util/trpc";
 
 import { Prisma } from "@prisma/client";
@@ -91,7 +90,7 @@ const Connections = () => {
                 <p>
                   {`${
                     calcOweGroup[user.id].isNegative() ? "You" : "They"
-                  } owe: $${Math.abs(parseMoney(calcOweGroup[user.id].toNumber()))}`}
+                  } owe: $${Math.abs(calcOweGroup[user.id].toNumber())}`}
                 </p>
 
                 <ActionBtn
