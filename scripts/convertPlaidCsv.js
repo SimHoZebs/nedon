@@ -46,12 +46,15 @@ async function main() {
         description: description.replace(/^"/, "").replace(/"$/, ""),
       };
     })
-    .filter(Boolean);
+    .filter(Boolean)
+    .reduce((acc, cat) => {
+      if (!acc[cat.primary]) acc[cat.primary] = {};
+      acc[cat.primary][cat.detailed] = { description: cat.description };
+      return acc;
+    }, {});
   fs.writeFileSync(
     "./server/util/plaidCategories.ts",
-    `import type { PlaidCategory } from '../../types/cat';
-
-export const plaidCategories: PlaidCategory[] = ${JSON.stringify(categories, null, 2)};`,
+    `export const plaidCategories = ${JSON.stringify(categories, null, 2)} as const;`,
   );
 }
 
