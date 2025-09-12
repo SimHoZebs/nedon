@@ -10,6 +10,7 @@
     "test": "vitest",
     "format": "biome check . --write",
     "tsc": "tsc",
+    "convert-csv": "node scripts/convertPlaidCsv.js",
     "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "migrate-prod": "dotenv -e .env.prod prisma migrate deploy",
     "reset-prod": "dotenv -e .env.prod prisma migrate reset"
