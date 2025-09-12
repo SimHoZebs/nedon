@@ -85,7 +85,9 @@ const Cat = () => {
                 createNewCat({
                   amount: Prisma.Decimal(0),
                   txId,
-                  nameArray: [],
+                  primary: "Uncategorized", // Default primary
+                  detailed: "Uncategorized", // Default detailed
+                  description: "undefined",
                 }),
               );
 
