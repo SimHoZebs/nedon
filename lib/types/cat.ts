@@ -6,10 +6,10 @@ export type Cat = Prisma.CatGetPayload<undefined>;
 export const CatSchema = z
   .object({
     id: z.string(),
-    name: z.string(),
     amount: z.instanceof(Prisma.Decimal),
     primary: z.string(),
     detailed: z.string(),
+    description: z.string(),
     txId: z.string(),
   })
   .strict() satisfies z.ZodType<Cat>;
