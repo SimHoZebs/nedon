@@ -1,26 +1,26 @@
-import type { TreedCatWithTx } from "@/types/cat";
-import type { ChaseCSVTx, Tx, UnsavedTx } from "@/types/tx";
+import type {
+  ChaseCSVTx,
+  Tx,
+  TxWithUnsavedContent,
+  UnsavedTx,
+} from "@/types/tx";
 
 import useAutoLoadUser from "../hooks/useAutoLoadUser";
 import { useStore } from "../store/store";
 import { trpc } from "../util/trpc";
-import { createNewCat, fillArrayByCat } from "./cat";
+import { convertPlaidCatToCat, resetCatArray } from "./cat";
 
+import { createId } from "@paralleldrive/cuid2";
 import { MdsType, Prisma } from "@prisma/client";
 import type { Transaction } from "plaid";
 
-export const resetTx = (tx: Tx) => ({
-  ...tx,
-  plaidTx: tx.plaidTx,
-  catArray: [
-    createNewCat({
-      txId: tx.id,
-      nameArray: tx.plaidTx?.category || [],
-      amount: tx.amount,
-    }),
-  ],
-  receipt: null,
-});
+export const resetTxToPlaidTx = (tx: Tx): TxWithUnsavedContent => {
+  return {
+    ...tx,
+    catArray: resetCatArray(tx),
+    receipt: null,
+  };
+};
 
 export const mergePlaidTxWithTx = (tx: Tx, plaidTx: Transaction): Tx => {
   return {
@@ -56,7 +56,10 @@ export const createTxFromPlaidTx = (
   userId: string,
   plaidTx: Transaction,
 ): UnsavedTx => {
+  const id = createId();
+
   return {
+    id: id,
     plaidTx: plaidTx,
     name: plaidTx.name,
     splitTxArray: [],
@@ -70,24 +73,74 @@ export const createTxFromPlaidTx = (
     plaidId: plaidTx.transaction_id,
     ownerId: userId,
     accountId: plaidTx.account_id,
-    catArray: [],
+    catArray: plaidTx.personal_finance_category
+      ? [
+          convertPlaidCatToCat(
+            plaidTx.personal_finance_category,
+            id,
+            Prisma.Decimal(plaidTx.amount),
+          ),
+        ]
+      : [],
     receipt: null,
   };
 };
 
+type CatWithTx = {
+  [primaryCat: string]: {
+    total: Prisma.Decimal;
+    detailed: {
+      [detailedCat: string]: {
+        txs: Tx[];
+        total: Prisma.Decimal;
+      };
+    };
+  };
+};
+
 export const organizeTxByCat = (txArray: Tx[]) => {
-  const catArray: TreedCatWithTx[] = [];
+  const catWithTx: CatWithTx = {};
 
   for (const tx of txArray) {
-    const txCopy = structuredClone(tx);
+    for (const cat of tx.catArray) {
+      if (!catWithTx[cat.primary]) {
+        catWithTx[cat.primary] = {
+          total: Prisma.Decimal(0),
+          detailed: {},
+        };
+      }
+      const primaryTotal = catWithTx[cat.primary].total;
+      catWithTx[cat.primary].total = Prisma.Decimal.add(
+        primaryTotal,
+        cat.amount,
+      );
 
-    for (const cat of txCopy.catArray) {
-      fillArrayByCat(catArray, txCopy, cat);
+      if (!catWithTx[cat.primary].detailed[cat.detailed]) {
+        catWithTx[cat.primary].detailed[cat.detailed] = {
+          txs: [],
+          total: Prisma.Decimal(0),
+        };
+      }
+      catWithTx[cat.primary].detailed[cat.detailed].txs.push(tx);
+
+      const detailedTotal = catWithTx[cat.primary].detailed[cat.detailed].total;
+      catWithTx[cat.primary].detailed[cat.detailed].total = Prisma.Decimal.add(
+        detailedTotal,
+        cat.amount,
+      );
     }
   }
 
-  return catArray;
+  return catWithTx;
 };
+
+export const txTypeArray: ["spending", "received", "transfers"] = [
+  "spending",
+  "received",
+  "transfers",
+] as const;
+
+export type TxType = (typeof txTypeArray)[number];
 
 export const organizeTxByTime = (txArray: Tx[]) => {
   const txSortedByTimeArray = txArray.sort(
@@ -192,14 +245,6 @@ export const getScopeIndex = (
 
   return [y, m, d];
 };
-
-export const txTypeArray: ["spending", "received", "transfers"] = [
-  "spending",
-  "received",
-  "transfers",
-];
-
-export type TxType = (typeof txTypeArray)[number];
 
 export const useTxGetAll = () => {
   const { user: appUser, isLoading: appUserIsLoading } = useAutoLoadUser();

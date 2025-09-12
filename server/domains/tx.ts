@@ -1,6 +1,8 @@
 import type { Tx, UnsavedTx } from "@/types/tx";
 
+import { Prisma } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { convertPlaidCatToCat, createNewCat } from "lib/domain/cat";
 import { createTxFromPlaidTx } from "lib/domain/tx";
 import type { RemovedTransaction, Transaction } from "plaid";
 import db from "server/util/db";
@@ -30,12 +32,7 @@ export const createTxInput = (txClientSide: UnsavedTx) => {
     : undefined;
 
   const catArrayCreate = {
-    create: catArray.map((cat) => ({
-      name: cat.name,
-      amount: cat.amount,
-      primary: cat.primary,
-      detailed: cat.detailed,
-    })),
+    create: catArray.map((cat) => createNewCat(cat)),
   };
 
   return {
@@ -48,7 +45,6 @@ export const createTxInput = (txClientSide: UnsavedTx) => {
         create: splitTxArray.map((split) => ({
           ...split,
           owner: { connect: { id: split.ownerId } },
-          plaidTx: split.plaidTx || undefined,
           catArray: catArrayCreate,
           receipt: receiptCreate,
         })),
@@ -98,6 +94,8 @@ export const mergePlaidTxWithTxArray = async (
           console.log("Error in creating tx: ", error);
           return null;
       }
+    } else {
+      console.error("Unknown error in creating tx: ", error);
     }
   }
 
@@ -138,16 +136,20 @@ export const mergePlaidTxWithTxArray = async (
       (tx) => tx.plaidId === plaidTx.transaction_id,
     );
     if (matchingTxIndex === -1) {
-      throw new Error(
-        `Somehow there is no matching tx for ${plaidTx.transaction_id}`,
+      console.error(
+        `Somehow there is no matching tx for ${plaidTx.transaction_id}. Skipping`,
       );
+      continue;
     }
     const matchingTx = txArray[matchingTxIndex];
 
-    const primary =
-      plaidTx.personal_finance_category?.primary || "Uncategorized";
-    const detailed =
-      plaidTx.personal_finance_category?.detailed || "Uncategorized";
+    const cat = plaidTx.personal_finance_category
+      ? convertPlaidCatToCat(
+          plaidTx.personal_finance_category,
+          matchingTx.id,
+          Prisma.Decimal(0),
+        )
+      : undefined;
 
     await db.tx.update({
       where: {
@@ -155,14 +157,10 @@ export const mergePlaidTxWithTxArray = async (
       },
       data: {
         plaidId: matchingTx.plaidId || undefined,
+        plaidTx: plaidTx,
         catArray: {
           deleteMany: {},
-          create: {
-            name: detailed,
-            primary: primary,
-            detailed: detailed,
-            amount: matchingTx.amount,
-          },
+          create: cat,
         },
       },
     });
