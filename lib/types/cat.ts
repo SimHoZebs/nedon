@@ -1,21 +1,5 @@
-import type { Tx } from "./tx";
-
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
-
-export type TreedCat = {
-  name: string;
-  subCatArray: TreedCat[];
-};
-
-export type TreedCatWithTx = {
-  name: string;
-  budget: number;
-  spending: number;
-  received: number;
-  txArray: Tx[];
-  subCatArray: TreedCatWithTx[];
-};
 
 export type Cat = Prisma.CatGetPayload<undefined>;
 
@@ -24,7 +8,8 @@ export const CatSchema = z
     id: z.string(),
     name: z.string(),
     amount: z.instanceof(Prisma.Decimal),
-    nameArray: z.array(z.string()),
+    primary: z.string(),
+    detailed: z.string(),
     txId: z.string(),
   })
   .strict() satisfies z.ZodType<Cat>;

@@ -17,8 +17,8 @@ function parseCSVLine(line) {
   return result;
 }
 
-import fs from "fs";
-import https from "https";
+import fs from "node:fs";
+import https from "node:https";
 
 async function main() {
   const content = await new Promise((resolve, reject) => {
