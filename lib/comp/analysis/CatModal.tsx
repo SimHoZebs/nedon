@@ -1,7 +1,7 @@
 import catStyleArray from "@/util/catStyle";
 import { trpc } from "@/util/trpc";
 
-import type { TreedCatWithTx } from "@/types/cat";
+import type { UIData } from "@/types/ui";
 
 import { Button, CloseBtn } from "../shared/Button";
 import DateSortedTxList from "../shared/DateSortedTxList";
@@ -10,7 +10,6 @@ import Input from "../shared/Input";
 import Modal from "../shared/Modal";
 
 import { type CatSettings, Prisma } from "@prisma/client";
-import { subCatTotal } from "lib/domain/cat";
 import { organizeTxByTime } from "lib/domain/tx";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useEffect, useState } from "react";
@@ -19,7 +18,7 @@ interface Props {
   setShowModal: (show: boolean) => void;
   modalData: {
     settings?: CatSettings;
-    data: TreedCatWithTx;
+    data: UIData[0];
   };
 }
 
@@ -42,15 +41,9 @@ const CatModal = (props: Props) => {
   const upsertCatSetting = trpc.settings.upsertCatSetting.useMutation();
   const queryClient = trpc.useUtils();
 
-  const subCatTotalAmount = Math.abs(
-    subCatTotal(props.modalData.data, "spending") +
-      props.modalData.data.spending,
-  );
+  const totalAmount = Math.abs(data.total);
 
-  //combine data.txArray and data.subCatArray.txArray
-  const txUnderThisCat = data.txArray.concat(
-    data.subCatArray.flatMap((subCat) => subCat.txArray),
-  );
+  const txUnderThisCat = data.detailed.flatMap((d) => d.txs);
 
   return (
     <Modal className="px-4 py-2">
@@ -73,12 +66,12 @@ const CatModal = (props: Props) => {
           </header>
 
           <div className="flex w-full flex-col items-start">
-            <H2>$ {data.spending + subCatTotal(data, "spending")} Spent</H2>
+            <H2>$ {totalAmount} Spent</H2>
             <p>
               {props.modalData.settings?.budget && (
                 <p className="text-sm text-zinc-400">
                   {Prisma.Decimal.div(
-                    subCatTotalAmount,
+                    totalAmount,
                     props.modalData.settings.budget,
                   )
                     .mul(100)
@@ -119,17 +112,17 @@ const CatModal = (props: Props) => {
               change budget
             </Button>
           </div>
-          {
-            //this only shows subCategories that have split transactions. Later should show all subCategories
-            data.subCatArray.length > 0 && (
-              <details className="flex flex-col gap-y-2">
-                <summary>Sub categories</summary>
-                <pre className="text-sm">
-                  {JSON.stringify(data.subCatArray, null, 2)}
-                </pre>
-              </details>
-            )
-          }
+          {data.detailed.length > 0 && (
+            <details className="flex flex-col gap-y-2">
+              <summary>Detailed categories</summary>
+              {data.detailed.map((detailedCat) => (
+                <div key={detailedCat.name} className="flex justify-between">
+                  <span>{detailedCat.name}</span>
+                  <span>${Number(Math.abs(detailedCat.total).toFixed(2))}</span>
+                </div>
+              ))}
+            </details>
+          )}
         </section>
 
         <DateSortedTxList sortedTxArray={organizeTxByTime(txUnderThisCat)} />

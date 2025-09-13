@@ -7,15 +7,12 @@ import DateRangePicker from "@/comp/shared/DateRangePicker";
 
 import { trpc } from "@/util/trpc";
 
-import type { TreedCatWithTx } from "@/types/cat";
-
-import type { CatSettings } from "@prisma/client";
+import { type CatSettings, Prisma } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
-import { calcCatTypeTotal, subCatTotal } from "lib/domain/cat";
-import type { TxType } from "lib/domain/tx";
+import type { NestedCatWithTx, TxType } from "lib/domain/tx";
 import {
+  convertTxArrayToNestedCatWithTxArray,
   getScopeIndex,
-  organizeTxByCat,
   txTypeArray as txTypes,
   useTxGetAll,
 } from "lib/domain/tx";
@@ -24,6 +21,11 @@ import useDateRange from "lib/hooks/useDateRange";
 import { useStore } from "lib/store/store";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+
+type ModalData = {
+  settings?: CatSettings;
+  data: NestedCatWithTx[];
+};
 
 const Page = () => {
   const { user: appUser, isLoading } = useAutoLoadUser();
@@ -42,10 +44,7 @@ const Page = () => {
 
   const [txType, setTxType] = useState<TxType>("spending");
   const [showModal, setShowModal] = useState(false);
-  const [modalData, setModalData] = useState<{
-    settings?: CatSettings;
-    data: TreedCatWithTx;
-  }>();
+  const [modalData, setModalData] = useState<ModalData>();
 
   const txTypeArray: React.MutableRefObject<typeof txTypes> = useRef(txTypes);
 
@@ -70,41 +69,23 @@ const Page = () => {
     setYMD([y, m, d]);
   }, [date, rangeFormat, txArray.data, txArray.status, txOragnizedByTimeArray]);
 
-  const treedCatWithTxArray = useMemo(() => {
+  const { nestedCatWithTxArray, spendingTotal } = useMemo(() => {
     const [y, m, _d] = YMD;
 
-    if (y === -1 || !txOragnizedByTimeArray[y][m]) return [];
+    if (y === -1 || !txOragnizedByTimeArray[y] || !txOragnizedByTimeArray[y][m])
+      return { groupedCatUI: [], spendingTotal: 0 };
 
-    const organizedTxByCatArray = organizeTxByCat(
+    const nestedCatWithTxArray = convertTxArrayToNestedCatWithTxArray(
       txOragnizedByTimeArray[y][m].flat(),
     );
 
-    return organizedTxByCatArray.sort((a, b) => {
-      const aTotal = Math.abs(
-        subCatTotal(a, txType) +
-          (txType === "spending" ? a.spending : a.received),
-      );
-      const bTotal = Math.abs(
-        subCatTotal(b, txType) +
-          (txType === "spending" ? b.spending : b.received),
-      );
-      return aTotal - bTotal;
-    });
-  }, [txType, txOragnizedByTimeArray, YMD]);
+    const spendingTotal = nestedCatWithTxArray.reduce(
+      (acc, curr) => acc.add(curr.primary.total),
+      Prisma.Decimal(0),
+    );
 
-  const spendingTotal = calcCatTypeTotal(treedCatWithTxArray, "spending");
-
-  const sortCatAmount = (catArray: TreedCatWithTx[]) => {
-    return catArray.sort((b, a) => {
-      const aTotal =
-        subCatTotal(a, txType) +
-        (txType === "spending" ? a.spending : a.received);
-      const bTotal =
-        subCatTotal(b, txType) +
-        (txType === "spending" ? b.spending : b.received);
-      return aTotal - bTotal;
-    });
-  };
+    return { nestedCatWithTxArray, spendingTotal };
+  }, [txOragnizedByTimeArray, YMD]);
 
   return appUser ? (
     <section className="flex flex-col items-center gap-y-4">
@@ -164,14 +145,14 @@ const Page = () => {
           )}
 
           <AnalysisBar
-            organizedTxByCatArray={treedCatWithTxArray.reverse()}
+            organizedTxByCatArray={nestedCatWithTxArray}
             spendingTotal={spendingTotal}
           />
 
           <div className="flex w-full flex-col gap-y-2">
-            {sortCatAmount(treedCatWithTxArray).map((cat) => (
+            {nestedCatWithTxArray.map((cat) => (
               <CatCard
-                key={cat.name}
+                key={cat.primary.name}
                 cat={cat}
                 txType={txType}
                 catSettings={settings.data?.catSettings.find(

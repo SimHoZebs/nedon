@@ -41,9 +41,9 @@ const CatChip = (props: Props) => {
       >
         <span
           className={`flex h-6 w-6 p-1 ${
-            getCatStyle(props.cat.nameArray)?.textColor
+            getCatStyle(props.cat.detailed)?.textColor
           } ${
-            getCatStyle(props.cat.nameArray)?.icon ||
+            getCatStyle(props.cat.detailed)?.icon ||
             "icon-[mdi--shape-plus-outline]"
           } `}
         />
@@ -51,7 +51,7 @@ const CatChip = (props: Props) => {
         <div className={"group flex h-full flex-col items-start text-zinc-300"}>
           <div className="flex w-full justify-between gap-x-2">
             <p className={props.isEditTarget ? "animate-pulse" : "font-light"}>
-              {props.cat.nameArray.at(-1)}
+              {props.cat.detailed}
             </p>
 
             {

@@ -1,15 +1,16 @@
 import catStyleArray from "@/util/catStyle";
 import { trpc } from "@/util/trpc";
 
-import type { TreedCat, UnsavedCat } from "@/types/cat";
+import type { UnsavedCat } from "@/types/cat";
 import { isUnsavedTx } from "@/types/tx";
 
 import { createId } from "@paralleldrive/cuid2";
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { createNewCat } from "lib/domain/cat";
 import { useStore } from "lib/store/store";
 import { useTxStore } from "lib/store/txStore";
-import { type ForwardedRef, forwardRef, useEffect, useState } from "react";
+import { type ForwardedRef, forwardRef, useState } from "react";
+import { plaidCategories } from "server/util/plaidCategories";
 
 interface Props {
   appUserCatArray: UnsavedCat[];
@@ -22,7 +23,7 @@ const CatPicker = forwardRef(
   (props: Props, ref: ForwardedRef<HTMLDivElement>) => {
     const createTx = trpc.tx.create.useMutation();
     const upsertCatArray = trpc.cat.upsertMany.useMutation();
-    const catOptionArray = trpc.settings.getCatOptionArray.useQuery(undefined, {
+    const catOptionArray = trpc.cat.getPlaidCats.useQuery(undefined, {
       staleTime: Number.POSITIVE_INFINITY,
     });
     const queryClient = trpc.useUtils();
@@ -31,49 +32,37 @@ const CatPicker = forwardRef(
     const tx = useTxStore((state) => state.txOnModal);
     const catArray = tx?.catArray || [];
     const screenType = useStore((state) => state.screenType);
-    const [unsavedNameArray, setCurrentNameArray] = useState<string[]>([]);
-    const [currentOptionArray, setCurrentOptionArray] = useState<TreedCat[]>(
-      [],
-    );
+
+    const [selectedPrimary, setSelectedPrimary] = useState<string | null>(null);
 
     const editingCat = props.appUserCatArray[props.editingCatIndex];
 
     const resetPicker = () => {
-      setCurrentNameArray([]);
+      setSelectedPrimary(null);
       revertToTxInDB();
-
-      if (!catOptionArray.data) {
-        console.error(
-          "Can't reset picker. catOptionArray is undefined. How did you get here?",
-        );
-        return;
-      }
-      setCurrentOptionArray(catOptionArray.data);
     };
 
-    /**
-     * @param clickedTreedCat  if the cat is assigned by click instead of the "save" button.
-     */
-    const applyChangesToCat = async (clickedTreedCat?: TreedCat) => {
+    const applyChangesToCat = async (
+      primary: string,
+      detailed: string,
+      amount: Prisma.Decimal,
+    ) => {
       if (!tx) {
         console.error("Can't apply changes to cat. tx is undefined.");
         return;
       }
 
       const tmpCatArray = structuredClone(catArray);
-      const tmpNameArray = structuredClone(unsavedNameArray);
       const tmpTx = structuredClone(tx);
-      if (clickedTreedCat) {
-        tmpNameArray.push(clickedTreedCat.name);
-      }
 
       if (isUnsavedTx(tmpTx)) {
         const txId = createId();
 
         tmpCatArray[tmpCatArray.length - 1] = createNewCat({
           txId,
-          nameArray: tmpNameArray,
-          amount: new Prisma.Decimal(0),
+          primary,
+          detailed,
+          amount,
         });
 
         tmpTx.catArray = tmpCatArray;
@@ -81,6 +70,25 @@ const CatPicker = forwardRef(
         console.log("tx.id is undefined. Creating a new tx.", tmpTx);
         await createTx.mutateAsync(tmpTx);
       } else {
+        // Update the existing category or create a new one
+        if (editingCat.id) {
+          // Update existing
+          tmpCatArray[props.editingCatIndex] = {
+            ...editingCat,
+            primary,
+            detailed,
+            amount,
+          };
+        } else {
+          // Create new
+          tmpCatArray[tmpCatArray.length - 1] = createNewCat({
+            txId: tmpTx.id,
+            primary,
+            detailed,
+            amount,
+          });
+        }
+
         await upsertCatArray.mutateAsync({
           txId: tmpTx.id,
           catArray: tmpCatArray,
@@ -90,28 +98,14 @@ const CatPicker = forwardRef(
       queryClient.tx.invalidate();
     };
 
-    useEffect(() => {
-      if (!catOptionArray.data) {
-        catOptionArray.status === "pending"
-          ? console.debug(
-              "Can't sync currentOptionArray. catOptionArray is loading.",
-            )
-          : console.error(
-              "Can't sync currentOptionArray. fetching catOptionArray failed.",
-            );
+    const primaryCategories = catOptionArray.data
+      ? Array.from(new Set(catOptionArray.data.map((cat) => cat.primary)))
+      : [];
 
-        return;
-      }
-
-      const filteredOptionArray = catOptionArray.data.filter(
-        (option) =>
-          !props.appUserCatArray.find(
-            (unsavedCat) => unsavedCat.nameArray.at(-1) === option.name,
-          ),
-      );
-
-      setCurrentOptionArray(filteredOptionArray);
-    }, [catOptionArray.data, catOptionArray.status, props.appUserCatArray]);
+    const detailedCategories = selectedPrimary
+      ? catOptionArray.data?.filter((cat) => cat.primary === selectedPrimary) ||
+        []
+      : [];
 
     return catOptionArray.data ? (
       <div
@@ -129,18 +123,12 @@ const CatPicker = forwardRef(
       >
         <div className="flex w-full justify-between px-2 py-1">
           <div className="flex w-fit items-center">
-            {unsavedNameArray.length > 0 && (
+            {selectedPrimary && (
               <button
                 type="button"
                 aria-label="back"
                 className="flex"
-                onClick={() => {
-                  if (!tx)
-                    return console.error(
-                      "Can't reset splitArray. tx is undefined.",
-                    );
-                  resetPicker();
-                }}
+                onClick={() => setSelectedPrimary(null)}
               >
                 <span className="icon-[mdi--chevron-left] h-6 w-6" />
               </button>
@@ -150,26 +138,9 @@ const CatPicker = forwardRef(
           <div className="flex gap-x-2">
             <button
               type="button"
-              className="text-indigo-300 hover:text-indigo-400"
-              onClick={async () => {
-                if (editingCat.id === null) {
-                  await applyChangesToCat();
-                  resetPicker();
-                  props.closePicker();
-                }
-              }}
-            >
-              save
-            </button>
-            <button
-              type="button"
               className="text-pink-400 hover:text-pink-500"
               onClick={(e) => {
                 e.stopPropagation();
-                if (!tx)
-                  return console.error(
-                    "Can't reset splitTxArray. tx is undefined.",
-                  );
                 resetPicker();
                 props.closePicker();
               }}
@@ -182,48 +153,53 @@ const CatPicker = forwardRef(
         <hr className="w-full border-zinc-700" />
 
         <div className="grid w-full auto-cols-fr grid-cols-3 overflow-x-hidden overflow-y-scroll bg-zinc-800 pb-1 pl-2 text-xs">
-          {currentOptionArray.map((cat) => (
-            <button
-              className="group my-1 mr-2 flex aspect-square flex-col items-center justify-center gap-y-1 hyphens-auto rounded-lg border border-zinc-400 text-center hover:bg-zinc-700 hover:text-zinc-200"
-              type="button"
-              onClick={async () => {
-                if (cat.subCatArray.length === 0) {
-                  await applyChangesToCat(cat);
-                  resetPicker();
-                  props.closePicker();
-                } else {
-                  const updatedOptionArray = cat.subCatArray;
-
-                  const filteredOptionArray = updatedOptionArray.filter(
-                    (option) =>
-                      !props.appUserCatArray.find(
-                        (unsavedCat) =>
-                          unsavedCat.nameArray.at(-1) === option.name,
-                      ),
-                  );
-
-                  setCurrentOptionArray(filteredOptionArray);
-                  setCurrentNameArray((prev) => [...prev, cat.name]);
-                }
-              }}
-              key={cat.name}
-            >
-              <span
-                className={`h-6 w-6 ${
-                  catStyleArray[cat.name]?.textColor ||
-                  "text-zinc-500 group-hover:text-zinc-400"
-                } ${
-                  catStyleArray[cat.name]?.icon ||
-                  "icon-[material-symbols--category-outline]"
-                }`}
-              />
-              <p>{cat.name}</p>
-              <p className="text-zinc-500 group-hover:text-zinc-400">
-                {cat.subCatArray.length > 0 &&
-                  `${cat.subCatArray.length} subcategories`}
-              </p>
-            </button>
-          ))}
+          {!selectedPrimary
+            ? primaryCategories.map((primaryCat) => (
+                <button
+                  className="group my-1 mr-2 flex aspect-square flex-col items-center justify-center gap-y-1 hyphens-auto rounded-lg border border-zinc-400 text-center hover:bg-zinc-700 hover:text-zinc-200"
+                  type="button"
+                  onClick={() => setSelectedPrimary(primaryCat)}
+                  key={primaryCat}
+                >
+                  <span
+                    className={`h-6 w-6 ${
+                      catStyleArray[primaryCat]?.textColor ||
+                      "text-zinc-500 group-hover:text-zinc-400"
+                    } ${
+                      catStyleArray[primaryCat]?.icon ||
+                      "icon-[material-symbols--category-outline]"
+                    }`}
+                  />
+                  <p>{primaryCat}</p>
+                </button>
+              ))
+            : detailedCategories.map((detailedCat) => (
+                <button
+                  className="group my-1 mr-2 flex aspect-square flex-col items-center justify-center gap-y-1 hyphens-auto rounded-lg border border-zinc-400 text-center hover:bg-zinc-700 hover:text-zinc-200"
+                  type="button"
+                  onClick={async () => {
+                    await applyChangesToCat(
+                      detailedCat.primary,
+                      detailedCat.detailed,
+                      editingCat.amount,
+                    );
+                    resetPicker();
+                    props.closePicker();
+                  }}
+                  key={detailedCat.detailed}
+                >
+                  <span
+                    className={`h-6 w-6 ${
+                      catStyleArray[detailedCat.detailed]?.textColor ||
+                      "text-zinc-500 group-hover:text-zinc-400"
+                    } ${
+                      catStyleArray[detailedCat.detailed]?.icon ||
+                      "icon-[material-symbols--category-outline]"
+                    }`}
+                  />
+                  <p>{detailedCat.detailed}</p>
+                </button>
+              ))}
         </div>
       </div>
     ) : null;

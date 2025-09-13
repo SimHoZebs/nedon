@@ -1,81 +1,83 @@
-import type { TreedCatWithTx } from "@/types/cat";
+import type { UIData } from "@/types/ui";
 
 import { H3 } from "../shared/Heading";
 
 import { type CatSettings, Prisma } from "@prisma/client";
-import { getCatStyle, subCatTotal } from "lib/domain/cat";
+import { getCatStyle } from "lib/domain/cat";
 import type { TxType } from "lib/domain/tx";
 
 interface Props {
   txType: TxType;
   catSettings?: CatSettings;
   showModal: () => void;
-  cat: TreedCatWithTx;
+  cat: UIData[0];
 }
 
 const CatCard = (props: Props) => {
-  const subCatTotalAmount = Number(
-    Math.abs(
-      subCatTotal(props.cat, props.txType) +
-        (props.txType === "spending" ? props.cat.spending : props.cat.received),
-    ).toFixed(2),
-  );
-  console.log("subCatTotalAmount", subCatTotalAmount);
+  const totalAmount = Number(Math.abs(props.cat.total).toFixed(2));
 
   return (
-    <button
-      type="button"
+    <div
       key={props.cat.name}
       className="flex cursor-pointer flex-col p-3 outline-1 outline-white hover:bg-zinc-700"
-      onKeyDown={() => props.showModal()}
-      onClick={() => props.showModal()}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center justify-center gap-x-2">
-          <span
-            className={`h-8 w-8 rounded-lg text-zinc-950 ${
-              getCatStyle([props.cat.name]).icon
-            } ${getCatStyle([props.cat.name]).bgColor}`}
-          />
-          <div>
-            <H3>{props.cat.name}</H3>
-
-            <p className="text-sm text-zinc-400">
-              {`${(
-                ((props.cat.spending + subCatTotal(props.cat, "spending")) /
-                  1000) *
-                  100
-              ).toFixed(2)}%`}
-            </p>
+      <button
+        type="button"
+        onKeyDown={() => props.showModal()}
+        onClick={() => props.showModal()}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center gap-x-2">
+            <span
+              className={`h-8 w-8 rounded-lg text-zinc-950 ${
+                getCatStyle(props.cat.name).icon
+              } ${getCatStyle(props.cat.name).bgColor}`}
+            />
+            <div>
+              <H3>{props.cat.name}</H3>
+            </div>
+          </div>
+          <div className="flex flex-col items-end">
+            <div className="flex">
+              <H3>${totalAmount}</H3>
+              <p className="text-sm text-zinc-400">
+                {props.catSettings && ` /${props.catSettings?.budget}`}
+              </p>
+            </div>
+            {props.catSettings && (
+              <p className="text-sm text-zinc-400">
+                {Prisma.Decimal.div(totalAmount, props.catSettings.budget)
+                  .mul(100)
+                  .toNumber()}
+                % of {props.catSettings.budget.toNumber()}
+              </p>
+            )}
           </div>
         </div>
-        <div className="flex flex-col items-end">
-          <div className="flex">
-            <H3>${subCatTotalAmount}</H3>
-            <p className="text-sm text-zinc-400">
-              {props.catSettings && ` /${props.catSettings?.budget}`}
-            </p>
+      </button>
+      <div className="flex flex-col gap-y-2 pl-10">
+        {props.cat.detailed.map((detailedCat) => (
+          <div
+            key={detailedCat.name}
+            className="flex items-center justify-between"
+          >
+            <div className="flex items-center justify-center gap-x-2">
+              <span
+                className={`h-6 w-6 rounded-lg text-zinc-950 ${
+                  getCatStyle(detailedCat.name).icon
+                } ${getCatStyle(detailedCat.name).bgColor}`}
+              />
+              <div>
+                <p>{detailedCat.name}</p>
+              </div>
+            </div>
+            <div className="flex flex-col items-end">
+              <p>${Number(Math.abs(detailedCat.total).toFixed(2))}</p>
+            </div>
           </div>
-          {props.catSettings && (
-            <p className="text-sm text-zinc-400">
-              {Prisma.Decimal.div(subCatTotalAmount, props.catSettings.budget)
-                .mul(100)
-                .toNumber()}
-              % of ${props.catSettings.budget.toNumber()}
-            </p>
-          )}
-        </div>
+        ))}
       </div>
-
-      {/*
-            add as a toggle feature later
-            cat.subCatArray.length > 0 && (
-            <details className="flex flex-col gap-y-2">
-              <summary>Sub categories</summary>
-              <SpendingByCatList hierarchicalCatArray={cat.subCatArray} />
-            </details>
-          )*/}
-    </button>
+    </div>
   );
 };
 

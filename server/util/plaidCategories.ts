@@ -1,15 +1,41 @@
 export type PlaidCategory = {
   [key: string]: {
-    [key: string]: {
-      description: string;
+    styles: {
+      icon: string;
+      bgColor: string;
+      textColor: string;
+      border: string;
     };
+    [key: string]:
+      | {
+          description: string;
+          styles: {
+            icon: string;
+            bgColor: string;
+            textColor: string;
+            border: string;
+          };
+        }
+      | any;
   };
 };
 
 export const plaidCategories: PlaidCategory = {
   INCOME: {
+    styles: {
+      icon: "icon-[mdi--cash]",
+      bgColor: "bg-green-300",
+      textColor: "text-green-300",
+      border: "border border-1 border-green-300",
+    },
     INCOME_DIVIDENDS: {
       description: "Dividends from investment accounts",
+      styles: {
+        icon: "icon-[mdi--chart-line]",
+        bgColor: "bg-green-300",
+        textColor: "text-green-300",
+        border: "border border-1 border-green-300",
+      },
     },
     INCOME_INTEREST_EARNED: {
       description: "Income from interest on savings accounts",
@@ -33,85 +59,247 @@ export const plaidCategories: PlaidCategory = {
     },
   },
   TRANSFER_IN: {
+    styles: {
+      icon: "icon-[mdi--arrow-down]",
+      bgColor: "bg-blue-300",
+      textColor: "text-blue-300",
+      border: "border border-1 border-blue-300",
+    },
     TRANSFER_IN_CASH_ADVANCES_AND_LOANS: {
       description: "Loans and cash advances deposited into a bank account",
+      styles: {
+        icon: "icon-[mdi--cash-plus]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     TRANSFER_IN_DEPOSIT: {
       description: "Cash, checks, and ATM deposits into a bank account",
+      styles: {
+        icon: "icon-[mdi--arrow-down]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     TRANSFER_IN_INVESTMENT_AND_RETIREMENT_FUNDS: {
       description: "Inbound transfers to an investment or retirement account",
+      styles: {
+        icon: "icon-[mdi--arrow-down]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     TRANSFER_IN_SAVINGS: {
       description: "Inbound transfers to a savings account",
+      styles: {
+        icon: "icon-[mdi--arrow-down]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     TRANSFER_IN_ACCOUNT_TRANSFER: {
       description: "General inbound transfers from another account",
+      styles: {
+        icon: "icon-[mdi--arrow-down]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     TRANSFER_IN_OTHER_TRANSFER_IN: {
       description: "Other miscellaneous inbound transactions",
+      styles: {
+        icon: "icon-[mdi--arrow-down]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
   },
   TRANSFER_OUT: {
+    styles: {
+      icon: "icon-[mdi--arrow-up]",
+      bgColor: "bg-red-300",
+      textColor: "text-red-300",
+      border: "border border-1 border-red-300",
+    },
     TRANSFER_OUT_INVESTMENT_AND_RETIREMENT_FUNDS: {
       description:
         "Transfers to an investment or retirement account, including investment apps such as Acorns, Betterment",
+      styles: {
+        icon: "icon-[mdi--arrow-up]",
+        bgColor: "bg-red-300",
+        textColor: "text-red-300",
+        border: "border border-1 border-red-300",
+      },
     },
     TRANSFER_OUT_SAVINGS: {
       description: "Outbound transfers to savings accounts",
+      styles: {
+        icon: "icon-[mdi--arrow-up]",
+        bgColor: "bg-red-300",
+        textColor: "text-red-300",
+        border: "border border-1 border-red-300",
+      },
     },
     TRANSFER_OUT_WITHDRAWAL: {
       description: "Withdrawals from a bank account",
+      styles: {
+        icon: "icon-[mdi--arrow-up]",
+        bgColor: "bg-red-300",
+        textColor: "text-red-300",
+        border: "border border-1 border-red-300",
+      },
     },
     TRANSFER_OUT_ACCOUNT_TRANSFER: {
       description: "General outbound transfers to another account",
+      styles: {
+        icon: "icon-[mdi--arrow-up]",
+        bgColor: "bg-red-300",
+        textColor: "text-red-300",
+        border: "border border-1 border-red-300",
+      },
     },
     TRANSFER_OUT_OTHER_TRANSFER_OUT: {
       description: "Other miscellaneous outbound transactions",
+      styles: {
+        icon: "icon-[mdi--arrow-up]",
+        bgColor: "bg-red-300",
+        textColor: "text-red-300",
+        border: "border border-1 border-red-300",
+      },
     },
   },
   LOAN_PAYMENTS: {
+    styles: {
+      icon: "icon-[mdi--credit-card]",
+      bgColor: "bg-orange-300",
+      textColor: "text-orange-300",
+      border: "border border-1 border-orange-300",
+    },
     LOAN_PAYMENTS_CAR_PAYMENT: {
       description: "Car loans and leases",
+      styles: {
+        icon: "icon-[mdi--credit-card]",
+        bgColor: "bg-orange-300",
+        textColor: "text-orange-300",
+        border: "border border-1 border-orange-300",
+      },
     },
     LOAN_PAYMENTS_CREDIT_CARD_PAYMENT: {
       description:
         "Payments to a credit card. These are positive amounts for credit card subtypes and negative for depository subtypes",
+      styles: {
+        icon: "icon-[mdi--credit-card]",
+        bgColor: "bg-orange-300",
+        textColor: "text-orange-300",
+        border: "border border-1 border-orange-300",
+      },
     },
     LOAN_PAYMENTS_PERSONAL_LOAN_PAYMENT: {
       description:
         "Personal loans, including cash advances and buy now pay later repayments",
+      styles: {
+        icon: "icon-[mdi--credit-card]",
+        bgColor: "bg-orange-300",
+        textColor: "text-orange-300",
+        border: "border border-1 border-orange-300",
+      },
     },
     LOAN_PAYMENTS_MORTGAGE_PAYMENT: {
       description: "Payments on mortgages",
+      styles: {
+        icon: "icon-[mdi--credit-card]",
+        bgColor: "bg-orange-300",
+        textColor: "text-orange-300",
+        border: "border border-1 border-orange-300",
+      },
     },
     LOAN_PAYMENTS_STUDENT_LOAN_PAYMENT: {
       description:
         "Payments on student loans. For college tuition, refer to General Services - Education",
+      styles: {
+        icon: "icon-[mdi--credit-card]",
+        bgColor: "bg-orange-300",
+        textColor: "text-orange-300",
+        border: "border border-1 border-orange-300",
+      },
     },
     LOAN_PAYMENTS_OTHER_PAYMENT: {
       description: "Other miscellaneous debt payments",
+      styles: {
+        icon: "icon-[mdi--credit-card]",
+        bgColor: "bg-orange-300",
+        textColor: "text-orange-300",
+        border: "border border-1 border-orange-300",
+      },
     },
   },
   BANK_FEES: {
+    styles: {
+      icon: "icon-[mdi--bank]",
+      bgColor: "bg-red-300",
+      textColor: "text-red-300",
+      border: "border border-1 border-red-300",
+    },
     BANK_FEES_ATM_FEES: {
       description: "Fees incurred for out-of-network ATMs",
+      styles: {
+        icon: "icon-[mdi--bank]",
+        bgColor: "bg-red-300",
+        textColor: "text-red-300",
+        border: "border border-1 border-red-300",
+      },
     },
     BANK_FEES_FOREIGN_TRANSACTION_FEES: {
       description: "Fees incurred on non-domestic transactions",
+      styles: {
+        icon: "icon-[mdi--bank]",
+        bgColor: "bg-red-300",
+        textColor: "text-red-300",
+        border: "border border-1 border-red-300",
+      },
     },
     BANK_FEES_INSUFFICIENT_FUNDS: {
       description: "Fees relating to insufficient funds",
+      styles: {
+        icon: "icon-[mdi--bank]",
+        bgColor: "bg-red-300",
+        textColor: "text-red-300",
+        border: "border border-1 border-red-300",
+      },
     },
     BANK_FEES_INTEREST_CHARGE: {
       description:
         "Fees incurred for interest on purchases, including not-paid-in-full or interest on cash advances",
+      styles: {
+        icon: "icon-[mdi--bank]",
+        bgColor: "bg-red-300",
+        textColor: "text-red-300",
+        border: "border border-1 border-red-300",
+      },
     },
     BANK_FEES_OVERDRAFT_FEES: {
       description: "Fees incurred when an account is in overdraft",
+      styles: {
+        icon: "icon-[mdi--bank]",
+        bgColor: "bg-red-300",
+        textColor: "text-red-300",
+        border: "border border-1 border-red-300",
+      },
     },
     BANK_FEES_OTHER_BANK_FEES: {
       description: "Other miscellaneous bank fees",
+      styles: {
+        icon: "icon-[mdi--bank]",
+        bgColor: "bg-red-300",
+        textColor: "text-red-300",
+        border: "border border-1 border-red-300",
+      },
     },
   },
   ENTERTAINMENT: {
@@ -138,29 +326,77 @@ export const plaidCategories: PlaidCategory = {
     },
   },
   FOOD_AND_DRINK: {
+    styles: {
+      icon: "icon-[mdi--food]",
+      bgColor: "bg-yellow-300",
+      textColor: "text-yellow-300",
+      border: "border border-1 border-yellow-300",
+    },
     FOOD_AND_DRINK_BEER_WINE_AND_LIQUOR: {
       description: "Beer, Wine & Liquor Stores",
+      styles: {
+        icon: "icon-[mdi--food]",
+        bgColor: "bg-yellow-300",
+        textColor: "text-yellow-300",
+        border: "border border-1 border-yellow-300",
+      },
     },
     FOOD_AND_DRINK_COFFEE: {
       description: "Purchases at coffee shops or cafes",
+      styles: {
+        icon: "icon-[mdi--food]",
+        bgColor: "bg-yellow-300",
+        textColor: "text-yellow-300",
+        border: "border border-1 border-yellow-300",
+      },
     },
     FOOD_AND_DRINK_FAST_FOOD: {
       description: "Dining expenses for fast food chains",
+      styles: {
+        icon: "icon-[mdi--food]",
+        bgColor: "bg-yellow-300",
+        textColor: "text-yellow-300",
+        border: "border border-1 border-yellow-300",
+      },
     },
     FOOD_AND_DRINK_GROCERIES: {
       description:
         "Purchases for fresh produce and groceries, including farmers' markets",
+      styles: {
+        icon: "icon-[mdi--food]",
+        bgColor: "bg-yellow-300",
+        textColor: "text-yellow-300",
+        border: "border border-1 border-yellow-300",
+      },
     },
     FOOD_AND_DRINK_RESTAURANT: {
       description:
         "Dining expenses for restaurants, bars, gastropubs, and diners",
+      styles: {
+        icon: "icon-[mdi--food]",
+        bgColor: "bg-yellow-300",
+        textColor: "text-yellow-300",
+        border: "border border-1 border-yellow-300",
+      },
     },
     FOOD_AND_DRINK_VENDING_MACHINES: {
       description: "Purchases made at vending machine operators",
+      styles: {
+        icon: "icon-[mdi--food]",
+        bgColor: "bg-yellow-300",
+        textColor: "text-yellow-300",
+        border: "border border-1 border-yellow-300",
+      },
     },
     FOOD_AND_DRINK_OTHER_FOOD_AND_DRINK: {
       description:
         "Other miscellaneous food and drink, including desserts, juice bars, and delis",
+      styles: {
+        icon: "icon-[mdi--food]",
+        bgColor: "bg-yellow-300",
+        textColor: "text-yellow-300",
+        border: "border border-1 border-yellow-300",
+      },
     },
   },
   GENERAL_MERCHANDISE: {
@@ -212,21 +448,57 @@ export const plaidCategories: PlaidCategory = {
     },
   },
   HOME_IMPROVEMENT: {
+    styles: {
+      icon: "icon-[mdi--hammer-wrench]",
+      bgColor: "bg-amber-300",
+      textColor: "text-amber-300",
+      border: "border border-1 border-amber-300",
+    },
     HOME_IMPROVEMENT_FURNITURE: {
       description: "Furniture, bedding, and home accessories",
+      styles: {
+        icon: "icon-[mdi--hammer-wrench]",
+        bgColor: "bg-amber-300",
+        textColor: "text-amber-300",
+        border: "border border-1 border-amber-300",
+      },
     },
     HOME_IMPROVEMENT_HARDWARE: {
       description: "Building materials, hardware stores, paint, and wallpaper",
+      styles: {
+        icon: "icon-[mdi--hammer-wrench]",
+        bgColor: "bg-amber-300",
+        textColor: "text-amber-300",
+        border: "border border-1 border-amber-300",
+      },
     },
     HOME_IMPROVEMENT_REPAIR_AND_MAINTENANCE: {
       description: "Plumbing, lighting, gardening, and roofing",
+      styles: {
+        icon: "icon-[mdi--hammer-wrench]",
+        bgColor: "bg-amber-300",
+        textColor: "text-amber-300",
+        border: "border border-1 border-amber-300",
+      },
     },
     HOME_IMPROVEMENT_SECURITY: {
       description: "Home security system purchases",
+      styles: {
+        icon: "icon-[mdi--hammer-wrench]",
+        bgColor: "bg-amber-300",
+        textColor: "text-amber-300",
+        border: "border border-1 border-amber-300",
+      },
     },
     HOME_IMPROVEMENT_OTHER_HOME_IMPROVEMENT: {
       description:
         "Other miscellaneous home purchases, including pool installation and pest control",
+      styles: {
+        icon: "icon-[mdi--hammer-wrench]",
+        bgColor: "bg-amber-300",
+        textColor: "text-amber-300",
+        border: "border border-1 border-amber-300",
+      },
     },
   },
   MEDICAL: {
@@ -270,34 +542,94 @@ export const plaidCategories: PlaidCategory = {
     },
   },
   GENERAL_SERVICES: {
+    styles: {
+      icon: "icon-[mdi--wrench]",
+      bgColor: "bg-blue-300",
+      textColor: "text-blue-300",
+      border: "border border-1 border-blue-300",
+    },
     GENERAL_SERVICES_ACCOUNTING_AND_FINANCIAL_PLANNING: {
       description: "Financial planning, and tax and accounting services",
+      styles: {
+        icon: "icon-[mdi--wrench]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     GENERAL_SERVICES_AUTOMOTIVE: {
       description: "Oil changes, car washes, repairs, and towing",
+      styles: {
+        icon: "icon-[mdi--wrench]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     GENERAL_SERVICES_CHILDCARE: {
       description: "Babysitters and daycare",
+      styles: {
+        icon: "icon-[mdi--wrench]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     GENERAL_SERVICES_CONSULTING_AND_LEGAL: {
       description: "Consulting and legal services",
+      styles: {
+        icon: "icon-[mdi--wrench]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     GENERAL_SERVICES_EDUCATION: {
       description:
         "Elementary, high school, professional schools, and college tuition",
+      styles: {
+        icon: "icon-[mdi--wrench]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     GENERAL_SERVICES_INSURANCE: {
       description: "Insurance for auto, home, and healthcare",
+      styles: {
+        icon: "icon-[mdi--wrench]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     GENERAL_SERVICES_POSTAGE_AND_SHIPPING: {
       description: "Mail, packaging, and shipping services",
+      styles: {
+        icon: "icon-[mdi--wrench]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     GENERAL_SERVICES_STORAGE: {
       description: "Storage services and facilities",
+      styles: {
+        icon: "icon-[mdi--wrench]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     GENERAL_SERVICES_OTHER_GENERAL_SERVICES: {
       description:
         "Other miscellaneous services, including advertising and cloud storage",
+      styles: {
+        icon: "icon-[mdi--wrench]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
   },
   GOVERNMENT_AND_NON_PROFIT: {
@@ -354,26 +686,74 @@ export const plaidCategories: PlaidCategory = {
     },
   },
   RENT_AND_UTILITIES: {
+    styles: {
+      icon: "icon-[mdi--home]",
+      bgColor: "bg-blue-300",
+      textColor: "text-blue-300",
+      border: "border border-1 border-blue-300",
+    },
     RENT_AND_UTILITIES_GAS_AND_ELECTRICITY: {
       description: "Gas and electricity bills",
+      styles: {
+        icon: "icon-[mdi--home]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     RENT_AND_UTILITIES_INTERNET_AND_CABLE: {
       description: "Internet and cable bills",
+      styles: {
+        icon: "icon-[mdi--home]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     RENT_AND_UTILITIES_RENT: {
       description: "Rent payment",
+      styles: {
+        icon: "icon-[mdi--home]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     RENT_AND_UTILITIES_SEWAGE_AND_WASTE_MANAGEMENT: {
       description: "Sewage and garbage disposal bills",
+      styles: {
+        icon: "icon-[mdi--home]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     RENT_AND_UTILITIES_TELEPHONE: {
       description: "Cell phone bills",
+      styles: {
+        icon: "icon-[mdi--home]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     RENT_AND_UTILITIES_WATER: {
       description: "Water bills",
+      styles: {
+        icon: "icon-[mdi--home]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
     RENT_AND_UTILITIES_OTHER_UTILITIES: {
       description: "Other miscellaneous utility bills",
+      styles: {
+        icon: "icon-[mdi--home]",
+        bgColor: "bg-blue-300",
+        textColor: "text-blue-300",
+        border: "border border-1 border-blue-300",
+      },
     },
   },
 };

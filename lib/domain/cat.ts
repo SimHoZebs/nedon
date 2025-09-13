@@ -15,8 +15,12 @@ export const createNewCat = (input: UnsavedCat): UnsavedCat => {
 };
 
 export const getCatStyle = (detailedCat: string) => {
-  const style = catStyleArray[detailedCat];
-  return style ? style : catStyleArray.Unknown;
+  for (const primary in plaidCategories) {
+    if (plaidCategories[primary][detailedCat]) {
+      return plaidCategories[primary][detailedCat].styles;
+    }
+  }
+  return catStyleArray.Unknown;
 };
 
 export const resetCatArray = (tx: Tx): UnsavedCat[] => {
