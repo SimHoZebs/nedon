@@ -9,7 +9,7 @@ import {
 import { procedure, router } from "server/trpc";
 import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
-import { INCLUDE_CONNECTIONS_SAEFLY } from "server/util/user";
+import { INCLUDE_CONNECTIONS_SAEFLY, sanitizeUser } from "server/util/user";
 import { z } from "zod";
 
 const devRouter = router({
@@ -22,9 +22,7 @@ const devRouter = router({
   getAllUsers: procedure.input(z.undefined()).query(async () => {
     //developers get to see all accounts
     const userArray = await db.user.findMany({
-      include: {
-        myConnectionArray: { omit: { accessToken: true } },
-      },
+      ...INCLUDE_CONNECTIONS_SAEFLY,
     });
 
     return userArray;
@@ -39,16 +37,12 @@ const devRouter = router({
 
       if (!user) throw UserNotFoundError;
 
-      const { accessToken, ...userWithoutAccessToken } = user;
-      const userClientSide = {
-        ...userWithoutAccessToken,
-        hasAccessToken: !!accessToken,
-      };
+      const userClientSide = sanitizeUser(user);
 
       if (isUserClientSide(userClientSide)) {
         result = {
           ok: true,
-          value: exact<UserClientSide>()(userClientSide),
+          value: userClientSide,
         };
       } else {
         result = {

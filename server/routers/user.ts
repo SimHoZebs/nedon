@@ -13,8 +13,8 @@ import { Prisma } from "@prisma/client";
 import { getPlaidTokensAndIds as getPlaidAccessData } from "server/services/plaid";
 import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
+import { INCLUDE_CONNECTIONS_SAEFLY, sanitizeUser } from "server/util/user";
 import { z } from "zod";
-import { INCLUDE_CONNECTIONS_SAEFLY } from "server/util/user";
 
 const userRouter = router({
   create: procedure
@@ -35,16 +35,9 @@ const userRouter = router({
         });
         console.log("Created user without Plaid data:", user);
 
-        const { accessToken, ...userWithoutAccessToken } = user;
-
-        const userClientSide: UnAuthUserClientSide = {
-          ...userWithoutAccessToken,
-          hasAccessToken: !!accessToken,
-        };
-
         result = {
           ok: true,
-          value: userClientSide,
+          value: sanitizeUser(user),
         };
       } catch (e) {
         console.error("Error creating user:", e);
@@ -71,10 +64,7 @@ const userRouter = router({
 
         result = {
           ok: true,
-          value: {
-            ...user,
-            hasAccessToken: !!user.accessToken,
-          },
+          value: sanitizeUser(user),
         };
       } catch (e) {
         if (e instanceof UserNotFoundError) {
@@ -111,15 +101,13 @@ const userRouter = router({
           },
           ...INCLUDE_CONNECTIONS_SAEFLY,
         });
-        const { accessToken, ...userWithoutAccessToken } = user;
-        const userClientSide = {
-          ...userWithoutAccessToken,
-          hasAccessToken: !!accessToken,
-        };
+
+        const userClientSide = sanitizeUser(user);
 
         if (!isUserClientSide(userClientSide)) {
           throw new Error("Updated user does not match UserClientSide schema");
         }
+
         result = {
           ok: true,
           value: userClientSide,
@@ -169,16 +157,13 @@ const userRouter = router({
           ...INCLUDE_CONNECTIONS_SAEFLY,
         });
 
-        if (!isUserClientSide(user)) {
+        const clientSideUser = sanitizeUser(user);
+        if (!isUserClientSide(clientSideUser)) {
           throw new Error("Updated user does not match UserClientSide schema");
         }
-        const { accessToken, ...userWithoutAccessToken } = user;
         result = {
           ok: true,
-          value: exact<UserClientSide>()({
-            ...userWithoutAccessToken,
-            hasAccessToken: !!accessToken,
-          }),
+          value: clientSideUser,
         };
       } catch (e) {
         console.error("Error updating user name:", e);

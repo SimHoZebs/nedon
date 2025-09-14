@@ -134,6 +134,7 @@ const authorizeAndCreateTransfer = async (accessToken: string) => {
   return transferResponse.data.transfer.id;
 };
 
+//this should be on user route
 export const getAuth = async (userId: string) => {
   const user = await db.user.findFirst({
     where: {

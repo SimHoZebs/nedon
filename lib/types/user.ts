@@ -11,7 +11,7 @@ export const OMIT_PRIVATE_DATA = {
 
 export type OmitPrivateData = typeof OMIT_PRIVATE_DATA;
 
-type PureUser = Prisma.UserGetPayload<undefined>;
+export type PureUser = Prisma.UserGetPayload<undefined>;
 
 const PureUserSchema = z
   .object({
