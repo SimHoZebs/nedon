@@ -14,7 +14,7 @@ import { getPlaidTokensAndIds as getPlaidAccessData } from "server/services/plai
 import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
 import { z } from "zod";
-import { WITH_CONNECTIONS_OMIT_ACCESS_TOKEN } from "server/util/user";
+import { INCLUDE_CONNECTIONS_SAEFLY } from "server/util/user";
 
 const userRouter = router({
   create: procedure
@@ -27,7 +27,7 @@ const userRouter = router({
       let result: Result<UnAuthUserClientSide, unknown>;
       try {
         const user = await db.user.create({
-          ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
+          ...INCLUDE_CONNECTIONS_SAEFLY,
           data: {
             id: input?.id,
             name: input?.name,
@@ -63,7 +63,7 @@ const userRouter = router({
       try {
         const user = await db.user.findFirst({
           where: { id: input.id },
-          ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
+          ...INCLUDE_CONNECTIONS_SAEFLY,
         });
         if (!user) {
           throw new UserNotFoundError(input.id);
@@ -109,7 +109,7 @@ const userRouter = router({
           data: {
             ...plaidDataResult.value,
           },
-          ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
+          ...INCLUDE_CONNECTIONS_SAEFLY,
         });
         const { accessToken, ...userWithoutAccessToken } = user;
         const userClientSide = {
@@ -166,7 +166,7 @@ const userRouter = router({
           data: {
             name: input.name,
           },
-          ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
+          ...INCLUDE_CONNECTIONS_SAEFLY,
         });
 
         if (!isUserClientSide(user)) {
@@ -195,7 +195,7 @@ const userRouter = router({
       where: {
         id: input,
       },
-      ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
+      ...INCLUDE_CONNECTIONS_SAEFLY,
     });
 
     return user;

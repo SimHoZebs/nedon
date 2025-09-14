@@ -7,7 +7,9 @@ import {
 } from "@/types/user";
 
 import { procedure, router } from "server/trpc";
+import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
+import { INCLUDE_CONNECTIONS_SAEFLY } from "server/util/user";
 import { z } from "zod";
 
 const devRouter = router({
@@ -32,12 +34,10 @@ const devRouter = router({
     let result: Result<UnAuthUserClientSide | UserClientSide, unknown>;
     try {
       const user = await db.user.findFirst({
-        include: {
-          myConnectionArray: { omit: { accessToken: true } },
-        },
+        ...INCLUDE_CONNECTIONS_SAEFLY,
       });
 
-      if (!user) throw new Error("No users found in the database.");
+      if (!user) throw UserNotFoundError;
 
       const { accessToken, ...userWithoutAccessToken } = user;
       const userClientSide = {
@@ -53,7 +53,7 @@ const devRouter = router({
       } else {
         result = {
           ok: true,
-          value: exact<UnAuthUserClientSide>()(userClientSide),
+          value: userClientSide,
         };
       }
     } catch (e) {

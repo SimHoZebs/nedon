@@ -1,6 +1,16 @@
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+export const OMIT_PRIVATE_DATA = {
+  accessToken: true,
+  publicToken: true,
+  itemId: true,
+  transferId: true,
+  cursor: true,
+} as const;
+
+export type OmitPrivateData = typeof OMIT_PRIVATE_DATA;
+
 type PureUser = Prisma.UserGetPayload<undefined>;
 
 const PureUserSchema = z
@@ -16,13 +26,7 @@ const PureUserSchema = z
   .strict() satisfies z.ZodType<PureUser>;
 
 export type Connection = Prisma.UserGetPayload<{
-  omit: {
-    accessToken: true;
-    publicToken: true;
-    itemId: true;
-    transferId: true;
-    cursor: true;
-  };
+  omit: OmitPrivateData;
 }>;
 
 export const ConnectionSchema = PureUserSchema.omit({
@@ -36,15 +40,13 @@ export const ConnectionSchema = PureUserSchema.omit({
 export type unAuthUser = Prisma.UserGetPayload<{
   include: {
     myConnectionArray: {
-      omit: {
-        accessToken: true;
-      };
+      omit: OmitPrivateData;
     };
   };
 }>;
 
 export const unAuthUserSchema = PureUserSchema.extend({
-  myConnectionArray: z.array(PureUserSchema.omit({ accessToken: true })),
+  myConnectionArray: ConnectionSchema.array(),
 }).strict() satisfies z.ZodType<unAuthUser>;
 
 export const unAuthUserClientSideSchema = unAuthUserSchema

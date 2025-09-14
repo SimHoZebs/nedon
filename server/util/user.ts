@@ -1,12 +1,9 @@
-export const WITH_CONNECTIONS_OMIT_ACCESS_TOKEN = {
+import { OMIT_PRIVATE_DATA } from "@/types/user";
+
+export const INCLUDE_CONNECTIONS_SAEFLY = {
   include: {
     myConnectionArray: {
-      omit: {
-        accessToken: true,
-        publicToken: true,
-        itemId: true,
-        transferId: true,
-      },
+      omit: OMIT_PRIVATE_DATA,
     },
   },
-};
+} as const;

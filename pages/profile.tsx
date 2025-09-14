@@ -13,8 +13,8 @@ const Profile = () => {
 
   const updateName = trpc.user.updateName.useMutation();
   const connectToPlaid = trpc.user.connectToPlaid.useMutation({
-    onSuccess: () => {
-      queryClient.user.get.invalidate();
+    onSuccess: async () => {
+      await queryClient.invalidate();
     },
   });
   const queryClient = trpc.useUtils();
