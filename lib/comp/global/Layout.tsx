@@ -19,7 +19,7 @@ const customFont = Space_Grotesk({
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
-  const { user: appUser } = useAutoLoadUser();
+  const { user: appUser, isLoading: appUserLoading } = useAutoLoadUser();
 
   const txGetAllRetryCount = useRef(0);
   const setScreenType = useStore((state) => state.setScreenType);

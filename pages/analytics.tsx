@@ -24,7 +24,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 type ModalData = {
   settings?: CatSettings;
-  data: NestedCatWithTx[];
+  data: NestedCatWithTx;
 };
 
 const Page = () => {
@@ -91,7 +91,7 @@ const Page = () => {
     <section className="flex flex-col items-center gap-y-4">
       {showModal && (
         <motion.div
-          className="absolute top-0 left-0 z-10 h-full w-full overflow-hidden bg-zinc-950 bg-opacity-70 backdrop-blur-sm sm:justify-center"
+          className="absolute top-0 left-0 z-10 h-full w-full overflow-hidden bg-zinc-950/70 backdrop-blur-sm sm:justify-center"
           onMouseDown={(e) => {
             e.stopPropagation();
             setShowModal(false);
@@ -117,9 +117,7 @@ const Page = () => {
               <Button
                 key={type}
                 className={`px-3 text-sm ${
-                  txType === type
-                    ? "bg-indigo-200 bg-opacity-20 text-indigo-200"
-                    : ""
+                  txType === type ? "bg-indigo-200/20 text-indigo-200" : ""
                 } rounded-md`}
                 onClick={() => setTxType(type)}
               >
@@ -144,35 +142,39 @@ const Page = () => {
             />
           )}
 
-          <AnalysisBar
-            organizedTxByCatArray={nestedCatWithTxArray}
-            spendingTotal={spendingTotal}
-          />
-
-          <div className="flex w-full flex-col gap-y-2">
-            {nestedCatWithTxArray.map((cat) => (
-              <CatCard
-                key={cat.primary.name}
-                cat={cat}
-                txType={txType}
-                catSettings={settings.data?.catSettings.find(
-                  (catSettings) => catSettings.name === cat.name,
-                )}
-                showModal={() => {
-                  if (!settings.data) return;
-                  const selectedSettings = settings.data.catSettings.find(
-                    (catSettings) => catSettings.name === cat.name,
-                  );
-
-                  setModalData({
-                    settings: selectedSettings,
-                    data: cat,
-                  });
-                  setShowModal(true);
-                }}
+          {nestedCatWithTxArray && nestedCatWithTxArray.length === 0 && (
+            <>
+              <AnalysisBar
+                organizedTxByCatArray={nestedCatWithTxArray}
+                spendingTotal={spendingTotal}
               />
-            ))}
-          </div>
+
+              <div className="flex w-full flex-col gap-y-2">
+                {nestedCatWithTxArray.map((cat) => (
+                  <CatCard
+                    key={cat.primary.name}
+                    cat={cat}
+                    txType={txType}
+                    catSettings={settings.data?.catSettings.find(
+                      (catSettings) => catSettings.name === cat.primary.name,
+                    )}
+                    showModal={() => {
+                      if (!settings.data) return;
+                      const selectedSettings = settings.data.catSettings.find(
+                        (catSettings) => catSettings.name === cat.primary.name,
+                      );
+
+                      setModalData({
+                        settings: selectedSettings,
+                        data: cat,
+                      });
+                      setShowModal(true);
+                    }}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </section>

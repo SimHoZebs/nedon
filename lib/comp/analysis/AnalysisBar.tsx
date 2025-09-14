@@ -1,10 +1,11 @@
+import type { Prisma } from "@prisma/client";
 import { getCatStyle } from "lib/domain/cat";
 import type { NestedCatWithTx } from "lib/domain/tx";
 import { useId } from "react";
 
 interface Props {
   organizedTxByCatArray: NestedCatWithTx[];
-  spendingTotal: number;
+  spendingTotal: Prisma.Decimal;
 }
 
 const AnalysisBar = (props: Props) => {
