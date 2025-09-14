@@ -1,9 +1,9 @@
 import type { Result } from "@/util/type";
 
 import { ACHClass, Products, TransferNetwork, TransferType } from "plaid";
+import client from "server/clients/plaidClient";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "server/constants";
 import db from "server/util/db";
-import { client } from "server/util/plaid";
 
 /**
  * Creates a public token for a sandbox institution.
