@@ -3,7 +3,6 @@ import type { Result } from "@/util/type";
 import { type Tx, TxSchema, UnsavedTxSchema } from "@/types/tx";
 
 import { procedure, router } from "../trpc";
-import { getPlaidTxSyncData } from "../util/plaid";
 
 import { convertPlaidCatToCat } from "lib/domain/cat";
 import { resetTxToPlaidTx } from "lib/domain/tx";
@@ -12,6 +11,7 @@ import {
   mergePlaidTxWithTxArray,
   txInclude,
 } from "server/domains/tx";
+import { getPlaidTxSyncData } from "server/services/plaid";
 import db from "server/util/db";
 import { z } from "zod";
 

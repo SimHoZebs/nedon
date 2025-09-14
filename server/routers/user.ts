@@ -10,11 +10,8 @@ import { procedure, router } from "../trpc";
 import connectionRouter from "./connection";
 
 import { Prisma } from "@prisma/client";
-import type { AccountBase, AuthGetResponse } from "plaid";
-import {
-  getAuth,
-  getPlaidTokensAndIds as getPlaidAccessData,
-} from "server/services/plaid";
+import type { AccountBase } from "plaid";
+import { getAuth, getPlaidTokensAndIds } from "server/services/plaid";
 import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
 import { INCLUDE_CONNECTIONS_SAEFLY, sanitizeUser } from "server/util/user";
@@ -92,16 +89,16 @@ const userRouter = router({
     .mutation(async ({ input }) => {
       let result: Result<UserClientSide, Error>;
       try {
-        const plaidDataResult = await getPlaidAccessData();
-        if (!plaidDataResult.ok) {
+        const getResult = await getPlaidTokensAndIds();
+        if (!getResult.ok) {
           throw new Error(
-            `Failed to get Plaid access data: ${plaidDataResult.error}`,
+            `Failed to get Plaid access data: ${getResult.error}`,
           );
         }
         const user = await db.user.update({
           where: { id: input.id },
           data: {
-            ...plaidDataResult.value,
+            ...getResult.value,
           },
           ...INCLUDE_CONNECTIONS_SAEFLY,
         });

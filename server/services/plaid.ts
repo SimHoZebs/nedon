@@ -1,26 +1,18 @@
 import type { Result } from "@/util/type";
 
-import { ACHClass, Products, TransferNetwork, TransferType } from "plaid";
+import { AxiosError, isAxiosError } from "axios";
+import {
+  ACHClass,
+  PlaidErrorType,
+  Products,
+  type RemovedTransaction,
+  type Transaction,
+  type TransactionsSyncRequest,
+  TransferNetwork,
+  TransferType,
+} from "plaid";
 import client from "server/clients/plaidClient";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "server/constants";
-
-/**
- * Creates a public token for a sandbox institution.
- * Defaults to "ins_1" if no institution ID is provided.
- */
-const getSandboxPublicToken = async (
-  instituteID: string,
-): Promise<Result<string, unknown>> => {
-  try {
-    const response = await client.sandboxPublicTokenCreate({
-      institution_id: instituteID,
-      initial_products: PLAID_PRODUCTS,
-    });
-    return { ok: true, value: response.data.public_token };
-  } catch (e) {
-    return { ok: false, error: e };
-  }
-};
 
 export const createPlaidLinkToken = async () => {
   const response = await client.linkTokenCreate({
@@ -47,21 +39,37 @@ export const getPlaidTokensAndIds = async (): Promise<
   >
 > => {
   try {
-    const getSandboxPublicTokenResponse = await getSandboxPublicToken("ins_1");
+    console.log("Creating public token...");
+    const publicTokenCreateResponse = await client.sandboxPublicTokenCreate({
+      institution_id: "ins_109508",
+      initial_products: PLAID_PRODUCTS,
+    });
 
-    if (!getSandboxPublicTokenResponse.ok) {
-      return { ok: false, error: getSandboxPublicTokenResponse.error };
+    if (publicTokenCreateResponse.status !== 200) {
+      console.error("Error creating public token:", publicTokenCreateResponse);
+      throw new Error(JSON.stringify(publicTokenCreateResponse, null, 2));
     }
-    const { value: publicToken } = getSandboxPublicTokenResponse;
+
+    const publicToken = publicTokenCreateResponse.data.public_token;
+
     const exchangeResponse = await client.itemPublicTokenExchange({
       public_token: publicToken,
     });
+
+    if (exchangeResponse.status !== 200) {
+      console.error("Error exchanging public token:", exchangeResponse);
+      throw new Error(JSON.stringify(exchangeResponse, null, 2));
+    }
 
     let transferId: string | null = null;
     if (PLAID_PRODUCTS.includes(Products.Transfer)) {
       transferId = await authorizeAndCreateTransfer(
         exchangeResponse.data.access_token,
       );
+
+      if (!transferId) {
+        throw new Error("Transfer ID is null");
+      }
     }
 
     return {
@@ -74,6 +82,14 @@ export const getPlaidTokensAndIds = async (): Promise<
       },
     };
   } catch (e) {
+    if (isAxiosError(e)) {
+      console.error(
+        "Axios error in getPlaidTokensAndIds:",
+        e.response?.data.display_message,
+      );
+      return { ok: false, error: e.response?.data.display_message };
+    }
+    console.error("Unexpected error in getPlaidTokensAndIds:", e);
     return { ok: false, error: e };
   }
 };
@@ -144,4 +160,68 @@ export const getAuth = async (accessToken: string) => {
   }
 
   return authResponse.data;
+};
+
+export const getPlaidTxSyncData = async (
+  accessToken: string,
+  cursor?: string,
+) => {
+  // New tx updates since "cursor"
+  let added: Transaction[] = [];
+  let modified: Transaction[] = [];
+  // Removed tx ids
+  let removed: RemovedTransaction[] = [];
+  let totalCount = 100;
+  let hasMore = true;
+
+  while (hasMore && totalCount > 0) {
+    const request: TransactionsSyncRequest = {
+      access_token: accessToken,
+      cursor: cursor,
+      count: totalCount,
+    };
+
+    try {
+      console.log(
+        `syncing ${request.count} transactions with cursor ${request.cursor} and accessToken ${request.access_token}`,
+      );
+      const response = await client.transactionsSync(request);
+      const data = response.data;
+      // Add this page of results
+      added = added.concat(data.added);
+      modified = modified.concat(data.modified);
+      removed = removed.concat(data.removed);
+      totalCount =
+        totalCount -
+        data.added.length -
+        data.modified.length -
+        data.removed.length;
+
+      hasMore = data.has_more;
+
+      // Update cursor to the next cursor
+      cursor = data.next_cursor;
+    } catch (error) {
+      if (
+        // biome-ignore lint/suspicious/noExplicitAny: because fuck making types for stupid errors
+        (error as any).response.data.error_type ===
+        PlaidErrorType.TransactionError
+      ) {
+        console.error(
+          `${PlaidErrorType.TransactionError}, Resetting sync cursor`,
+        );
+        cursor = cursor || undefined;
+      } else {
+        console.error("Error in transactionsSync: ", error);
+        return null;
+      }
+    }
+  }
+
+  return {
+    added,
+    modified,
+    removed,
+    cursor,
+  };
 };
