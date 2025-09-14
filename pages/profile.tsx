@@ -1,8 +1,9 @@
 import { ActionBtn, Button } from "@/comp/shared/Button";
 import Input from "@/comp/shared/Input";
-import type { UnAuthUserClientSide } from "@/types/user";
 
 import { trpc } from "@/util/trpc";
+
+import type { UnAuthUserClientSide } from "@/types/user";
 
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useEffect, useId, useState } from "react";
@@ -62,9 +63,13 @@ const Profile = () => {
           >
             Save
           </ActionBtn>
-          <ActionBtn onClickAsync={() => connectUnAuthUserToPlaid(unsavedUser)}>
-            Connect to Plaid
-          </ActionBtn>
+          {unsavedUser.hasAccessToken || (
+            <ActionBtn
+              onClickAsync={() => connectUnAuthUserToPlaid(unsavedUser)}
+            >
+              Connect to Plaid
+            </ActionBtn>
+          )}
           <pre>{JSON.stringify(appUser, null, 2)}</pre>
         </section>
       ) : (

@@ -1,26 +1,4 @@
-export type PlaidCategory = {
-  [key: string]: {
-    styles: {
-      icon: string;
-      bgColor: string;
-      textColor: string;
-      border: string;
-    };
-    [key: string]:
-      | {
-          description: string;
-          styles: {
-            icon: string;
-            bgColor: string;
-            textColor: string;
-            border: string;
-          };
-        }
-      | any;
-  };
-};
-
-export const plaidCategories: PlaidCategory = {
+export const plaidCategories = {
   INCOME: {
     styles: {
       icon: "icon-[mdi--cash]",
@@ -757,3 +735,5 @@ export const plaidCategories: PlaidCategory = {
     },
   },
 };
+
+export type PlaidCat = typeof plaidCategories;

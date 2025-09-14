@@ -22,12 +22,9 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 /**
- * Tx depends on three forms of data:
- * 1. Data in the database
- * 2. Data on the client side synced with the database
- * 3. Data on the client side that isn't synced with the database due to
- * temporary modifications
- *
+ * TxOnModal depends on:
+ * 1. this global store, a read-only reference to react query cache
+ * 2. local useState in TxModal for temporary edits
  * */
 interface Store {
   txOnModalIndex: number[] | null;
