@@ -38,10 +38,11 @@ const Home: NextPage = () => {
   const { user: appUser, isLoading } = useAutoLoadUser();
   const { date, setDate, rangeFormat, setRangeFormat } = useDateRange();
 
-  const auth = trpc.plaid.auth.useQuery(
-    { id: appUser ? appUser.id : "" },
+  const getAllAccounts = trpc.user.getAllAccounts.useQuery(
+    { userId: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser && !isLoading },
   );
+  const allAccounts = getAllAccounts.data?.ok ? getAllAccounts.data.value : [];
 
   const txArray = useTxGetAll();
   const txOragnizedByTimeArray = useStore(
@@ -52,10 +53,13 @@ const Home: NextPage = () => {
     <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700" />,
   );
 
-  const total = auth.data?.accounts.reduce(
-    (current, account) => current + (account.balances.available || 0),
-    0,
-  );
+  const total =
+    allAccounts && allAccounts.length > 0
+      ? allAccounts.reduce(
+          (sum, account) => sum + (account.balances.available || 0),
+          0,
+        )
+      : 0;
 
   useEffect(() => {
     if (!txArray.data) {
@@ -156,9 +160,9 @@ const Home: NextPage = () => {
             <H3>Total: ${total}</H3>
           </div>
 
-          {auth.fetchStatus === "idle" && auth.status !== "pending" ? (
-            auth.data ? (
-              auth.data.accounts.map(
+          {getAllAccounts.isSuccess ? (
+            allAccounts && allAccounts.length > 0 ? (
+              allAccounts.map(
                 (account) =>
                   account.balances.available && (
                     <AccountCard

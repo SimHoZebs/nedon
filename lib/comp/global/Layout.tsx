@@ -150,7 +150,11 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
           </NavBtn>
         </div>
 
-        {appUser ? (
+        {appUserLoading ? (
+          <div className="flex justify-center text-xs text-zinc-500">
+            Loading...
+          </div>
+        ) : appUser ? (
           <NavBtn router={router} route="/profile">
             <span className="icon-[mdi--account] mr-4 h-6 w-6" />
             {appUser.name}

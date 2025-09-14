@@ -1,4 +1,4 @@
-import { exact, type Result } from "@/util/type";
+import type { Result } from "@/util/type";
 
 import {
   isUserClientSide,

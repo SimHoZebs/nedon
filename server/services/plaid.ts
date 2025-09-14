@@ -3,7 +3,6 @@ import type { Result } from "@/util/type";
 import { ACHClass, Products, TransferNetwork, TransferType } from "plaid";
 import client from "server/clients/plaidClient";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "server/constants";
-import db from "server/util/db";
 
 /**
  * Creates a public token for a sandbox institution.
@@ -135,19 +134,14 @@ const authorizeAndCreateTransfer = async (accessToken: string) => {
 };
 
 //this should be on user route
-export const getAuth = async (userId: string) => {
-  const user = await db.user.findFirst({
-    where: {
-      id: userId,
-    },
-    select: { accessToken: true },
-  });
-
-  if (!user || !user.accessToken) return null;
-
+export const getAuth = async (accessToken: string) => {
   const authResponse = await client.authGet({
-    access_token: user.accessToken,
+    access_token: accessToken,
   });
+
+  if (authResponse.status !== 200) {
+    throw new Error(authResponse.statusText);
+  }
 
   return authResponse.data;
 };

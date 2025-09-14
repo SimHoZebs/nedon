@@ -1,4 +1,4 @@
-import { exact, type Result } from "@/util/type";
+import type { Result } from "@/util/type";
 
 import {
   isUserClientSide,
@@ -10,7 +10,11 @@ import { procedure, router } from "../trpc";
 import connectionRouter from "./connection";
 
 import { Prisma } from "@prisma/client";
-import { getPlaidTokensAndIds as getPlaidAccessData } from "server/services/plaid";
+import type { AccountBase, AuthGetResponse } from "plaid";
+import {
+  getAuth,
+  getPlaidTokensAndIds as getPlaidAccessData,
+} from "server/services/plaid";
 import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
 import { INCLUDE_CONNECTIONS_SAEFLY, sanitizeUser } from "server/util/user";
@@ -138,6 +142,40 @@ const userRouter = router({
           };
         }
       }
+      return result;
+    }),
+
+  getAllAccounts: procedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input }) => {
+      let result: Result<AccountBase[], Error>;
+
+      try {
+        const user = await db.user.findFirst({
+          where: {
+            id: input.userId,
+          },
+          select: { accessToken: true },
+        });
+
+        if (!user || !user.accessToken)
+          throw new Error("User or access token not found");
+
+        const res = await getAuth(user.accessToken);
+
+        result = { ok: true, value: res.accounts };
+      } catch (e) {
+        if (e instanceof Error) {
+          result = { ok: false, error: e };
+        } else {
+          console.error("Error fetching accounts:", e);
+          result = {
+            ok: false,
+            error: new Error("An unexpected error occurred."),
+          };
+        }
+      }
+
       return result;
     }),
 
