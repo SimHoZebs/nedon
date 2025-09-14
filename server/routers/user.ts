@@ -14,20 +14,7 @@ import { getPlaidTokensAndIds as getPlaidAccessData } from "server/services/plai
 import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
 import { z } from "zod";
-
-// Define the reusable selection pattern
-const WITH_CONNECTIONS_OMIT_ACCESS_TOKEN = {
-  include: {
-    myConnectionArray: {
-      omit: {
-        accessToken: true,
-        publicToken: true,
-        itemId: true,
-        transferId: true,
-      },
-    },
-  },
-};
+import { WITH_CONNECTIONS_OMIT_ACCESS_TOKEN } from "server/util/user";
 
 const userRouter = router({
   create: procedure
@@ -109,10 +96,7 @@ const userRouter = router({
   connectToPlaid: procedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
-      let result: Result<
-        UserClientSide,
-        { code: string; message: string } | Error
-      >;
+      let result: Result<UserClientSide, Error>;
       try {
         const plaidDataResult = await getPlaidAccessData();
         if (!plaidDataResult.ok) {
@@ -145,10 +129,7 @@ const userRouter = router({
           console.error("Unknown error type:", e);
           result = {
             ok: false,
-            error: {
-              code: "INTERNAL_SERVER_ERROR",
-              message: "An unexpected error occurred.",
-            },
+            error: new Error("An unexpected error occurred."),
           };
           return result;
         }
@@ -157,19 +138,15 @@ const userRouter = router({
           e instanceof Prisma.PrismaClientKnownRequestError &&
           e.code === "P2025"
         ) {
-          const err = new UserNotFoundError(input.id);
           result = {
             ok: false,
-            error: { code: err.code, message: err.message },
+            error: new UserNotFoundError(input.id),
           };
         } else {
           console.error("Error connecting user to Plaid:", e);
           result = {
             ok: false,
-            error: {
-              code: "INTERNAL_SERVER_ERROR",
-              message: "An unexpected error occurred.",
-            },
+            error: new Error("An unexpected error occurred."),
           };
         }
       }
