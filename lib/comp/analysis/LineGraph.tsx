@@ -25,8 +25,8 @@ const LineGraph = (props: Props) => {
     (store) => store.txOrganizedByTimeArray,
   );
   const [dailyTxSumArray, setDailyTxSumArray] = useState<
-    { date: number; amount: Prisma.Decimal }[]
-  >([{ date: 0, amount: new Prisma.Decimal(0) }]);
+    { date: number; amount: number }[]
+  >([{ date: 0, amount: 0 }]);
 
   useEffect(() => {
     if (props.rangeFormat === "all") {
@@ -93,7 +93,7 @@ const generateDailyTxSumArray = (
   txType: TxType,
   dateLen: number,
 ) => {
-  const result: { date: number; amount: Prisma.Decimal }[] = [];
+  const result: { date: number; amount: number }[] = [];
   let amountSum = new Prisma.Decimal(0);
   let txIndex = txArray.length - 1;
 
@@ -129,7 +129,7 @@ const generateDailyTxSumArray = (
 
     result.push({
       date: i,
-      amount: amountSum,
+      amount: amountSum.toNumber(),
     });
   }
 
