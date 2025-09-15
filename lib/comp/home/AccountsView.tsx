@@ -15,10 +15,10 @@ interface Props {
 }
 
 const AccountsView = (props: Props) => {
-  const { user: appUser, isLoading } = useAutoLoadUser();
+  const { user: appUser, isLoading: appUserIsLoading } = useAutoLoadUser();
   const getAllAccounts = trpc.user.getAllAccounts.useQuery(
     { userId: appUser ? appUser.id : "" },
-    { staleTime: 3600000, enabled: !!appUser && !isLoading },
+    { staleTime: 3600000, enabled: !!appUser && !appUserIsLoading },
   );
   const allAccounts = getAllAccounts.data?.ok ? getAllAccounts.data.value : [];
 
@@ -43,7 +43,11 @@ const AccountsView = (props: Props) => {
           <H3>Total: ${total}</H3>
         </div>
 
-        {getAllAccounts.isSuccess ? (
+        {!appUser && !appUserIsLoading ? (
+          <div className="text-red-500">
+            Error loading user data. Please try refreshing the page.
+          </div>
+        ) : getAllAccounts.isSuccess ? (
           allAccounts && allAccounts.length > 0 ? (
             allAccounts.map(
               (account) =>
