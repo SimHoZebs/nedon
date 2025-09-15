@@ -29,14 +29,13 @@ interface Store {
 }
 
 export const useStore = create<Store>()(
-  devtools(
+  devtools<Store>(
     (set) => ({
       linkToken: "", // Don't set to null or error message will show up briefly when site loads
       setLinkToken: (linkToken: string | null) => set({ linkToken }),
 
-      appUser: undefined,
-      setAppUser: (appUser: UnAuthUserClientSide | undefined) =>
-        set({ appUser }),
+      appUser: null,
+      setAppUser: (appUser: UnAuthUserClientSide | null) => set({ appUser }),
 
       appGroup: undefined,
       setAppGroup: (appGroup: GroupClientSide | undefined) => set({ appGroup }),
@@ -52,8 +51,8 @@ export const useStore = create<Store>()(
       setVerticalCatPicker: (verticalCatPicker: boolean) =>
         set({ verticalCatPicker }),
 
-      txOragnizedByTimeArray: [],
-      setTxOragnizedByTimeArray: (txOragnizedByTimeArray: Tx[][][][]) =>
+      txOrganizedByTimeArray: [],
+      setTxOrganizedByTimeArray: (txOragnizedByTimeArray: Tx[][][][]) =>
         set({ txOrganizedByTimeArray: txOragnizedByTimeArray }),
     }),
 
