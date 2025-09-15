@@ -99,14 +99,17 @@ const txRouter = router({
     .input(UnsavedTxSchema)
     .output(TxSchema)
     .mutation(async ({ input }) => {
-      return await db.tx.create(createTxInput(input));
+      return await db.tx.create({
+        data: createTxInput(input),
+        include: txInclude,
+      });
     }),
 
   createMany: procedure
     .input(z.array(UnsavedTxSchema))
     .mutation(async ({ input }) => {
       const txCreateQueryArray = input.map((tx) => {
-        return db.tx.create(createTxInput(tx));
+        return db.tx.create({ data: createTxInput(tx), include: txInclude });
       });
 
       return await db.$transaction(txCreateQueryArray);

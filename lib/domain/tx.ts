@@ -67,7 +67,7 @@ export const createTxFromPlaidTx = (
     recurring: false,
     mds: MdsType.UNDETERMINED,
     userTotal: Prisma.Decimal(0),
-    originTxId: null,
+    originTxId: id,
     datetime: plaidTx.datetime ? new Date(plaidTx.datetime) : null,
     authorizedDatetime: new Date(plaidTx.authorized_date || 0),
     plaidId: plaidTx.transaction_id,
