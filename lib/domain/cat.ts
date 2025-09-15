@@ -5,19 +5,7 @@ import { Prisma } from "@prisma/client";
 import type { PersonalFinanceCategory } from "plaid";
 import { plaidCategories } from "server/util/plaidCategories";
 
-export const createCatWithoutTxInput = (
-  input: UnsavedCat,
-): Prisma.CatCreateWithoutTxInput => {
-  const { txId: _txId, ...rest } = input;
-  return {
-    ...rest,
-    id: undefined,
-  };
-};
-
-export const createNewCat = (
-  input: UnsavedCat,
-): Prisma.CatCreateWithoutTxInput => {
+export const createNewCat = (input: UnsavedCat): UnsavedCat => {
   return {
     ...input,
     id: undefined,
@@ -43,7 +31,7 @@ export const getCatStyle = (primary: string, detailed: string) => {
     bgColor: plaidCategories[primary][detailed].bgColor,
     textColor: plaidCategories[primary][detailed].textColor,
     icon: plaidCategories[primary][detailed].icon,
-    borderColor: plaidCategories[primary][detailed]?.border,
+    border: plaidCategories[primary][detailed]?.border,
   };
 };
 

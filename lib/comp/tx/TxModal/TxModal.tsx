@@ -16,7 +16,6 @@ import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useStore } from "lib/store/store";
 import { useTxStore } from "lib/store/txStore";
 import Image from "next/image";
-import type { AuthGetResponse } from "plaid";
 import { useEffect, useId } from "react";
 
 interface Props {
@@ -38,8 +37,8 @@ const TxModal = (props: Props) => {
     (store) => store.txOrganizedByTimeArray,
   );
   const { user: appUser, isLoading: appUserIsLoading } = useAutoLoadUser();
-  const auth = trpc.plaid.auth.useQuery(
-    { id: appUser ? appUser.id : "" },
+  const getAllAccounts = trpc.user.getAllAccounts.useQuery(
+    { userId: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser && !appUserIsLoading },
   );
   const queryClient = trpc.useUtils();
@@ -81,11 +80,12 @@ const TxModal = (props: Props) => {
     setIsEditingSplitTx(false);
   };
 
-  const accountName = auth.isLoading
-    ? ""
-    : (auth.data as unknown as AuthGetResponse).accounts.find(
-        (account) => account.account_id === tx?.accountId,
-      )?.name || "";
+  const accountName =
+    getAllAccounts.isLoading || !getAllAccounts.data || !getAllAccounts.data.ok
+      ? ""
+      : getAllAccounts.data.value.find(
+          (account) => account.account_id === tx?.accountId,
+        )?.name || "";
 
   return (
     tx && (
@@ -121,7 +121,7 @@ const TxModal = (props: Props) => {
               </div>
               <AccountName
                 isDesktop={true}
-                isLoading={auth.isLoading}
+                isLoading={getAllAccounts.isLoading}
                 accountName={accountName}
               />
             </div>
@@ -138,7 +138,7 @@ const TxModal = (props: Props) => {
               <div className="flex w-full justify-between">
                 <AccountName
                   isDesktop={false}
-                  isLoading={auth.isLoading}
+                  isLoading={getAllAccounts.isLoading}
                   accountName={accountName}
                 />
                 <div className="flex flex-col items-end">

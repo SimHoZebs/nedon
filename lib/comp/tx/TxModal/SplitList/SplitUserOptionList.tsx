@@ -81,7 +81,6 @@ const SplitUserOptionList = () => {
                     recurring: txOnModal.recurring,
                     mds: txOnModal.mds,
                     plaidId: null,
-                    plaidTx: null,
                     datetime: txOnModal.datetime,
                     authorizedDatetime: txOnModal.authorizedDatetime,
                     accountId: txOnModal.accountId,

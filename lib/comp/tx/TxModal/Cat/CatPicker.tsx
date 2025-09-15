@@ -1,14 +1,13 @@
-import catStyleArray from "@/util/catStyle";
 import { trpc } from "@/util/trpc";
 
 import type { UnsavedCat } from "@/types/cat";
 import { isUnsavedTx } from "@/types/tx";
 
-import { createNewCat } from "lib/domain/cat";
+import { createNewCat, getCatStyle } from "lib/domain/cat";
 import { useStore } from "lib/store/store";
 import { useTxStore } from "lib/store/txStore";
 import { type ForwardedRef, forwardRef, useState } from "react";
-import type { PlaidCategory } from "server/util/plaidCategories";
+import type { plaidCategories } from "server/util/plaidCategories";
 
 interface Props {
   appUserCatArray: UnsavedCat[];
@@ -77,7 +76,7 @@ const CatPicker = forwardRef(
       queryClient.tx.invalidate();
     };
 
-    const plaidCatsToCatArray = (plaidCats: PlaidCategory) => {
+    const plaidCatsToCatArray = (plaidCats: typeof plaidCategories) => {
       return Object.entries(plaidCats).flatMap(([primaryName, detailedObj]) => {
         return {
           name: primaryName,
@@ -157,10 +156,10 @@ const CatPicker = forwardRef(
                 >
                   <span
                     className={`h-6 w-6 ${
-                      catStyleArray[primaryCat.name]?.textColor ||
+                      getCatStyle(primaryCat.name, "").textColor ||
                       "text-zinc-500 group-hover:text-zinc-400"
                     } ${
-                      catStyleArray[primaryCat.name]?.icon ||
+                      getCatStyle(primaryCat.name, "").textColor ||
                       "icon-[material-symbols--category-outline]"
                     }`}
                   />
@@ -186,11 +185,11 @@ const CatPicker = forwardRef(
                 >
                   <span
                     className={`h-6 w-6 ${
-                      catStyleArray[detailedCat.detailed]?.textColor ||
-                      "text-zinc-500 group-hover:text-zinc-400"
+                      getCatStyle(detailedCat.primary, detailedCat.detailed)
+                        .textColor || "text-zinc-500 group-hover:text-zinc-400"
                     } ${
-                      catStyleArray[detailedCat.detailed]?.icon ||
-                      "icon-[material-symbols--category-outline]"
+                      getCatStyle(detailedCat.primary, detailedCat.detailed)
+                        .icon || "icon-[material-symbols--category-outline]"
                     }`}
                   />
                   <p>{detailedCat.detailed}</p>

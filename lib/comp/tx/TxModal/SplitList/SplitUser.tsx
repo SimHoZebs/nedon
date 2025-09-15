@@ -48,7 +48,7 @@ const SplitUser = (props: Props) => {
 
     //add split amount back to unassigned category
     const unassignedCat = updatedCatArray.findIndex(
-      (cat) => cat.name === "Unassigned",
+      (cat) => cat.primary === "Unassigned",
     );
 
     if (unassignedCat === -1) {

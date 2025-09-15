@@ -1,6 +1,6 @@
 import type { Result } from "@/util/type";
 
-import { AxiosError, isAxiosError } from "axios";
+import { isAxiosError } from "axios";
 import {
   ACHClass,
   PlaidErrorType,

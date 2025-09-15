@@ -28,6 +28,7 @@ const CatChip = (props: Props) => {
   const queryClient = trpc.useUtils();
   const deleteCat = trpc.cat.delete.useMutation();
 
+  const catStyle = getCatStyle(props.cat.primary, props.cat.detailed);
   return (
     <div className="flex flex-col gap-2">
       <div
@@ -40,12 +41,7 @@ const CatChip = (props: Props) => {
         onClick={(e) => props.onCatChipClick(e)}
       >
         <span
-          className={`flex h-6 w-6 p-1 ${
-            getCatStyle(props.cat.detailed)?.textColor
-          } ${
-            getCatStyle(props.cat.detailed)?.icon ||
-            "icon-[mdi--shape-plus-outline]"
-          } `}
+          className={`flex h-6 w-6 p-1 ${catStyle.textColor} ${catStyle.icon} `}
         />
 
         <div className={"group flex h-full flex-col items-start text-zinc-300"}>

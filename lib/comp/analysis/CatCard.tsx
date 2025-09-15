@@ -1,24 +1,26 @@
-import type { UIData } from "@/types/ui";
-
 import { H3 } from "../shared/Heading";
 
 import { type CatSettings, Prisma } from "@prisma/client";
 import { getCatStyle } from "lib/domain/cat";
-import type { TxType } from "lib/domain/tx";
+import type { NestedCatWithTx, TxType } from "lib/domain/tx";
 
 interface Props {
   txType: TxType;
   catSettings?: CatSettings;
   showModal: () => void;
-  cat: UIData[0];
+  cat: NestedCatWithTx;
 }
 
 const CatCard = (props: Props) => {
-  const totalAmount = Number(Math.abs(props.cat.total).toFixed(2));
+  const totalAmount = props.cat.primary.total.absoluteValue().toFixed(2);
+  const catStyle = getCatStyle(
+    props.cat.primary.name,
+    props.cat.primary.detailed[0].name,
+  );
 
   return (
     <div
-      key={props.cat.name}
+      key={props.cat.primary.name}
       className="flex cursor-pointer flex-col p-3 outline-1 outline-white hover:bg-zinc-700"
     >
       <button
@@ -30,11 +32,11 @@ const CatCard = (props: Props) => {
           <div className="flex items-center justify-center gap-x-2">
             <span
               className={`h-8 w-8 rounded-lg text-zinc-950 ${
-                getCatStyle(props.cat.name).icon
-              } ${getCatStyle(props.cat.name).bgColor}`}
+                catStyle.icon
+              } ${catStyle.bgColor}`}
             />
             <div>
-              <H3>{props.cat.name}</H3>
+              <H3>{props.cat.primary.name}</H3>
             </div>
           </div>
           <div className="flex flex-col items-end">
@@ -56,7 +58,7 @@ const CatCard = (props: Props) => {
         </div>
       </button>
       <div className="flex flex-col gap-y-2 pl-10">
-        {props.cat.detailed.map((detailedCat) => (
+        {props.cat.primary.detailed.map((detailedCat) => (
           <div
             key={detailedCat.name}
             className="flex items-center justify-between"
@@ -64,15 +66,15 @@ const CatCard = (props: Props) => {
             <div className="flex items-center justify-center gap-x-2">
               <span
                 className={`h-6 w-6 rounded-lg text-zinc-950 ${
-                  getCatStyle(detailedCat.name).icon
-                } ${getCatStyle(detailedCat.name).bgColor}`}
+                  getCatStyle(props.cat.primary.name, detailedCat.name).icon
+                } ${getCatStyle(props.cat.primary.name, detailedCat.name).bgColor}`}
               />
               <div>
                 <p>{detailedCat.name}</p>
               </div>
             </div>
             <div className="flex flex-col items-end">
-              <p>${Number(Math.abs(detailedCat.total).toFixed(2))}</p>
+              <p>${Number(detailedCat.total.absoluteValue().toFixed(2))}</p>
             </div>
           </div>
         ))}

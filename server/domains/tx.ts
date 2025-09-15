@@ -1,11 +1,13 @@
 import type { Tx, UnsavedTx } from "@/types/tx";
 
+import { createCatWithoutTxInput } from "./cat";
+
 import { Prisma } from "@prisma/client";
 import {
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
 } from "@prisma/client/runtime/library";
-import { convertPlaidCatToCat, createCatWithoutTxInput } from "lib/domain/cat";
+import { convertPlaidCatToCat } from "lib/domain/cat";
 import { createTxFromPlaidTx } from "lib/domain/tx";
 import type { RemovedTransaction, Transaction } from "plaid";
 import db from "server/util/db";

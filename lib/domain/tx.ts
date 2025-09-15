@@ -61,7 +61,7 @@ export const createTxFromPlaidTx = (
   return {
     id: id,
     plaidTx: plaidTx,
-    name: plaidTx.name,
+    name: plaidTx.merchant_name || plaidTx.name,
     splitTxArray: [],
     amount: Prisma.Decimal(plaidTx.amount),
     recurring: false,

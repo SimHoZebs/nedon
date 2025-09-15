@@ -24,7 +24,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 type ModalData = {
   settings?: CatSettings;
-  data: NestedCatWithTx;
+  cat: NestedCatWithTx;
 };
 
 const Page = () => {
@@ -166,7 +166,7 @@ const Page = () => {
 
                       setModalData({
                         settings: selectedSettings,
-                        data: cat,
+                        cat: cat,
                       });
                       setShowModal(true);
                     }}

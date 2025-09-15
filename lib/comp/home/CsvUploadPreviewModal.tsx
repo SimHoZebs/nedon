@@ -42,7 +42,7 @@ const CsvUploadPreviewModal = (props: Props) => {
                 <td>{tx.name}</td>
                 <td>{tx.authorizedDatetime.toString()}</td>
                 <td>{tx.amount.toNumber()}</td>
-                <td>{tx.catArray.at(-1)?.name}</td>
+                <td>{tx.catArray.at(-1)?.detailed}</td>
                 <td>{tx.accountId}</td>
               </tr>
             ))}

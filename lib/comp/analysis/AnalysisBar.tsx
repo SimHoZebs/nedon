@@ -16,7 +16,7 @@ const AnalysisBar = (props: Props) => {
       {props.organizedTxByCatArray.map((cat) => (
         <div
           key={id}
-          className={`+ h-full ${getCatStyle(cat.primary.name).bgColor}`}
+          className={`+ h-full ${getCatStyle(cat.primary.name, cat.primary.detailed[0].name).bgColor}`}
           style={{
             width: `${cat.primary.total.dividedBy(props.spendingTotal).mul(100).toFixed(2)}%`,
           }}

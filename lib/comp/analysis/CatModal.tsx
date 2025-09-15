@@ -1,7 +1,4 @@
-import catStyleArray from "@/util/catStyle";
 import { trpc } from "@/util/trpc";
-
-import type { UIData } from "@/types/ui";
 
 import { Button, CloseBtn } from "../shared/Button";
 import DateSortedTxList from "../shared/DateSortedTxList";
@@ -10,20 +7,21 @@ import Input from "../shared/Input";
 import Modal from "../shared/Modal";
 
 import { type CatSettings, Prisma } from "@prisma/client";
-import { organizeTxByTime } from "lib/domain/tx";
+import { type NestedCatWithTx, organizeTxByTime } from "lib/domain/tx";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useEffect, useState } from "react";
+import { getCatStyle } from "lib/domain/cat";
 
 interface Props {
   setShowModal: (show: boolean) => void;
   modalData: {
     settings?: CatSettings;
-    data: UIData[0];
+    cat: NestedCatWithTx;
   };
 }
 
 const CatModal = (props: Props) => {
-  const { settings, data } = props.modalData;
+  const { settings, cat } = props.modalData;
   const { user: appUser, isLoading: appUserLoading } = useAutoLoadUser();
   const { data: userSettings } = trpc.settings.get.useQuery(
     { userId: appUser?.id || "" },
@@ -41,10 +39,11 @@ const CatModal = (props: Props) => {
   const upsertCatSetting = trpc.settings.upsertCatSetting.useMutation();
   const queryClient = trpc.useUtils();
 
-  const totalAmount = Math.abs(data.total);
+  const totalAmount = cat.primary.total.absoluteValue();
 
-  const txUnderThisCat = data.detailed.flatMap((d) => d.txs);
+  const txUnderThisCat = cat.primary.detailed.flatMap((d) => d.txs);
 
+  const catStyle = getCatStyle(cat.primary.name, cat.primary.detailed[0]?.name);
   return (
     <Modal className="px-4 py-2">
       <div className="flex w-full justify-end">
@@ -58,15 +57,13 @@ const CatModal = (props: Props) => {
         <section className="flex flex-col">
           <header className="flex gap-x-3">
             <span
-              className={`h-9 w-9 ${catStyleArray[data.name].icon} ${
-                catStyleArray[data.name].textColor
-              }`}
+              className={`h-9 w-9 ${catStyle.icon} ${catStyle.textColor}`}
             />
-            <H1>{data.name}</H1>
+            <H1>{cat.primary.name}</H1>
           </header>
 
           <div className="flex w-full flex-col items-start">
-            <H2>$ {totalAmount} Spent</H2>
+            <H2>$ {totalAmount.toNumber()} Spent</H2>
             <p>
               {props.modalData.settings?.budget && (
                 <p className="text-sm text-zinc-400">
@@ -99,7 +96,7 @@ const CatModal = (props: Props) => {
 
                 const upsertData = {
                   id: settings?.id,
-                  name: data.name,
+                  name: cat.primary.name,
                   budget: budget,
                   parentId: null,
                   userSettingsId: userSettings.id,
@@ -112,13 +109,15 @@ const CatModal = (props: Props) => {
               change budget
             </Button>
           </div>
-          {data.detailed.length > 0 && (
+          {cat.primary.detailed.length > 0 && (
             <details className="flex flex-col gap-y-2">
               <summary>Detailed categories</summary>
-              {data.detailed.map((detailedCat) => (
+              {cat.primary.detailed.map((detailedCat) => (
                 <div key={detailedCat.name} className="flex justify-between">
                   <span>{detailedCat.name}</span>
-                  <span>${Number(Math.abs(detailedCat.total).toFixed(2))}</span>
+                  <span>
+                    ${Number(detailedCat.total.absoluteValue().toFixed(2))}
+                  </span>
                 </div>
               ))}
             </details>

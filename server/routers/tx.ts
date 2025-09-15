@@ -4,7 +4,6 @@ import { type Tx, TxSchema, UnsavedTxSchema } from "@/types/tx";
 
 import { procedure, router } from "../trpc";
 
-import { Prisma } from "@prisma/client";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
 import { convertPlaidCatToCat } from "lib/domain/cat";
 import { resetTxToPlaidTx } from "lib/domain/tx";
