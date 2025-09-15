@@ -202,15 +202,29 @@ export const getPlaidTxSyncData = async (
       // Update cursor to the next cursor
       cursor = data.next_cursor;
     } catch (error) {
-      if (
-        // biome-ignore lint/suspicious/noExplicitAny: because fuck making types for stupid errors
-        (error as any).response.data.error_type ===
-        PlaidErrorType.TransactionError
-      ) {
+      if (isAxiosError(error)) {
         console.error(
-          `${PlaidErrorType.TransactionError}, Resetting sync cursor`,
+          "Axios error in transactionsSync: ",
+          error.response?.data,
         );
-        cursor = cursor || undefined;
+
+        if (
+          error.response?.data.error_type === PlaidErrorType.TransactionsError
+        ) {
+          switch (error.response?.data.error_code) {
+            case "TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION":
+              console.error(
+                "Error: Transactions data has changed during pagination. Restarting sync.",
+              );
+              cursor = undefined;
+              added = [];
+              modified = [];
+              removed = [];
+              totalCount = 100;
+              hasMore = true;
+              continue;
+          }
+        }
       } else {
         console.error("Error in transactionsSync: ", error);
         return null;

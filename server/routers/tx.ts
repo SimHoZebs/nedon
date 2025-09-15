@@ -14,6 +14,8 @@ import {
 import { getPlaidTxSyncData } from "server/services/plaid";
 import db from "server/util/db";
 import { z } from "zod";
+import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
+import { Prisma } from "@prisma/client";
 
 const txRouter = router({
   getWithoutPlaid: procedure
@@ -31,22 +33,20 @@ const txRouter = router({
       return txInDB;
     }),
 
-  /*
-   * Fetches PlaidTx, converts them to Tx,
-   * */
-  getAll: procedure
-    .input(z.object({ id: z.string(), date: z.string() }))
-    .query(async ({ input }) => {
-      let result: Result<Tx[] | null, unknown>;
+  syncWithPlaid: procedure
+    .input(z.object({ userId: z.string(), date: z.date() }))
+    .mutation(async ({ input }) => {
+      let result: Result<
+        { added: number; updated: number; removed: number },
+        unknown
+      >;
       try {
-        const user = await db.user.findFirst({ where: { id: input.id } });
-
+        const user = await db.user.findFirst({ where: { id: input.userId } });
         if (!user) {
-          console.error("No user found with id: ", input.id);
-          throw new Error("No user found");
-        } else if (!user.accessToken) {
-          console.error("No access token for user: ", input.id);
-          throw new Error("No access token for user");
+          throw new Error(`No user found with id: ${input.userId}`);
+        }
+        if (!user.accessToken) {
+          throw new Error("User is not connected to Plaid");
         }
 
         const plaidSyncResponse = await getPlaidTxSyncData(
@@ -59,9 +59,10 @@ const txRouter = router({
         const res = await mergePlaidTxWithTxArray(
           plaidSyncResponse,
           user.id,
-          input.date,
+          input.date.toISOString(),
         );
         if (!res) throw new Error("Merging Plaid tx with db tx failed");
+
         const { txArray, cursor } = res;
 
         // update cursor in db asynchonously
@@ -72,9 +73,86 @@ const txRouter = router({
           })
           .then();
 
+        return { ok: true, value: txArray };
+      } catch (error) {
+        if (error instanceof PrismaClientInitializationError) {
+          result = { ok: false, error: "Database not initialized" };
+          return result;
+        }
+        console.error(error);
+        console.error("Input: ", input);
+        result = { ok: false, error };
+        return result;
+      }
+    }),
+
+  getAll: procedure
+    .input(z.object({ userId: z.string(), date: z.string() }))
+    .query(async ({ input }) => {
+      let result: Result<Tx[], unknown>;
+      try {
+        const user = await db.user.findFirst({ where: { id: input.userId } });
+
+        const date = new Date(input.date);
+
+        const firstDayThisMonth = new Date(
+          date.getFullYear(),
+          date.getMonth(),
+          1,
+        );
+        const lastDayThisMonth = new Date(
+          date.getFullYear(),
+          date.getMonth() + 1,
+          0,
+        );
+
+        const txArray = await db.tx.findMany({
+          where: {
+            OR: [
+              { ownerId: input.userId },
+              {
+                recurring: true,
+                ownerId: input.userId,
+                authorizedDatetime: {
+                  gte: firstDayThisMonth.toISOString(),
+                  lte: lastDayThisMonth.toISOString(),
+                },
+              },
+            ],
+          },
+          include: {
+            catArray: true,
+            receipt: {
+              include: {
+                items: true,
+              },
+            },
+            originTx: true,
+            splitTxArray: true,
+          },
+        });
+
+        if (!user) {
+          console.error("No user found with id: ", input.userId);
+          throw new Error("No user found");
+        } else if (!user.accessToken) {
+          console.error("No access token for user: ", input.userId);
+          throw new Error("No access token for user");
+        }
+
         console.log("returning txArray", txArray.length);
+
+        console.log("testing amount:", txArray[0]?.amount);
+        console.log(
+          "Is it a Decimal?",
+          txArray[0]?.amount instanceof Prisma.Decimal,
+        );
         result = { ok: true, value: txArray };
       } catch (error) {
+        if (error instanceof PrismaClientInitializationError) {
+          result = { ok: false, error: "Database not initialized" };
+          return result;
+        }
         console.error(error);
         console.error("Input: ", input);
         result = { ok: false, error };
