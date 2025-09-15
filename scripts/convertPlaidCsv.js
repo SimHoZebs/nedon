@@ -49,12 +49,30 @@ async function main() {
     .filter(Boolean)
     .reduce((acc, cat) => {
       if (!acc[cat.primary]) acc[cat.primary] = {};
-      acc[cat.primary][cat.detailed] = { description: cat.description };
+      acc[cat.primary][cat.detailed] = {
+        description: cat.description,
+        icon: "icon-[mdi--shape-outline]", // Default icon
+        bgColor: "bg-gray-300", // Default background color
+        textColor: "text-gray-300", // Default text color
+        border: "border border-1 border-gray-300", // Default border
+      };
       return acc;
     }, {});
   fs.writeFileSync(
     "./server/util/plaidCategories.ts",
-    `export const plaidCategories = ${JSON.stringify(categories, null, 2)} as const;`,
+    `export const plaidCategories: {
+  [primary: string]: {
+    [detailed: string]: {
+      description: string;
+      icon: string;
+      bgColor: string;
+      textColor: string;
+      border: string;
+    };
+  };
+} = ${JSON.stringify(categories, null, 2)} as const;
+
+export type PlaidCat = typeof plaidCategories;`,
   );
 }
 
