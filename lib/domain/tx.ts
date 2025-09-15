@@ -281,7 +281,7 @@ export const useTxGetAll = () => {
 
   const txGetAllResult = trpc.tx.getAll.useQuery(
     {
-      id: appUser?.id || "",
+      userId: appUser?.id || "",
       date: datetime || new Date(Date.now()).toString(),
     },
     {

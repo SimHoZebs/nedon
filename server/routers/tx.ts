@@ -4,6 +4,8 @@ import { type Tx, TxSchema, UnsavedTxSchema } from "@/types/tx";
 
 import { procedure, router } from "../trpc";
 
+import { Prisma } from "@prisma/client";
+import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
 import { convertPlaidCatToCat } from "lib/domain/cat";
 import { resetTxToPlaidTx } from "lib/domain/tx";
 import {
@@ -14,8 +16,6 @@ import {
 import { getPlaidTxSyncData } from "server/services/plaid";
 import db from "server/util/db";
 import { z } from "zod";
-import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
-import { Prisma } from "@prisma/client";
 
 const txRouter = router({
   getWithoutPlaid: procedure
@@ -141,12 +141,6 @@ const txRouter = router({
         }
 
         console.log("returning txArray", txArray.length);
-
-        console.log("testing amount:", txArray[0]?.amount);
-        console.log(
-          "Is it a Decimal?",
-          txArray[0]?.amount instanceof Prisma.Decimal,
-        );
         result = { ok: true, value: txArray };
       } catch (error) {
         if (error instanceof PrismaClientInitializationError) {

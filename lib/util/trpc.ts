@@ -1,8 +1,18 @@
 import type { AppRouter } from "../../server/routers/_app";
 
+import { Prisma } from "@prisma/client";
 import { httpBatchLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
 import SuperJSON from "superjson";
+
+SuperJSON.registerCustom<Prisma.Decimal, string>(
+  {
+    isApplicable: (v): v is Prisma.Decimal => Prisma.Decimal.isDecimal(v),
+    serialize: (v) => v.toJSON(),
+    deserialize: (v) => new Prisma.Decimal(v),
+  },
+  "prisma-decimal",
+);
 
 function getBaseUrl() {
   if (typeof window !== "undefined")
