@@ -7,10 +7,10 @@ import Input from "../shared/Input";
 import Modal from "../shared/Modal";
 
 import { type CatSettings, Prisma } from "@prisma/client";
+import { getCatStyle } from "lib/domain/cat";
 import { type NestedCatWithTx, organizeTxByTime } from "lib/domain/tx";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useEffect, useState } from "react";
-import { getCatStyle } from "lib/domain/cat";
 
 interface Props {
   setShowModal: (show: boolean) => void;

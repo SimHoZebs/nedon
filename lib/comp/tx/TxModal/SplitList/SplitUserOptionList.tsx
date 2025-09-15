@@ -8,7 +8,7 @@ import useAppUser from "lib/hooks/useAutoLoadUser";
 import { useTxStore } from "lib/store/txStore";
 
 const SplitUserOptionList = () => {
-  const { user: appUser, isLoading } = useAppUser();
+  const { user: appUser } = useAppUser();
 
   const setSplitTxArray = useTxStore((state) => state.setSplitTxArray);
   const setUnsavedCatArray = useTxStore((state) => state.setCatArray);

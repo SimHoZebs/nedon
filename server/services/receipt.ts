@@ -12,7 +12,7 @@ export const createReceipt = async (input: {
   id: string;
   receipt: UnsavedReceipt;
 }) => {
-  const { items, id, ...receiptWithoutItems } = input.receipt;
+  const { items, id: _id, ...receiptWithoutItems } = input.receipt;
 
   if (!items) {
     throw new Error("No items in receipt");

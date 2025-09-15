@@ -46,7 +46,6 @@ const SettleModal = (props: Props) => {
         </div>
         <input
           className="bg-zinc-800"
-          id="settleAmount"
           type="number"
           step={0.01}
           value={settleAmount}

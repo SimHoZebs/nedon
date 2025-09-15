@@ -10,7 +10,7 @@ const blobStorageRouter = router({
         img: z.instanceof(File),
       }),
     )
-    .mutation(async ({ input }) => {}),
+    .mutation(async () => {}),
 
   getSignedUploadUrl: procedure
     .input(z.object({ path: z.string() }))

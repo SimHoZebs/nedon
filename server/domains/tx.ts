@@ -26,8 +26,14 @@ export const txInclude = {
 export const createTxInput = (
   txClientSide: UnsavedTx,
 ): Prisma.TxCreateInput => {
-  const { catArray, receipt, splitTxArray, originTxId, ownerId, ...rest } =
-    txClientSide;
+  const {
+    catArray,
+    receipt,
+    splitTxArray,
+    originTxId: _originTxId,
+    ownerId,
+    ...rest
+  } = txClientSide;
   const receiptCreate = receipt
     ? {
         create: {

@@ -201,4 +201,6 @@ const CatPicker = forwardRef(
   },
 );
 
+CatPicker.displayName = "CatPicker";
+
 export default CatPicker;
