@@ -87,7 +87,7 @@ const txRouter = router({
     }),
 
   getAll: procedure
-    .input(z.object({ userId: z.string(), date: z.string() }))
+    .input(z.object({ userId: z.string(), date: z.date() }))
     .query(async ({ input }) => {
       let result: Result<Tx[], unknown>;
       try {

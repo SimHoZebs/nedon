@@ -217,7 +217,7 @@ export const organizeTxByTime = (txArray: Tx[]) => {
 export const getScopeIndex = (
   txOragnizedByTimeArray: Tx[][][][],
   date: Date,
-  rangeFormat: "year" | "month" | "date",
+  rangeFormat: "year" | "month" | "date" | "all",
 ): [number, number, number] => {
   let [y, m, d]: [number, number, number] = [-1, -1, -1];
 
@@ -263,7 +263,7 @@ export const getScopeIndex = (
 
 export const useTxGetAll = () => {
   const { user: appUser, isLoading: appUserIsLoading } = useAutoLoadUser();
-  const datetime = useStore((store) => store.datetime);
+  const datetime = useStore((store) => store.appInitDatetime);
 
   console.debug(
     "useTxGetAll - appUser.hasAccessToken:",
@@ -282,7 +282,7 @@ export const useTxGetAll = () => {
   const txGetAllResult = trpc.tx.getAll.useQuery(
     {
       userId: appUser?.id || "",
-      date: datetime || new Date(Date.now()).toString(),
+      date: datetime || new Date(Date.now()),
     },
     {
       staleTime: 3600000,
