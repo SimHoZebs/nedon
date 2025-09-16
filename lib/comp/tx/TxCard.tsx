@@ -65,7 +65,9 @@ const TxCard = (props: Props) => {
               <span
                 className={`${getCatStyle(cat.primary, cat.detailed).icon} ${getCatStyle(cat.primary, cat.detailed).textColor} w-4`}
               />
-              <p className="font-light text-xs">{cat.detailed}</p>
+              <p className="font-light text-xs">
+                {getCatStyle(cat.primary, cat.detailed).name}
+              </p>
             </div>
           ))}
         </div>

@@ -14,6 +14,7 @@ export const createNewCat = (input: UnsavedCat): UnsavedCat => {
 
 export const getCatStyle = (primary: string, detailed: string) => {
   const defaultStyle = {
+    name: "UNDEFINED",
     bgColor: "bg-gray-300",
     textColor: "text-gray-800",
     icon: "",
@@ -28,6 +29,7 @@ export const getCatStyle = (primary: string, detailed: string) => {
   }
 
   return {
+    name: plaidCategories[primary][detailed].name,
     bgColor: plaidCategories[primary][detailed].bgColor,
     textColor: plaidCategories[primary][detailed].textColor,
     icon: plaidCategories[primary][detailed].icon,

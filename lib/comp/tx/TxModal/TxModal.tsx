@@ -7,7 +7,7 @@ import { trpc } from "@/util/trpc";
 import { isTx } from "@/types/tx";
 
 import AccountName from "./AccountName";
-import Cat from "./Cat/Cat";
+import CatSection from "./CatSection/CatSection";
 import Receipt from "./Receipt";
 import SplitList from "./SplitList/SplitList";
 
@@ -179,7 +179,7 @@ const TxModal = (props: Props) => {
                       </SecondaryBtn>
                     )}
                 </div>
-                <Cat />
+                <CatSection />
               </div>
 
               <div className="flex flex-col gap-3 md:flex-row">
@@ -190,8 +190,8 @@ const TxModal = (props: Props) => {
                 />
 
                 <div className="flex items-center">
-                  <input type="checkbox" id={recurring} onChange={() => {}} />
                   <label htmlFor={recurring}>Recurring</label>
+                  <input type="checkbox" id={recurring} onChange={() => {}} />
                 </div>
                 <Receipt />
               </div>

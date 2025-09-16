@@ -1,6 +1,7 @@
 export const plaidCategories: {
   [primary: string]: {
     [detailed: string]: {
+      name: string;
       description: string;
       icon: string;
       bgColor: string;
@@ -11,6 +12,7 @@ export const plaidCategories: {
 } = {
   INCOME: {
     INCOME_DIVIDENDS: {
+      name: "Dividends",
       description: "Dividends from investment accounts",
       icon: "icon-[mdi--cash]",
       bgColor: "bg-green-300",
@@ -18,6 +20,7 @@ export const plaidCategories: {
       border: "border border-1 border-green-300",
     },
     INCOME_INTEREST_EARNED: {
+      name: "Interest Earned",
       description: "Income from interest on savings accounts",
       icon: "icon-[mdi--cash]",
       bgColor: "bg-green-300",
@@ -25,6 +28,7 @@ export const plaidCategories: {
       border: "border border-1 border-green-300",
     },
     INCOME_RETIREMENT_PENSION: {
+      name: "Retirement Pension",
       description: "Income from pension payments",
       icon: "icon-[mdi--cash]",
       bgColor: "bg-green-300",
@@ -32,6 +36,7 @@ export const plaidCategories: {
       border: "border border-1 border-green-300",
     },
     INCOME_TAX_REFUND: {
+      name: "Tax Refund",
       description: "Income from tax refunds",
       icon: "icon-[mdi--cash]",
       bgColor: "bg-green-300",
@@ -39,6 +44,7 @@ export const plaidCategories: {
       border: "border border-1 border-green-300",
     },
     INCOME_UNEMPLOYMENT: {
+      name: "Unemployment",
       description:
         "Income from unemployment benefits, including unemployment insurance and healthcare",
       icon: "icon-[mdi--cash]",
@@ -47,6 +53,7 @@ export const plaidCategories: {
       border: "border border-1 border-green-300",
     },
     INCOME_WAGES: {
+      name: "Wages",
       description: "Income from salaries, gig-economy work, and tips earned",
       icon: "icon-[mdi--cash]",
       bgColor: "bg-green-300",
@@ -54,6 +61,7 @@ export const plaidCategories: {
       border: "border border-1 border-green-300",
     },
     INCOME_OTHER_INCOME: {
+      name: "Other Income",
       description:
         "Other miscellaneous income, including alimony, social security, child support, and rental",
       icon: "icon-[mdi--cash]",
@@ -64,6 +72,7 @@ export const plaidCategories: {
   },
   TRANSFER_IN: {
     TRANSFER_IN_CASH_ADVANCES_AND_LOANS: {
+      name: "Cash Advances and Loans",
       description: "Loans and cash advances deposited into a bank account",
       icon: "icon-[mdi--cash-plus]",
       bgColor: "bg-blue-300",
@@ -71,6 +80,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     TRANSFER_IN_DEPOSIT: {
+      name: "Deposit",
       description: "Cash, checks, and ATM deposits into a bank account",
       icon: "icon-[mdi--arrow-down]",
       bgColor: "bg-blue-300",
@@ -78,6 +88,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     TRANSFER_IN_INVESTMENT_AND_RETIREMENT_FUNDS: {
+      name: "Investment and Retirement Funds",
       description: "Inbound transfers to an investment or retirement account",
       icon: "icon-[mdi--arrow-down]",
       bgColor: "bg-blue-300",
@@ -85,6 +96,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     TRANSFER_IN_SAVINGS: {
+      name: "Savings",
       description: "Inbound transfers to a savings account",
       icon: "icon-[mdi--arrow-down]",
       bgColor: "bg-blue-300",
@@ -92,6 +104,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     TRANSFER_IN_ACCOUNT_TRANSFER: {
+      name: "Account Transfer",
       description: "General inbound transfers from another account",
       icon: "icon-[mdi--arrow-down]",
       bgColor: "bg-blue-300",
@@ -99,6 +112,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     TRANSFER_IN_OTHER_TRANSFER_IN: {
+      name: "Other Transfer In",
       description: "Other miscellaneous inbound transactions",
       icon: "icon-[mdi--arrow-down]",
       bgColor: "bg-blue-300",
@@ -108,6 +122,7 @@ export const plaidCategories: {
   },
   TRANSFER_OUT: {
     TRANSFER_OUT_INVESTMENT_AND_RETIREMENT_FUNDS: {
+      name: "Investment and Retirement Funds",
       description:
         "Transfers to an investment or retirement account, including investment apps such as Acorns, Betterment",
       icon: "icon-[mdi--arrow-up]",
@@ -116,6 +131,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     TRANSFER_OUT_SAVINGS: {
+      name: "Savings",
       description: "Outbound transfers to savings accounts",
       icon: "icon-[mdi--arrow-up]",
       bgColor: "bg-red-300",
@@ -123,6 +139,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     TRANSFER_OUT_WITHDRAWAL: {
+      name: "Withdrawal",
       description: "Withdrawals from a bank account",
       icon: "icon-[mdi--arrow-up]",
       bgColor: "bg-red-300",
@@ -130,6 +147,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     TRANSFER_OUT_ACCOUNT_TRANSFER: {
+      name: "Account Transfer",
       description: "General outbound transfers to another account",
       icon: "icon-[mdi--arrow-up]",
       bgColor: "bg-red-300",
@@ -137,6 +155,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     TRANSFER_OUT_OTHER_TRANSFER_OUT: {
+      name: "Other Transfer Out",
       description: "Other miscellaneous outbound transactions",
       icon: "icon-[mdi--arrow-up]",
       bgColor: "bg-red-300",
@@ -146,6 +165,7 @@ export const plaidCategories: {
   },
   LOAN_PAYMENTS: {
     LOAN_PAYMENTS_CAR_PAYMENT: {
+      name: "Car Payment",
       description: "Car loans and leases",
       icon: "icon-[mdi--credit-card]",
       bgColor: "bg-orange-300",
@@ -153,6 +173,7 @@ export const plaidCategories: {
       border: "border border-1 border-orange-300",
     },
     LOAN_PAYMENTS_CREDIT_CARD_PAYMENT: {
+      name: "Credit Card Payment",
       description:
         "Payments to a credit card. These are positive amounts for credit card subtypes and negative for depository subtypes",
       icon: "icon-[mdi--credit-card]",
@@ -161,6 +182,7 @@ export const plaidCategories: {
       border: "border border-1 border-orange-300",
     },
     LOAN_PAYMENTS_PERSONAL_LOAN_PAYMENT: {
+      name: "Personal Loan Payment",
       description:
         "Personal loans, including cash advances and buy now pay later repayments",
       icon: "icon-[mdi--credit-card]",
@@ -169,6 +191,7 @@ export const plaidCategories: {
       border: "border border-1 border-orange-300",
     },
     LOAN_PAYMENTS_MORTGAGE_PAYMENT: {
+      name: "Mortgage Payment",
       description: "Payments on mortgages",
       icon: "icon-[mdi--credit-card]",
       bgColor: "bg-orange-300",
@@ -176,6 +199,7 @@ export const plaidCategories: {
       border: "border border-1 border-orange-300",
     },
     LOAN_PAYMENTS_STUDENT_LOAN_PAYMENT: {
+      name: "Student Loan Payment",
       description:
         "Payments on student loans. For college tuition, refer to General Services - Education",
       icon: "icon-[mdi--credit-card]",
@@ -184,6 +208,7 @@ export const plaidCategories: {
       border: "border border-1 border-orange-300",
     },
     LOAN_PAYMENTS_OTHER_PAYMENT: {
+      name: "Other Payment",
       description: "Other miscellaneous debt payments",
       icon: "icon-[mdi--credit-card]",
       bgColor: "bg-orange-300",
@@ -193,6 +218,7 @@ export const plaidCategories: {
   },
   BANK_FEES: {
     BANK_FEES_ATM_FEES: {
+      name: "ATM Fees",
       description: "Fees incurred for out-of-network ATMs",
       icon: "icon-[mdi--bank]",
       bgColor: "bg-red-300",
@@ -200,6 +226,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     BANK_FEES_FOREIGN_TRANSACTION_FEES: {
+      name: "Foreign Transaction Fees",
       description: "Fees incurred on non-domestic transactions",
       icon: "icon-[mdi--bank]",
       bgColor: "bg-red-300",
@@ -207,6 +234,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     BANK_FEES_INSUFFICIENT_FUNDS: {
+      name: "Insufficient Funds",
       description: "Fees relating to insufficient funds",
       icon: "icon-[mdi--bank]",
       bgColor: "bg-red-300",
@@ -214,6 +242,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     BANK_FEES_INTEREST_CHARGE: {
+      name: "Interest Charge",
       description:
         "Fees incurred for interest on purchases, including not-paid-in-full or interest on cash advances",
       icon: "icon-[mdi--bank]",
@@ -222,6 +251,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     BANK_FEES_OVERDRAFT_FEES: {
+      name: "Overdraft Fees",
       description: "Fees incurred when an account is in overdraft",
       icon: "icon-[mdi--bank]",
       bgColor: "bg-red-300",
@@ -229,6 +259,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     BANK_FEES_OTHER_BANK_FEES: {
+      name: "Other Bank Fees",
       description: "Other miscellaneous bank fees",
       icon: "icon-[mdi--bank]",
       bgColor: "bg-red-300",
@@ -238,6 +269,7 @@ export const plaidCategories: {
   },
   ENTERTAINMENT: {
     ENTERTAINMENT_CASINOS_AND_GAMBLING: {
+      name: "Casinos and Gambling",
       description: "Gambling, casinos, and sports betting",
       icon: "icon-[mdi--movie]",
       bgColor: "bg-purple-300",
@@ -245,6 +277,7 @@ export const plaidCategories: {
       border: "border border-1 border-purple-300",
     },
     ENTERTAINMENT_MUSIC_AND_AUDIO: {
+      name: "Music and Audio",
       description:
         "Digital and in-person music purchases, including music streaming services",
       icon: "icon-[mdi--movie]",
@@ -253,6 +286,7 @@ export const plaidCategories: {
       border: "border border-1 border-purple-300",
     },
     ENTERTAINMENT_SPORTING_EVENTS_AMUSEMENT_PARKS_AND_MUSEUMS: {
+      name: "Sporting Events, Amusement Parks and Museums",
       description:
         "Purchases made at sporting events, music venues, concerts, museums, and amusement parks",
       icon: "icon-[mdi--movie]",
@@ -261,6 +295,7 @@ export const plaidCategories: {
       border: "border border-1 border-purple-300",
     },
     ENTERTAINMENT_TV_AND_MOVIES: {
+      name: "TV and Movies",
       description: "In home movie streaming services and movie theaters",
       icon: "icon-[mdi--movie]",
       bgColor: "bg-purple-300",
@@ -268,6 +303,7 @@ export const plaidCategories: {
       border: "border border-1 border-purple-300",
     },
     ENTERTAINMENT_VIDEO_GAMES: {
+      name: "Video Games",
       description: "Digital and in-person video game purchases",
       icon: "icon-[mdi--movie]",
       bgColor: "bg-purple-300",
@@ -275,6 +311,7 @@ export const plaidCategories: {
       border: "border border-1 border-purple-300",
     },
     ENTERTAINMENT_OTHER_ENTERTAINMENT: {
+      name: "Other Entertainment",
       description:
         "Other miscellaneous entertainment purchases, including night life and adult entertainment",
       icon: "icon-[mdi--movie]",
@@ -285,6 +322,7 @@ export const plaidCategories: {
   },
   FOOD_AND_DRINK: {
     FOOD_AND_DRINK_BEER_WINE_AND_LIQUOR: {
+      name: "Beer, Wine and Liquor",
       description: "Beer, Wine & Liquor Stores",
       icon: "icon-[mdi--food]",
       bgColor: "bg-yellow-300",
@@ -292,6 +330,7 @@ export const plaidCategories: {
       border: "border border-1 border-yellow-300",
     },
     FOOD_AND_DRINK_COFFEE: {
+      name: "Coffee",
       description: "Purchases at coffee shops or cafes",
       icon: "icon-[mdi--food]",
       bgColor: "bg-yellow-300",
@@ -299,6 +338,7 @@ export const plaidCategories: {
       border: "border border-1 border-yellow-300",
     },
     FOOD_AND_DRINK_FAST_FOOD: {
+      name: "Fast Food",
       description: "Dining expenses for fast food chains",
       icon: "icon-[mdi--food]",
       bgColor: "bg-yellow-300",
@@ -306,6 +346,7 @@ export const plaidCategories: {
       border: "border border-1 border-yellow-300",
     },
     FOOD_AND_DRINK_GROCERIES: {
+      name: "Groceries",
       description:
         "Purchases for fresh produce and groceries, including farmers' markets",
       icon: "icon-[mdi--food]",
@@ -314,6 +355,7 @@ export const plaidCategories: {
       border: "border border-1 border-yellow-300",
     },
     FOOD_AND_DRINK_RESTAURANT: {
+      name: "Restaurant",
       description:
         "Dining expenses for restaurants, bars, gastropubs, and diners",
       icon: "icon-[mdi--food]",
@@ -322,6 +364,7 @@ export const plaidCategories: {
       border: "border border-1 border-yellow-300",
     },
     FOOD_AND_DRINK_VENDING_MACHINES: {
+      name: "Vending Machines",
       description: "Purchases made at vending machine operators",
       icon: "icon-[mdi--food]",
       bgColor: "bg-yellow-300",
@@ -329,6 +372,7 @@ export const plaidCategories: {
       border: "border border-1 border-yellow-300",
     },
     FOOD_AND_DRINK_OTHER_FOOD_AND_DRINK: {
+      name: "Other Food and Drink",
       description:
         "Other miscellaneous food and drink, including desserts, juice bars, and delis",
       icon: "icon-[mdi--food]",
@@ -339,6 +383,7 @@ export const plaidCategories: {
   },
   GENERAL_MERCHANDISE: {
     GENERAL_MERCHANDISE_BOOKSTORES_AND_NEWSSTANDS: {
+      name: "Bookstores and Newsstands",
       description: "Books, magazines, and news",
       icon: "icon-[mdi--shopping]",
       bgColor: "bg-indigo-300",
@@ -346,6 +391,7 @@ export const plaidCategories: {
       border: "border border-1 border-indigo-300",
     },
     GENERAL_MERCHANDISE_CLOTHING_AND_ACCESSORIES: {
+      name: "Clothing and Accessories",
       description: "Apparel, shoes, and jewelry",
       icon: "icon-[mdi--shopping]",
       bgColor: "bg-indigo-300",
@@ -353,6 +399,7 @@ export const plaidCategories: {
       border: "border border-1 border-indigo-300",
     },
     GENERAL_MERCHANDISE_CONVENIENCE_STORES: {
+      name: "Convenience Stores",
       description: "Purchases at convenience stores",
       icon: "icon-[mdi--shopping]",
       bgColor: "bg-indigo-300",
@@ -360,6 +407,7 @@ export const plaidCategories: {
       border: "border border-1 border-indigo-300",
     },
     GENERAL_MERCHANDISE_DEPARTMENT_STORES: {
+      name: "Department Stores",
       description:
         "Retail stores with wide ranges of consumer goods, typically specializing in clothing and home goods",
       icon: "icon-[mdi--shopping]",
@@ -368,6 +416,7 @@ export const plaidCategories: {
       border: "border border-1 border-indigo-300",
     },
     GENERAL_MERCHANDISE_DISCOUNT_STORES: {
+      name: "Discount Stores",
       description: "Stores selling goods at a discounted price",
       icon: "icon-[mdi--shopping]",
       bgColor: "bg-indigo-300",
@@ -375,6 +424,7 @@ export const plaidCategories: {
       border: "border border-1 border-indigo-300",
     },
     GENERAL_MERCHANDISE_ELECTRONICS: {
+      name: "Electronics",
       description: "Electronics stores and websites",
       icon: "icon-[mdi--shopping]",
       bgColor: "bg-indigo-300",
@@ -382,6 +432,7 @@ export const plaidCategories: {
       border: "border border-1 border-indigo-300",
     },
     GENERAL_MERCHANDISE_GIFTS_AND_NOVELTIES: {
+      name: "Gifts and Novelties",
       description: "Photo, gifts, cards, and floral stores",
       icon: "icon-[mdi--shopping]",
       bgColor: "bg-indigo-300",
@@ -389,6 +440,7 @@ export const plaidCategories: {
       border: "border border-1 border-indigo-300",
     },
     GENERAL_MERCHANDISE_OFFICE_SUPPLIES: {
+      name: "Office Supplies",
       description: "Stores that specialize in office goods",
       icon: "icon-[mdi--shopping]",
       bgColor: "bg-indigo-300",
@@ -396,6 +448,7 @@ export const plaidCategories: {
       border: "border border-1 border-indigo-300",
     },
     GENERAL_MERCHANDISE_ONLINE_MARKETPLACES: {
+      name: "Online Marketplaces",
       description:
         "Multi-purpose e-commerce platforms such as Etsy, Ebay and Amazon",
       icon: "icon-[mdi--shopping]",
@@ -404,6 +457,7 @@ export const plaidCategories: {
       border: "border border-1 border-indigo-300",
     },
     GENERAL_MERCHANDISE_PET_SUPPLIES: {
+      name: "Pet Supplies",
       description: "Pet supplies and pet food",
       icon: "icon-[mdi--shopping]",
       bgColor: "bg-indigo-300",
@@ -411,6 +465,7 @@ export const plaidCategories: {
       border: "border border-1 border-indigo-300",
     },
     GENERAL_MERCHANDISE_SPORTING_GOODS: {
+      name: "Sporting Goods",
       description: "Sporting goods, camping gear, and outdoor equipment",
       icon: "icon-[mdi--shopping]",
       bgColor: "bg-indigo-300",
@@ -418,6 +473,7 @@ export const plaidCategories: {
       border: "border border-1 border-indigo-300",
     },
     GENERAL_MERCHANDISE_SUPERSTORES: {
+      name: "Superstores",
       description:
         "Superstores such as Target and Walmart, selling both groceries and general merchandise",
       icon: "icon-[mdi--shopping]",
@@ -426,6 +482,7 @@ export const plaidCategories: {
       border: "border border-1 border-indigo-300",
     },
     GENERAL_MERCHANDISE_TOBACCO_AND_VAPE: {
+      name: "Tobacco and Vape",
       description: "Purchases for tobacco and vaping products",
       icon: "icon-[mdi--shopping]",
       bgColor: "bg-indigo-300",
@@ -433,6 +490,7 @@ export const plaidCategories: {
       border: "border border-1 border-indigo-300",
     },
     GENERAL_MERCHANDISE_OTHER_GENERAL_MERCHANDISE: {
+      name: "Other General Merchandise",
       description:
         "Other miscellaneous merchandise, including toys, hobbies, and arts and crafts",
       icon: "icon-[mdi--shopping]",
@@ -443,6 +501,7 @@ export const plaidCategories: {
   },
   HOME_IMPROVEMENT: {
     HOME_IMPROVEMENT_FURNITURE: {
+      name: "Furniture",
       description: "Furniture, bedding, and home accessories",
       icon: "icon-[mdi--hammer-wrench]",
       bgColor: "bg-amber-300",
@@ -450,6 +509,7 @@ export const plaidCategories: {
       border: "border border-1 border-amber-300",
     },
     HOME_IMPROVEMENT_HARDWARE: {
+      name: "Hardware",
       description: "Building materials, hardware stores, paint, and wallpaper",
       icon: "icon-[mdi--hammer-wrench]",
       bgColor: "bg-amber-300",
@@ -457,6 +517,7 @@ export const plaidCategories: {
       border: "border border-1 border-amber-300",
     },
     HOME_IMPROVEMENT_REPAIR_AND_MAINTENANCE: {
+      name: "Repair and Maintenance",
       description: "Plumbing, lighting, gardening, and roofing",
       icon: "icon-[mdi--hammer-wrench]",
       bgColor: "bg-amber-300",
@@ -464,6 +525,7 @@ export const plaidCategories: {
       border: "border border-1 border-amber-300",
     },
     HOME_IMPROVEMENT_SECURITY: {
+      name: "Security",
       description: "Home security system purchases",
       icon: "icon-[mdi--hammer-wrench]",
       bgColor: "bg-amber-300",
@@ -471,6 +533,7 @@ export const plaidCategories: {
       border: "border border-1 border-amber-300",
     },
     HOME_IMPROVEMENT_OTHER_HOME_IMPROVEMENT: {
+      name: "Other Home Improvement",
       description:
         "Other miscellaneous home purchases, including pool installation and pest control",
       icon: "icon-[mdi--hammer-wrench]",
@@ -481,6 +544,7 @@ export const plaidCategories: {
   },
   MEDICAL: {
     MEDICAL_DENTAL_CARE: {
+      name: "Dental Care",
       description: "Dentists and general dental care",
       icon: "icon-[mdi--medical-bag]",
       bgColor: "bg-red-300",
@@ -488,6 +552,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     MEDICAL_EYE_CARE: {
+      name: "Eye Care",
       description: "Optometrists, contacts, and glasses stores",
       icon: "icon-[mdi--medical-bag]",
       bgColor: "bg-red-300",
@@ -495,6 +560,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     MEDICAL_NURSING_CARE: {
+      name: "Nursing Care",
       description: "Nursing care and facilities",
       icon: "icon-[mdi--medical-bag]",
       bgColor: "bg-red-300",
@@ -502,6 +568,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     MEDICAL_PHARMACIES_AND_SUPPLEMENTS: {
+      name: "Pharmacies and Supplements",
       description: "Pharmacies and nutrition shops",
       icon: "icon-[mdi--medical-bag]",
       bgColor: "bg-red-300",
@@ -509,6 +576,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     MEDICAL_PRIMARY_CARE: {
+      name: "Primary Care",
       description: "Doctors and physicians",
       icon: "icon-[mdi--medical-bag]",
       bgColor: "bg-red-300",
@@ -516,6 +584,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     MEDICAL_VETERINARY_SERVICES: {
+      name: "Veterinary Services",
       description: "Prevention and care procedures for animals",
       icon: "icon-[mdi--medical-bag]",
       bgColor: "bg-red-300",
@@ -523,6 +592,7 @@ export const plaidCategories: {
       border: "border border-1 border-red-300",
     },
     MEDICAL_OTHER_MEDICAL: {
+      name: "Other Medical",
       description:
         "Other miscellaneous medical, including blood work, hospitals, and ambulances",
       icon: "icon-[mdi--medical-bag]",
@@ -533,6 +603,7 @@ export const plaidCategories: {
   },
   PERSONAL_CARE: {
     PERSONAL_CARE_GYMS_AND_FITNESS_CENTERS: {
+      name: "Gyms and Fitness Centers",
       description: "Gyms, fitness centers, and workout classes",
       icon: "icon-[mdi--dumbbell]",
       bgColor: "bg-pink-300",
@@ -540,6 +611,7 @@ export const plaidCategories: {
       border: "border border-1 border-pink-300",
     },
     PERSONAL_CARE_HAIR_AND_BEAUTY: {
+      name: "Hair and Beauty",
       description:
         "Manicures, haircuts, waxing, spa/massages, and bath and beauty products",
       icon: "icon-[mdi--content-cut]",
@@ -548,6 +620,7 @@ export const plaidCategories: {
       border: "border border-1 border-pink-300",
     },
     PERSONAL_CARE_LAUNDRY_AND_DRY_CLEANING: {
+      name: "Laundry and Dry Cleaning",
       description: "Wash and fold, and dry cleaning expenses",
       icon: "icon-[mdi--washing-machine]",
       bgColor: "bg-pink-300",
@@ -555,6 +628,7 @@ export const plaidCategories: {
       border: "border border-1 border-pink-300",
     },
     PERSONAL_CARE_OTHER_PERSONAL_CARE: {
+      name: "Other Personal Care",
       description:
         "Other miscellaneous personal care, including mental health apps and services",
       icon: "icon-[mdi--account-heart]",
@@ -565,6 +639,7 @@ export const plaidCategories: {
   },
   GENERAL_SERVICES: {
     GENERAL_SERVICES_ACCOUNTING_AND_FINANCIAL_PLANNING: {
+      name: "Accounting and Financial Planning",
       description: "Financial planning, and tax and accounting services",
       icon: "icon-[mdi--wrench]",
       bgColor: "bg-blue-300",
@@ -572,6 +647,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     GENERAL_SERVICES_AUTOMOTIVE: {
+      name: "Automotive",
       description: "Oil changes, car washes, repairs, and towing",
       icon: "icon-[mdi--wrench]",
       bgColor: "bg-blue-300",
@@ -579,6 +655,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     GENERAL_SERVICES_CHILDCARE: {
+      name: "Childcare",
       description: "Babysitters and daycare",
       icon: "icon-[mdi--wrench]",
       bgColor: "bg-blue-300",
@@ -586,6 +663,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     GENERAL_SERVICES_CONSULTING_AND_LEGAL: {
+      name: "Consulting and Legal",
       description: "Consulting and legal services",
       icon: "icon-[mdi--wrench]",
       bgColor: "bg-blue-300",
@@ -593,6 +671,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     GENERAL_SERVICES_EDUCATION: {
+      name: "Education",
       description:
         "Elementary, high school, professional schools, and college tuition",
       icon: "icon-[mdi--wrench]",
@@ -601,6 +680,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     GENERAL_SERVICES_INSURANCE: {
+      name: "Insurance",
       description: "Insurance for auto, home, and healthcare",
       icon: "icon-[mdi--wrench]",
       bgColor: "bg-blue-300",
@@ -608,6 +688,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     GENERAL_SERVICES_POSTAGE_AND_SHIPPING: {
+      name: "Postage and Shipping",
       description: "Mail, packaging, and shipping services",
       icon: "icon-[mdi--wrench]",
       bgColor: "bg-blue-300",
@@ -615,6 +696,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     GENERAL_SERVICES_STORAGE: {
+      name: "Storage",
       description: "Storage services and facilities",
       icon: "icon-[mdi--wrench]",
       bgColor: "bg-blue-300",
@@ -622,6 +704,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     GENERAL_SERVICES_OTHER_GENERAL_SERVICES: {
+      name: "Other General Services",
       description:
         "Other miscellaneous services, including advertising and cloud storage",
       icon: "icon-[mdi--wrench]",
@@ -632,6 +715,7 @@ export const plaidCategories: {
   },
   GOVERNMENT_AND_NON_PROFIT: {
     GOVERNMENT_AND_NON_PROFIT_DONATIONS: {
+      name: "Donations",
       description: "Charitable, political, and religious donations",
       icon: "icon-[mdi--government]",
       bgColor: "bg-slate-300",
@@ -639,6 +723,7 @@ export const plaidCategories: {
       border: "border border-1 border-slate-300",
     },
     GOVERNMENT_AND_NON_PROFIT_GOVERNMENT_DEPARTMENTS_AND_AGENCIES: {
+      name: "Government Departments and Agencies",
       description:
         "Government departments and agencies, such as driving licences, and passport renewal",
       icon: "icon-[mdi--government]",
@@ -647,6 +732,7 @@ export const plaidCategories: {
       border: "border border-1 border-slate-300",
     },
     GOVERNMENT_AND_NON_PROFIT_TAX_PAYMENT: {
+      name: "Tax Payment",
       description: "Tax payments, including income and property taxes",
       icon: "icon-[mdi--government]",
       bgColor: "bg-slate-300",
@@ -654,6 +740,7 @@ export const plaidCategories: {
       border: "border border-1 border-slate-300",
     },
     GOVERNMENT_AND_NON_PROFIT_OTHER_GOVERNMENT_AND_NON_PROFIT: {
+      name: "Other Government and Non-Profit",
       description: "Other miscellaneous government and non-profit agencies",
       icon: "icon-[mdi--government]",
       bgColor: "bg-slate-300",
@@ -663,6 +750,7 @@ export const plaidCategories: {
   },
   TRANSPORTATION: {
     TRANSPORTATION_BIKES_AND_SCOOTERS: {
+      name: "Bikes and Scooters",
       description: "Bike and scooter rentals",
       icon: "icon-[mdi--car]",
       bgColor: "bg-cyan-300",
@@ -670,6 +758,7 @@ export const plaidCategories: {
       border: "border border-1 border-cyan-300",
     },
     TRANSPORTATION_GAS: {
+      name: "Gas",
       description: "Purchases at a gas station",
       icon: "icon-[mdi--car]",
       bgColor: "bg-cyan-300",
@@ -677,6 +766,7 @@ export const plaidCategories: {
       border: "border border-1 border-cyan-300",
     },
     TRANSPORTATION_PARKING: {
+      name: "Parking",
       description: "Parking fees and expenses",
       icon: "icon-[mdi--car]",
       bgColor: "bg-cyan-300",
@@ -684,6 +774,7 @@ export const plaidCategories: {
       border: "border border-1 border-cyan-300",
     },
     TRANSPORTATION_PUBLIC_TRANSIT: {
+      name: "Public Transit",
       description:
         "Public transportation, including rail and train, buses, and metro",
       icon: "icon-[mdi--car]",
@@ -692,6 +783,7 @@ export const plaidCategories: {
       border: "border border-1 border-cyan-300",
     },
     TRANSPORTATION_TAXIS_AND_RIDE_SHARES: {
+      name: "Taxis and Ride Shares",
       description: "Taxi and ride share services",
       icon: "icon-[mdi--car]",
       bgColor: "bg-cyan-300",
@@ -699,6 +791,7 @@ export const plaidCategories: {
       border: "border border-1 border-cyan-300",
     },
     TRANSPORTATION_TOLLS: {
+      name: "Tolls",
       description: "Toll expenses",
       icon: "icon-[mdi--car]",
       bgColor: "bg-cyan-300",
@@ -706,6 +799,7 @@ export const plaidCategories: {
       border: "border border-1 border-cyan-300",
     },
     TRANSPORTATION_OTHER_TRANSPORTATION: {
+      name: "Other Transportation",
       description: "Other miscellaneous transportation expenses",
       icon: "icon-[mdi--car]",
       bgColor: "bg-cyan-300",
@@ -715,6 +809,7 @@ export const plaidCategories: {
   },
   TRAVEL: {
     TRAVEL_FLIGHTS: {
+      name: "Flights",
       description: "Airline expenses",
       icon: "icon-[mdi--airplane]",
       bgColor: "bg-teal-300",
@@ -722,6 +817,7 @@ export const plaidCategories: {
       border: "border border-1 border-teal-300",
     },
     TRAVEL_LODGING: {
+      name: "Lodging",
       description: "Hotels, motels, and hosted accommodation such as Airbnb",
       icon: "icon-[mdi--airplane]",
       bgColor: "bg-teal-300",
@@ -729,6 +825,7 @@ export const plaidCategories: {
       border: "border border-1 border-teal-300",
     },
     TRAVEL_RENTAL_CARS: {
+      name: "Rental Cars",
       description: "Rental cars, charter buses, and trucks",
       icon: "icon-[mdi--airplane]",
       bgColor: "bg-teal-300",
@@ -736,6 +833,7 @@ export const plaidCategories: {
       border: "border border-1 border-teal-300",
     },
     TRAVEL_OTHER_TRAVEL: {
+      name: "Other Travel",
       description: "Other miscellaneous travel expenses",
       icon: "icon-[mdi--airplane]",
       bgColor: "bg-teal-300",
@@ -745,6 +843,7 @@ export const plaidCategories: {
   },
   RENT_AND_UTILITIES: {
     RENT_AND_UTILITIES_GAS_AND_ELECTRICITY: {
+      name: "Gas and Electricity",
       description: "Gas and electricity bills",
       icon: "icon-[mdi--home]",
       bgColor: "bg-blue-300",
@@ -752,6 +851,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     RENT_AND_UTILITIES_INTERNET_AND_CABLE: {
+      name: "Internet and Cable",
       description: "Internet and cable bills",
       icon: "icon-[mdi--home]",
       bgColor: "bg-blue-300",
@@ -759,6 +859,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     RENT_AND_UTILITIES_RENT: {
+      name: "Rent",
       description: "Rent payment",
       icon: "icon-[mdi--home]",
       bgColor: "bg-blue-300",
@@ -766,6 +867,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     RENT_AND_UTILITIES_SEWAGE_AND_WASTE_MANAGEMENT: {
+      name: "Sewage and Waste Management",
       description: "Sewage and garbage disposal bills",
       icon: "icon-[mdi--home]",
       bgColor: "bg-blue-300",
@@ -773,6 +875,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     RENT_AND_UTILITIES_TELEPHONE: {
+      name: "Telephone",
       description: "Cell phone bills",
       icon: "icon-[mdi--home]",
       bgColor: "bg-blue-300",
@@ -780,6 +883,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     RENT_AND_UTILITIES_WATER: {
+      name: "Water",
       description: "Water bills",
       icon: "icon-[mdi--home]",
       bgColor: "bg-blue-300",
@@ -787,6 +891,7 @@ export const plaidCategories: {
       border: "border border-1 border-blue-300",
     },
     RENT_AND_UTILITIES_OTHER_UTILITIES: {
+      name: "Other Utilities",
       description: "Other miscellaneous utility bills",
       icon: "icon-[mdi--home]",
       bgColor: "bg-blue-300",

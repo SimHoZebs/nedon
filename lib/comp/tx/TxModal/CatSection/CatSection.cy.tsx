@@ -3,13 +3,13 @@ import "styles/globals.css";
 
 import { trpc } from "@/util/trpc";
 
-import Cat from "./Cat";
+import CatSection from "./CatSection";
 
 describe("<Cat />", () => {
   it("renders", () => {
     // see: https://on.cypress.io/mounting-react
     //
-    const Test = trpc.withTRPC(Cat);
+    const Test = trpc.withTRPC(CatSection);
 
     mount(<Test />);
   });

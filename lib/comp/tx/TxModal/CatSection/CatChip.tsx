@@ -47,7 +47,7 @@ const CatChip = (props: Props) => {
         <div className={"group flex h-full flex-col items-start text-zinc-300"}>
           <div className="flex w-full justify-between gap-x-2">
             <p className={props.isEditTarget ? "animate-pulse" : "font-light"}>
-              {props.cat.detailed}
+              {getCatStyle(props.cat.primary, props.cat.detailed).name}
             </p>
 
             {

@@ -16,7 +16,7 @@ import { useRef, useState } from "react";
 
 const OFFSCREEN = { x: -800, y: -800 };
 
-const Cat = () => {
+const CatSection = () => {
   const queryClient = trpc.useUtils();
   const setCatArray = useTxStore((state) => state.setCatArray);
   const tx = useTxStore((state) => state.txOnModal);
@@ -36,7 +36,7 @@ const Cat = () => {
   }>(OFFSCREEN);
 
   return (
-    <div className="flex gap-y-1">
+    <section className="flex gap-y-1">
       <div className="flex flex-col gap-y-1">
         <div className="relative flex w-full flex-wrap items-center gap-2">
           {catArray?.map((cat, index) => (
@@ -174,8 +174,8 @@ const Cat = () => {
           />
         )}
       </div>
-    </div>
+    </section>
   );
 };
 
-export default Cat;
+export default CatSection;
