@@ -2,6 +2,7 @@ import type { ButtonProps } from "../shared/Button";
 
 import Link from "next/link";
 import type { NextRouter } from "next/router";
+import { twMerge } from "tailwind-merge";
 
 interface NavBtnProps extends ButtonProps {
   icon?: string;
@@ -12,11 +13,13 @@ interface NavBtnProps extends ButtonProps {
 export const NavBtn = (props: NavBtnProps) => {
   return (
     <Link
-      className={`group flex justify-center gap-x-2 p-3 text-sm transition-all hover:bg-indigo-200/5 hover:text-indigo-200 sm:w-full sm:justify-start ${
-        props.router.pathname === props.route
-          ? "bg-indigo-200/20 text-indigo-200"
-          : "text-zinc-300"
-      }`}
+      className={twMerge(
+        `group flex justify-center gap-x-2 rounded p-3 text-sm transition-all hover:bg-indigo-200/5 hover:text-indigo-200 sm:w-full sm:justify-start sm:rounded-none ${
+          props.router.pathname === props.route
+            ? "bg-indigo-200/20 text-indigo-200"
+            : "text-zinc-300"
+        } ${props.className}`,
+      )}
       href={props.route}
     >
       {props.icon && (
@@ -28,7 +31,7 @@ export const NavBtn = (props: NavBtnProps) => {
           } ${props.icon}`}
         />
       )}
-      <p className="hidden items-center sm:flex">{props.children}</p>
+      {props.children}
     </Link>
   );
 };

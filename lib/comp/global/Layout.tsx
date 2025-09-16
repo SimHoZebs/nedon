@@ -6,18 +6,15 @@ import SandboxLoginBtn from "./SandboxLoginBtn";
 import { organizeTxByTime, useTxGetAll } from "lib/domain/tx";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useStore } from "lib/store/store";
-import { Space_Grotesk } from "next/font/google";
+import { Inter } from "next/font/google";
 import { useRouter } from "next/router";
 import type React from "react";
 import { useEffect, useRef } from "react";
 
-const customFont = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-custom",
-  weight: "variable",
-});
+const font = Inter({ subsets: ["latin"] });
 
 const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
+  const isDev = process.env.NODE_ENV === "development";
   const router = useRouter();
   const { user: appUser, isLoading: appUserLoading } = useAutoLoadUser();
 
@@ -110,19 +107,29 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
   return (
     <div
-      className={`flex h-[100dvh] w-[100dvw] flex-col bg-zinc-900 text-sm text-zinc-300 sm:flex-row sm:text-base ${customFont.variable} font-sans`}
+      className={`flex h-[100dvh] w-[100dvw] flex-col bg-zinc-900 ${font.className} font-sans text-sm text-zinc-300 sm:flex-row sm:text-base`}
     >
+      {isDev && (
+        <div className="absolute top-0 right-0 z-50 rounded-md bg-zinc-800 text-xs text-zinc-500">
+          <NavBtn
+            route="/dev"
+            router={router}
+            icon="icon-[mdi--bug]"
+            className="p-0"
+          />
+        </div>
+      )}
       <main className="no-scrollbar h-full w-full overflow-auto px-5 py-3">
         {props.children}
       </main>
-      <nav className="flex h-20 w-full gap-y-2 border-zinc-400 border-l bg-zinc-900 p-5 sm:h-full sm:w-56 sm:flex-col sm:justify-between sm:px-0">
-        <div className="flex w-full items-center justify-center sm:flex-col">
+      <nav className="flex h-20 w-full items-center gap-y-2 border-zinc-400 bg-zinc-900 px-5 py-0 sm:h-full sm:w-56 sm:flex-col sm:justify-between sm:border-l sm:px-0 sm:py-5">
+        <div className="flex h-full w-full items-center justify-evenly sm:flex-col sm:justify-center">
           <NavBtn
             route="/"
             router={router}
             icon="icon-[mdi--home-variant-outline]"
           >
-            Home
+            <div className="hidden items-center sm:flex">Home</div>
           </NavBtn>
 
           <NavBtn
@@ -130,7 +137,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             router={router}
             icon="icon-[mdi--google-analytics]"
           >
-            Analytics
+            <div className="hidden items-center sm:flex">Analytics</div>
           </NavBtn>
 
           <NavBtn
@@ -138,7 +145,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             router={router}
             icon="icon-[mdi--account-group-outline]"
           >
-            Connections
+            <div className="hidden items-center sm:flex">Connections</div>
           </NavBtn>
 
           <NavBtn
@@ -146,7 +153,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             router={router}
             icon="icon-[mdi--cog-outline]"
           >
-            Settings
+            <div className="hidden items-center sm:flex">Settings</div>
           </NavBtn>
         </div>
 
@@ -156,8 +163,10 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
           </div>
         ) : appUser ? (
           <NavBtn router={router} route="/profile">
-            <span className="icon-[mdi--account] mr-4 h-6 w-6" />
-            {appUser.name}
+            <div className="flex h-6 items-center">
+              <span className="icon-[mdi--account] h-6 w-6 lg:mr-4" />
+              <p className="hidden w-full md:flex">{appUser.name}</p>
+            </div>
           </NavBtn>
         ) : (
           <SandboxLoginBtn />
