@@ -12,6 +12,7 @@ const Profile = () => {
   const { user: appUser, isLoading } = useAutoLoadUser();
   const [unsavedUser, setUnsavedUser] = useState(appUser);
 
+  const isDev = process.env.NODE_ENV === "development";
   const updateName = trpc.user.updateName.useMutation();
   const connectToPlaid = trpc.user.connectToPlaid.useMutation({
     onSuccess: async () => {
@@ -41,7 +42,7 @@ const Profile = () => {
   return (
     <main className="flex h-full w-full flex-col items-center gap-y-1">
       {unsavedUser ? (
-        <section className="flex w-full max-w-lg flex-col items-start">
+        <section className="flex w-full max-w-lg flex-col items-start gap-y-2">
           <Button className="flex gap-x-2 self-end rounded-lg bg-zinc-800 text-indigo-300 hover:bg-zinc-700 hover:text-indigo-200">
             <span className="icon-[mdi--edit]" />
             Manage
@@ -70,7 +71,11 @@ const Profile = () => {
               Connect to Plaid
             </ActionBtn>
           )}
-          <pre>{JSON.stringify(appUser, null, 2)}</pre>
+          {isDev && (
+            <div>
+              <pre>{JSON.stringify(appUser, null, 2)}</pre>
+            </div>
+          )}
         </section>
       ) : (
         <div>appUser loading...</div>
