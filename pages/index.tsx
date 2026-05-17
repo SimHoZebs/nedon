@@ -14,7 +14,7 @@ import { getScopeIndex, useTxGetAll } from "lib/domain/tx";
 import useDateRange from "lib/hooks/useDateRange";
 import { useStore } from "lib/store/store";
 import type { NextPage } from "next";
-import type { AccountBase } from "plaid";
+import type { GenericAccount } from "server/services/IBankService";
 import React, { useEffect, useMemo, useState } from "react";
 
 const Home: NextPage = () => {
@@ -22,7 +22,7 @@ const Home: NextPage = () => {
   const [showTxModal, setShowTxModal] = useState(false);
   const [showCsvUploadPreviewModal, setShowCsvUploadPreviewModal] =
     useState(false);
-  const [clickedAccount, setClickedAccount] = useState<AccountBase>();
+  const [clickedAccount, setClickedAccount] = useState<GenericAccount>();
   const [YMD, setYMD] = useState([-1, -1, -1]);
   const [csvTxArray, setCsvTxArray] = React.useState<UnsavedTx[]>([]);
   const { date, setDate, rangeFormat, setRangeFormat } = useDateRange();

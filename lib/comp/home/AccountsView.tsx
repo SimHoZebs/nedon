@@ -4,13 +4,13 @@ import { H2, H3 } from "@/comp/shared/Heading";
 import { trpc } from "@/util/trpc";
 
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
-import type { AccountBase } from "plaid";
+import type { GenericAccount } from "server/services/IBankService";
 import { useRef } from "react";
 
 interface Props {
   setShowAccountModal: React.Dispatch<React.SetStateAction<boolean>>;
   setClickedAccount: React.Dispatch<
-    React.SetStateAction<AccountBase | undefined>
+    React.SetStateAction<GenericAccount | undefined>
   >;
 }
 
@@ -53,7 +53,7 @@ const AccountsView = (props: Props) => {
               (account) =>
                 account.balances.available && (
                   <AccountCard
-                    key={account.account_id}
+                    key={account.id}
                     onClick={() => {
                       props.setClickedAccount(account);
                       props.setShowAccountModal(true);

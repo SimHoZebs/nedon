@@ -84,7 +84,7 @@ const TxModal = (props: Props) => {
     getAllAccounts.isLoading || !getAllAccounts.data || !getAllAccounts.data.ok
       ? ""
       : getAllAccounts.data.value.find(
-          (account) => account.account_id === tx?.accountId,
+          (account) => account.id === tx?.accountId,
         )?.name || "";
 
   return (

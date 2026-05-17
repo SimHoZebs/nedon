@@ -5,13 +5,13 @@ import DateSortedTxList from "../shared/DateSortedTxList";
 import { H1, H2, H3 } from "../shared/Heading";
 
 import { organizeTxByTime, useTxGetAll } from "lib/domain/tx";
-import type { AccountBase } from "plaid";
+import type { GenericAccount } from "server/services/IBankService";
 import type React from "react";
 import { useMemo } from "react";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
-  clickedAccount: AccountBase;
+  clickedAccount: GenericAccount;
 }
 
 const AccountModal = (props: Props) => {
@@ -22,10 +22,10 @@ const AccountModal = (props: Props) => {
     const txArray = txGetAll.data.value;
     if (!txArray || txArray.length === 0) return [[[[]]]];
     const filteredTxArray = txArray.filter(
-      (tx) => tx.accountId === props.clickedAccount.account_id,
+      (tx) => tx.accountId === props.clickedAccount.id,
     );
     return organizeTxByTime(filteredTxArray);
-  }, [props.clickedAccount.account_id, txGetAll.data]);
+  }, [props.clickedAccount.id, txGetAll.data]);
 
   return (
     <div className="pointer-events-none absolute top-0 left-0 flex h-full w-full flex-col items-center justify-center overflow-hidden">
@@ -38,7 +38,7 @@ const AccountModal = (props: Props) => {
               <div className="">
                 <H1>{props.clickedAccount.name}</H1>
                 <p className="text-zinc-400">
-                  {props.clickedAccount.official_name}
+                  {""}
                 </p>
               </div>
               <div className="flex flex-col items-end lg:items-start">

@@ -10,7 +10,7 @@ import { procedure, router } from "../trpc";
 import connectionRouter from "./connection";
 
 import { Prisma } from "@prisma/client";
-import type { AccountBase } from "plaid";
+import type { GenericAccount } from "server/services/IBankService";
 import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
 import { INCLUDE_CONNECTIONS_SAEFLY, sanitizeUser } from "server/util/user";
@@ -144,7 +144,7 @@ const userRouter = router({
   getAllAccounts: procedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ input, ctx }) => {
-      let result: Result<AccountBase[], Error>;
+      let result: Result<GenericAccount[], Error>;
 
       try {
         const user = await db.user.findFirst({

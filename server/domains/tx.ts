@@ -8,8 +8,8 @@ import {
   PrismaClientValidationError,
 } from "@prisma/client/runtime/library";
 import { convertPlaidCatToCat } from "lib/domain/cat";
-import { createTxFromPlaidTx } from "lib/domain/tx";
-import type { RemovedTransaction, Transaction } from "plaid";
+import { createTxFromGenericTx } from "lib/domain/tx";
+import type { GenericBankTransaction, GenericRemovedBankTransaction } from "server/services/IBankService";
 import db from "server/util/db";
 
 export const txInclude = {
@@ -67,14 +67,14 @@ export const createTxInput = (
 };
 
 /**
- * Merges Plaid transaction sync data with existing database transactions.
+ * Merges Bank transaction sync data with existing database transactions.
  * Handles creation of new transactions, updates to modified ones, and deletion of removed ones.
  */
-export const mergePlaidTxWithTxArray = async (
+export const mergeBankTxWithTxArray = async (
   txSyncResponse: {
-    added: Transaction[];
-    modified: Transaction[];
-    removed: RemovedTransaction[];
+    added: GenericBankTransaction[];
+    modified: GenericBankTransaction[];
+    removed: GenericRemovedBankTransaction[];
     cursor?: string;
   },
   userId: string,
@@ -89,8 +89,8 @@ export const mergePlaidTxWithTxArray = async (
 
     // newly added txs gets created
     //FUTURE: make this somehow asynchoronous so users don't have to wait for all txs to be added to see their existing tx
-    const txCreateQueryArray = added.map((plaidTx) => {
-      const newTx = createTxFromPlaidTx(userId, plaidTx);
+    const txCreateQueryArray = added.map((genericTx) => {
+      const newTx = createTxFromGenericTx(userId, genericTx);
       return db.tx.create({ data: createTxInput(newTx), include: txInclude });
     });
 
@@ -134,21 +134,21 @@ export const mergePlaidTxWithTxArray = async (
     });
 
     // modified txs gets updated and removed txs gets deleted
-    for (const plaidTx of modified) {
+    for (const genericTx of modified) {
       const matchingTxIndex = txArray.findIndex(
-        (tx) => tx.plaidId === plaidTx.transaction_id,
+        (tx) => tx.plaidId === genericTx.id,
       );
       if (matchingTxIndex === -1) {
         console.error(
-          `Somehow there is no matching tx for ${plaidTx.transaction_id}. Skipping`,
+          `Somehow there is no matching tx for ${genericTx.id}. Skipping`,
         );
         continue;
       }
       const matchingTx = txArray[matchingTxIndex];
 
-      const cat = plaidTx.personal_finance_category
+      const cat = genericTx.category
         ? convertPlaidCatToCat(
-            plaidTx.personal_finance_category,
+            { primary: genericTx.category.primary, detailed: genericTx.category.detailed || "" },
             matchingTx.id,
             Prisma.Decimal(0),
           )
@@ -160,7 +160,7 @@ export const mergePlaidTxWithTxArray = async (
         },
         data: {
           plaidId: matchingTx.plaidId || undefined,
-          plaidTx: plaidTx,
+          plaidTx: genericTx.raw,
           catArray: {
             deleteMany: {},
             create: cat,
@@ -169,9 +169,9 @@ export const mergePlaidTxWithTxArray = async (
       });
     }
 
-    for (const plaidTx of removed) {
+    for (const genericTx of removed) {
       const matchingTxIndex = txArray.findIndex(
-        (tx) => tx.plaidId === plaidTx.transaction_id,
+        (tx) => tx.plaidId === genericTx.id,
       );
       if (matchingTxIndex !== -1) {
         txArray.splice(matchingTxIndex, 1);

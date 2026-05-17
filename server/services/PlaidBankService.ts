@@ -1,6 +1,11 @@
 import type { Result } from "@/util/type";
 
-import type { IBankService } from "./IBankService";
+import type {
+  GenericAccount,
+  GenericBankTransaction,
+  GenericRemovedBankTransaction,
+  IBankService,
+} from "./IBankService";
 
 import { isAxiosError } from "axios";
 import {
@@ -17,6 +22,27 @@ import client from "server/clients/plaidClient";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "server/constants";
 
 export class PlaidBankService implements IBankService {
+  private convertPlaidTransaction(tx: Transaction): GenericBankTransaction {
+    return {
+      id: tx.transaction_id,
+      accountId: tx.account_id,
+      amount: tx.amount,
+      date: tx.date,
+      name: tx.name,
+      merchantName: tx.merchant_name,
+      pending: tx.pending,
+      category: tx.personal_finance_category
+        ? {
+            primary: tx.personal_finance_category.primary,
+            detailed: tx.personal_finance_category.detailed,
+          }
+        : null,
+      paymentChannel: tx.payment_channel,
+      authorizedDate: tx.authorized_date,
+      raw: tx, // Include original data for backward compatibility or future use
+    };
+  }
+
   async createLinkToken(): Promise<string> {
     const response = await client.linkTokenCreate({
       user: {
@@ -155,7 +181,7 @@ export class PlaidBankService implements IBankService {
     return transferResponse.data.transfer.id;
   }
 
-  async getAuth(accessToken: string) {
+  async getAuth(accessToken: string): Promise<{ accounts: GenericAccount[] }> {
     const authResponse = await client.authGet({
       access_token: accessToken,
     });
@@ -164,7 +190,22 @@ export class PlaidBankService implements IBankService {
       throw new Error(authResponse.statusText);
     }
 
-    return authResponse.data;
+    return {
+      accounts: authResponse.data.accounts.map((acc) => ({
+        id: acc.account_id,
+        name: acc.name,
+        mask: acc.mask,
+        type: acc.type,
+        subtype: acc.subtype,
+        balances: {
+          available: acc.balances.available,
+          current: acc.balances.current,
+          limit: acc.balances.limit,
+          isoCurrencyCode: acc.balances.iso_currency_code,
+        },
+        raw: acc, // Include original data for backward compatibility
+      })),
+    };
   }
 
   async getTxSyncData(accessToken: string, cursor?: string) {
@@ -235,9 +276,12 @@ export class PlaidBankService implements IBankService {
     }
 
     return {
-      added,
-      modified,
-      removed,
+      added: added.map((tx) => this.convertPlaidTransaction(tx)),
+      modified: modified.map((tx) => this.convertPlaidTransaction(tx)),
+      removed: removed.map((tx) => ({
+        id: tx.transaction_id || "",
+        raw: tx,
+      })),
       cursor,
     };
   }

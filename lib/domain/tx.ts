@@ -13,6 +13,7 @@ import { convertPlaidCatToCat, resetCatArray } from "./cat";
 import { createId } from "@paralleldrive/cuid2";
 import { MdsType, Prisma } from "@prisma/client";
 import type { Transaction } from "plaid";
+import type { GenericBankTransaction } from "server/services/IBankService";
 
 export const resetTxToPlaidTx = (tx: Tx): TxWithUnsavedContent => {
   return {
@@ -85,6 +86,41 @@ export const createTxFromPlaidTx = (
     receipt: null,
   };
 };
+
+export const createTxFromGenericTx = (
+  userId: string,
+  genericTx: GenericBankTransaction,
+): UnsavedTx => {
+  const id = createId();
+
+  return {
+    id: id,
+    plaidTx: genericTx.raw, // Still store raw plaid for DB compatibility
+    name: genericTx.merchantName || genericTx.name,
+    splitTxArray: [],
+    amount: Prisma.Decimal(genericTx.amount),
+    recurring: false,
+    mds: MdsType.UNDETERMINED,
+    userTotal: Prisma.Decimal(0),
+    originTxId: id,
+    datetime: genericTx.date ? new Date(genericTx.date) : null,
+    authorizedDatetime: new Date(genericTx.authorizedDate || 0),
+    plaidId: genericTx.id,
+    ownerId: userId,
+    accountId: genericTx.accountId,
+    catArray: genericTx.category
+      ? [
+          convertPlaidCatToCat(
+            { primary: genericTx.category.primary, detailed: genericTx.category.detailed || "" },
+            id,
+            Prisma.Decimal(genericTx.amount),
+          ),
+        ]
+      : [],
+    receipt: null,
+  };
+};
+
 
 export type NestedCatWithTx = {
   primary: {

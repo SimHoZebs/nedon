@@ -9,7 +9,7 @@ import { convertPlaidCatToCat } from "lib/domain/cat";
 import { resetTxToPlaidTx } from "lib/domain/tx";
 import {
   createTxInput,
-  mergePlaidTxWithTxArray,
+  mergeBankTxWithTxArray,
   txInclude,
 } from "server/domains/tx";
 import db from "server/util/db";
@@ -54,7 +54,7 @@ const txRouter = router({
 
         if (!plaidSyncResponse) throw new Error("No Plaid sync response");
 
-        const res = await mergePlaidTxWithTxArray(
+        const res = await mergeBankTxWithTxArray(
           plaidSyncResponse,
           user.id,
           input.date.toISOString(),
