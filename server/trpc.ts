@@ -1,3 +1,5 @@
+import type { Context } from "./context";
+
 import { Prisma } from "@prisma/client";
 import { initTRPC } from "@trpc/server";
 import SuperJSON from "superjson";
@@ -15,7 +17,7 @@ SuperJSON.registerCustom<Prisma.Decimal, string>(
 // since it's not very descriptive.
 // For instance, the use of a t variable
 // is common in i18n libraries.
-const t = initTRPC.create({
+const t = initTRPC.context<Context>().create({
   transformer: SuperJSON,
 });
 

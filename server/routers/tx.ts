@@ -12,7 +12,6 @@ import {
   mergePlaidTxWithTxArray,
   txInclude,
 } from "server/domains/tx";
-import { getPlaidTxSyncData } from "server/services/plaid";
 import db from "server/util/db";
 import { z } from "zod";
 
@@ -34,7 +33,7 @@ const txRouter = router({
 
   syncWithPlaid: procedure
     .input(z.object({ userId: z.string(), date: z.date() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       let result: Result<
         { added: number; updated: number; removed: number },
         unknown
@@ -48,7 +47,7 @@ const txRouter = router({
           throw new Error("User is not connected to Plaid");
         }
 
-        const plaidSyncResponse = await getPlaidTxSyncData(
+        const plaidSyncResponse = await ctx.bankService.getTxSyncData(
           user.accessToken,
           user.cursor || undefined,
         );

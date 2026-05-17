@@ -1,8 +1,8 @@
 import { router } from "../trpc";
+import bankRouter from "./bank";
 import blobStorageRouter from "./blobStorage";
 import catRouter from "./cat";
 import devRouter from "./dev";
-import plaidRouter from "./plaid";
 import receiptRouter from "./receipt";
 import settingsRouter from "./settings";
 import txRouter from "./tx";
@@ -15,7 +15,7 @@ export const appRouter = router({
   receipt: receiptRouter,
   dev: devRouter,
   settings: settingsRouter,
-  plaid: plaidRouter,
+  bank: bankRouter,
   blobStorage: blobStorageRouter,
 });
 

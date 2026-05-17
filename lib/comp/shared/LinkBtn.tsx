@@ -9,7 +9,7 @@ import { usePlaidLink } from "react-plaid-link";
 
 const LinkBtn = () => {
   const appUser = useAutoLoadUser();
-  const linkToken = trpc.plaid.createLinkToken.useQuery(undefined, {
+  const linkToken = trpc.bank.createLinkToken.useQuery(undefined, {
     staleTime: 360000,
   });
 

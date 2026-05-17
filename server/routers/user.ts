@@ -11,7 +11,6 @@ import connectionRouter from "./connection";
 
 import { Prisma } from "@prisma/client";
 import type { AccountBase } from "plaid";
-import { getAuth, getPlaidTokensAndIds } from "server/services/plaid";
 import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
 import { INCLUDE_CONNECTIONS_SAEFLY, sanitizeUser } from "server/util/user";
@@ -86,10 +85,10 @@ const userRouter = router({
 
   connectToPlaid: procedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       let result: Result<UserClientSide, Error>;
       try {
-        const getResult = await getPlaidTokensAndIds();
+        const getResult = await ctx.bankService.getTokensAndIds();
         if (!getResult.ok) {
           throw new Error(
             `Failed to get Plaid access data: ${getResult.error}`,
@@ -144,7 +143,7 @@ const userRouter = router({
 
   getAllAccounts: procedure
     .input(z.object({ userId: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       let result: Result<AccountBase[], Error>;
 
       try {
@@ -158,7 +157,7 @@ const userRouter = router({
         if (!user || !user.accessToken)
           throw new Error("User or access token not found");
 
-        const res = await getAuth(user.accessToken);
+        const res = await ctx.bankService.getAuth(user.accessToken);
 
         result = { ok: true, value: res.accounts };
       } catch (e) {
