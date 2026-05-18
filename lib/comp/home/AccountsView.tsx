@@ -4,13 +4,13 @@ import { H2, H3 } from "@/comp/shared/Heading";
 import { trpc } from "@/util/trpc";
 
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
-import type { GenericAccount } from "server/services/IBankService";
+import type { BankAccount } from "server/services/IBankService";
 import { useRef } from "react";
 
 interface Props {
   setShowAccountModal: React.Dispatch<React.SetStateAction<boolean>>;
   setClickedAccount: React.Dispatch<
-    React.SetStateAction<GenericAccount | undefined>
+    React.SetStateAction<BankAccount | undefined>
   >;
 }
 

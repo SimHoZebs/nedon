@@ -13,7 +13,7 @@ import { convertPlaidCatToCat, resetCatArray } from "./cat";
 import { createId } from "@paralleldrive/cuid2";
 import { MdsType, Prisma } from "@prisma/client";
 import type { Transaction } from "plaid";
-import type { GenericBankTransaction } from "server/services/IBankService";
+import type { BankTransaction } from "server/services/IBankService";
 
 export const resetTxToPlaidTx = (tx: Tx): TxWithUnsavedContent => {
   return {
@@ -89,31 +89,31 @@ export const createTxFromPlaidTx = (
 
 export const createTxFromGenericTx = (
   userId: string,
-  genericTx: GenericBankTransaction,
+  bankTx: BankTransaction,
 ): UnsavedTx => {
   const id = createId();
 
   return {
     id: id,
-    plaidTx: genericTx.raw, // Still store raw plaid for DB compatibility
-    name: genericTx.merchantName || genericTx.name,
+    plaidTx: bankTx.raw, // Still store raw plaid for DB compatibility
+    name: bankTx.merchantName || bankTx.name,
     splitTxArray: [],
-    amount: Prisma.Decimal(genericTx.amount),
+    amount: Prisma.Decimal(bankTx.amount),
     recurring: false,
     mds: MdsType.UNDETERMINED,
     userTotal: Prisma.Decimal(0),
     originTxId: id,
-    datetime: genericTx.date ? new Date(genericTx.date) : null,
-    authorizedDatetime: new Date(genericTx.authorizedDate || 0),
-    plaidId: genericTx.id,
+    datetime: bankTx.date ? new Date(bankTx.date) : null,
+    authorizedDatetime: new Date(bankTx.authorizedDate || 0),
+    plaidId: bankTx.id,
     ownerId: userId,
-    accountId: genericTx.accountId,
-    catArray: genericTx.category
+    accountId: bankTx.accountId,
+    catArray: bankTx.category
       ? [
           convertPlaidCatToCat(
-            { primary: genericTx.category.primary, detailed: genericTx.category.detailed || "" },
+            { primary: bankTx.category.primary, detailed: bankTx.category.detailed || "" },
             id,
-            Prisma.Decimal(genericTx.amount),
+            Prisma.Decimal(bankTx.amount),
           ),
         ]
       : [],

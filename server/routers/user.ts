@@ -10,7 +10,7 @@ import { procedure, router } from "../trpc";
 import connectionRouter from "./connection";
 
 import { Prisma } from "@prisma/client";
-import type { GenericAccount } from "server/services/IBankService";
+import type { BankAccount } from "server/services/IBankService";
 import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
 import { INCLUDE_CONNECTIONS_SAEFLY, sanitizeUser } from "server/util/user";
@@ -83,12 +83,12 @@ const userRouter = router({
       return result;
     }),
 
-  connectToPlaid: procedure
+  connectToBank: procedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       let result: Result<UserClientSide, Error>;
       try {
-        const getResult = await ctx.bankService.getTokensAndIds();
+        const getResult = await ctx.bankService.establishSandboxConnection();
         if (!getResult.ok) {
           throw new Error(
             `Failed to get Plaid access data: ${getResult.error}`,
@@ -144,7 +144,7 @@ const userRouter = router({
   getAllAccounts: procedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ input, ctx }) => {
-      let result: Result<GenericAccount[], Error>;
+      let result: Result<BankAccount[], Error>;
 
       try {
         const user = await db.user.findFirst({
@@ -157,7 +157,7 @@ const userRouter = router({
         if (!user || !user.accessToken)
           throw new Error("User or access token not found");
 
-        const res = await ctx.bankService.getAuth(user.accessToken);
+        const res = await ctx.bankService.getAccounts(user.accessToken);
 
         result = { ok: true, value: res.accounts };
       } catch (e) {

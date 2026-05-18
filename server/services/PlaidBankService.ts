@@ -1,9 +1,11 @@
 import type { Result } from "@/util/type";
 
 import type {
-  GenericAccount,
-  GenericBankTransaction,
-  GenericRemovedBankTransaction,
+  BankAccount,
+  BankTransaction,
+  RemovedBankTransaction,
+  BankSyncResult,
+  BankConnectionData,
   IBankService,
 } from "./IBankService";
 
@@ -22,7 +24,7 @@ import client from "server/clients/plaidClient";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "server/constants";
 
 export class PlaidBankService implements IBankService {
-  private convertPlaidTransaction(tx: Transaction): GenericBankTransaction {
+  private convertPlaidTransaction(tx: Transaction): BankTransaction {
     return {
       id: tx.transaction_id,
       accountId: tx.account_id,
@@ -39,11 +41,11 @@ export class PlaidBankService implements IBankService {
         : null,
       paymentChannel: tx.payment_channel,
       authorizedDate: tx.authorized_date,
-      raw: tx, // Include original data for backward compatibility or future use
+      raw: tx,
     };
   }
 
-  async createLinkToken(): Promise<string> {
+  async createConnectionIntent(): Promise<string> {
     const response = await client.linkTokenCreate({
       user: {
         client_user_id: "user-id",
@@ -56,14 +58,9 @@ export class PlaidBankService implements IBankService {
     return response.data.link_token;
   }
 
-  async getTokensAndIds(): Promise<
+  async establishSandboxConnection(): Promise<
     Result<
-      {
-        publicToken: string;
-        accessToken: string;
-        itemId: string;
-        transferId: string | null;
-      },
+      BankConnectionData,
       unknown
     >
   > {
@@ -116,12 +113,12 @@ export class PlaidBankService implements IBankService {
     } catch (e) {
       if (isAxiosError(e)) {
         console.error(
-          "Axios error in getTokensAndIds:",
+          "Axios error in establishSandboxConnection:",
           e.response?.data.display_message,
         );
         return { ok: false, error: e.response?.data.display_message };
       }
-      console.error("Unexpected error in getTokensAndIds:", e);
+      console.error("Unexpected error in establishSandboxConnection:", e);
       return { ok: false, error: e };
     }
   }
@@ -181,7 +178,7 @@ export class PlaidBankService implements IBankService {
     return transferResponse.data.transfer.id;
   }
 
-  async getAuth(accessToken: string): Promise<{ accounts: GenericAccount[] }> {
+  async getAccounts(accessToken: string): Promise<{ accounts: BankAccount[] }> {
     const authResponse = await client.authGet({
       access_token: accessToken,
     });
@@ -203,19 +200,18 @@ export class PlaidBankService implements IBankService {
           limit: acc.balances.limit,
           isoCurrencyCode: acc.balances.iso_currency_code,
         },
-        raw: acc, // Include original data for backward compatibility
+        raw: acc,
       })),
     };
   }
 
-  async getTxSyncData(accessToken: string, cursor?: string) {
-    // New tx updates since "cursor"
+  async syncTransactions(accessToken: string, syncToken?: string): Promise<BankSyncResult | null> {
     let added: Transaction[] = [];
     let modified: Transaction[] = [];
-    // Removed tx ids
     let removed: RemovedTransaction[] = [];
     let totalCount = 100;
     let hasMore = true;
+    let cursor = syncToken;
 
     while (hasMore && totalCount > 0) {
       const request: TransactionsSyncRequest = {
@@ -230,7 +226,7 @@ export class PlaidBankService implements IBankService {
         );
         const response = await client.transactionsSync(request);
         const data = response.data;
-        // Add this page of results
+
         added = added.concat(data.added);
         modified = modified.concat(data.modified);
         removed = removed.concat(data.removed);
@@ -241,8 +237,6 @@ export class PlaidBankService implements IBankService {
           data.removed.length;
 
         hasMore = data.has_more;
-
-        // Update cursor to the next cursor
         cursor = data.next_cursor;
       } catch (error) {
         if (isAxiosError(error)) {
@@ -275,14 +269,18 @@ export class PlaidBankService implements IBankService {
       }
     }
 
+    const upserted = [
+        ...added.map((tx) => this.convertPlaidTransaction(tx)),
+        ...modified.map((tx) => this.convertPlaidTransaction(tx))
+    ];
+
     return {
-      added: added.map((tx) => this.convertPlaidTransaction(tx)),
-      modified: modified.map((tx) => this.convertPlaidTransaction(tx)),
+      upserted,
       removed: removed.map((tx) => ({
         id: tx.transaction_id || "",
         raw: tx,
       })),
-      cursor,
+      nextSyncToken: cursor,
     };
   }
 }

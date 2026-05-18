@@ -1,6 +1,6 @@
 import type { Result } from "@/util/type";
 
-export interface GenericBankTransaction {
+export interface BankTransaction {
   id: string;
   accountId: string;
   amount: number;
@@ -14,14 +14,14 @@ export interface GenericBankTransaction {
   } | null;
   paymentChannel?: string | null;
   authorizedDate?: string | null;
-  raw?: any; // To store the original connector's raw data, e.g. plaid transaction for migrations or direct access
+  raw?: any; // To store the original connector's raw data
 }
 
-export interface GenericRemovedBankTransaction {
+export interface RemovedBankTransaction {
   id: string;
 }
 
-export interface GenericAccount {
+export interface BankAccount {
   id: string;
   name: string;
   mask?: string | null;
@@ -36,27 +36,48 @@ export interface GenericAccount {
   raw?: any;
 }
 
+export interface BankSyncResult {
+  upserted: BankTransaction[];
+  removed: RemovedBankTransaction[];
+  nextSyncToken?: string;
+}
+
+export interface BankConnectionData {
+  accessToken: string;
+  publicToken?: string; // Optional because not all providers use this
+  itemId?: string; // Provider-specific connection ID
+  transferId?: string | null;
+  [key: string]: any; // Catch-all for provider-specific properties
+}
+
 export interface IBankService {
-  createLinkToken(): Promise<string>;
-  getTokensAndIds(): Promise<
+  /**
+   * Initializes a connection flow (e.g. creates a link token for Plaid).
+   * Returns a token or URL to be used by the frontend.
+   */
+  createConnectionIntent(): Promise<string>;
+
+  /**
+   * Establishes a sandbox connection, typically returning access tokens.
+   * Useful for testing environments where no interactive user login is needed.
+   */
+  establishSandboxConnection(): Promise<
     Result<
-      {
-        publicToken: string;
-        accessToken: string;
-        itemId: string;
-        transferId: string | null;
-      },
+      BankConnectionData,
       unknown
     >
   >;
-  getAuth(accessToken: string): Promise<{ accounts: GenericAccount[] }>;
-  getTxSyncData(
+
+  /**
+   * Fetches the accounts associated with the connection.
+   */
+  getAccounts(accessToken: string): Promise<{ accounts: BankAccount[] }>;
+
+  /**
+   * Synchronizes transactions since the last sync token.
+   */
+  syncTransactions(
     accessToken: string,
-    cursor?: string,
-  ): Promise<{
-    added: GenericBankTransaction[];
-    modified: GenericBankTransaction[];
-    removed: GenericRemovedBankTransaction[];
-    cursor?: string;
-  } | null>;
+    syncToken?: string,
+  ): Promise<BankSyncResult | null>;
 }

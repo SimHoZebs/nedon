@@ -5,13 +5,13 @@ import DateSortedTxList from "../shared/DateSortedTxList";
 import { H1, H2, H3 } from "../shared/Heading";
 
 import { organizeTxByTime, useTxGetAll } from "lib/domain/tx";
-import type { GenericAccount } from "server/services/IBankService";
+import type { BankAccount } from "server/services/IBankService";
 import type React from "react";
 import { useMemo } from "react";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
-  clickedAccount: GenericAccount;
+  clickedAccount: BankAccount;
 }
 
 const AccountModal = (props: Props) => {

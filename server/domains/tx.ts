@@ -9,7 +9,7 @@ import {
 } from "@prisma/client/runtime/library";
 import { convertPlaidCatToCat } from "lib/domain/cat";
 import { createTxFromGenericTx } from "lib/domain/tx";
-import type { GenericBankTransaction, GenericRemovedBankTransaction } from "server/services/IBankService";
+import type { BankTransaction, RemovedBankTransaction, BankSyncResult } from "server/services/IBankService";
 import db from "server/util/db";
 
 export const txInclude = {
@@ -71,33 +71,65 @@ export const createTxInput = (
  * Handles creation of new transactions, updates to modified ones, and deletion of removed ones.
  */
 export const mergeBankTxWithTxArray = async (
-  txSyncResponse: {
-    added: GenericBankTransaction[];
-    modified: GenericBankTransaction[];
-    removed: GenericRemovedBankTransaction[];
-    cursor?: string;
-  },
+  txSyncResponse: BankSyncResult,
   userId: string,
   dateString: string,
 ) => {
   try {
-    const { added, modified, removed, cursor } = txSyncResponse;
+    const { upserted, removed, nextSyncToken } = txSyncResponse;
 
     console.log(
-      `added: ${added.length}, modified: ${modified.length}, removed: ${removed.length}`,
+      `upserted: ${upserted.length}, removed: ${removed.length}`,
     );
 
-    // newly added txs gets created
-    //FUTURE: make this somehow asynchoronous so users don't have to wait for all txs to be added to see their existing tx
-    const txCreateQueryArray = added.map((genericTx) => {
-      const newTx = createTxFromGenericTx(userId, genericTx);
-      return db.tx.create({ data: createTxInput(newTx), include: txInclude });
-    });
+    // 1. Process all removed transactions first
+    for (const bankTx of removed) {
+      await db.tx.deleteMany({
+        where: {
+          plaidId: bankTx.id, // Using deleteMany as plaidId is not necessarily unique unless @unique is added in schema
+        },
+      });
+    }
 
-    await db.$transaction(txCreateQueryArray);
+    // 2. Process all upserted transactions safely querying the DB
+    for (const bankTx of upserted) {
+      const existingTx = await db.tx.findFirst({
+        where: {
+          plaidId: bankTx.id,
+        },
+      });
 
-    // --- END CREATING NEW TXS ---
+      if (!existingTx) {
+          // newly added txs gets created
+          const newTx = createTxFromGenericTx(userId, bankTx);
+          await db.tx.create({ data: createTxInput(newTx), include: txInclude });
+      } else {
+        // modified txs gets updated
+        const cat = bankTx.category
+          ? convertPlaidCatToCat(
+              { primary: bankTx.category.primary, detailed: bankTx.category.detailed || "" },
+              existingTx.id,
+              Prisma.Decimal(0),
+            )
+          : undefined;
 
+        await db.tx.update({
+          where: {
+            id: existingTx.id,
+          },
+          data: {
+            plaidId: existingTx.plaidId || undefined,
+            plaidTx: bankTx.raw,
+            catArray: {
+              deleteMany: {},
+              create: cat,
+            },
+          },
+        });
+      }
+    }
+
+    // 3. Fetch current month's transactions to return to the client
     const date = new Date(dateString);
 
     const firstDayThisMonth = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -133,61 +165,10 @@ export const mergeBankTxWithTxArray = async (
       },
     });
 
-    // modified txs gets updated and removed txs gets deleted
-    for (const genericTx of modified) {
-      const matchingTxIndex = txArray.findIndex(
-        (tx) => tx.plaidId === genericTx.id,
-      );
-      if (matchingTxIndex === -1) {
-        console.error(
-          `Somehow there is no matching tx for ${genericTx.id}. Skipping`,
-        );
-        continue;
-      }
-      const matchingTx = txArray[matchingTxIndex];
-
-      const cat = genericTx.category
-        ? convertPlaidCatToCat(
-            { primary: genericTx.category.primary, detailed: genericTx.category.detailed || "" },
-            matchingTx.id,
-            Prisma.Decimal(0),
-          )
-        : undefined;
-
-      await db.tx.update({
-        where: {
-          id: matchingTx.id,
-        },
-        data: {
-          plaidId: matchingTx.plaidId || undefined,
-          plaidTx: genericTx.raw,
-          catArray: {
-            deleteMany: {},
-            create: cat,
-          },
-        },
-      });
-    }
-
-    for (const genericTx of removed) {
-      const matchingTxIndex = txArray.findIndex(
-        (tx) => tx.plaidId === genericTx.id,
-      );
-      if (matchingTxIndex !== -1) {
-        txArray.splice(matchingTxIndex, 1);
-        db.tx.delete({
-          where: {
-            id: txArray[matchingTxIndex].id,
-          },
-        });
-      }
-    }
-
     //at the moment it's impossible to have no cursor and have nothing added.
-    // In the future, this would be a valid condition if the user just created an account without linking their bank account.
-    if (!cursor && added.length < 1) return null;
+    if (!nextSyncToken && upserted.length < 1) return null;
 
-    return { txArray, cursor };
+    return { txArray, nextSyncToken };
   } catch (error) {
     if (error instanceof PrismaClientValidationError) {
       console.log("Validation error in creating tx: ", error.message);

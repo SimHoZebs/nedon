@@ -31,7 +31,7 @@ const txRouter = router({
       return txInDB;
     }),
 
-  syncWithPlaid: procedure
+  syncWithBank: procedure
     .input(z.object({ userId: z.string(), date: z.date() }))
     .mutation(async ({ input, ctx }) => {
       let result: Result<
@@ -47,27 +47,27 @@ const txRouter = router({
           throw new Error("User is not connected to Plaid");
         }
 
-        const plaidSyncResponse = await ctx.bankService.getTxSyncData(
+        const bankSyncResponse = await ctx.bankService.syncTransactions(
           user.accessToken,
           user.cursor || undefined,
         );
 
-        if (!plaidSyncResponse) throw new Error("No Plaid sync response");
+        if (!bankSyncResponse) throw new Error("No Bank sync response");
 
         const res = await mergeBankTxWithTxArray(
-          plaidSyncResponse,
+          bankSyncResponse,
           user.id,
           input.date.toISOString(),
         );
-        if (!res) throw new Error("Merging Plaid tx with db tx failed");
+        if (!res) throw new Error("Merging Bank tx with db tx failed");
 
-        const { txArray, cursor } = res;
+        const { txArray, nextSyncToken } = res;
 
         // update cursor in db asynchonously
         db.user
           .update({
             where: { id: user.id },
-            data: { cursor: cursor },
+            data: { cursor: nextSyncToken },
           })
           .then();
 

@@ -10,17 +10,17 @@ import { useLocalStore } from "lib/store/localStore";
 const SandboxLoginBtn = () => {
   const saveUserIdOnLocalStorage = useLocalStore((state) => state.setUserId);
   const createUser = trpc.user.create.useMutation();
-  const connectToPlaid = trpc.user.connectToPlaid.useMutation();
+  const connectToBank = trpc.user.connectToBank.useMutation();
   const queryClient = trpc.useUtils();
 
   const connectUnAuthUserToPlaid = async (user: UnAuthUserClientSide) => {
     console.log("User has no access token, connecting to Plaid...");
 
-    const connectToPlaidResult = await connectToPlaid.mutateAsync({
+    const connectToBankResult = await connectToBank.mutateAsync({
       id: user.id,
     });
-    if (!connectToPlaidResult.ok) {
-      console.error("Failed to connect to Plaid:", connectToPlaidResult.error);
+    if (!connectToBankResult.ok) {
+      console.error("Failed to connect to Plaid:", connectToBankResult.error);
       return;
     }
 
@@ -45,7 +45,7 @@ const SandboxLoginBtn = () => {
 
       saveUserIdOnLocalStorage(user.id);
 
-      await connectToPlaid.mutateAsync({ id: user.id });
+      await connectToBank.mutateAsync({ id: user.id });
 
       await queryClient.invalidate();
     } catch (error) {

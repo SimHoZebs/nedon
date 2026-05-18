@@ -14,7 +14,7 @@ const Profile = () => {
 
   const isDev = process.env.NODE_ENV === "development";
   const updateName = trpc.user.updateName.useMutation();
-  const connectToPlaid = trpc.user.connectToPlaid.useMutation({
+  const connectToBank = trpc.user.connectToBank.useMutation({
     onSuccess: async () => {
       await queryClient.invalidate();
     },
@@ -22,11 +22,11 @@ const Profile = () => {
   const queryClient = trpc.useUtils();
 
   const connectUnAuthUserToPlaid = async (user: UnAuthUserClientSide) => {
-    const connectToPlaidResult = await connectToPlaid.mutateAsync({
+    const connectToBankResult = await connectToBank.mutateAsync({
       id: user.id,
     });
-    if (!connectToPlaidResult.ok) {
-      console.error("Failed to connect to Plaid:", connectToPlaidResult.error);
+    if (!connectToBankResult.ok) {
+      console.error("Failed to connect to Plaid:", connectToBankResult.error);
       return;
     }
 
