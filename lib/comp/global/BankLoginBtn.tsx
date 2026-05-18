@@ -7,24 +7,24 @@ import type { UnAuthUserClientSide } from "@/types/user";
 import { createId } from "@paralleldrive/cuid2";
 import { useLocalStore } from "lib/store/localStore";
 
-const SandboxLoginBtn = () => {
+const BankLoginBtn = () => {
   const saveUserIdOnLocalStorage = useLocalStore((state) => state.setUserId);
   const createUser = trpc.user.create.useMutation();
   const connectToBank = trpc.user.connectToBank.useMutation();
   const queryClient = trpc.useUtils();
 
-  const connectUnAuthUserToPlaid = async (user: UnAuthUserClientSide) => {
-    console.log("User has no access token, connecting to Plaid...");
+  const connectUnAuthUserToBank = async (user: UnAuthUserClientSide) => {
+    console.log("User has no access token, connecting to Bank...");
 
     const connectToBankResult = await connectToBank.mutateAsync({
       id: user.id,
     });
     if (!connectToBankResult.ok) {
-      console.error("Failed to connect to Plaid:", connectToBankResult.error);
+      console.error("Failed to connect to Bank:", connectToBankResult.error);
       return;
     }
 
-    console.log("Connected to Plaid successfully");
+    console.log("Connected to Bank successfully");
     await queryClient.user.get.invalidate();
     console.log("Invalidated user query");
   };
@@ -41,7 +41,7 @@ const SandboxLoginBtn = () => {
         throw new Error(JSON.stringify(createUserResult.error));
       }
       const user = createUserResult.value;
-      connectUnAuthUserToPlaid(user);
+      connectUnAuthUserToBank(user);
 
       saveUserIdOnLocalStorage(user.id);
 
@@ -54,6 +54,6 @@ const SandboxLoginBtn = () => {
     }
   };
 
-  return <Button onClickAsync={handleClick}>Connect to Plaid Sandbox</Button>;
+  return <Button onClickAsync={handleClick}>Connect to Bank</Button>;
 };
-export default SandboxLoginBtn;
+export default BankLoginBtn;

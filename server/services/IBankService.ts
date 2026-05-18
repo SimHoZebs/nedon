@@ -14,7 +14,16 @@ export interface BankTransaction {
   } | null;
   paymentChannel?: string | null;
   authorizedDate?: string | null;
-  raw?: any; // To store the original connector's raw data
+  logoUrl?: string | null;
+  isoCurrencyCode?: string | null;
+  location?: {
+    address?: string | null;
+    city?: string | null;
+    region?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+  } | null;
+  raw?: any;
 }
 
 export interface RemovedBankTransaction {
@@ -36,48 +45,12 @@ export interface BankAccount {
   raw?: any;
 }
 
-export interface BankSyncResult {
-  upserted: BankTransaction[];
-  removed: RemovedBankTransaction[];
-  nextSyncToken?: string;
-}
-
-export interface BankConnectionData {
-  accessToken: string;
-  publicToken?: string; // Optional because not all providers use this
-  itemId?: string; // Provider-specific connection ID
-  transferId?: string | null;
-  [key: string]: any; // Catch-all for provider-specific properties
-}
-
 export interface IBankService {
-  /**
-   * Initializes a connection flow (e.g. creates a link token for Plaid).
-   * Returns a token or URL to be used by the frontend.
-   */
-  createConnectionIntent(): Promise<string>;
-
-  /**
-   * Establishes a sandbox connection, typically returning access tokens.
-   * Useful for testing environments where no interactive user login is needed.
-   */
-  establishSandboxConnection(): Promise<
-    Result<
-      BankConnectionData,
-      unknown
-    >
-  >;
-
-  /**
-   * Fetches the accounts associated with the connection.
-   */
-  getAccounts(accessToken: string): Promise<{ accounts: BankAccount[] }>;
-
-  /**
-   * Synchronizes transactions since the last sync token.
-   */
+  createConnectionIntent(userId: string): Promise<string>;
+  establishConnection(userId: string): Promise<Result<void, unknown>>;
+  getAccounts(userId: string): Promise<{ accounts: BankAccount[] }>;
   syncTransactions(
-    accessToken: string,
-    syncToken?: string,
-  ): Promise<BankSyncResult | null>;
+    userId: string,
+    dateString: string,
+  ): Promise<Result<void, unknown>>;
 }

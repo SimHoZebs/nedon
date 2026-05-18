@@ -85,7 +85,7 @@ const DateSortedTxList = (props: Props) => {
                             <TxCard
                               onInteraction={() => onInteraction(tx, [j, k, l])}
                               tx={tx}
-                              key={tx.plaidId}
+                              key={tx.bankId}
                             />
                           ),
                       )}

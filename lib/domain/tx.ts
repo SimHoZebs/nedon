@@ -8,25 +8,15 @@ import type {
 import useAutoLoadUser from "../hooks/useAutoLoadUser";
 import { useStore } from "../store/store";
 import { trpc } from "../util/trpc";
-import { convertPlaidCatToCat, resetCatArray } from "./cat";
+import { resetCatArray } from "./cat";
 
-import { createId } from "@paralleldrive/cuid2";
 import { MdsType, Prisma } from "@prisma/client";
-import type { Transaction } from "plaid";
-import type { BankTransaction } from "server/services/IBankService";
 
-export const resetTxToPlaidTx = (tx: Tx): TxWithUnsavedContent => {
+export const resetTxToBankTx = (tx: Tx): TxWithUnsavedContent => {
   return {
     ...tx,
     catArray: resetCatArray(tx),
     receipt: null,
-  };
-};
-
-export const mergePlaidTxWithTx = (tx: Tx, plaidTx: Transaction): Tx => {
-  return {
-    ...tx,
-    plaidTx: plaidTx,
   };
 };
 
@@ -35,7 +25,6 @@ export const createTxFromChaseCSV = (
   userId: string,
 ): UnsavedTx => {
   return {
-    plaidTx: null,
     splitTxArray: [],
     name: chaseCSVTx.Description,
     amount: Prisma.Decimal(chaseCSVTx.Amount),
@@ -45,82 +34,20 @@ export const createTxFromChaseCSV = (
     authorizedDatetime: new Date(chaseCSVTx.PostingDate),
     userTotal: Prisma.Decimal(0),
     originTxId: null,
-    plaidId: null,
+    bankId: null,
     ownerId: userId,
     accountId: null,
+    logoUrl: null,
+    isoCurrencyCode: null,
+    locationAddress: null,
+    locationCity: null,
+    locationRegion: null,
+    locationPostalCode: null,
+    locationCountry: null,
     catArray: [],
     receipt: null,
   };
 };
-
-export const createTxFromPlaidTx = (
-  userId: string,
-  plaidTx: Transaction,
-): UnsavedTx => {
-  const id = createId();
-
-  return {
-    id: id,
-    plaidTx: plaidTx,
-    name: plaidTx.merchant_name || plaidTx.name,
-    splitTxArray: [],
-    amount: Prisma.Decimal(plaidTx.amount),
-    recurring: false,
-    mds: MdsType.UNDETERMINED,
-    userTotal: Prisma.Decimal(0),
-    originTxId: id,
-    datetime: plaidTx.datetime ? new Date(plaidTx.datetime) : null,
-    authorizedDatetime: new Date(plaidTx.authorized_date || 0),
-    plaidId: plaidTx.transaction_id,
-    ownerId: userId,
-    accountId: plaidTx.account_id,
-    catArray: plaidTx.personal_finance_category
-      ? [
-          convertPlaidCatToCat(
-            plaidTx.personal_finance_category,
-            id,
-            Prisma.Decimal(plaidTx.amount),
-          ),
-        ]
-      : [],
-    receipt: null,
-  };
-};
-
-export const createTxFromGenericTx = (
-  userId: string,
-  bankTx: BankTransaction,
-): UnsavedTx => {
-  const id = createId();
-
-  return {
-    id: id,
-    plaidTx: bankTx.raw, // Still store raw plaid for DB compatibility
-    name: bankTx.merchantName || bankTx.name,
-    splitTxArray: [],
-    amount: Prisma.Decimal(bankTx.amount),
-    recurring: false,
-    mds: MdsType.UNDETERMINED,
-    userTotal: Prisma.Decimal(0),
-    originTxId: id,
-    datetime: bankTx.date ? new Date(bankTx.date) : null,
-    authorizedDatetime: new Date(bankTx.authorizedDate || 0),
-    plaidId: bankTx.id,
-    ownerId: userId,
-    accountId: bankTx.accountId,
-    catArray: bankTx.category
-      ? [
-          convertPlaidCatToCat(
-            { primary: bankTx.category.primary, detailed: bankTx.category.detailed || "" },
-            id,
-            Prisma.Decimal(bankTx.amount),
-          ),
-        ]
-      : [],
-    receipt: null,
-  };
-};
-
 
 export type NestedCatWithTx = {
   primary: {
@@ -214,8 +141,6 @@ export const organizeTxByTime = (txArray: Tx[]) => {
       lastDate = date;
     }
 
-    //other indexs are resetted because if one if statement is true,
-    //the following ifs are expected to be true as well and adjust the indexs accordingly.
     if (lastDate.getFullYear() !== date.getFullYear()) {
       yearIndex++;
       monthIndex = -1;
@@ -231,12 +156,10 @@ export const organizeTxByTime = (txArray: Tx[]) => {
       txOrganizedByTimeArray[yearIndex][monthIndex][dateIndex] = [];
     }
 
-    //fallback for when year differs but month somehow matches.
     if (monthIndex === -1) {
       monthIndex++;
       txOrganizedByTimeArray[yearIndex][monthIndex] = [];
     }
-    //fallback for when month differs but date somehow matches.
     if (dateIndex === -1) {
       dateIndex++;
       txOrganizedByTimeArray[yearIndex][monthIndex][dateIndex] = [];

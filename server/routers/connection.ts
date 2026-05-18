@@ -1,3 +1,5 @@
+import { OMIT_PRIVATE_DATA } from "@/types/user";
+
 import { procedure, router } from "server/trpc";
 import db from "server/util/db";
 import z from "zod";
@@ -5,12 +7,7 @@ import z from "zod";
 const WITH_CONNECTIONS_OMIT_ACCESS_TOKEN = {
   include: {
     myConnectionArray: {
-      omit: {
-        accessToken: true,
-        publicToken: true,
-        itemId: true,
-        transferId: true,
-      },
+      omit: OMIT_PRIVATE_DATA,
     },
   },
 };
@@ -46,7 +43,7 @@ const connectionRouter = router({
         },
       });
 
-      return user;
+      return user as any;
     }),
 
   remove: procedure
@@ -79,7 +76,7 @@ const connectionRouter = router({
         },
       });
 
-      return user;
+      return user as any;
     }),
 });
 export default connectionRouter;

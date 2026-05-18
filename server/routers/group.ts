@@ -1,3 +1,5 @@
+import { OMIT_PRIVATE_DATA } from "@/types/user";
+
 import { procedure, router } from "../trpc";
 
 import db from "server/util/db";
@@ -13,7 +15,7 @@ export const groupRouter = router({
         },
         include: {
           userArray: {
-            omit: { accessToken: true },
+            omit: OMIT_PRIVATE_DATA,
           },
         },
       });
@@ -39,7 +41,7 @@ export const groupRouter = router({
           },
         },
         include: {
-          userArray: { omit: { accessToken: true } },
+          userArray: { omit: OMIT_PRIVATE_DATA },
         },
       });
 
@@ -73,7 +75,7 @@ export const groupRouter = router({
           },
         },
         include: {
-          userArray: { omit: { accessToken: true } },
+          userArray: { omit: OMIT_PRIVATE_DATA },
         },
       });
 
@@ -95,7 +97,7 @@ export const groupRouter = router({
           },
         },
         include: {
-          userArray: { omit: { accessToken: true } },
+          userArray: { omit: OMIT_PRIVATE_DATA },
         },
       });
 

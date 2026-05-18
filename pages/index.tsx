@@ -14,8 +14,8 @@ import { getScopeIndex, useTxGetAll } from "lib/domain/tx";
 import useDateRange from "lib/hooks/useDateRange";
 import { useStore } from "lib/store/store";
 import type { NextPage } from "next";
-import type { BankAccount } from "server/services/IBankService";
 import React, { useEffect, useMemo, useState } from "react";
+import type { BankAccount } from "server/services/IBankService";
 
 const Home: NextPage = () => {
   const [showAccountModal, setShowAccountModal] = useState(false);

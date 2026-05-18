@@ -1,15 +1,10 @@
 import { CatSchema, isSavedCatArray, UnsavedCatSchema } from "./cat";
-import { plaidTxSchema } from "./plaid";
 import { ReceiptSchema, UnsavedReceiptSchema } from "./receipt";
 
 import { MdsType, Prisma } from "@prisma/client";
 import { z } from "zod";
 
-export type SplitTx = Prisma.TxGetPayload<{
-  omit: {
-    plaidTx: true;
-  };
-}>;
+export type SplitTx = Prisma.TxGetPayload<{}>;
 
 const SplitTx = z
   .object({
@@ -19,12 +14,19 @@ const SplitTx = z
     userTotal: z.instanceof(Prisma.Decimal),
     recurring: z.boolean(),
     mds: z.nativeEnum(MdsType),
-    plaidId: z.string().nullable(),
+    bankId: z.string().nullable(),
     name: z.string(),
     amount: z.instanceof(Prisma.Decimal),
     datetime: z.date().nullable(),
     authorizedDatetime: z.date(),
     accountId: z.string().nullable(),
+    logoUrl: z.string().nullable(),
+    isoCurrencyCode: z.string().nullable(),
+    locationAddress: z.string().nullable(),
+    locationCity: z.string().nullable(),
+    locationRegion: z.string().nullable(),
+    locationPostalCode: z.string().nullable(),
+    locationCountry: z.string().nullable(),
   })
   .strict() satisfies z.ZodType<SplitTx>;
 
@@ -40,7 +42,7 @@ export type UnsavedSplitTx = z.infer<typeof UnsavedSplitTxSchema>;
 
 export type Tx = Prisma.TxGetPayload<{
   include: {
-    splitTxArray: { omit: { plaidTx: true } };
+    splitTxArray: true;
     receipt: { include: { items: true } };
     catArray: true;
   };
@@ -50,7 +52,6 @@ export const TxSchema = SplitTx.extend({
   splitTxArray: z.array(SplitTx),
   receipt: ReceiptSchema.nullable(),
   catArray: z.array(CatSchema),
-  plaidTx: plaidTxSchema.nullable(),
 }).strict() satisfies z.ZodType<Tx>;
 
 //Although cat fields are created when a tx is created, new ones can exist without id on the clientside.
@@ -79,7 +80,6 @@ export const isUnsavedTx = (tx: unknown): tx is UnsavedTx => {
 export const TxWithUnsavedContentSchema = TxSchema.extend({
   catArray: z.array(z.union([UnsavedCatSchema, CatSchema])),
   receipt: UnsavedReceiptSchema.nullable(),
-  plaidTx: plaidTxSchema.nullable(),
 }).strict();
 
 export interface TxWithUnsavedContent

@@ -41,7 +41,7 @@ const TxCard = (props: Props) => {
               ? splitAmount.mul(-1).toNumber()
               : props.tx.amount.mul(-1).toNumber()}
           </div>
-          <div>{props.tx.plaidTx?.iso_currency_code || "US"}</div>
+          <div>{props.tx.isoCurrencyCode || "US"}</div>
         </div>
       </section>
 

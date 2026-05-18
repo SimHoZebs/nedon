@@ -5,18 +5,13 @@ import { type Tx, TxSchema, UnsavedTxSchema } from "@/types/tx";
 import { procedure, router } from "../trpc";
 
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
-import { convertPlaidCatToCat } from "lib/domain/cat";
-import { resetTxToPlaidTx } from "lib/domain/tx";
-import {
-  createTxInput,
-  mergeBankTxWithTxArray,
-  txInclude,
-} from "server/domains/tx";
+import { resetTxToBankTx } from "lib/domain/tx";
+import { createTxInput, txInclude } from "server/domains/tx";
 import db from "server/util/db";
 import { z } from "zod";
 
 const txRouter = router({
-  getWithoutPlaid: procedure
+  getWithoutBank: procedure
     .input(z.object({ userId: z.string(), txId: z.string() }))
     .query(async ({ input }) => {
       const txInDB = await db.tx.findUnique({
@@ -34,44 +29,17 @@ const txRouter = router({
   syncWithBank: procedure
     .input(z.object({ userId: z.string(), date: z.date() }))
     .mutation(async ({ input, ctx }) => {
-      let result: Result<
-        { added: number; updated: number; removed: number },
-        unknown
-      >;
+      let result: Result<void, unknown>;
       try {
-        const user = await db.user.findFirst({ where: { id: input.userId } });
-        if (!user) {
-          throw new Error(`No user found with id: ${input.userId}`);
-        }
-        if (!user.accessToken) {
-          throw new Error("User is not connected to Plaid");
-        }
-
-        const bankSyncResponse = await ctx.bankService.syncTransactions(
-          user.accessToken,
-          user.cursor || undefined,
-        );
-
-        if (!bankSyncResponse) throw new Error("No Bank sync response");
-
-        const res = await mergeBankTxWithTxArray(
-          bankSyncResponse,
-          user.id,
+        const syncResult = await ctx.bankService.syncTransactions(
+          input.userId,
           input.date.toISOString(),
         );
-        if (!res) throw new Error("Merging Bank tx with db tx failed");
 
-        const { txArray, nextSyncToken } = res;
+        if (!syncResult.ok)
+          throw new Error("Bank sync failed: " + syncResult.error);
 
-        // update cursor in db asynchonously
-        db.user
-          .update({
-            where: { id: user.id },
-            data: { cursor: nextSyncToken },
-          })
-          .then();
-
-        return { ok: true, value: txArray };
+        return { ok: true, value: undefined };
       } catch (error) {
         if (error instanceof PrismaClientInitializationError) {
           result = { ok: false, error: "Database not initialized" };
@@ -133,7 +101,7 @@ const txRouter = router({
         if (!user) {
           console.error("No user found with id: ", input.userId);
           throw new Error("No user found");
-        } else if (!user.accessToken) {
+        } else if (!user.bankAccessToken) {
           console.error("No access token for user: ", input.userId);
           throw new Error("No access token for user");
         }
@@ -187,7 +155,7 @@ const txRouter = router({
 
   update: procedure.input(TxSchema).mutation(async ({ input }) => {
     const { catArray, splitTxArray: _splitTxArray, ...rest } = input;
-    const { receipt: _receipt, plaidTx: _plaidTx, ...useful } = rest;
+    const { receipt: _receipt, bankTx: _bankTx, ...useful } = rest as any;
     const catToCreate = catArray.filter((cat) => !cat.id);
     const catToUpdate = catArray.filter((cat) => cat.id);
 
@@ -197,7 +165,7 @@ const txRouter = router({
       },
       data: {
         ...useful,
-        plaidId: input.plaidId || undefined,
+        bankId: input.bankId || undefined,
         catArray: {
           createMany: {
             data: catToCreate,
@@ -211,11 +179,11 @@ const txRouter = router({
       include: txInclude,
     });
 
-    return tx;
+    return tx as any;
   }),
 
   reset: procedure.input(TxSchema).mutation(async ({ input }) => {
-    const newTx = resetTxToPlaidTx(input);
+    const newTx = resetTxToBankTx(input);
 
     await db.tx.update({
       where: {
@@ -223,19 +191,12 @@ const txRouter = router({
       },
       data: {
         ...newTx,
-        plaidTx: newTx.plaidTx || undefined,
-        plaidId: newTx.plaidId || undefined,
+        bankId: newTx.bankId || undefined,
         splitTxArray: {
           deleteMany: {},
         },
         catArray: {
           deleteMany: {},
-          create: newTx.plaidTx?.personal_finance_category
-            ? convertPlaidCatToCat(
-                newTx.plaidTx.personal_finance_category,
-                newTx.id,
-              )
-            : undefined,
         },
         receipt: input.receipt
           ? {
@@ -245,12 +206,12 @@ const txRouter = router({
       },
     });
 
-    return await db.tx.findUnique({
+    return (await db.tx.findUnique({
       where: {
         id: input.id,
       },
       include: txInclude,
-    });
+    })) as any;
   }),
 
   delete: procedure

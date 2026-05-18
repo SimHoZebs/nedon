@@ -80,10 +80,17 @@ const SplitUserOptionList = () => {
                     userTotal: new Prisma.Decimal(0),
                     recurring: txOnModal.recurring,
                     mds: txOnModal.mds,
-                    plaidId: null,
+                    bankId: null,
                     datetime: txOnModal.datetime,
                     authorizedDatetime: txOnModal.authorizedDatetime,
                     accountId: txOnModal.accountId,
+                    logoUrl: txOnModal.logoUrl,
+                    isoCurrencyCode: txOnModal.isoCurrencyCode,
+                    locationAddress: txOnModal.locationAddress,
+                    locationCity: txOnModal.locationCity,
+                    locationRegion: txOnModal.locationRegion,
+                    locationPostalCode: txOnModal.locationPostalCode,
+                    locationCountry: txOnModal.locationCountry,
                   };
 
                   updatedSplitTxArray.push(newSplit);

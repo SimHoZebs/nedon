@@ -2,7 +2,6 @@ import type { UnsavedCat } from "@/types/cat";
 import type { Tx } from "@/types/tx";
 
 import { Prisma } from "@prisma/client";
-import type { PersonalFinanceCategory } from "plaid";
 import { plaidCategories } from "server/util/plaidCategories";
 
 export const createNewCat = (input: UnsavedCat): UnsavedCat => {
@@ -38,23 +37,20 @@ export const getCatStyle = (primary: string, detailed: string) => {
 };
 
 export const resetCatArray = (tx: Tx): UnsavedCat[] => {
-  return tx.plaidTx?.personal_finance_category
-    ? [convertPlaidCatToCat(tx.plaidTx.personal_finance_category, tx.id)]
-    : [];
+  return [];
 };
 
 export const convertPlaidCatToCat = (
-  plaidCat: PersonalFinanceCategory,
+  plaidCat: { primary: string; detailed?: string },
   txId: string,
   amount?: Prisma.Decimal,
 ): UnsavedCat => {
-  const { confidence_level: _c, version: _v, ...rest } = plaidCat;
-
   if (!(plaidCat.primary in plaidCategories)) {
   }
 
   return createNewCat({
-    ...rest,
+    primary: plaidCat.primary,
+    detailed: plaidCat.detailed || "",
     description:
       plaidCategories[plaidCat.primary || ""][plaidCat.detailed || ""]
         ?.description || "UNDEFINED",

@@ -77,7 +77,7 @@ const TxModal = (props: Props) => {
     resetTxOnModal();
     setSplitTxAmountDisplayArray([]);
     setFocusedSplitTxIndex(undefined);
-    setIsEditingSplitTx(false);
+    setIsEditingSplitTx(true);
   };
 
   const accountName =
@@ -95,10 +95,10 @@ const TxModal = (props: Props) => {
             <div className="flex w-full flex-col gap-y-1 lg:w-fit">
               <div className="flex w-full items-start justify-between">
                 <div className="flex items-center gap-x-2">
-                  {tx.plaidTx?.counterparties?.[0]?.logo_url && (
+                  {tx.logoUrl && (
                     <Image
                       className="rounded-lg"
-                      src={tx.plaidTx.counterparties[0].logo_url}
+                      src={tx.logoUrl}
                       alt=""
                       width={56}
                       height={56}
@@ -137,26 +137,20 @@ const TxModal = (props: Props) => {
 
               <div className="flex w-full justify-between">
                 <AccountName
-                  isDesktop={false}
+                  isDesktop={true}
                   isLoading={getAllAccounts.isLoading}
                   accountName={accountName}
                 />
                 <div className="flex flex-col items-end">
-                  <p>
-                    Authorized at{" "}
-                    {tx.plaidTx?.authorized_date || "1970-01-23 12:34:56"}
-                  </p>
+                  <p>Authorized at {tx.authorizedDatetime.toString()}</p>
                   <p>
                     Posted at {tx.datetime?.toString() || "1970-01-23 12:34:56"}
                   </p>
 
-                  {tx.plaidTx?.location.address && (
+                  {tx.locationAddress && (
                     <div className="flex">
                       <span className="icon-[mdi--location-on-outline]" />
-                      <p>
-                        {tx.plaidTx?.location.address &&
-                          JSON.stringify(tx.plaidTx?.location)}
-                      </p>
+                      <p>{tx.locationAddress}</p>
                     </div>
                   )}
                 </div>

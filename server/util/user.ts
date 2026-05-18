@@ -1,7 +1,6 @@
 import {
   type Connection,
   OMIT_PRIVATE_DATA,
-  type PureUser,
   type UnAuthUserClientSide,
   type UserClientSide,
 } from "@/types/user";
@@ -15,12 +14,12 @@ export const INCLUDE_CONNECTIONS_SAEFLY = {
 } as const;
 
 export const sanitizeUser = (
-  user: PureUser & { myConnectionArray: Connection[] },
+  user: any, // Use any here temporarily to ease transition with Prisma type issues
 ): UnAuthUserClientSide | UserClientSide => {
-  const { accessToken, ...userWithoutAccessToken } = user;
+  const { bankAccessToken, bankSyncToken, ...userWithoutAccessToken } = user;
   const clientSideUser = {
     ...userWithoutAccessToken,
-    hasAccessToken: !!accessToken,
+    hasAccessToken: !!bankAccessToken,
   };
-  return clientSideUser;
+  return clientSideUser as any;
 };

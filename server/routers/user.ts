@@ -33,7 +33,7 @@ const userRouter = router({
             name: input?.name,
           },
         });
-        console.log("Created user without Plaid data:", user);
+        console.log("Created user without Bank data:", user);
 
         result = {
           ok: true,
@@ -88,19 +88,22 @@ const userRouter = router({
     .mutation(async ({ input, ctx }) => {
       let result: Result<UserClientSide, Error>;
       try {
-        const getResult = await ctx.bankService.establishSandboxConnection();
+        const getResult = await ctx.bankService.establishConnection(input.id);
         if (!getResult.ok) {
           throw new Error(
-            `Failed to get Plaid access data: ${getResult.error}`,
+            `Failed to establish bank connection: ${getResult.error}`,
           );
         }
-        const user = await db.user.update({
+
+        // Fetch user after update
+        const user = await db.user.findUnique({
           where: { id: input.id },
-          data: {
-            ...getResult.value,
-          },
           ...INCLUDE_CONNECTIONS_SAEFLY,
         });
+
+        if (!user) {
+          throw new UserNotFoundError(input.id);
+        }
 
         const userClientSide = sanitizeUser(user);
 
@@ -131,7 +134,7 @@ const userRouter = router({
             error: new UserNotFoundError(input.id),
           };
         } else {
-          console.error("Error connecting user to Plaid:", e);
+          console.error("Error connecting user to bank:", e);
           result = {
             ok: false,
             error: new Error("An unexpected error occurred."),
@@ -147,18 +150,7 @@ const userRouter = router({
       let result: Result<BankAccount[], Error>;
 
       try {
-        const user = await db.user.findFirst({
-          where: {
-            id: input.userId,
-          },
-          select: { accessToken: true },
-        });
-
-        if (!user || !user.accessToken)
-          throw new Error("User or access token not found");
-
-        const res = await ctx.bankService.getAccounts(user.accessToken);
-
+        const res = await ctx.bankService.getAccounts(input.userId);
         result = { ok: true, value: res.accounts };
       } catch (e) {
         if (e instanceof Error) {

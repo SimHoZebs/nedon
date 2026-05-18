@@ -2,9 +2,11 @@ import { procedure, router } from "server/trpc";
 import { z } from "zod";
 
 const bankRouter = router({
-  createConnectionIntent: procedure.input(z.void()).query(async ({ ctx }) => {
-    return await ctx.bankService.createConnectionIntent();
-  }),
+  createConnectionIntent: procedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      return await ctx.bankService.createConnectionIntent(input.userId);
+    }),
 });
 
 export default bankRouter;

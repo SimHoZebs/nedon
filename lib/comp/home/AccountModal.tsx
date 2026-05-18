@@ -5,9 +5,9 @@ import DateSortedTxList from "../shared/DateSortedTxList";
 import { H1, H2, H3 } from "../shared/Heading";
 
 import { organizeTxByTime, useTxGetAll } from "lib/domain/tx";
-import type { BankAccount } from "server/services/IBankService";
 import type React from "react";
 import { useMemo } from "react";
+import type { BankAccount } from "server/services/IBankService";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -37,9 +37,7 @@ const AccountModal = (props: Props) => {
             <div className="flex w-full flex-row justify-between lg:flex-col lg:justify-normal">
               <div className="">
                 <H1>{props.clickedAccount.name}</H1>
-                <p className="text-zinc-400">
-                  {""}
-                </p>
+                <p className="text-zinc-400">{""}</p>
               </div>
               <div className="flex flex-col items-end lg:items-start">
                 <H3>Current: ${props.clickedAccount.balances.available}</H3>

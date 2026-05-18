@@ -4,8 +4,8 @@ import { H2, H3 } from "@/comp/shared/Heading";
 import { trpc } from "@/util/trpc";
 
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
-import type { BankAccount } from "server/services/IBankService";
 import { useRef } from "react";
+import type { BankAccount } from "server/services/IBankService";
 
 interface Props {
   setShowAccountModal: React.Dispatch<React.SetStateAction<boolean>>;

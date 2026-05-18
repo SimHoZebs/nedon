@@ -1,7 +1,7 @@
 import { trpc } from "@/util/trpc";
 
+import BankLoginBtn from "./BankLoginBtn";
 import { NavBtn } from "./NavBtn";
-import SandboxLoginBtn from "./SandboxLoginBtn";
 
 import { organizeTxByTime, useTxGetAll } from "lib/domain/tx";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
@@ -44,9 +44,9 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
       const txArray = txGetAll.data.value;
 
-      //undefined cursor should should give user txs for sandbox accounts
+      //undefined bankSyncToken should should give user txs for sandbox accounts
       while (
-        !appUser.cursor &&
+        !appUser.id &&
         txGetAllRetryCount.current < 3 &&
         ((txArray && txArray.length < 1) || txArray === null)
       ) {
@@ -65,13 +65,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
     };
 
     loadTxArray();
-  }, [
-    appUser,
-    queryClient.tx.getAll,
-    appUser?.cursor,
-    setTxOragnizedByTimeArray,
-    txGetAll,
-  ]);
+  }, [appUser, queryClient.tx.getAll, setTxOragnizedByTimeArray, txGetAll]);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null;
@@ -169,7 +163,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
             </div>
           </NavBtn>
         ) : (
-          <SandboxLoginBtn />
+          <BankLoginBtn />
         )}
       </nav>
     </div>

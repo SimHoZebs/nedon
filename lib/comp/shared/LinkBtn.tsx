@@ -9,9 +9,12 @@ import { usePlaidLink } from "react-plaid-link";
 
 const LinkBtn = () => {
   const appUser = useAutoLoadUser();
-  const linkToken = trpc.bank.createConnectionIntent.useQuery(undefined, {
-    staleTime: 360000,
-  });
+  const linkToken = trpc.bank.createConnectionIntent.useQuery(
+    { userId: appUser.user?.id || "" },
+    {
+      staleTime: 360000,
+    },
+  );
 
   const router = useRouter();
 
