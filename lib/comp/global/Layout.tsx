@@ -46,7 +46,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
       //undefined bankSyncToken should should give user txs for sandbox accounts
       while (
-        !appUser.id &&
+        !appUser.bankSyncToken &&
         txGetAllRetryCount.current < 3 &&
         ((txArray && txArray.length < 1) || txArray === null)
       ) {

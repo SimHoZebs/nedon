@@ -43,7 +43,7 @@ const connectionRouter = router({
         },
       });
 
-      return user as any;
+      return user;
     }),
 
   remove: procedure
@@ -76,7 +76,7 @@ const connectionRouter = router({
         },
       });
 
-      return user as any;
+      return user;
     }),
 });
 export default connectionRouter;

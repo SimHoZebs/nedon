@@ -372,7 +372,7 @@ export class PlaidBankService implements IBankService {
               locationRegion: bankTx.location?.region,
               locationPostalCode: bankTx.location?.postalCode,
               locationCountry: bankTx.location?.country,
-            } as any, // Ignoring TS error here until we update the Prisma schema
+            },
           });
         } else {
           // modified txs gets updated
@@ -409,7 +409,7 @@ export class PlaidBankService implements IBankService {
               locationRegion: bankTx.location?.region,
               locationPostalCode: bankTx.location?.postalCode,
               locationCountry: bankTx.location?.country,
-            } as any, // Ignoring TS error here until we update the Prisma schema
+            },
           });
         }
       }

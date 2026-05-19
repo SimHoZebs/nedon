@@ -85,9 +85,14 @@ export const processReceipt = async (path: string) => {
       }
 
       //Rarely, the receipt is in a different shape.
-      if ("properties" in receiptJson) {
+      if (
+        receiptJson &&
+        typeof receiptJson === "object" &&
+        "properties" in receiptJson
+      ) {
         sr.success = true;
-        sr.data = receiptJson.properties as UnsavedReceipt;
+        sr.data = (receiptJson as Record<string, unknown>)
+          .properties as UnsavedReceipt;
         sr.clientMsg = "Receipt processed successfully.";
         sr.devMsg = "";
         return sr;
@@ -105,7 +110,7 @@ export const processReceipt = async (path: string) => {
 
       //Hopefully this never happens
       sr.devMsg = `Unrecognized JSON shape: ${JSON.stringify(
-        receiptJson,
+        receiptJson as Record<string, unknown>,
         null,
         2,
       )}`;
@@ -117,7 +122,7 @@ export const processReceipt = async (path: string) => {
         e,
         null,
         2,
-      )}. Response was: ${JSON.stringify(receiptJson, null, 2)}`;
+      )}. Response was: ${JSON.stringify(receiptJson as Record<string, unknown>, null, 2)}`;
       console.error(sr);
       return sr;
     }

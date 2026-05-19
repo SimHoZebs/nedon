@@ -77,7 +77,7 @@ const TxModal = (props: Props) => {
     resetTxOnModal();
     setSplitTxAmountDisplayArray([]);
     setFocusedSplitTxIndex(undefined);
-    setIsEditingSplitTx(true);
+    setIsEditingSplitTx(false);
   };
 
   const accountName =

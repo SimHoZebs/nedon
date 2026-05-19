@@ -4,7 +4,7 @@ import openai from "server/clients/openaiClient";
 // It's better to have it here than hardcoded in the middle of logic.
 const RECEIPT_ASSISTANT_ID = "asst_ThX4O8JDzBsGV7BO43RA3FVE";
 
-export async function extractReceiptData(text: string): Promise<any> {
+export async function extractReceiptData(text: string): Promise<unknown> {
   try {
     const thread = await openai.beta.threads.create();
 

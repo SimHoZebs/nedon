@@ -155,7 +155,11 @@ const txRouter = router({
 
   update: procedure.input(TxSchema).mutation(async ({ input }) => {
     const { catArray, splitTxArray: _splitTxArray, ...rest } = input;
-    const { receipt: _receipt, bankTx: _bankTx, ...useful } = rest as any;
+    const {
+      receipt: _receipt,
+
+      ...useful
+    } = rest;
     const catToCreate = catArray.filter((cat) => !cat.id);
     const catToUpdate = catArray.filter((cat) => cat.id);
 
@@ -179,7 +183,7 @@ const txRouter = router({
       include: txInclude,
     });
 
-    return tx as any;
+    return tx;
   }),
 
   reset: procedure.input(TxSchema).mutation(async ({ input }) => {
@@ -206,12 +210,12 @@ const txRouter = router({
       },
     });
 
-    return (await db.tx.findUnique({
+    return await db.tx.findUnique({
       where: {
         id: input.id,
       },
       include: txInclude,
-    })) as any;
+    });
   }),
 
   delete: procedure

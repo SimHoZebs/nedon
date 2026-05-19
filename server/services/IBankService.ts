@@ -23,7 +23,7 @@ export interface BankTransaction {
     postalCode?: string | null;
     country?: string | null;
   } | null;
-  raw?: any;
+  raw?: unknown;
 }
 
 export interface RemovedBankTransaction {
@@ -42,7 +42,7 @@ export interface BankAccount {
     limit?: number | null;
     isoCurrencyCode?: string | null;
   };
-  raw?: any;
+  raw?: unknown;
 }
 
 export interface IBankService {
