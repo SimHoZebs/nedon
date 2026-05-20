@@ -20,6 +20,49 @@ export const resetTxToBankTx = (tx: Tx): TxWithUnsavedContent => {
   };
 };
 
+import type { BankTransaction } from "server/services/IBankService";
+
+export const createTxFromBankTx = (
+  bankTx: BankTransaction,
+  userId: string,
+  id: string,
+): UnsavedTx => {
+  return {
+    id,
+    name: bankTx.merchantName || bankTx.name,
+    amount: Prisma.Decimal(bankTx.amount),
+    recurring: false,
+    mds: MdsType.UNDETERMINED,
+    userTotal: Prisma.Decimal(0),
+    originTxId: null,
+    datetime: bankTx.date ? new Date(bankTx.date) : null,
+    authorizedDatetime: new Date(bankTx.authorizedDate || 0),
+    bankId: bankTx.id,
+    accountId: bankTx.accountId,
+    ownerId: userId,
+    splitTxArray: [],
+    receipt: null,
+    catArray: bankTx.category
+      ? [
+          {
+            primary: bankTx.category.primary,
+            detailed: bankTx.category.detailed,
+            description: bankTx.category.description,
+            amount: Prisma.Decimal(bankTx.amount),
+            txId: id,
+          },
+        ]
+      : [],
+    logoUrl: bankTx.logoUrl || null,
+    isoCurrencyCode: bankTx.isoCurrencyCode || null,
+    locationAddress: bankTx.location?.address || null,
+    locationCity: bankTx.location?.city || null,
+    locationRegion: bankTx.location?.region || null,
+    locationPostalCode: bankTx.location?.postalCode || null,
+    locationCountry: bankTx.location?.country || null,
+  };
+};
+
 export const createTxFromChaseCSV = (
   chaseCSVTx: ChaseCSVTx,
   userId: string,

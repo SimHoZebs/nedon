@@ -1,5 +1,7 @@
 import type { Result } from "@/util/type";
 
+import type { UnsavedTx } from "@/types/tx";
+
 import type { BankAccount, IBankService } from "./IBankService";
 import { mapPlaidTransactionToBankTransaction } from "./plaidMappers";
 
@@ -10,6 +12,7 @@ import {
   PrismaClientValidationError,
 } from "@prisma/client/runtime/library";
 import { isAxiosError } from "axios";
+import { createTxFromBankTx } from "lib/domain/tx";
 import {
   ACHClass,
   PlaidErrorType,
@@ -22,6 +25,7 @@ import {
 } from "plaid";
 import client from "server/clients/plaidClient";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "server/constants";
+import { createTxInput, txInclude } from "server/domains/tx";
 import db from "server/util/db";
 
 const authorizeAndCreateTransfer = async (accessToken: string) => {
@@ -289,43 +293,13 @@ export const plaidBankService: IBankService = {
 
         if (!existingTx) {
           const id = createId();
-          const catArrayCreate: Prisma.CatCreateNestedManyWithoutTxInput =
-            bankTx.category
-              ? {
-                  create: [
-                    {
-                      primary: bankTx.category.primary,
-                      detailed: bankTx.category.detailed,
-                      description: bankTx.category.description,
-                      amount: Prisma.Decimal(bankTx.amount),
-                    },
-                  ],
-                }
-              : { create: [] };
+          // const catArrayCreate: Prisma.CatCreateNestedManyWithoutTxInput =
+
+          const unsavedTx = createTxFromBankTx(bankTx, userId, id);
 
           await db.tx.create({
-            data: {
-              id,
-              name: bankTx.merchantName || bankTx.name,
-              amount: Prisma.Decimal(bankTx.amount),
-              recurring: false,
-              mds: MdsType.UNDETERMINED,
-              userTotal: Prisma.Decimal(0),
-              originTxId: null,
-              datetime: bankTx.date ? new Date(bankTx.date) : null,
-              authorizedDatetime: new Date(bankTx.authorizedDate || 0),
-              bankId: bankTx.id,
-              accountId: bankTx.accountId,
-              ownerId: userId,
-              catArray: catArrayCreate,
-              logoUrl: bankTx.logoUrl,
-              isoCurrencyCode: bankTx.isoCurrencyCode,
-              locationAddress: bankTx.location?.address,
-              locationCity: bankTx.location?.city,
-              locationRegion: bankTx.location?.region,
-              locationPostalCode: bankTx.location?.postalCode,
-              locationCountry: bankTx.location?.country,
-            },
+            data: createTxInput(unsavedTx),
+            include: txInclude,
           });
         } else {
           const cat = bankTx.category
