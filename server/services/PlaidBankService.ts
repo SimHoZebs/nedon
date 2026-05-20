@@ -7,6 +7,7 @@ import type {
   BankTransaction,
   IBankService,
 } from "./IBankService";
+import { mapPlaidTransactionToBankTransaction } from "./plaidMappers";
 
 import { createId } from "@paralleldrive/cuid2";
 import { MdsType, Prisma } from "@prisma/client";
@@ -31,55 +32,8 @@ import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "server/constants";
 import { createCatWithoutTxInput } from "server/domains/cat";
 import { txInclude } from "server/domains/tx";
 import db from "server/util/db";
-import { plaidCategories } from "server/util/plaidCategories";
 
 export class PlaidBankService implements IBankService {
-  private convertPlaidTransaction(tx: Transaction): BankTransaction {
-    const primary = tx.personal_finance_category?.primary;
-    const detailed = tx.personal_finance_category?.detailed;
-
-    let description = "UNDEFINED";
-    if (
-      primary &&
-      detailed &&
-      primary in plaidCategories &&
-      detailed in plaidCategories[primary]
-    ) {
-      description = plaidCategories[primary][detailed].description;
-    }
-
-    return {
-      id: tx.transaction_id,
-      accountId: tx.account_id,
-      amount: tx.amount,
-      date: tx.date,
-      name: tx.name,
-      merchantName: tx.merchant_name,
-      pending: tx.pending,
-      category: tx.personal_finance_category
-        ? {
-            primary: primary!,
-            detailed: detailed || "",
-            description: description,
-          }
-        : null,
-      paymentChannel: tx.payment_channel,
-      authorizedDate: tx.authorized_date,
-      logoUrl: tx.logo_url,
-      isoCurrencyCode: tx.iso_currency_code,
-      location: tx.location
-        ? {
-            address: tx.location.address,
-            city: tx.location.city,
-            region: tx.location.region,
-            postalCode: tx.location.postal_code,
-            country: tx.location.country,
-          }
-        : null,
-      raw: tx,
-    };
-  }
-
   async createConnectionIntent(userId: string): Promise<string> {
     const response = await client.linkTokenCreate({
       user: {
@@ -332,7 +286,7 @@ export class PlaidBankService implements IBankService {
 
       const upsertedPlaidTxs = [...added, ...modified];
       const upserted = upsertedPlaidTxs.map((tx) =>
-        this.convertPlaidTransaction(tx),
+        mapPlaidTransactionToBankTransaction(tx),
       );
 
       // 2. Process all upserted transactions
