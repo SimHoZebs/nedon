@@ -7,6 +7,7 @@ import * as blobStorage from "./blobStorage";
 import * as ocr from "./OCR";
 
 import db from "server/util/db";
+import { z } from "zod";
 
 export const createReceipt = async (input: {
   id: string;
@@ -85,14 +86,16 @@ export const processReceipt = async (path: string) => {
       }
 
       //Rarely, the receipt is in a different shape.
-      if (
-        receiptJson &&
-        typeof receiptJson === "object" &&
-        "properties" in receiptJson
-      ) {
+      const FallbackReceiptSchema = z.object({
+        properties: UnsavedReceiptSchema,
+      });
+
+      const parsedFallbackReceipt =
+        FallbackReceiptSchema.safeParse(receiptJson);
+
+      if (parsedFallbackReceipt.success) {
         sr.success = true;
-        sr.data = (receiptJson as Record<string, unknown>)
-          .properties as UnsavedReceipt;
+        sr.data = parsedFallbackReceipt.data.properties;
         sr.clientMsg = "Receipt processed successfully.";
         sr.devMsg = "";
         return sr;
@@ -110,7 +113,7 @@ export const processReceipt = async (path: string) => {
 
       //Hopefully this never happens
       sr.devMsg = `Unrecognized JSON shape: ${JSON.stringify(
-        receiptJson as Record<string, unknown>,
+        receiptJson,
         null,
         2,
       )}`;
@@ -122,7 +125,7 @@ export const processReceipt = async (path: string) => {
         e,
         null,
         2,
-      )}. Response was: ${JSON.stringify(receiptJson as Record<string, unknown>, null, 2)}`;
+      )}. Response was: ${JSON.stringify(receiptJson, null, 2)}`;
       console.error(sr);
       return sr;
     }
