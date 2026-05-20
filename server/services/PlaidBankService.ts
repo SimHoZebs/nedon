@@ -3,7 +3,7 @@ import type { Result } from "@/util/type";
 import type { UnsavedTx } from "@/types/tx";
 
 import type { BankAccount, IBankService } from "./IBankService";
-import { mapPlaidTransactionToBankTransaction } from "./plaidMappers";
+import { mapPlaidTransactionToUnsavedTx } from "./plaidMappers";
 
 import { createId } from "@paralleldrive/cuid2";
 import { MdsType, Prisma } from "@prisma/client";
@@ -12,7 +12,6 @@ import {
   PrismaClientValidationError,
 } from "@prisma/client/runtime/library";
 import { isAxiosError } from "axios";
-import { createTxFromBankTx } from "lib/domain/tx";
 import {
   ACHClass,
   PlaidErrorType,
@@ -281,36 +280,32 @@ export const plaidBankService: IBankService = {
 
       const upsertedPlaidTxs = [...added, ...modified];
       const upserted = upsertedPlaidTxs.map((tx) =>
-        mapPlaidTransactionToBankTransaction(tx),
+        mapPlaidTransactionToUnsavedTx(tx, userId),
       );
 
-      for (const bankTx of upserted) {
+      for (const unsavedTx of upserted) {
         const existingTx = await db.tx.findFirst({
           where: {
-            bankId: bankTx.id,
+            bankId: unsavedTx.bankId,
           },
         });
 
         if (!existingTx) {
-          const id = createId();
-          // const catArrayCreate: Prisma.CatCreateNestedManyWithoutTxInput =
-
-          const unsavedTx = createTxFromBankTx(bankTx, userId, id);
-
           await db.tx.create({
             data: createTxInput(unsavedTx),
             include: txInclude,
           });
         } else {
-          const cat = bankTx.category
-            ? {
-                primary: bankTx.category.primary,
-                detailed: bankTx.category.detailed,
-                description: bankTx.category.description,
-                amount: Prisma.Decimal(0),
-                txId: existingTx.id,
-              }
-            : undefined;
+          const cat =
+            unsavedTx.catArray.length > 0
+              ? {
+                  primary: unsavedTx.catArray[0].primary,
+                  detailed: unsavedTx.catArray[0].detailed,
+                  description: unsavedTx.catArray[0].description,
+                  amount: Prisma.Decimal(0),
+                  txId: existingTx.id,
+                }
+              : undefined;
 
           await db.tx.update({
             where: {
@@ -318,22 +313,22 @@ export const plaidBankService: IBankService = {
             },
             data: {
               bankId: existingTx.bankId || undefined,
-              name: bankTx.merchantName || bankTx.name,
-              amount: Prisma.Decimal(bankTx.amount),
-              datetime: bankTx.date ? new Date(bankTx.date) : null,
-              authorizedDatetime: new Date(bankTx.authorizedDate || 0),
-              accountId: bankTx.accountId,
+              name: unsavedTx.name,
+              amount: Prisma.Decimal(unsavedTx.amount),
+              datetime: unsavedTx.datetime,
+              authorizedDatetime: unsavedTx.authorizedDatetime,
+              accountId: unsavedTx.accountId,
               catArray: {
                 deleteMany: {},
                 create: cat,
               },
-              logoUrl: bankTx.logoUrl,
-              isoCurrencyCode: bankTx.isoCurrencyCode,
-              locationAddress: bankTx.location?.address,
-              locationCity: bankTx.location?.city,
-              locationRegion: bankTx.location?.region,
-              locationPostalCode: bankTx.location?.postalCode,
-              locationCountry: bankTx.location?.country,
+              logoUrl: unsavedTx.logoUrl,
+              isoCurrencyCode: unsavedTx.isoCurrencyCode,
+              locationAddress: unsavedTx.locationAddress,
+              locationCity: unsavedTx.locationCity,
+              locationRegion: unsavedTx.locationRegion,
+              locationPostalCode: unsavedTx.locationPostalCode,
+              locationCountry: unsavedTx.locationCountry,
             },
           });
         }

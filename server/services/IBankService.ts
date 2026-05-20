@@ -1,33 +1,6 @@
 import type { Result } from "@/util/type";
 
-export interface BankTransactionCategory {
-  primary: string;
-  detailed: string;
-  description: string;
-}
-
-export interface BankTransaction {
-  id: string;
-  accountId: string;
-  amount: number;
-  date: string;
-  name: string;
-  merchantName?: string | null;
-  pending: boolean;
-  category?: BankTransactionCategory | null;
-  paymentChannel?: string | null;
-  authorizedDate?: string | null;
-  logoUrl?: string | null;
-  isoCurrencyCode?: string | null;
-  location?: {
-    address?: string | null;
-    city?: string | null;
-    region?: string | null;
-    postalCode?: string | null;
-    country?: string | null;
-  } | null;
-  raw?: unknown;
-}
+import type { UnsavedTx } from "@/types/tx";
 
 export interface RemovedBankTransaction {
   id: string;
@@ -46,6 +19,12 @@ export interface BankAccount {
     isoCurrencyCode?: string | null;
   };
   raw?: unknown;
+}
+
+export interface BankSyncResult {
+  upserted: UnsavedTx[];
+  removed: RemovedBankTransaction[];
+  nextSyncToken?: string;
 }
 
 export interface IBankService {

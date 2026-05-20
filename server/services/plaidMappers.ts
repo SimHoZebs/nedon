@@ -1,11 +1,14 @@
-import type { BankTransaction } from "./IBankService";
+import type { UnsavedTx } from "@/types/tx";
 
+import { createId } from "@paralleldrive/cuid2";
+import { MdsType, Prisma } from "@prisma/client";
 import type { Transaction } from "plaid";
 import { plaidCategories } from "server/util/plaidCategories";
 
-export function mapPlaidTransactionToBankTransaction(
+export function mapPlaidTransactionToUnsavedTx(
   tx: Transaction,
-): BankTransaction {
+  userId: string,
+): UnsavedTx {
   const primary = tx.personal_finance_category?.primary;
   const detailed = tx.personal_finance_category?.detailed;
 
@@ -19,34 +22,40 @@ export function mapPlaidTransactionToBankTransaction(
     description = plaidCategories[primary][detailed].description;
   }
 
+  const id = createId();
+
   return {
-    id: tx.transaction_id,
+    id,
+    name: tx.merchant_name || tx.name,
+    amount: new Prisma.Decimal(tx.amount),
+    recurring: false,
+    mds: MdsType.UNDETERMINED,
+    userTotal: new Prisma.Decimal(0),
+    originTxId: null,
+    datetime: tx.date ? new Date(tx.date) : null,
+    authorizedDatetime: new Date(tx.authorized_date || 0),
+    bankId: tx.transaction_id,
     accountId: tx.account_id,
-    amount: tx.amount,
-    date: tx.date,
-    name: tx.name,
-    merchantName: tx.merchant_name,
-    pending: tx.pending,
-    category: tx.personal_finance_category
-      ? {
-          primary: primary || "",
-          detailed: detailed || "",
-          description: description,
-        }
-      : null,
-    paymentChannel: tx.payment_channel,
-    authorizedDate: tx.authorized_date,
-    logoUrl: tx.logo_url,
-    isoCurrencyCode: tx.iso_currency_code,
-    location: tx.location
-      ? {
-          address: tx.location.address,
-          city: tx.location.city,
-          region: tx.location.region,
-          postalCode: tx.location.postal_code,
-          country: tx.location.country,
-        }
-      : null,
-    raw: tx,
+    ownerId: userId,
+    splitTxArray: [],
+    receipt: null,
+    catArray: tx.personal_finance_category
+      ? [
+          {
+            primary: primary || "",
+            detailed: detailed || "",
+            description: description,
+            amount: new Prisma.Decimal(tx.amount),
+            txId: id,
+          },
+        ]
+      : [],
+    logoUrl: tx.logo_url || null,
+    isoCurrencyCode: tx.iso_currency_code || null,
+    locationAddress: tx.location?.address || null,
+    locationCity: tx.location?.city || null,
+    locationRegion: tx.location?.region || null,
+    locationPostalCode: tx.location?.postal_code || null,
+    locationCountry: tx.location?.country || null,
   };
 }
