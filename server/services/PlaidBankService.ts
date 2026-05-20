@@ -1,18 +1,11 @@
 import type { Result } from "@/util/type";
 
-import type { Tx, UnsavedTx } from "@/types/tx";
-
-import type {
-  BankAccount,
-  BankTransaction,
-  IBankService,
-} from "./IBankService";
+import type { BankAccount, IBankService } from "./IBankService";
 import { mapPlaidTransactionToBankTransaction } from "./plaidMappers";
 
 import { createId } from "@paralleldrive/cuid2";
 import { MdsType, Prisma } from "@prisma/client";
 import {
-  PrismaClientInitializationError,
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
 } from "@prisma/client/runtime/library";
@@ -29,12 +22,65 @@ import {
 } from "plaid";
 import client from "server/clients/plaidClient";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "server/constants";
-import { createCatWithoutTxInput } from "server/domains/cat";
-import { txInclude } from "server/domains/tx";
 import db from "server/util/db";
 
-export class PlaidBankService implements IBankService {
-  async createConnectionIntent(userId: string): Promise<string> {
+const authorizeAndCreateTransfer = async (accessToken: string) => {
+  const accountsGetResponse = await client.accountsGet({
+    access_token: accessToken,
+  });
+  const accountId = accountsGetResponse.data.accounts[0].account_id;
+
+  const transferAuthorizationResponse =
+    await client.transferAuthorizationCreate({
+      access_token: accessToken,
+      account_id: accountId,
+      type: TransferType.Credit,
+      network: TransferNetwork.Ach,
+      amount: "1.34",
+      ach_class: ACHClass.Ppd,
+      user: {
+        legal_name: "FirstName LastName",
+        email_address: "foobar@email.com",
+        address: {
+          street: "123 Main St.",
+          city: "San Francisco",
+          region: "CA",
+          postal_code: "94053",
+          country: "US",
+        },
+      },
+    });
+
+  const authorizationId = transferAuthorizationResponse.data.authorization.id;
+
+  const transferResponse = await client.transferCreate({
+    idempotency_key: "1223abc456xyz7890001",
+    access_token: accessToken,
+    account_id: accountId,
+    authorization_id: authorizationId,
+    type: TransferType.Credit,
+    network: TransferNetwork.Ach,
+    amount: "12.34",
+    description: "Payment",
+    ach_class: ACHClass.Ppd,
+    user: {
+      legal_name: "FirstName LastName",
+      email_address: "foobar@email.com",
+      address: {
+        street: "123 Main St.",
+        city: "San Francisco",
+        region: "CA",
+        postal_code: "94053",
+        country: "US",
+      },
+    },
+  });
+
+  return transferResponse.data.transfer.id;
+};
+
+export const plaidBankService: IBankService = {
+  createConnectionIntent: async (userId: string): Promise<string> => {
     const response = await client.linkTokenCreate({
       user: {
         client_user_id: userId,
@@ -45,9 +91,11 @@ export class PlaidBankService implements IBankService {
       language: "en",
     });
     return response.data.link_token;
-  }
+  },
 
-  async establishConnection(userId: string): Promise<Result<void, unknown>> {
+  establishConnection: async (
+    userId: string,
+  ): Promise<Result<void, unknown>> => {
     try {
       console.log(`Creating public token for user ${userId} in sandbox...`);
       const publicTokenCreateResponse = await client.sandboxPublicTokenCreate({
@@ -76,7 +124,7 @@ export class PlaidBankService implements IBankService {
 
       let transferId: string | null = null;
       if (PLAID_PRODUCTS.includes(Products.Transfer)) {
-        transferId = await this.authorizeAndCreateTransfer(
+        transferId = await authorizeAndCreateTransfer(
           exchangeResponse.data.access_token,
         );
 
@@ -85,7 +133,6 @@ export class PlaidBankService implements IBankService {
         }
       }
 
-      // Save tokens directly to DB, abstracting away from the router
       await db.user.update({
         where: { id: userId },
         data: {
@@ -105,64 +152,9 @@ export class PlaidBankService implements IBankService {
       console.error("Unexpected error in establishConnection:", e);
       return { ok: false, error: e };
     }
-  }
+  },
 
-  private async authorizeAndCreateTransfer(accessToken: string) {
-    const accountsGetResponse = await client.accountsGet({
-      access_token: accessToken,
-    });
-    const accountId = accountsGetResponse.data.accounts[0].account_id;
-
-    const transferAuthorizationResponse =
-      await client.transferAuthorizationCreate({
-        access_token: accessToken,
-        account_id: accountId,
-        type: TransferType.Credit,
-        network: TransferNetwork.Ach,
-        amount: "1.34",
-        ach_class: ACHClass.Ppd,
-        user: {
-          legal_name: "FirstName LastName",
-          email_address: "foobar@email.com",
-          address: {
-            street: "123 Main St.",
-            city: "San Francisco",
-            region: "CA",
-            postal_code: "94053",
-            country: "US",
-          },
-        },
-      });
-
-    const authorizationId = transferAuthorizationResponse.data.authorization.id;
-
-    const transferResponse = await client.transferCreate({
-      idempotency_key: "1223abc456xyz7890001",
-      access_token: accessToken,
-      account_id: accountId,
-      authorization_id: authorizationId,
-      type: TransferType.Credit,
-      network: TransferNetwork.Ach,
-      amount: "12.34",
-      description: "Payment",
-      ach_class: ACHClass.Ppd,
-      user: {
-        legal_name: "FirstName LastName",
-        email_address: "foobar@email.com",
-        address: {
-          street: "123 Main St.",
-          city: "San Francisco",
-          region: "CA",
-          postal_code: "94053",
-          country: "US",
-        },
-      },
-    });
-
-    return transferResponse.data.transfer.id;
-  }
-
-  async getAccounts(userId: string): Promise<{ accounts: BankAccount[] }> {
+  getAccounts: async (userId: string): Promise<{ accounts: BankAccount[] }> => {
     const user = await db.user.findFirst({
       where: { id: userId },
       select: { bankAccessToken: true },
@@ -196,12 +188,12 @@ export class PlaidBankService implements IBankService {
         raw: acc,
       })),
     };
-  }
+  },
 
-  async syncTransactions(
+  syncTransactions: async (
     userId: string,
-    dateString: string,
-  ): Promise<Result<void, unknown>> {
+    _dateString: string,
+  ): Promise<Result<void, unknown>> => {
     const user = await db.user.findFirst({ where: { id: userId } });
     if (!user) {
       return { ok: false, error: `No user found with id: ${userId}` };
@@ -274,7 +266,6 @@ export class PlaidBankService implements IBankService {
     }
 
     try {
-      // 1. Process all removed transactions first
       for (const plaidTx of removed) {
         if (!plaidTx.transaction_id) continue;
         await db.tx.deleteMany({
@@ -289,7 +280,6 @@ export class PlaidBankService implements IBankService {
         mapPlaidTransactionToBankTransaction(tx),
       );
 
-      // 2. Process all upserted transactions
       for (const bankTx of upserted) {
         const existingTx = await db.tx.findFirst({
           where: {
@@ -298,7 +288,6 @@ export class PlaidBankService implements IBankService {
         });
 
         if (!existingTx) {
-          // newly added txs gets created
           const id = createId();
           const catArrayCreate: Prisma.CatCreateNestedManyWithoutTxInput =
             bankTx.category
@@ -339,7 +328,6 @@ export class PlaidBankService implements IBankService {
             },
           });
         } else {
-          // modified txs gets updated
           const cat = bankTx.category
             ? {
                 primary: bankTx.category.primary,
@@ -377,7 +365,6 @@ export class PlaidBankService implements IBankService {
         }
       }
 
-      // Update user cursor
       await db.user.update({
         where: { id: userId },
         data: { bankSyncToken: cursor },
@@ -404,5 +391,5 @@ export class PlaidBankService implements IBankService {
       console.error("Unknown error in creating tx: ", error);
       return { ok: false, error };
     }
-  }
-}
+  },
+};
