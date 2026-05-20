@@ -16,7 +16,6 @@ import {
   PrismaClientValidationError,
 } from "@prisma/client/runtime/library";
 import { isAxiosError } from "axios";
-import { convertPlaidCatToCat } from "lib/domain/cat";
 import {
   ACHClass,
   PlaidErrorType,
@@ -32,9 +31,23 @@ import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "server/constants";
 import { createCatWithoutTxInput } from "server/domains/cat";
 import { txInclude } from "server/domains/tx";
 import db from "server/util/db";
+import { plaidCategories } from "server/util/plaidCategories";
 
 export class PlaidBankService implements IBankService {
   private convertPlaidTransaction(tx: Transaction): BankTransaction {
+    const primary = tx.personal_finance_category?.primary;
+    const detailed = tx.personal_finance_category?.detailed;
+
+    let description = "UNDEFINED";
+    if (
+      primary &&
+      detailed &&
+      primary in plaidCategories &&
+      detailed in plaidCategories[primary]
+    ) {
+      description = plaidCategories[primary][detailed].description;
+    }
+
     return {
       id: tx.transaction_id,
       accountId: tx.account_id,
@@ -45,8 +58,9 @@ export class PlaidBankService implements IBankService {
       pending: tx.pending,
       category: tx.personal_finance_category
         ? {
-            primary: tx.personal_finance_category.primary,
-            detailed: tx.personal_finance_category.detailed,
+            primary: primary!,
+            detailed: detailed || "",
+            description: description,
           }
         : null,
       paymentChannel: tx.payment_channel,
@@ -336,16 +350,12 @@ export class PlaidBankService implements IBankService {
             bankTx.category
               ? {
                   create: [
-                    createCatWithoutTxInput(
-                      convertPlaidCatToCat(
-                        {
-                          primary: bankTx.category.primary,
-                          detailed: bankTx.category.detailed || "",
-                        },
-                        id,
-                        Prisma.Decimal(bankTx.amount),
-                      ),
-                    ),
+                    {
+                      primary: bankTx.category.primary,
+                      detailed: bankTx.category.detailed,
+                      description: bankTx.category.description,
+                      amount: Prisma.Decimal(bankTx.amount),
+                    },
                   ],
                 }
               : { create: [] };
@@ -377,14 +387,13 @@ export class PlaidBankService implements IBankService {
         } else {
           // modified txs gets updated
           const cat = bankTx.category
-            ? convertPlaidCatToCat(
-                {
-                  primary: bankTx.category.primary,
-                  detailed: bankTx.category.detailed || "",
-                },
-                existingTx.id,
-                Prisma.Decimal(0),
-              )
+            ? {
+                primary: bankTx.category.primary,
+                detailed: bankTx.category.detailed,
+                description: bankTx.category.description,
+                amount: Prisma.Decimal(0),
+                txId: existingTx.id,
+              }
             : undefined;
 
           await db.tx.update({

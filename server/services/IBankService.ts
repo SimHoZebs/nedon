@@ -1,5 +1,11 @@
 import type { Result } from "@/util/type";
 
+export interface BankTransactionCategory {
+  primary: string;
+  detailed: string;
+  description: string;
+}
+
 export interface BankTransaction {
   id: string;
   accountId: string;
@@ -8,10 +14,7 @@ export interface BankTransaction {
   name: string;
   merchantName?: string | null;
   pending: boolean;
-  category?: {
-    primary: string;
-    detailed?: string;
-  } | null;
+  category?: BankTransactionCategory | null;
   paymentChannel?: string | null;
   authorizedDate?: string | null;
   logoUrl?: string | null;
