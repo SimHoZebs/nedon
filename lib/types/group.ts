@@ -26,8 +26,7 @@ export type Group = Prisma.GroupGetPayload<{
 const ConnectionSchema = z.object({
   id: z.string(),
   name: z.string(),
-  bankAccessToken: z.string().nullable().optional(),
-  bankSyncToken: z.string().nullable().optional(),
+  hasBankSyncToken: z.boolean().optional(),
 });
 
 export const GroupSchema = PureGroupSchema.extend({

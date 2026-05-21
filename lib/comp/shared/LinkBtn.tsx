@@ -9,6 +9,8 @@ import { usePlaidLink } from "react-plaid-link";
 
 const LinkBtn = () => {
   const appUser = useAutoLoadUser();
+  const exchangeConnectionToken =
+    trpc.bank.exchangeConnectionToken.useMutation();
   const linkToken = trpc.bank.createConnectionIntent.useQuery(
     { userId: appUser.user?.id || "" },
     {
@@ -19,19 +21,32 @@ const LinkBtn = () => {
   const router = useRouter();
 
   const onSuccess = React.useCallback(
-    (_public_token: string) => {
-      const getUserAccessToken = async () => {
-        if (!appUser) {
+    (publicToken: string) => {
+      const exchangeToken = async () => {
+        if (!appUser.user) {
           console.error("appUser is undefined.");
           return;
         }
+
+        const result = await exchangeConnectionToken.mutateAsync({
+          userId: appUser.user.id,
+          publicToken,
+        });
+
+        if (!result.ok) {
+          console.error(
+            "Failed to exchange bank connection token",
+            result.error,
+          );
+          return;
+        }
+
+        await router.push("/");
       };
 
-      getUserAccessToken();
-
-      router.push("/home");
+      exchangeToken();
     },
-    [appUser, router],
+    [appUser.user, exchangeConnectionToken, router],
   );
 
   let isOauth = false;

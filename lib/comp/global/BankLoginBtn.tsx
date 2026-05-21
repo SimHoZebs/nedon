@@ -41,11 +41,9 @@ const BankLoginBtn = () => {
         throw new Error(JSON.stringify(createUserResult.error));
       }
       const user = createUserResult.value;
-      connectUnAuthUserToBank(user);
+      await connectUnAuthUserToBank(user);
 
       saveUserIdOnLocalStorage(user.id);
-
-      await connectToBank.mutateAsync({ id: user.id });
 
       await queryClient.invalidate();
     } catch (error) {

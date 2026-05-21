@@ -1,12 +1,11 @@
 import type { Result } from "@/util/type";
 
-import type { UnsavedTx } from "@/types/tx";
+import type { BankAccount } from "@/types/bank";
 
-import type { BankAccount, IBankService } from "./IBankService";
+import type { IBankService } from "./IBankService";
 import { mapPlaidTransactionToUnsavedTx } from "./plaidMappers";
 
-import { createId } from "@paralleldrive/cuid2";
-import { MdsType, Prisma } from "@prisma/client";
+import { Prisma, TxKind } from "@prisma/client";
 import {
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
@@ -24,6 +23,7 @@ import {
 } from "plaid";
 import client from "server/clients/plaidClient";
 import { PLAID_COUNTRY_CODES, PLAID_PRODUCTS } from "server/constants";
+import { createCatWithoutTxInput } from "server/domains/cat";
 import { createTxInput, txInclude } from "server/domains/tx";
 import db from "server/util/db";
 
@@ -82,6 +82,53 @@ const authorizeAndCreateTransfer = async (accessToken: string) => {
   return transferResponse.data.transfer.id;
 };
 
+const exchangeAndStorePublicToken = async (
+  userId: string,
+  publicToken: string,
+): Promise<Result<void, unknown>> => {
+  try {
+    const exchangeResponse = await client.itemPublicTokenExchange({
+      public_token: publicToken,
+    });
+
+    if (exchangeResponse.status !== 200) {
+      console.error("Error exchanging public token:", exchangeResponse);
+      throw new Error(JSON.stringify(exchangeResponse, null, 2));
+    }
+
+    if (PLAID_PRODUCTS.includes(Products.Transfer)) {
+      const transferId = await authorizeAndCreateTransfer(
+        exchangeResponse.data.access_token,
+      );
+
+      if (!transferId) {
+        throw new Error("Transfer ID is null");
+      }
+    }
+
+    await db.user.update({
+      where: { id: userId },
+      data: {
+        bankAccessToken: exchangeResponse.data.access_token,
+        bankSyncToken: null,
+      },
+    });
+
+    return { ok: true, value: undefined };
+  } catch (e) {
+    if (isAxiosError(e)) {
+      console.error(
+        "Axios error in exchangeAndStorePublicToken:",
+        e.response?.data.display_message,
+      );
+      return { ok: false, error: e.response?.data.display_message };
+    }
+
+    console.error("Unexpected error in exchangeAndStorePublicToken:", e);
+    return { ok: false, error: e };
+  }
+};
+
 export const plaidBankService: IBankService = {
   createConnectionIntent: async (userId: string): Promise<string> => {
     const response = await client.linkTokenCreate({
@@ -94,6 +141,13 @@ export const plaidBankService: IBankService = {
       language: "en",
     });
     return response.data.link_token;
+  },
+
+  exchangeConnectionToken: async (
+    userId: string,
+    publicToken: string,
+  ): Promise<Result<void, unknown>> => {
+    return exchangeAndStorePublicToken(userId, publicToken);
   },
 
   establishConnection: async (
@@ -115,35 +169,7 @@ export const plaidBankService: IBankService = {
       }
 
       const publicToken = publicTokenCreateResponse.data.public_token;
-
-      const exchangeResponse = await client.itemPublicTokenExchange({
-        public_token: publicToken,
-      });
-
-      if (exchangeResponse.status !== 200) {
-        console.error("Error exchanging public token:", exchangeResponse);
-        throw new Error(JSON.stringify(exchangeResponse, null, 2));
-      }
-
-      let transferId: string | null = null;
-      if (PLAID_PRODUCTS.includes(Products.Transfer)) {
-        transferId = await authorizeAndCreateTransfer(
-          exchangeResponse.data.access_token,
-        );
-
-        if (!transferId) {
-          throw new Error("Transfer ID is null");
-        }
-      }
-
-      await db.user.update({
-        where: { id: userId },
-        data: {
-          bankAccessToken: exchangeResponse.data.access_token,
-        },
-      });
-
-      return { ok: true, value: undefined };
+      return exchangeAndStorePublicToken(userId, publicToken);
     } catch (e) {
       if (isAxiosError(e)) {
         console.error(
@@ -208,20 +234,22 @@ export const plaidBankService: IBankService = {
     let added: Transaction[] = [];
     let modified: Transaction[] = [];
     let removed: RemovedTransaction[] = [];
-    let totalCount = 100;
     let hasMore = true;
     let cursor = user.bankSyncToken || undefined;
+    let mutationDuringPaginationRetries = 0;
+    const pageSize = 100;
+    const maxMutationDuringPaginationRetries = 3;
 
-    while (hasMore && totalCount > 0) {
+    while (hasMore) {
       const request: TransactionsSyncRequest = {
         access_token: user.bankAccessToken,
         cursor: cursor,
-        count: totalCount,
+        count: pageSize,
       };
 
       try {
         console.log(
-          `syncing ${request.count} transactions with cursor ${request.cursor} and accessToken ${request.access_token}`,
+          `syncing ${request.count} transactions with cursor ${request.cursor ? "present" : "absent"}`,
         );
         const response = await client.transactionsSync(request);
         const data = response.data;
@@ -229,11 +257,6 @@ export const plaidBankService: IBankService = {
         added = added.concat(data.added);
         modified = modified.concat(data.modified);
         removed = removed.concat(data.removed);
-        totalCount =
-          totalCount -
-          data.added.length -
-          data.modified.length -
-          data.removed.length;
 
         hasMore = data.has_more;
         cursor = data.next_cursor;
@@ -249,18 +272,27 @@ export const plaidBankService: IBankService = {
           ) {
             switch (error.response?.data.error_code) {
               case "TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION":
+                if (
+                  mutationDuringPaginationRetries >=
+                  maxMutationDuringPaginationRetries
+                ) {
+                  return { ok: false, error };
+                }
+
                 console.error(
                   "Error: Transactions data has changed during pagination. Restarting sync.",
                 );
+                mutationDuringPaginationRetries += 1;
                 cursor = undefined;
                 added = [];
                 modified = [];
                 removed = [];
-                totalCount = 100;
                 hasMore = true;
                 continue;
             }
           }
+
+          return { ok: false, error: error.response?.data ?? error };
         } else {
           console.error("Error in transactionsSync: ", error);
           return { ok: false, error };
@@ -273,7 +305,18 @@ export const plaidBankService: IBankService = {
         if (!plaidTx.transaction_id) continue;
         await db.tx.deleteMany({
           where: {
+            originalBankTx: {
+              is: {
+                bankId: plaidTx.transaction_id,
+              },
+            },
+          },
+        });
+
+        await db.tx.deleteMany({
+          where: {
             bankId: plaidTx.transaction_id,
+            kind: TxKind.ORIGINAL,
           },
         });
       }
@@ -284,35 +327,39 @@ export const plaidBankService: IBankService = {
       );
 
       for (const unsavedTx of upserted) {
-        const existingTx = await db.tx.findFirst({
+        const existingOriginalTx = await db.tx.findFirst({
           where: {
             bankId: unsavedTx.bankId,
+            kind: TxKind.ORIGINAL,
           },
         });
 
-        if (!existingTx) {
-          await db.tx.create({
+        if (!existingOriginalTx) {
+          const originalTx = await db.tx.create({
             data: createTxInput(unsavedTx),
             include: txInclude,
           });
-        } else {
-          const cat =
-            unsavedTx.catArray.length > 0
-              ? {
-                  primary: unsavedTx.catArray[0].primary,
-                  detailed: unsavedTx.catArray[0].detailed,
-                  description: unsavedTx.catArray[0].description,
-                  amount: Prisma.Decimal(0),
-                  txId: existingTx.id,
-                }
-              : undefined;
 
+          await db.tx.create({
+            data: {
+              ...createTxInput({
+                ...unsavedTx,
+                id: undefined,
+                kind: TxKind.USER,
+                bankId: null,
+                originalBankTxId: originalTx.id,
+              }),
+              originalBankTx: { connect: { id: originalTx.id } },
+            },
+            include: txInclude,
+          });
+        } else {
           await db.tx.update({
             where: {
-              id: existingTx.id,
+              id: existingOriginalTx.id,
             },
             data: {
-              bankId: existingTx.bankId || undefined,
+              bankId: unsavedTx.bankId || undefined,
               name: unsavedTx.name,
               amount: Prisma.Decimal(unsavedTx.amount),
               datetime: unsavedTx.datetime,
@@ -320,7 +367,9 @@ export const plaidBankService: IBankService = {
               accountId: unsavedTx.accountId,
               catArray: {
                 deleteMany: {},
-                create: cat,
+                create: unsavedTx.catArray.map((cat) =>
+                  createCatWithoutTxInput(cat),
+                ),
               },
               logoUrl: unsavedTx.logoUrl,
               isoCurrencyCode: unsavedTx.isoCurrencyCode,
@@ -331,6 +380,29 @@ export const plaidBankService: IBankService = {
               locationCountry: unsavedTx.locationCountry,
             },
           });
+
+          const existingUserTx = await db.tx.findFirst({
+            where: {
+              originalBankTxId: existingOriginalTx.id,
+              kind: TxKind.USER,
+            },
+          });
+
+          if (!existingUserTx) {
+            await db.tx.create({
+              data: {
+                ...createTxInput({
+                  ...unsavedTx,
+                  id: undefined,
+                  kind: TxKind.USER,
+                  bankId: null,
+                  originalBankTxId: existingOriginalTx.id,
+                }),
+                originalBankTx: { connect: { id: existingOriginalTx.id } },
+              },
+              include: txInclude,
+            });
+          }
         }
       }
 

@@ -1,5 +1,7 @@
 import Modal from "@/comp/shared/Modal";
 
+import type { BankAccount } from "@/types/bank";
+
 import { CloseBtn } from "../shared/Button";
 import DateSortedTxList from "../shared/DateSortedTxList";
 import { H1, H2, H3 } from "../shared/Heading";
@@ -7,7 +9,6 @@ import { H1, H2, H3 } from "../shared/Heading";
 import { organizeTxByTime, useTxGetAll } from "lib/domain/tx";
 import type React from "react";
 import { useMemo } from "react";
-import type { BankAccount } from "server/services/IBankService";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;

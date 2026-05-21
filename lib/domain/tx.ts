@@ -1,30 +1,17 @@
-import type {
-  ChaseCSVTx,
-  Tx,
-  TxWithUnsavedContent,
-  UnsavedTx,
-} from "@/types/tx";
+import type { ChaseCSVTx, Tx, UnsavedTx } from "@/types/tx";
 
 import useAutoLoadUser from "../hooks/useAutoLoadUser";
 import { useStore } from "../store/store";
 import { trpc } from "../util/trpc";
-import { resetCatArray } from "./cat";
 
-import { MdsType, Prisma } from "@prisma/client";
-
-export const resetTxToBankTx = (tx: Tx): TxWithUnsavedContent => {
-  return {
-    ...tx,
-    catArray: resetCatArray(tx),
-    receipt: null,
-  };
-};
+import { MdsType, Prisma, TxKind } from "@prisma/client";
 
 export const createTxFromChaseCSV = (
   chaseCSVTx: ChaseCSVTx,
   userId: string,
 ): UnsavedTx => {
   return {
+    kind: TxKind.USER,
     splitTxArray: [],
     name: chaseCSVTx.Description,
     amount: Prisma.Decimal(chaseCSVTx.Amount),
@@ -34,6 +21,7 @@ export const createTxFromChaseCSV = (
     authorizedDatetime: new Date(chaseCSVTx.PostingDate),
     userTotal: Prisma.Decimal(0),
     originTxId: null,
+    originalBankTxId: null,
     bankId: null,
     ownerId: userId,
     accountId: null,

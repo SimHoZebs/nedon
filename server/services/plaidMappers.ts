@@ -1,7 +1,7 @@
 import type { UnsavedTx } from "@/types/tx";
 
 import { createId } from "@paralleldrive/cuid2";
-import { MdsType, Prisma } from "@prisma/client";
+import { MdsType, Prisma, TxKind } from "@prisma/client";
 import type { Transaction } from "plaid";
 import { plaidCategories } from "server/util/plaidCategories";
 
@@ -26,12 +26,14 @@ export function mapPlaidTransactionToUnsavedTx(
 
   return {
     id,
+    kind: TxKind.ORIGINAL,
     name: tx.merchant_name || tx.name,
     amount: new Prisma.Decimal(tx.amount),
     recurring: false,
     mds: MdsType.UNDETERMINED,
     userTotal: new Prisma.Decimal(0),
     originTxId: null,
+    originalBankTxId: null,
     datetime: tx.date ? new Date(tx.date) : null,
     authorizedDatetime: new Date(tx.authorized_date || 0),
     bankId: tx.transaction_id,

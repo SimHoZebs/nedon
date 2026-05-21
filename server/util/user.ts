@@ -27,11 +27,13 @@ export const sanitizeUser = (
     return {
       ...userWithoutAccessToken,
       hasAccessToken: true,
+      hasBankSyncToken: !!bankSyncToken,
     } as UserClientSide;
   } else {
     return {
       ...userWithoutAccessToken,
       hasAccessToken: false,
+      hasBankSyncToken: !!bankSyncToken,
     } as UnAuthUserClientSide;
   }
 };

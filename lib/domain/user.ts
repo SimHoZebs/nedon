@@ -5,5 +5,5 @@ export const emptyUser: UnAuthUserClientSide = {
   name: "",
   hasAccessToken: false,
   myConnectionArray: [],
-  bankSyncToken: null,
+  hasBankSyncToken: false,
 };

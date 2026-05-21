@@ -4,8 +4,9 @@ import { type Tx, TxSchema, UnsavedTxSchema } from "@/types/tx";
 
 import { procedure, router } from "../trpc";
 
+import { TxKind } from "@prisma/client";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
-import { resetTxToBankTx } from "lib/domain/tx";
+import { createCatWithoutTxInput } from "server/domains/cat";
 import { createTxInput, txInclude } from "server/domains/tx";
 import db from "server/util/db";
 import { z } from "zod";
@@ -37,7 +38,7 @@ const txRouter = router({
         );
 
         if (!syncResult.ok)
-          throw new Error("Bank sync failed: " + syncResult.error);
+          throw new Error(`Bank sync failed: ${syncResult.error}`);
 
         return { ok: true, value: undefined };
       } catch (error) {
@@ -77,6 +78,7 @@ const txRouter = router({
             OR: [
               { ownerId: input.userId },
               {
+                kind: TxKind.USER,
                 recurring: true,
                 ownerId: input.userId,
                 authorizedDatetime: {
@@ -85,6 +87,7 @@ const txRouter = router({
                 },
               },
             ],
+            kind: TxKind.USER,
           },
           include: {
             catArray: true,
@@ -127,6 +130,7 @@ const txRouter = router({
       return db.tx.findMany({
         where: {
           ownerId: input.id,
+          kind: { not: TxKind.ORIGINAL },
         },
 
         include: txInclude,
@@ -157,6 +161,8 @@ const txRouter = router({
     const { catArray, splitTxArray: _splitTxArray, ...rest } = input;
     const {
       receipt: _receipt,
+      originalBankTxId: _originalBankTxId,
+      kind: _kind,
 
       ...useful
     } = rest;
@@ -186,37 +192,60 @@ const txRouter = router({
     return tx;
   }),
 
-  reset: procedure.input(TxSchema).mutation(async ({ input }) => {
-    const newTx = resetTxToBankTx(input);
-
-    await db.tx.update({
-      where: {
-        id: input.id,
-      },
-      data: {
-        ...newTx,
-        bankId: newTx.bankId || undefined,
-        splitTxArray: {
-          deleteMany: {},
+  reset: procedure
+    .input(z.object({ txId: z.string() }))
+    .mutation(async ({ input }) => {
+      const tx = await db.tx.findUnique({
+        where: {
+          id: input.txId,
         },
-        catArray: {
-          deleteMany: {},
+        include: {
+          originalBankTx: {
+            include: {
+              catArray: true,
+            },
+          },
         },
-        receipt: input.receipt
-          ? {
-              delete: {},
-            }
-          : undefined,
-      },
-    });
+      });
 
-    return await db.tx.findUnique({
-      where: {
-        id: input.id,
-      },
-      include: txInclude,
-    });
-  }),
+      if (!tx?.originalBankTx) {
+        return await db.tx.findUnique({
+          where: {
+            id: input.txId,
+          },
+          include: txInclude,
+        });
+      }
+
+      const originalTx = tx.originalBankTx;
+
+      return await db.tx.update({
+        where: {
+          id: input.txId,
+        },
+        data: {
+          name: originalTx.name,
+          amount: originalTx.amount,
+          datetime: originalTx.datetime,
+          authorizedDatetime: originalTx.authorizedDatetime,
+          accountId: originalTx.accountId,
+          logoUrl: originalTx.logoUrl,
+          isoCurrencyCode: originalTx.isoCurrencyCode,
+          locationAddress: originalTx.locationAddress,
+          locationCity: originalTx.locationCity,
+          locationRegion: originalTx.locationRegion,
+          locationPostalCode: originalTx.locationPostalCode,
+          locationCountry: originalTx.locationCountry,
+          catArray: {
+            deleteMany: {},
+            create: originalTx.catArray.map((cat) =>
+              createCatWithoutTxInput(cat),
+            ),
+          },
+        },
+        include: txInclude,
+      });
+    }),
 
   delete: procedure
     .input(z.object({ id: z.string() }))

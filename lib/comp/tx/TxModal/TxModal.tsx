@@ -198,7 +198,7 @@ const TxModal = (props: Props) => {
                     return;
                   }
 
-                  const resettedTx = await resetTx.mutateAsync(tx);
+                  const resettedTx = await resetTx.mutateAsync({ txId: tx.id });
                   if (!resettedTx) {
                     return;
                   }

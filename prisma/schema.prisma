@@ -20,6 +20,12 @@ enum MdsType {
   SAVING
 }
 
+enum TxKind {
+  ORIGINAL
+  USER
+  SPLIT
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -35,10 +41,10 @@ model Group {
 }
 
 model User {
-  id          String  @id @default(cuid(2))
-  name        String  @default("")
+  id              String  @id @default(cuid(2))
+  name            String  @default("")
   bankAccessToken String? // Private: Do not expose to client
-  bankSyncToken String? //tracker for transaction updates
+  bankSyncToken   String? //tracker for transaction updates
 
   ownedTxArray Tx[] //transactions I own
   splitTxs     Tx[] @relation("txSplits") //transactions I was split into
@@ -58,8 +64,14 @@ model User {
 model Tx {
   id String @id @default(cuid(2))
 
+  kind TxKind @default(USER)
+
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  originalBankTxId String?
+  originalBankTx   Tx?     @relation("bankOriginalTx", fields: [originalBankTxId], references: [id], onDelete: SetNull)
+  modifiedTxArray  Tx[]    @relation("bankOriginalTx")
 
   //the original transaction this tx was split from. null if this is the original tx
   originTxId String?

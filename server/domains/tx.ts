@@ -1,8 +1,8 @@
-import type { Tx, UnsavedTx } from "@/types/tx";
+import type { UnsavedTx } from "@/types/tx";
 
 import { createCatWithoutTxInput } from "./cat";
 
-import type { Prisma } from "@prisma/client";
+import { type Prisma, TxKind } from "@prisma/client";
 
 export const txInclude = {
   catArray: true,
@@ -22,6 +22,7 @@ export const createTxInput = (
     catArray,
     receipt,
     splitTxArray,
+    originalBankTxId: _originalBankTxId,
     originTxId: _originTxId,
     ownerId,
     ...rest
@@ -49,6 +50,7 @@ export const createTxInput = (
     splitTxArray: {
       create: splitTxArray.map((split) => ({
         ...split,
+        kind: TxKind.SPLIT,
         owner: { connect: { id: split.ownerId } },
         catArray: catArrayCreate,
         receipt: receiptCreate,

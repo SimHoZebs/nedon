@@ -1,5 +1,4 @@
 import type { UnsavedCat } from "@/types/cat";
-import type { Tx } from "@/types/tx";
 
 import { plaidCategories } from "server/util/plaidCategories";
 
@@ -33,8 +32,4 @@ export const getCatStyle = (primary: string, detailed: string) => {
     icon: plaidCategories[primary][detailed].icon,
     border: plaidCategories[primary][detailed]?.border,
   };
-};
-
-export const resetCatArray = (tx: Tx): UnsavedCat[] => {
-  return [];
 };

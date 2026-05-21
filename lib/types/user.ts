@@ -25,7 +25,7 @@ export const UnAuthUserClientSideSchema = z
       }),
     ),
     hasAccessToken: z.boolean(),
-    bankSyncToken: z.string().nullable().optional(),
+    hasBankSyncToken: z.boolean(),
   })
   .strict();
 
@@ -43,7 +43,7 @@ export const UserClientSideSchema = z
       }),
     ),
     hasAccessToken: z.literal(true),
-    bankSyncToken: z.string().nullable().optional(),
+    hasBankSyncToken: z.boolean(),
   })
   .strict();
 

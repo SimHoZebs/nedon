@@ -7,6 +7,7 @@ import DateRangePicker from "@/comp/shared/DateRangePicker";
 import DateSortedTxList from "@/comp/shared/DateSortedTxList";
 import TxModalAndCalculator from "@/comp/tx/TxModalAndCalculator";
 
+import type { BankAccount } from "@/types/bank";
 import type { UnsavedTx } from "@/types/tx";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -15,7 +16,6 @@ import useDateRange from "lib/hooks/useDateRange";
 import { useStore } from "lib/store/store";
 import type { NextPage } from "next";
 import React, { useEffect, useMemo, useState } from "react";
-import type { BankAccount } from "server/services/IBankService";
 
 const Home: NextPage = () => {
   const [showAccountModal, setShowAccountModal] = useState(false);

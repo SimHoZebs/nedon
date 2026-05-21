@@ -44,9 +44,9 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
       const txArray = txGetAll.data.value;
 
-      //undefined bankSyncToken should should give user txs for sandbox accounts
+      // Missing sync state means sandbox accounts may still be backfilling txs.
       while (
-        !appUser.bankSyncToken &&
+        !appUser.hasBankSyncToken &&
         txGetAllRetryCount.current < 3 &&
         ((txArray && txArray.length < 1) || txArray === null)
       ) {

@@ -1,5 +1,6 @@
 import type { Result } from "@/util/type";
 
+import type { BankAccount } from "@/types/bank";
 import {
   isUserClientSide,
   type UnAuthUserClientSide,
@@ -10,7 +11,6 @@ import { procedure, router } from "../trpc";
 import connectionRouter from "./connection";
 
 import { Prisma } from "@prisma/client";
-import type { BankAccount } from "server/services/IBankService";
 import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
 import { INCLUDE_CONNECTIONS_SAEFLY, sanitizeUser } from "server/util/user";

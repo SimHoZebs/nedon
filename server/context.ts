@@ -8,7 +8,7 @@ export interface Context {
 }
 
 export const createContext = async (
-  opts?: trpcNext.CreateNextContextOptions,
+  _opts?: trpcNext.CreateNextContextOptions,
 ): Promise<Context> => {
   return {
     bankService: plaidBankService,

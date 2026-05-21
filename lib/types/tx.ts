@@ -1,15 +1,17 @@
 import { CatSchema, isSavedCatArray, UnsavedCatSchema } from "./cat";
 import { ReceiptSchema, UnsavedReceiptSchema } from "./receipt";
 
-import { MdsType, Prisma } from "@prisma/client";
+import { MdsType, Prisma, TxKind } from "@prisma/client";
 import { z } from "zod";
 
-export type SplitTx = Prisma.TxGetPayload<{}>;
+export type SplitTx = Prisma.TxGetPayload<undefined>;
 
 const SplitTx = z
   .object({
     id: z.string(),
+    kind: z.nativeEnum(TxKind),
     ownerId: z.string(),
+    originalBankTxId: z.string().nullable(),
     originTxId: z.string().nullable(),
     userTotal: z.instanceof(Prisma.Decimal),
     recurring: z.boolean(),
