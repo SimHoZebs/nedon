@@ -1,14 +1,14 @@
-import type { UnsavedTx } from "@/types/tx";
+import type { TxFormState } from "@/types/tx";
 
 import { createId } from "@paralleldrive/cuid2";
-import { MdsType, Prisma, TxKind } from "@prisma/client";
+import { MdsType, TxKind } from "@prisma/client";
 import type { Transaction } from "plaid";
 import { plaidCategories } from "server/util/plaidCategories";
 
-export function mapPlaidTransactionToUnsavedTx(
+export function mapPlaidTransactionToTxFormState(
   tx: Transaction,
   userId: string,
-): UnsavedTx {
+): TxFormState {
   const primary = tx.personal_finance_category?.primary;
   const detailed = tx.personal_finance_category?.detailed;
 
@@ -28,10 +28,10 @@ export function mapPlaidTransactionToUnsavedTx(
     id,
     kind: TxKind.ORIGINAL,
     name: tx.merchant_name || tx.name,
-    amount: new Prisma.Decimal(tx.amount),
+    amount: tx.amount,
     recurring: false,
     mds: MdsType.UNDETERMINED,
-    userTotal: new Prisma.Decimal(0),
+    userTotal: 0,
     originTxId: null,
     originalBankTxId: null,
     datetime: tx.date ? new Date(tx.date) : null,
@@ -47,7 +47,7 @@ export function mapPlaidTransactionToUnsavedTx(
             primary: primary || "",
             detailed: detailed || "",
             description: description,
-            amount: new Prisma.Decimal(tx.amount),
+            amount: tx.amount,
             txId: id,
           },
         ]

@@ -1,14 +1,13 @@
 import { trpc } from "@/util/trpc";
 
-import { isSavedCat, type UnsavedCat } from "@/types/cat";
+import type { CatFormState } from "@/types/cat";
 
-import { Prisma } from "@prisma/client";
 import { getCatStyle } from "lib/domain/cat";
 import { useTxStore } from "lib/store/txStore";
 import type React from "react";
 
 type Props = {
-  cat: UnsavedCat;
+  cat: CatFormState;
   index: number;
   onCatChipClick: (
     e:
@@ -68,14 +67,6 @@ const CatChip = (props: Props) => {
                     const tmpCatArray = structuredClone(catArray);
                     tmpCatArray.splice(props.index, 1);
 
-                    if (!isSavedCat(tmpCatArray)) {
-                      console.error(
-                        "Unable to delete cat; One or more cat in array are ClientSide.",
-                        tmpCatArray,
-                      );
-                      return;
-                    }
-
                     await deleteCat.mutateAsync({
                       id: props.cat.id,
                     });
@@ -99,7 +90,7 @@ const CatChip = (props: Props) => {
                 type="number"
                 min={0}
                 step={0.01}
-                value={props.cat.amount.toNumber()}
+                value={props.cat.amount}
                 onFocus={() => props.setIsManaging(true)}
                 onChange={(e) => {
                   if (!tx) {
@@ -109,13 +100,11 @@ const CatChip = (props: Props) => {
 
                   const valueToNum = Number.parseFloat(e.target.value) || 0;
                   const flooredAmount = Math.min(
-                    tx.amount.toNumber(),
+                    tx.amount,
                     Math.max(0, valueToNum),
                   );
                   const tmpCatArray = structuredClone(catArray);
-                  tmpCatArray[props.index].amount = new Prisma.Decimal(
-                    flooredAmount,
-                  );
+                  tmpCatArray[props.index].amount = flooredAmount;
                   setCatArray(tmpCatArray);
                 }}
               />

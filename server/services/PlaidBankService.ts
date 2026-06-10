@@ -3,7 +3,7 @@ import type { Result } from "@/util/type";
 import type { BankAccount } from "@/types/bank";
 
 import type { IBankService } from "./IBankService";
-import { mapPlaidTransactionToUnsavedTx } from "./plaidMappers";
+import { mapPlaidTransactionToTxFormState } from "./plaidMappers";
 
 import { Prisma, TxKind } from "@prisma/client";
 import {
@@ -323,7 +323,7 @@ export const plaidBankService: IBankService = {
 
       const upsertedPlaidTxs = [...added, ...modified];
       const upserted = upsertedPlaidTxs.map((tx) =>
-        mapPlaidTransactionToUnsavedTx(tx, userId),
+        mapPlaidTransactionToTxFormState(tx, userId),
       );
 
       for (const unsavedTx of upserted) {

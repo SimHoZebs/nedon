@@ -8,7 +8,7 @@ import DateSortedTxList from "@/comp/shared/DateSortedTxList";
 import TxModalAndCalculator from "@/comp/tx/TxModalAndCalculator";
 
 import type { BankAccount } from "@/types/bank";
-import type { UnsavedTx } from "@/types/tx";
+import type { TxFormState } from "@/types/tx";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { getScopeIndex, useTxGetAll } from "lib/domain/tx";
@@ -24,7 +24,7 @@ const Home: NextPage = () => {
     useState(false);
   const [clickedAccount, setClickedAccount] = useState<BankAccount>();
   const [YMD, setYMD] = useState([-1, -1, -1]);
-  const [csvTxArray, setCsvTxArray] = React.useState<UnsavedTx[]>([]);
+  const [csvTxArray, setCsvTxArray] = React.useState<TxFormState[]>([]);
   const { date, setDate, rangeFormat, setRangeFormat } = useDateRange();
 
   const txArray = useTxGetAll();

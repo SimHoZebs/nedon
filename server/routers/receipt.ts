@@ -1,4 +1,4 @@
-import { UnsavedReceiptSchema } from "@/types/receipt";
+import { ReceiptFormStateSchema } from "@/types/receipt";
 
 import { createReceipt, processReceipt } from "../services/receipt";
 import { procedure, router } from "../trpc";
@@ -10,7 +10,7 @@ const receiptRouter = router({
     .input(
       z.object({
         id: z.string(),
-        receipt: UnsavedReceiptSchema,
+        receipt: ReceiptFormStateSchema,
       }),
     )
     .mutation(async ({ input }) => {

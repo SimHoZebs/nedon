@@ -1,9 +1,8 @@
-import type { SplitTx } from "@/types/tx";
+import type { SplitTxFormState } from "@/types/tx";
 
 import Calculator from "./TxModal/SplitList/Calculator";
 import TxModal from "./TxModal/TxModal";
 
-import { Prisma } from "@prisma/client";
 import { motion } from "framer-motion";
 import { useStore } from "lib/store/store";
 import { useTxStore } from "lib/store/txStore";
@@ -27,9 +26,9 @@ const TxModalAndCalculator = (props: Props) => {
   const hasEditedCatArray = useTxStore((s) => s.hasEditedCatArray);
   const focusedSplitTxIndex = useTxStore((state) => state.focusedSplitTxIndex);
   const tx = useTxStore((state) => state.txOnModal);
-  const txAmount: Prisma.Decimal = tx?.amount || new Prisma.Decimal(0);
+  const txAmount = tx?.amount || 0;
   const catArray = tx?.catArray || [];
-  const splitTxArray: SplitTx[] = tx?.splitTxArray || [];
+  const splitTxArray: SplitTxFormState[] = tx?.splitTxArray || [];
   const [isCalcHidden, setIsCalcHidden] = React.useState(false);
   const screenType = useStore((s) => s.screenType);
 
@@ -37,23 +36,20 @@ const TxModalAndCalculator = (props: Props) => {
   const changeSplitAmount = (index: number, newAmount: number) => {
     const updatedSplitTxArray = structuredClone(splitTxArray);
 
-    const newAmountFloored = Prisma.Decimal.max(
-      Prisma.Decimal.min(new Prisma.Decimal(newAmount), txAmount),
-      new Prisma.Decimal(0),
-    );
+    const newAmountFloored = Math.max(Math.min(newAmount, txAmount), 0);
 
     updatedSplitTxArray[index].amount = newAmountFloored;
 
-    const uneditedSplitArray: SplitTx[] = [];
+    const uneditedSplitArray: SplitTxFormState[] = [];
     const editedIndices = new Set(editedSplitTxIndexArray); // Optimize lookup
 
     // Calculate the total amount of the splits that hasn't been edited
-    let editedSplitAmountTotal = new Prisma.Decimal(0);
+    let editedSplitAmountTotal = 0;
     const len = updatedSplitTxArray.length;
     for (let i = 0; i < len; i++) {
       const split = updatedSplitTxArray[i];
       if (editedIndices.has(i) || i === index) {
-        editedSplitAmountTotal = editedSplitAmountTotal.add(split.amount);
+        editedSplitAmountTotal += split.amount;
       } else {
         uneditedSplitArray.push(split);
       }
@@ -61,35 +57,30 @@ const TxModalAndCalculator = (props: Props) => {
 
     // Include tx.user's if needed
     if (hasEditedCatArray) {
-      editedSplitAmountTotal = editedSplitAmountTotal.add(
-        catArray.reduce(
-          (acc, cat) => acc.add(cat.amount),
-          new Prisma.Decimal(0),
-        ),
+      editedSplitAmountTotal += catArray.reduce(
+        (acc, cat) => acc + cat.amount,
+        0,
       );
     }
 
-    let remainder = txAmount.sub(editedSplitAmountTotal);
+    let remainder = txAmount - editedSplitAmountTotal;
 
     // Handle edge case: no unedited splits
     if (uneditedSplitArray.length === 0) {
       // Optionally log or handle remainder
-      console.warn(
-        "No unedited splits to distribute remainder:",
-        remainder.toNumber(),
-      );
+      console.warn("No unedited splits to distribute remainder:", remainder);
       return;
     }
 
     uneditedSplitArray.forEach((split, idx) => {
       if (uneditedSplitArray.length === 1) {
-        split.amount = new Prisma.Decimal(remainder.toFixed(2));
+        split.amount = Number(remainder.toFixed(2));
       } else if (idx === uneditedSplitArray.length - 1) {
-        split.amount = new Prisma.Decimal(remainder.toFixed(2));
+        split.amount = Number(remainder.toFixed(2));
       } else {
-        const portion = remainder.div(uneditedSplitArray.length);
-        split.amount = new Prisma.Decimal(portion.toFixed(2));
-        remainder = remainder.sub(portion);
+        const portion = remainder / uneditedSplitArray.length;
+        split.amount = Number(portion.toFixed(2));
+        remainder = remainder - portion;
       }
     });
 

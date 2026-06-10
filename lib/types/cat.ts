@@ -14,21 +14,18 @@ export const CatSchema = z
   })
   .strict() satisfies z.ZodType<Cat>;
 
-/* Considering making txId optional? Ask yourself:
- * - Should a cat exist without being associated with a transaction?
- * - can we create a uuid for txId on the client side?
- * */
-export type UnsavedCat = Prisma.CatGetPayload<{
-  omit: { id: true };
-}> & {
-  id?: string;
-};
-
-export const UnsavedCatSchema = CatSchema.omit({ id: true })
-  .extend({
+export const CatFormStateSchema = z
+  .object({
     id: z.string().optional(),
+    amount: z.number(),
+    primary: z.string(),
+    detailed: z.string(),
+    description: z.string(),
+    txId: z.string().optional(),
   })
-  .strict() satisfies z.ZodType<UnsavedCat>;
+  .strict();
+
+export type CatFormState = z.infer<typeof CatFormStateSchema>;
 
 export const isSavedCat = (cat: unknown): cat is Cat => {
   return CatSchema.safeParse(cat).success;

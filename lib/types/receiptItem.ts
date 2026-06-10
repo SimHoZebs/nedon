@@ -28,3 +28,17 @@ export const PureReceiptItemSchema = BaseReceiptItemSchema.omit({
 });
 
 export type PureReceiptItem = z.infer<typeof PureReceiptItemSchema>;
+
+export const ReceiptItemFormStateSchema = z
+  .object({
+    id: z.string().optional(),
+    name: z.string(),
+    description: z.string(),
+    quantity: z.number().int(),
+    unit_price: z.number(),
+    mds: z.nativeEnum(MdsType),
+    receiptId: z.string().optional(),
+  })
+  .strict();
+
+export type ReceiptItemFormState = z.infer<typeof ReceiptItemFormStateSchema>;

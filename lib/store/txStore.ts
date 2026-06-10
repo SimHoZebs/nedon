@@ -1,23 +1,9 @@
-import type { Cat, UnsavedCat } from "@/types/cat";
-import type {
-  SplitTx,
-  Tx,
-  TxWithUnsavedContent,
-  UnsavedSplitTx,
-  UnsavedTx,
-} from "@/types/tx";
+import type { CatFormState } from "@/types/cat";
+import type { SplitTxFormState, Tx, TxFormState } from "@/types/tx";
 
 import { useStore } from "./store";
 
-// Type guard to check if a transaction can accept unsaved content updates
-function canUpdateWithUnsavedContent(
-  tx: UnsavedTx | TxWithUnsavedContent | Tx | null,
-): tx is TxWithUnsavedContent {
-  if (!tx) return false;
-  // Check if transaction already has unsaved content or if we're adding unsaved content
-  return "catArray" in tx && Array.isArray(tx.catArray);
-}
-
+import { mapTxToFormState } from "lib/domain/tx";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
@@ -30,10 +16,10 @@ interface Store {
   txOnModalIndex: number[] | null;
   setTxOnModalIndex: (index: number[] | null) => void;
 
-  txOnModal: UnsavedTx | TxWithUnsavedContent | Tx | null;
+  txOnModal: TxFormState | null;
   setTxOnModal: (tx: Tx) => void;
-  setCatArray: (catArray: (UnsavedCat | Cat)[]) => void;
-  setSplitTxArray: (splitTxArray: (UnsavedSplitTx | SplitTx)[]) => void;
+  setCatArray: (catArray: CatFormState[]) => void;
+  setSplitTxArray: (splitTxArray: SplitTxFormState[]) => void;
 
   /**
    * Only use this function when new data is expected from the database.
@@ -67,44 +53,30 @@ export const useTxStore = create<Store>()(
       setTxOnModalIndex: (index) => set({ txOnModalIndex: index }),
 
       txOnModal: null,
-      setTxOnModal: (tx) => set({ txOnModal: tx }),
+      setTxOnModal: (tx) => set({ txOnModal: mapTxToFormState(tx) }),
 
-      setCatArray: (catArray: (UnsavedCat | Cat)[]) => {
+      setCatArray: (catArray: CatFormState[]) => {
         set((store) => {
           if (!store.txOnModal) return store;
-
-          // Only allow updates if tx supports unsaved content
-          if (!canUpdateWithUnsavedContent(store.txOnModal)) {
-            console.warn("Cannot update catArray on fully saved transaction");
-            return store;
-          }
 
           return {
             txOnModal: {
               ...store.txOnModal,
               catArray,
-            } as TxWithUnsavedContent,
+            },
           };
         });
       },
 
-      setSplitTxArray: (splitTxArray: (UnsavedSplitTx | SplitTx)[]) => {
+      setSplitTxArray: (splitTxArray: SplitTxFormState[]) => {
         set((store) => {
           if (!store.txOnModal) return store;
-
-          // Only allow updates if tx supports unsaved content
-          if (!canUpdateWithUnsavedContent(store.txOnModal)) {
-            console.warn(
-              "Cannot update splitTxArray on fully saved transaction",
-            );
-            return store;
-          }
 
           return {
             txOnModal: {
               ...store.txOnModal,
               splitTxArray,
-            } as TxWithUnsavedContent,
+            },
           };
         });
       },
@@ -118,7 +90,7 @@ export const useTxStore = create<Store>()(
             useStore.getState().txOrganizedByTimeArray;
           return {
             txOnModal: store.txOnModal
-              ? txOrganizedByTimeArray[y][m][d][i]
+              ? mapTxToFormState(txOrganizedByTimeArray[y][m][d][i])
               : null,
           };
         }),

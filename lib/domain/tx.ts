@@ -1,4 +1,4 @@
-import type { ChaseCSVTx, Tx, UnsavedTx } from "@/types/tx";
+import type { ChaseCSVTx, Tx, TxFormState } from "@/types/tx";
 
 import useAutoLoadUser from "../hooks/useAutoLoadUser";
 import { useStore } from "../store/store";
@@ -9,17 +9,17 @@ import { MdsType, Prisma, TxKind } from "@prisma/client";
 export const createTxFromChaseCSV = (
   chaseCSVTx: ChaseCSVTx,
   userId: string,
-): UnsavedTx => {
+): TxFormState => {
   return {
     kind: TxKind.USER,
     splitTxArray: [],
     name: chaseCSVTx.Description,
-    amount: Prisma.Decimal(chaseCSVTx.Amount),
+    amount: Number(chaseCSVTx.Amount),
     recurring: false,
     mds: MdsType.UNDETERMINED,
     datetime: new Date(chaseCSVTx.PostingDate),
     authorizedDatetime: new Date(chaseCSVTx.PostingDate),
-    userTotal: Prisma.Decimal(0),
+    userTotal: 0,
     originTxId: null,
     originalBankTxId: null,
     bankId: null,
@@ -34,6 +34,36 @@ export const createTxFromChaseCSV = (
     locationCountry: null,
     catArray: [],
     receipt: null,
+  };
+};
+
+export const mapTxToFormState = (tx: Tx): TxFormState => {
+  return {
+    ...tx,
+    amount: tx.amount.toNumber(),
+    userTotal: tx.userTotal.toNumber(),
+    splitTxArray: tx.splitTxArray.map((split) => ({
+      ...split,
+      amount: split.amount.toNumber(),
+      userTotal: split.userTotal.toNumber(),
+    })),
+    catArray: tx.catArray.map((cat) => ({
+      ...cat,
+      amount: cat.amount.toNumber(),
+    })),
+    receipt: tx.receipt
+      ? {
+          ...tx.receipt,
+          subtotal: tx.receipt.subtotal.toNumber(),
+          tax: tx.receipt.tax.toNumber(),
+          tip: tx.receipt.tip.toNumber(),
+          grand_total: tx.receipt.grand_total.toNumber(),
+          items: tx.receipt.items.map((item) => ({
+            ...item,
+            unit_price: item.unit_price.toNumber(),
+          })),
+        }
+      : null,
   };
 };
 

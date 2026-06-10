@@ -1,27 +1,36 @@
-import { type Cat, CatSchema, UnsavedCatSchema } from "@/types/cat";
+import { CatFormStateSchema, CatSchema } from "@/types/cat";
 
 import { procedure, router } from "../trpc";
 
+import { Prisma } from "@prisma/client";
 import db from "server/util/db";
 import { plaidCategories } from "server/util/plaidCategories";
 import { z } from "zod";
 
 const catRouter = router({
-  create: procedure.input(UnsavedCatSchema).mutation(async ({ input }) => {
-    return await db.cat.create({
-      data: input,
-    });
-  }),
+  create: procedure
+    .input(CatFormStateSchema.extend({ txId: z.string() }))
+    .mutation(async ({ input }) => {
+      return await db.cat.create({
+        data: {
+          ...input,
+          amount: new Prisma.Decimal(input.amount),
+        },
+      });
+    }),
 
   upsertMany: procedure
     .input(
       z.object({
         txId: z.string(),
-        catArray: z.array(UnsavedCatSchema),
+        catArray: z.array(CatFormStateSchema),
       }),
     )
     .mutation(async ({ input }) => {
-      const catToUpdateArray = input.catArray.filter((cat) => cat.id) as Cat[];
+      const catToUpdateArray = input.catArray.filter(
+        (cat): cat is (typeof input.catArray)[number] & { id: string } =>
+          !!cat.id,
+      );
       const catToCreateArray = input.catArray.filter((cat) => !cat.id);
 
       const upsertedTx = await db.tx.update({
@@ -30,15 +39,19 @@ const catRouter = router({
           catArray: {
             updateMany:
               catToUpdateArray.length > 0
-                ? catToUpdateArray.map(({ txId, ...rest }) => ({
+                ? catToUpdateArray.map(({ txId, amount, ...rest }) => ({
                     where: { id: rest.id },
-                    data: rest,
+                    data: {
+                      ...rest,
+                      amount: new Prisma.Decimal(amount),
+                    },
                   }))
                 : undefined,
 
             createMany: {
-              data: catToCreateArray.map(({ id, txId, ...rest }) => ({
+              data: catToCreateArray.map(({ id, txId, amount, ...rest }) => ({
                 ...rest,
+                amount: new Prisma.Decimal(amount),
                 id: undefined,
               })),
             },

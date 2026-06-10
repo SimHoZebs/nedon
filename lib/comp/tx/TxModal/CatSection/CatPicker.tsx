@@ -1,7 +1,6 @@
 import { trpc } from "@/util/trpc";
 
-import type { UnsavedCat } from "@/types/cat";
-import { isUnsavedTx } from "@/types/tx";
+import type { CatFormState } from "@/types/cat";
 
 import { createNewCat, getCatStyle } from "lib/domain/cat";
 import { useStore } from "lib/store/store";
@@ -10,7 +9,7 @@ import { type ForwardedRef, forwardRef, useState } from "react";
 import type { plaidCategories } from "server/util/plaidCategories";
 
 interface Props {
-  appUserCatArray: UnsavedCat[];
+  appUserCatArray: CatFormState[];
   editingCatIndex: number;
   closePicker: () => void;
   position: { x: number; y: number };
@@ -39,7 +38,7 @@ const CatPicker = forwardRef(
       revertToTxInDB();
     };
 
-    const applyChangesToCat = async (cat: UnsavedCat) => {
+    const applyChangesToCat = async (cat: CatFormState) => {
       if (!tx) {
         console.error("Can't apply changes to cat. tx is undefined.");
         return;
@@ -48,7 +47,7 @@ const CatPicker = forwardRef(
       const tmpCatArray = structuredClone(catArray);
       const tmpTx = structuredClone(tx);
 
-      if (isUnsavedTx(tmpTx)) {
+      if (!tmpTx.id) {
         tmpCatArray[tmpCatArray.length - 1] = createNewCat(cat);
 
         tmpTx.catArray = tmpCatArray;

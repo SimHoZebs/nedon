@@ -1,4 +1,4 @@
-import { PureReceiptItemSchema, ReceiptItemSchema } from "./receiptItem";
+import { ReceiptItemFormStateSchema, ReceiptItemSchema } from "./receiptItem";
 
 import { Prisma } from "@prisma/client";
 import z from "zod";
@@ -32,16 +32,24 @@ export const ReceiptSchema = PureReceiptSchema.extend({
   items: ReceiptItemSchema.array(),
 }) satisfies z.ZodType<Receipt>;
 
-export const UnsavedReceiptSchema = ReceiptSchema.omit({
-  txId: true,
-  id: true,
-  items: true,
-})
-  .extend({
-    id: z.undefined(),
-    txId: z.undefined(),
-    items: z.array(PureReceiptItemSchema),
+export const ReceiptFormStateSchema = z
+  .object({
+    id: z.string().optional(),
+    is_receipt: z.boolean(),
+    transaction_id: z.string(),
+    date: z.coerce.date(),
+    merchant: z.string(),
+    subtotal: z.number(),
+    currency: z.string(),
+    tax: z.number(),
+    tip: z.number(),
+    grand_total: z.number(),
+    payment_method: z.string(),
+    online_link: z.string(),
+    location: z.string(),
+    txId: z.string().optional(),
+    items: z.array(ReceiptItemFormStateSchema),
   })
   .strict();
 
-export type UnsavedReceipt = z.infer<typeof UnsavedReceiptSchema>;
+export type ReceiptFormState = z.infer<typeof ReceiptFormStateSchema>;

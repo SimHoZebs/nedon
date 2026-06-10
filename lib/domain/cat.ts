@@ -1,8 +1,8 @@
-import type { UnsavedCat } from "@/types/cat";
+import type { CatFormState } from "@/types/cat";
 
 import { plaidCategories } from "server/util/plaidCategories";
 
-export const createNewCat = (input: UnsavedCat): UnsavedCat => {
+export const createNewCat = (input: CatFormState): CatFormState => {
   return {
     ...input,
     id: undefined,

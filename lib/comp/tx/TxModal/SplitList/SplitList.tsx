@@ -3,12 +3,9 @@ import { H3 } from "@/comp/shared/Heading";
 
 import { trpc } from "@/util/trpc";
 
-import { isTx } from "@/types/tx";
-
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
 
-import { Prisma } from "@prisma/client";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useTxStore } from "lib/store/txStore";
 import type React from "react";
@@ -50,17 +47,16 @@ const SplitList = (props: Props) => {
     (state) => state.setEditedSplitTxIndexArray,
   );
 
-  const txAmount = tx?.amount || new Prisma.Decimal(0);
+  const txAmount = tx?.amount || 0;
 
   const splitTxArray = tx?.splitTxArray || [];
 
   const updatedSplitAmount = splitTxArray.reduce(
-    (amount, split) => amount.add(split.amount),
-    new Prisma.Decimal(0),
+    (amount, split) => amount + split.amount,
+    0,
   );
 
-  const isWrongSplit =
-    !updatedSplitAmount.equals(txAmount) && splitTxArray.length > 0;
+  const isWrongSplit = Math.abs(updatedSplitAmount - txAmount) > 0.01;
 
   const syncSplit = async () => {
     if (!appUser || !tx) {
@@ -77,14 +73,12 @@ const SplitList = (props: Props) => {
         console.log("delete split", split.id);
     }
 
-    tx.splitTxArray = splitTxArray;
-
-    if (!isTx(tx)) {
+    if (!tx.id) {
       console.error("Can't update Tx if tx doesn't exist in db", tx);
       return;
     }
 
-    await updateTx.mutateAsync(tx);
+    await updateTx.mutateAsync({ ...tx, id: tx.id, splitTxArray });
   };
 
   const resetEditingSplit = () => {
@@ -125,7 +119,7 @@ const SplitList = (props: Props) => {
                     revertToTxInDB();
                     setCatArray(tx.catArray);
                     const splitAmountArray = tx.splitTxArray.map((split) =>
-                      split.amount.toNumber().toString(),
+                      split.amount.toString(),
                     );
                     setSplitTxAmountDisplayArray(splitAmountArray);
                   }}
@@ -146,17 +140,12 @@ const SplitList = (props: Props) => {
 
           <p
             className={`h-5 text-red-800 ${
-              !updatedSplitAmount.equals(txAmount) && splitTxArray.length > 0
-                ? ""
-                : "hidden"
+              isWrongSplit && splitTxArray.length > 0 ? "" : "hidden"
             }`}
           >
-            {`Current split total is $${updatedSplitAmount.toString()}; ${txAmount
-              .sub(updatedSplitAmount)
-              .abs()
-              .toString()} ${
-              updatedSplitAmount.greaterThan(txAmount) ? "over " : "under "
-            }the total`}
+            {`Current split total is $${updatedSplitAmount.toString()}; ${Math.abs(
+              txAmount - updatedSplitAmount,
+            ).toString()} ${updatedSplitAmount > txAmount ? "over " : "under "}the total`}
           </p>
 
           <div className="flex flex-col gap-y-1 px-3 md:w-fit">

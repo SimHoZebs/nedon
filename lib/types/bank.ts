@@ -1,4 +1,4 @@
-import type { UnsavedTx } from "./tx";
+import type { TxFormState } from "./tx";
 
 export interface RemovedBankTransaction {
   id: string;
@@ -20,7 +20,7 @@ export interface BankAccount {
 }
 
 export interface BankSyncResult {
-  upserted: UnsavedTx[];
+  upserted: TxFormState[];
   removed: RemovedBankTransaction[];
   nextSyncToken?: string;
 }

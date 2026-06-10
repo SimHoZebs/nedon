@@ -5,10 +5,8 @@ import Input from "@/comp/shared/Input";
 import { createStructuredResponse } from "@/util/structuredResponse";
 import { trpc } from "@/util/trpc";
 
-import type { UnsavedReceipt } from "@/types/receipt";
-import { isTx, isUnsavedTx, type Tx, type UnsavedTx } from "@/types/tx";
+import type { ReceiptFormState } from "@/types/receipt";
 
-import { Prisma } from "@prisma/client";
 import { useTxStore } from "lib/store/txStore";
 import Image from "next/image";
 import React from "react";
@@ -29,7 +27,7 @@ const Receipt = () => {
 
   // returns boolean based on success
   const uploadAndProcess = async () => {
-    const sr = createStructuredResponse<UnsavedReceipt>({
+    const sr = createStructuredResponse<ReceiptFormState>({
       success: false,
       data: undefined,
       clientMsg: "Error uploading receipt",
@@ -85,27 +83,14 @@ const Receipt = () => {
 
     console.log("receipt processed");
 
-    let latestTx: Tx;
-    if (isUnsavedTx(tx)) {
-      const newTx: UnsavedTx = {
-        ...tx,
-      };
-      latestTx = await createTx.mutateAsync(newTx);
-    } else {
-      latestTx = tx;
-    }
+    const latestTxId = tx.id || (await createTx.mutateAsync(tx)).id;
 
     if (!response.data) return response;
 
     setProgressMsg("Adding receipt to transaction...");
 
-    if (!isTx(latestTx)) {
-      sr.devMsg = "latestTx is not FullTxInDB";
-      return sr;
-    }
-
     await createReceipt.mutateAsync({
-      id: latestTx.id,
+      id: latestTxId,
       receipt: response.data,
     });
     queryClient.tx.getAll.invalidate();
@@ -119,14 +104,13 @@ const Receipt = () => {
   };
 
   const receiptSum = tx?.receipt
-    ? tx.receipt.items
-        .reduce(
-          (sum, item) => sum.add(item.unit_price.mul(item.quantity)),
-          new Prisma.Decimal(0),
-        )
-        .add(tx.receipt.tip)
-        .add(tx.receipt.tax)
-    : new Prisma.Decimal(0);
+    ? tx.receipt.items.reduce(
+        (sum, item) => sum + item.unit_price * item.quantity,
+        0,
+      ) +
+      tx.receipt.tip +
+      tx.receipt.tax
+    : 0;
 
   return (
     <div>
@@ -204,7 +188,7 @@ const Receipt = () => {
                 />
               </td>
               <td>
-                <p>${item.unit_price.mul(item.quantity).toString()}</p>
+                <p>${(item.unit_price * item.quantity).toString()}</p>
               </td>
             </tr>
           ))}
@@ -225,7 +209,7 @@ const Receipt = () => {
                 value={tx.receipt.tip.toString()}
               />
               <p className="text-xs">
-                ({tx.receipt.tip.mul(100).div(tx.amount).toString()}%)
+                ({((tx.receipt.tip * 100) / tx.amount).toString()}%)
               </p>
             </td>
           </tr>
@@ -250,11 +234,11 @@ const Receipt = () => {
       {tx?.amount && tx.receipt && (
         <p
           className={`h-5 text-pink-500 ${
-            !receiptSum.equals(tx.amount) ? "" : "hidden"
+            Math.abs(receiptSum - tx.amount) > 0.01 ? "" : "hidden"
           }`}
         >
           Receipt total is <b>${receiptSum.toString()}</b>, which is{" "}
-          <b>${tx.amount.sub(receiptSum).toString()}</b> off from this
+          <b>${(tx.amount - receiptSum).toString()}</b> off from this
           transaction. Adjust your receipt to match the amount.
         </p>
       )}

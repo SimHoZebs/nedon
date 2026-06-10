@@ -1,9 +1,9 @@
 import { Button } from "@/comp/shared/Button";
 
-import { isTx, type SplitTx, type UnsavedSplitTx } from "@/types/tx";
+import type { SplitTxFormState } from "@/types/tx";
 
 import { createId } from "@paralleldrive/cuid2";
-import { Prisma, TxKind } from "@prisma/client";
+import { TxKind } from "@prisma/client";
 import useAppUser from "lib/hooks/useAutoLoadUser";
 import { useTxStore } from "lib/store/txStore";
 
@@ -53,11 +53,10 @@ const SplitUserOptionList = () => {
                     return;
                   }
 
-                  const newAmount = txOnModal.amount.div(
-                    splitTxArray.length + 1,
-                  );
+                  const newAmount =
+                    txOnModal.amount / (splitTxArray.length + 1);
 
-                  const updatedSplitTxArray: (UnsavedSplitTx | SplitTx)[] =
+                  const updatedSplitTxArray: SplitTxFormState[] =
                     structuredClone(splitTxArray).map((split) => ({
                       ...split,
                       amount: newAmount,
@@ -70,16 +69,16 @@ const SplitUserOptionList = () => {
                     }),
                   );
 
-                  const txId = isTx(txOnModal) ? txOnModal.id : createId();
+                  const txId = txOnModal.id || createId();
 
-                  const newSplit: UnsavedSplitTx = {
+                  const newSplit: SplitTxFormState = {
                     kind: TxKind.SPLIT,
                     ownerId: user.id,
                     originalBankTxId: txOnModal.originalBankTxId,
                     originTxId: txId,
                     name: txOnModal.name,
                     amount: newAmount,
-                    userTotal: new Prisma.Decimal(0),
+                    userTotal: 0,
                     recurring: txOnModal.recurring,
                     mds: txOnModal.mds,
                     bankId: null,

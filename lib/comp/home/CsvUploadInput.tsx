@@ -1,4 +1,4 @@
-import { ChaseCSVTxSchema, type UnsavedTx } from "@/types/tx";
+import { ChaseCSVTxSchema, type TxFormState } from "@/types/tx";
 
 import { Button } from "../shared/Button";
 
@@ -9,7 +9,7 @@ import { useRef } from "react";
 import z from "zod";
 
 interface Props {
-  setCsvTxArray: React.Dispatch<React.SetStateAction<UnsavedTx[]>>;
+  setCsvTxArray: React.Dispatch<React.SetStateAction<TxFormState[]>>;
   setShowCsvUploadPreviewModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 

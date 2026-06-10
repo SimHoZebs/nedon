@@ -11,7 +11,6 @@ import CatSection from "./CatSection/CatSection";
 import Receipt from "./Receipt";
 import SplitList from "./SplitList/SplitList";
 
-import { Prisma } from "@prisma/client";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useStore } from "lib/store/store";
 import { useTxStore } from "lib/store/txStore";
@@ -162,7 +161,7 @@ const TxModal = (props: Props) => {
             <div className="flex flex-col gap-y-3">
               <div className="flex flex-col gap-x-3 gap-y-1 md:flex-row md:items-center md:justify-between">
                 <div className="flex">
-                  <H1>${Prisma.Decimal.mul(amount, -1).toNumber()}</H1>
+                  <H1>${amount * -1}</H1>
                   {appUser?.myConnectionArray &&
                     appUser.myConnectionArray.length > 0 &&
                     focusedSplitTxIndex === undefined &&

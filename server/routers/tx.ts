@@ -1,10 +1,10 @@
 import type { Result } from "@/util/type";
 
-import { type Tx, TxSchema, UnsavedTxSchema } from "@/types/tx";
+import { type Tx, TxFormStateSchema, TxSchema } from "@/types/tx";
 
 import { procedure, router } from "../trpc";
 
-import { TxKind } from "@prisma/client";
+import { Prisma, TxKind } from "@prisma/client";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
 import { createCatWithoutTxInput } from "server/domains/cat";
 import { createTxInput, txInclude } from "server/domains/tx";
@@ -138,7 +138,7 @@ const txRouter = router({
     }),
 
   create: procedure
-    .input(UnsavedTxSchema)
+    .input(TxFormStateSchema)
     .output(TxSchema)
     .mutation(async ({ input }) => {
       return await db.tx.create({
@@ -148,7 +148,7 @@ const txRouter = router({
     }),
 
   createMany: procedure
-    .input(z.array(UnsavedTxSchema))
+    .input(z.array(TxFormStateSchema))
     .mutation(async ({ input }) => {
       const txCreateQueryArray = input.map((tx) => {
         return db.tx.create({ data: createTxInput(tx), include: txInclude });
@@ -157,40 +157,50 @@ const txRouter = router({
       return await db.$transaction(txCreateQueryArray);
     }),
 
-  update: procedure.input(TxSchema).mutation(async ({ input }) => {
-    const { catArray, splitTxArray: _splitTxArray, ...rest } = input;
-    const {
-      receipt: _receipt,
-      originalBankTxId: _originalBankTxId,
-      kind: _kind,
+  update: procedure
+    .input(TxFormStateSchema.extend({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      const { catArray, splitTxArray: _splitTxArray, ...rest } = input;
+      const {
+        receipt: _receipt,
+        originalBankTxId: _originalBankTxId,
+        kind: _kind,
 
-      ...useful
-    } = rest;
-    const catToCreate = catArray.filter((cat) => !cat.id);
-    const catToUpdate = catArray.filter((cat) => cat.id);
+        ...useful
+      } = rest;
+      const catToCreate = catArray.filter((cat) => !cat.id);
+      const catToUpdate = catArray.filter((cat) => cat.id);
 
-    const tx = await db.tx.update({
-      where: {
-        id: input.id,
-      },
-      data: {
-        ...useful,
-        bankId: input.bankId || undefined,
-        catArray: {
-          createMany: {
-            data: catToCreate,
-          },
-          updateMany: catToUpdate.map(({ id, ...catWithoutId }) => ({
-            where: { id: id },
-            data: catWithoutId,
-          })),
+      const tx = await db.tx.update({
+        where: {
+          id: input.id,
         },
-      },
-      include: txInclude,
-    });
+        data: {
+          ...useful,
+          amount: new Prisma.Decimal(input.amount),
+          userTotal: new Prisma.Decimal(input.userTotal),
+          bankId: input.bankId || undefined,
+          catArray: {
+            createMany: {
+              data: catToCreate.map(({ amount, ...cat }) => ({
+                ...cat,
+                amount: new Prisma.Decimal(amount),
+              })),
+            },
+            updateMany: catToUpdate.map(({ id, ...catWithoutId }) => ({
+              where: { id: id },
+              data: {
+                ...catWithoutId,
+                amount: new Prisma.Decimal(catWithoutId.amount),
+              },
+            })),
+          },
+        },
+        include: txInclude,
+      });
 
-    return tx;
-  }),
+      return tx;
+    }),
 
   reset: procedure
     .input(z.object({ txId: z.string() }))
@@ -239,7 +249,10 @@ const txRouter = router({
           catArray: {
             deleteMany: {},
             create: originalTx.catArray.map((cat) =>
-              createCatWithoutTxInput(cat),
+              createCatWithoutTxInput({
+                ...cat,
+                amount: cat.amount.toNumber(),
+              }),
             ),
           },
         },

@@ -1,19 +1,20 @@
 import { createStructuredResponse } from "@/util/structuredResponse";
 
-import { type UnsavedReceipt, UnsavedReceiptSchema } from "@/types/receipt";
+import { type ReceiptFormState, ReceiptFormStateSchema } from "@/types/receipt";
 
 import { extractReceiptData } from "./ai";
 import * as blobStorage from "./blobStorage";
 import * as ocr from "./OCR";
 
+import { Prisma } from "@prisma/client";
 import db from "server/util/db";
 import { z } from "zod";
 
 export const createReceipt = async (input: {
   id: string;
-  receipt: UnsavedReceipt;
+  receipt: ReceiptFormState;
 }) => {
-  const { items, id: _id, ...receiptWithoutItems } = input.receipt;
+  const { items, id: _id, txId: _txId, ...receiptWithoutItems } = input.receipt;
 
   if (!items) {
     throw new Error("No items in receipt");
@@ -27,9 +28,18 @@ export const createReceipt = async (input: {
       receipt: {
         create: {
           ...receiptWithoutItems,
+          subtotal: new Prisma.Decimal(receiptWithoutItems.subtotal),
+          tax: new Prisma.Decimal(receiptWithoutItems.tax),
+          tip: new Prisma.Decimal(receiptWithoutItems.tip),
+          grand_total: new Prisma.Decimal(receiptWithoutItems.grand_total),
           items: {
             createMany: {
-              data: items,
+              data: items.map(({ id, receiptId, unit_price, ...item }) => ({
+                ...item,
+                id: undefined,
+                receiptId: undefined,
+                unit_price: new Prisma.Decimal(unit_price),
+              })),
             },
           },
         },
@@ -48,7 +58,7 @@ export const createReceipt = async (input: {
 };
 
 export const processReceipt = async (path: string) => {
-  const sr = createStructuredResponse<UnsavedReceipt>({
+  const sr = createStructuredResponse<ReceiptFormState>({
     success: false,
     data: undefined,
     clientMsg:
@@ -75,7 +85,7 @@ export const processReceipt = async (path: string) => {
     const receiptJson = await extractReceiptData(annotationResult.text);
 
     try {
-      const parsedReceipt = UnsavedReceiptSchema.safeParse(receiptJson);
+      const parsedReceipt = ReceiptFormStateSchema.safeParse(receiptJson);
 
       if (parsedReceipt.success) {
         sr.success = true;
@@ -87,7 +97,7 @@ export const processReceipt = async (path: string) => {
 
       //Rarely, the receipt is in a different shape.
       const FallbackReceiptSchema = z.object({
-        properties: UnsavedReceiptSchema,
+        properties: ReceiptFormStateSchema,
       });
 
       const parsedFallbackReceipt =

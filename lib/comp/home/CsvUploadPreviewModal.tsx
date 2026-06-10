@@ -1,12 +1,12 @@
 import { trpc } from "@/util/trpc";
 
-import type { UnsavedTx } from "@/types/tx";
+import type { TxFormState } from "@/types/tx";
 
 import { ActionBtn } from "../shared/Button";
 import Modal from "../shared/Modal";
 
 interface Props {
-  unsavedTxArray: UnsavedTx[];
+  unsavedTxArray: TxFormState[];
 }
 
 const CsvUploadPreviewModal = (props: Props) => {
@@ -41,7 +41,7 @@ const CsvUploadPreviewModal = (props: Props) => {
               <tr key={tx.name}>
                 <td>{tx.name}</td>
                 <td>{tx.authorizedDatetime.toString()}</td>
-                <td>{tx.amount.toNumber()}</td>
+                <td>{tx.amount}</td>
                 <td>{tx.catArray.at(-1)?.detailed}</td>
                 <td>{tx.accountId}</td>
               </tr>
