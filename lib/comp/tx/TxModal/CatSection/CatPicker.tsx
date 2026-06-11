@@ -59,7 +59,9 @@ const CatPicker = forwardRef(
         if (editingCat.id) {
           // Update existing
           tmpCatArray[props.editingCatIndex] = {
-            ...editingCat,
+            ...cat,
+            id: editingCat.id,
+            txId: editingCat.txId,
           };
         } else {
           // Create new
@@ -100,7 +102,9 @@ const CatPicker = forwardRef(
       : [];
 
     return catOptionArray.data ? (
+      // biome-ignore lint/a11y/noStaticElementInteractions: this container only stops modal-level interactions from bubbling.
       <div
+        role="presentation"
         ref={ref}
         className={
           "absolute left-0 flex max-h-[50vh] w-full flex-col items-start gap-y-1 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-300 shadow-md shadow-zinc-900 sm:w-96"

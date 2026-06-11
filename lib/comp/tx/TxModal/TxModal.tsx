@@ -4,8 +4,6 @@ import Modal from "@/comp/shared/Modal";
 
 import { trpc } from "@/util/trpc";
 
-import { isTx } from "@/types/tx";
-
 import AccountName from "./AccountName";
 import CatSection from "./CatSection/CatSection";
 import Receipt from "./Receipt";
@@ -193,7 +191,7 @@ const TxModal = (props: Props) => {
             <div className="flex flex-col items-start gap-y-3">
               <ActionBtn
                 onClickAsync={async () => {
-                  if (!isTx(tx)) {
+                  if (!tx.id) {
                     return;
                   }
 

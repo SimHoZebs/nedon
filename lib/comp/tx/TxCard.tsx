@@ -18,12 +18,13 @@ const TxCard = (props: Props) => {
       : new Prisma.Decimal(0);
 
   return (
-    <section
+    <button
+      type="button"
       className="flex h-fit w-full flex-col justify-between gap-x-4 gap-y-1 rounded-lg px-3 py-2 text-start hover:cursor-pointer hover:bg-zinc-800 hover:text-zinc-200"
       onKeyDown={props.onInteraction}
       onClick={props.onInteraction}
     >
-      <section className="flex w-full justify-between gap-x-3 truncate">
+      <div className="flex w-full justify-between gap-x-3 truncate">
         <div className="flex h-full flex-start justify-center gap-x-2 truncate">
           <p className="truncate text-base sm:text-lg">{props.tx.name}</p>
         </div>
@@ -43,9 +44,9 @@ const TxCard = (props: Props) => {
           </div>
           <div>{props.tx.isoCurrencyCode || "US"}</div>
         </div>
-      </section>
+      </div>
 
-      <section className="flex h-fit w-full justify-between gap-x-1">
+      <div className="flex h-fit w-full justify-between gap-x-1">
         <p className="font-light text-xs text-zinc-400">
           {props.tx.authorizedDatetime.toLocaleTimeString()}
         </p>
@@ -71,8 +72,8 @@ const TxCard = (props: Props) => {
             </div>
           ))}
         </div>
-      </section>
-    </section>
+      </div>
+    </button>
   );
 };
 

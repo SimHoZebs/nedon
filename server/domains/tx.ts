@@ -33,21 +33,31 @@ export const createTxInput = (
   const receiptCreate = receipt
     ? {
         create: {
-          ...receipt,
-          id: undefined,
-          txId: undefined,
+          is_receipt: receipt.is_receipt,
+          transaction_id: receipt.transaction_id,
+          date: receipt.date,
+          merchant: receipt.merchant,
+          currency: receipt.currency,
+          payment_method: receipt.payment_method,
+          online_link: receipt.online_link,
+          location: receipt.location,
           subtotal: new Prisma.Decimal(receipt.subtotal),
           tax: new Prisma.Decimal(receipt.tax),
           tip: new Prisma.Decimal(receipt.tip),
           grand_total: new Prisma.Decimal(receipt.grand_total),
           items: {
             createMany: {
-              data: receipt.items.map((item) => ({
-                ...item,
-                id: undefined,
-                receiptId: undefined,
-                unit_price: new Prisma.Decimal(item.unit_price),
-              })),
+              data: receipt.items.map(
+                ({
+                  id: _itemId,
+                  receiptId: _receiptId,
+                  unit_price,
+                  ...item
+                }) => ({
+                  ...item,
+                  unit_price: new Prisma.Decimal(unit_price),
+                }),
+              ),
             },
           },
         },
@@ -72,6 +82,8 @@ export const createTxInput = (
           id: _splitId,
           amount: splitAmount,
           userTotal: splitUserTotal,
+          originalBankTxId: _splitOriginalBankTxId,
+          originTxId: _splitOriginTxId,
           ...splitRest
         } = split;
         return {

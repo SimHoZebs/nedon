@@ -30,7 +30,10 @@ const CatChip = (props: Props) => {
   const catStyle = getCatStyle(props.cat.primary, props.cat.detailed);
   return (
     <div className="flex flex-col gap-2">
+      {/* biome-ignore lint/a11y/useSemanticElements: contains nested controls, so it cannot be a button. */}
       <div
+        role="button"
+        tabIndex={0}
         className={`group flex items-center gap-x-1 rounded-lg p-2 text-xs text-zinc-400 hover:cursor-pointer hover:bg-zinc-700 hover:text-zinc-300 sm:text-sm ${
           props.isEditTarget && "animate-pulse bg-zinc-700"
         } `}

@@ -126,14 +126,15 @@ export const SplitBtn = (props: SplitBtnProps) => {
       <Button className={`rounded-l-lg bg-indigo-500 ${className}`} {...rest}>
         {childrenArray[0]}
       </Button>
-      <div
+      <button
+        type="button"
         className="flex cursor-pointer items-center justify-center rounded-r-lg border-l border-l-zinc-300 bg-indigo-500 p-1"
         onClick={() => setShowOptions(!showOptions)}
         onKeyUp={() => setShowOptions(!showOptions)}
       >
         <span className="icon-[mdi-light--chevron-down]" />
         {showOptions && childrenArray[1]}
-      </div>
+      </button>
     </div>
   );
 };

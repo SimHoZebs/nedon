@@ -1,5 +1,4 @@
 @import "tailwindcss";
-/* biome-ignore lint/suspicious: tailwindcss*/
 @plugin "@iconify/tailwind4";
 
 @layer utilities {

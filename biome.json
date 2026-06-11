@@ -12,6 +12,11 @@
   "files": {
     "includes": ["**", "!package.json", "!pnpm-lock.yaml"]
   },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
   "vcs": {
     "enabled": true,
     "clientKind": "git",

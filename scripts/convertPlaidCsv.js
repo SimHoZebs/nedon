@@ -26,7 +26,9 @@ async function main() {
       "https://plaid.com/documents/transactions-personal-finance-category-taxonomy.csv",
       (res) => {
         let data = "";
-        res.on("data", (chunk) => (data += chunk));
+        res.on("data", (chunk) => {
+          data += chunk;
+        });
         res.on("end", () => resolve(data));
         res.on("error", reject);
       },

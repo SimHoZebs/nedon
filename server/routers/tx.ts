@@ -160,40 +160,74 @@ const txRouter = router({
   update: procedure
     .input(TxFormStateSchema.extend({ id: z.string() }))
     .mutation(async ({ input }) => {
-      const { catArray, splitTxArray: _splitTxArray, ...rest } = input;
       const {
+        id,
+        catArray,
+        splitTxArray: _splitTxArray,
         receipt: _receipt,
         originalBankTxId: _originalBankTxId,
+        originTxId: _originTxId,
         kind: _kind,
-
-        ...useful
-      } = rest;
+        ownerId: _ownerId,
+        amount,
+        userTotal,
+        recurring,
+        mds,
+        bankId,
+        name,
+        datetime,
+        authorizedDatetime,
+        accountId,
+        logoUrl,
+        isoCurrencyCode,
+        locationAddress,
+        locationCity,
+        locationRegion,
+        locationPostalCode,
+        locationCountry,
+      } = input;
       const catToCreate = catArray.filter((cat) => !cat.id);
       const catToUpdate = catArray.filter((cat) => cat.id);
 
       const tx = await db.tx.update({
         where: {
-          id: input.id,
+          id,
         },
         data: {
-          ...useful,
-          amount: new Prisma.Decimal(input.amount),
-          userTotal: new Prisma.Decimal(input.userTotal),
-          bankId: input.bankId || undefined,
+          recurring,
+          mds,
+          bankId: bankId || undefined,
+          name,
+          amount: new Prisma.Decimal(amount),
+          userTotal: new Prisma.Decimal(userTotal),
+          datetime,
+          authorizedDatetime,
+          accountId,
+          logoUrl,
+          isoCurrencyCode,
+          locationAddress,
+          locationCity,
+          locationRegion,
+          locationPostalCode,
+          locationCountry,
           catArray: {
             createMany: {
-              data: catToCreate.map(({ amount, ...cat }) => ({
-                ...cat,
-                amount: new Prisma.Decimal(amount),
-              })),
+              data: catToCreate.map(
+                ({ id: _id, txId: _txId, amount, ...cat }) => ({
+                  ...cat,
+                  amount: new Prisma.Decimal(amount),
+                }),
+              ),
             },
-            updateMany: catToUpdate.map(({ id, ...catWithoutId }) => ({
-              where: { id: id },
-              data: {
-                ...catWithoutId,
-                amount: new Prisma.Decimal(catWithoutId.amount),
-              },
-            })),
+            updateMany: catToUpdate.map(
+              ({ id, txId: _txId, ...catWithoutId }) => ({
+                where: { id: id },
+                data: {
+                  ...catWithoutId,
+                  amount: new Prisma.Decimal(catWithoutId.amount),
+                },
+              }),
+            ),
           },
         },
         include: txInclude,

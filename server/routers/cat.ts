@@ -11,10 +11,11 @@ const catRouter = router({
   create: procedure
     .input(CatFormStateSchema.extend({ txId: z.string() }))
     .mutation(async ({ input }) => {
+      const { id: _id, amount, ...cat } = input;
       return await db.cat.create({
         data: {
-          ...input,
-          amount: new Prisma.Decimal(input.amount),
+          ...cat,
+          amount: new Prisma.Decimal(amount),
         },
       });
     }),
@@ -39,8 +40,8 @@ const catRouter = router({
           catArray: {
             updateMany:
               catToUpdateArray.length > 0
-                ? catToUpdateArray.map(({ txId, amount, ...rest }) => ({
-                    where: { id: rest.id },
+                ? catToUpdateArray.map(({ id, txId, amount, ...rest }) => ({
+                    where: { id },
                     data: {
                       ...rest,
                       amount: new Prisma.Decimal(amount),
@@ -49,11 +50,12 @@ const catRouter = router({
                 : undefined,
 
             createMany: {
-              data: catToCreateArray.map(({ id, txId, amount, ...rest }) => ({
-                ...rest,
-                amount: new Prisma.Decimal(amount),
-                id: undefined,
-              })),
+              data: catToCreateArray.map(
+                ({ id: _id, txId, amount, ...rest }) => ({
+                  ...rest,
+                  amount: new Prisma.Decimal(amount),
+                }),
+              ),
             },
           },
         },

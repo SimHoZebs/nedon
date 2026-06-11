@@ -11,7 +11,7 @@ const SplitUserOptionList = () => {
   const { user: appUser } = useAppUser();
 
   const setSplitTxArray = useTxStore((state) => state.setSplitTxArray);
-  const setUnsavedCatArray = useTxStore((state) => state.setCatArray);
+  const setCatArray = useTxStore((state) => state.setCatArray);
   const setIsEditingSplitTx = useTxStore((state) => state.setIsEditingSplitTx);
   const txOnModal = useTxStore((state) => state.txOnModal);
   const catArray = txOnModal?.catArray || [];
@@ -97,7 +97,7 @@ const SplitUserOptionList = () => {
                   updatedSplitTxArray.push(newSplit);
 
                   setSplitTxArray(updatedSplitTxArray);
-                  setUnsavedCatArray(updatedCatArray);
+                  setCatArray(updatedCatArray);
                   setIsEditingSplitTx(true);
                 }}
               >
