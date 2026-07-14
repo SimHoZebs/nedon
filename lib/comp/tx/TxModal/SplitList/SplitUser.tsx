@@ -1,5 +1,7 @@
 import Input from "@/comp/shared/Input";
 
+import { toMoney } from "@/util/money";
+
 import { useTxStore } from "lib/store/txStore";
 import type React from "react";
 import { twMerge } from "tailwind-merge";
@@ -55,8 +57,9 @@ const SplitUser = (props: Props) => {
       return;
     }
 
-    updatedCatArray[unassignedCat].amount =
-      updatedCatArray[unassignedCat].amount + amount;
+    updatedCatArray[unassignedCat].amount = toMoney(
+      updatedCatArray[unassignedCat].amount + amount,
+    );
     setCatArray(updatedCatArray);
   };
 
@@ -138,18 +141,20 @@ const SplitUser = (props: Props) => {
                   setEditedSplitTxIndexArray((prev) => [...prev, props.index]);
                   const prevPercentage =
                     txAmount === 0 ? 0 : (amount / txAmount) * 100;
-                  const updatedPercentage = Math.min(
-                    Number.parseFloat(e.target.value),
-                    100,
-                  );
+                  const parsedPercentage = Number.parseFloat(e.target.value);
+                  if (!Number.isFinite(parsedPercentage)) return;
 
-                  let updatedSplitAmount = (updatedPercentage / 100) * txAmount;
+                  const updatedPercentage = Math.min(parsedPercentage, 100);
+
+                  let updatedSplitAmount = toMoney(
+                    (updatedPercentage / 100) * txAmount,
+                  );
 
                   if (amount === updatedSplitAmount) {
                     if (prevPercentage < updatedPercentage) {
-                      updatedSplitAmount = updatedSplitAmount + 0.01;
+                      updatedSplitAmount = toMoney(updatedSplitAmount + 0.01);
                     } else {
-                      updatedSplitAmount = updatedSplitAmount - 0.01;
+                      updatedSplitAmount = toMoney(updatedSplitAmount - 0.01);
                     }
                   }
 

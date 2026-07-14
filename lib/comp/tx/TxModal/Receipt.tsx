@@ -2,6 +2,7 @@ import { ActionBtn } from "@/comp/shared/Button";
 import { H3 } from "@/comp/shared/Heading";
 import Input from "@/comp/shared/Input";
 
+import { toMoney } from "@/util/money";
 import { createStructuredResponse } from "@/util/structuredResponse";
 import { trpc } from "@/util/trpc";
 
@@ -103,14 +104,16 @@ const Receipt = () => {
     return sr;
   };
 
-  const receiptSum = tx?.receipt
-    ? tx.receipt.items.reduce(
-        (sum, item) => sum + item.unit_price * item.quantity,
-        0,
-      ) +
-      tx.receipt.tip +
-      tx.receipt.tax
-    : 0;
+  const receiptSum = toMoney(
+    tx?.receipt
+      ? tx.receipt.items.reduce(
+          (sum, item) => sum + item.unit_price * item.quantity,
+          0,
+        ) +
+          tx.receipt.tip +
+          tx.receipt.tax
+      : 0,
+  );
 
   return (
     <div>
@@ -188,7 +191,7 @@ const Receipt = () => {
                 />
               </td>
               <td>
-                <p>${(item.unit_price * item.quantity).toString()}</p>
+                <p>${toMoney(item.unit_price * item.quantity).toString()}</p>
               </td>
             </tr>
           ))}
@@ -209,7 +212,11 @@ const Receipt = () => {
                 value={tx.receipt.tip.toString()}
               />
               <p className="text-xs">
-                ({((tx.receipt.tip * 100) / tx.amount).toString()}%)
+                (
+                {tx.amount === 0
+                  ? "0"
+                  : ((tx.receipt.tip * 100) / tx.amount).toString()}
+                %)
               </p>
             </td>
           </tr>
@@ -231,14 +238,14 @@ const Receipt = () => {
         </table>
       )}
 
-      {tx?.amount && tx.receipt && (
+      {tx?.receipt && (
         <p
           className={`h-5 text-pink-500 ${
-            Math.abs(receiptSum - tx.amount) > 0.01 ? "" : "hidden"
+            receiptSum !== tx.amount ? "" : "hidden"
           }`}
         >
           Receipt total is <b>${receiptSum.toString()}</b>, which is{" "}
-          <b>${(tx.amount - receiptSum).toString()}</b> off from this
+          <b>${toMoney(tx.amount - receiptSum).toString()}</b> off from this
           transaction. Adjust your receipt to match the amount.
         </p>
       )}

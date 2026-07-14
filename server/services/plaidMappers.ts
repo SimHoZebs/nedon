@@ -1,6 +1,5 @@
 import type { TxFormState } from "@/types/tx";
 
-import { createId } from "@paralleldrive/cuid2";
 import { MdsType, TxKind } from "@prisma/client";
 import type { Transaction } from "plaid";
 import { plaidCategories } from "server/util/plaidCategories";
@@ -22,10 +21,7 @@ export function mapPlaidTransactionToTxFormState(
     description = plaidCategories[primary][detailed].description;
   }
 
-  const id = createId();
-
   return {
-    id,
     kind: TxKind.ORIGINAL,
     name: tx.merchant_name || tx.name,
     amount: tx.amount,
@@ -48,7 +44,6 @@ export function mapPlaidTransactionToTxFormState(
             detailed: detailed || "",
             description: description,
             amount: tx.amount,
-            txId: id,
           },
         ]
       : [],

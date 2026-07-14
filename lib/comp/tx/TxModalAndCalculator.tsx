@@ -1,3 +1,5 @@
+import { toMoney } from "@/util/money";
+
 import type { SplitTxFormState } from "@/types/tx";
 
 import Calculator from "./TxModal/SplitList/Calculator";
@@ -34,9 +36,13 @@ const TxModalAndCalculator = (props: Props) => {
 
   // Changes a user's split amount and balances
   const changeSplitAmount = (index: number, newAmount: number) => {
+    if (!Number.isFinite(newAmount)) return;
+
     const updatedSplitTxArray = structuredClone(splitTxArray);
 
-    const newAmountFloored = Math.max(Math.min(newAmount, txAmount), 0);
+    const newAmountFloored = toMoney(
+      Math.max(Math.min(newAmount, txAmount), 0),
+    );
 
     updatedSplitTxArray[index].amount = newAmountFloored;
 
@@ -63,7 +69,7 @@ const TxModalAndCalculator = (props: Props) => {
       );
     }
 
-    let remainder = txAmount - editedSplitAmountTotal;
+    let remainder = toMoney(txAmount - editedSplitAmountTotal);
 
     // Handle edge case: no unedited splits
     if (uneditedSplitArray.length === 0) {
@@ -74,13 +80,13 @@ const TxModalAndCalculator = (props: Props) => {
 
     uneditedSplitArray.forEach((split, idx) => {
       if (uneditedSplitArray.length === 1) {
-        split.amount = Number(remainder.toFixed(2));
+        split.amount = toMoney(remainder);
       } else if (idx === uneditedSplitArray.length - 1) {
-        split.amount = Number(remainder.toFixed(2));
+        split.amount = toMoney(remainder);
       } else {
         const portion = remainder / uneditedSplitArray.length;
-        split.amount = Number(portion.toFixed(2));
-        remainder = remainder - portion;
+        split.amount = toMoney(portion);
+        remainder = toMoney(remainder - portion);
       }
     });
 

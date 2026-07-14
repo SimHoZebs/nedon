@@ -1,5 +1,7 @@
 import { Button } from "@/comp/shared/Button";
 
+import { toMoney } from "@/util/money";
+
 import type { SplitTxFormState } from "@/types/tx";
 
 import { createId } from "@paralleldrive/cuid2";
@@ -53,8 +55,9 @@ const SplitUserOptionList = () => {
                     return;
                   }
 
-                  const newAmount =
-                    txOnModal.amount / (splitTxArray.length + 1);
+                  const newAmount = toMoney(
+                    txOnModal.amount / (splitTxArray.length + 1),
+                  );
 
                   const updatedSplitTxArray: SplitTxFormState[] =
                     structuredClone(splitTxArray).map((split) => ({

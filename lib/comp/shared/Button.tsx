@@ -128,13 +128,14 @@ export const SplitBtn = (props: SplitBtnProps) => {
       </Button>
       <button
         type="button"
+        aria-label="Show additional actions"
+        aria-expanded={showOptions}
         className="flex cursor-pointer items-center justify-center rounded-r-lg border-l border-l-zinc-300 bg-indigo-500 p-1"
         onClick={() => setShowOptions(!showOptions)}
-        onKeyUp={() => setShowOptions(!showOptions)}
       >
         <span className="icon-[mdi-light--chevron-down]" />
-        {showOptions && childrenArray[1]}
       </button>
+      {showOptions && childrenArray[1]}
     </div>
   );
 };

@@ -2,6 +2,7 @@ import type { ChaseCSVTx, Tx, TxFormState } from "@/types/tx";
 
 import useAutoLoadUser from "../hooks/useAutoLoadUser";
 import { useStore } from "../store/store";
+import { toMoney } from "../util/money";
 import { trpc } from "../util/trpc";
 
 import { MdsType, Prisma, TxKind } from "@prisma/client";
@@ -14,7 +15,7 @@ export const createTxFromChaseCSV = (
     kind: TxKind.USER,
     splitTxArray: [],
     name: chaseCSVTx.Description,
-    amount: Number(chaseCSVTx.Amount),
+    amount: toMoney(Number(chaseCSVTx.Amount)),
     recurring: false,
     mds: MdsType.UNDETERMINED,
     datetime: new Date(chaseCSVTx.PostingDate),
@@ -40,27 +41,27 @@ export const createTxFromChaseCSV = (
 export const mapTxToFormState = (tx: Tx): TxFormState => {
   return {
     ...tx,
-    amount: tx.amount.toNumber(),
-    userTotal: tx.userTotal.toNumber(),
+    amount: toMoney(tx.amount.toNumber()),
+    userTotal: toMoney(tx.userTotal.toNumber()),
     splitTxArray: tx.splitTxArray.map((split) => ({
       ...split,
-      amount: split.amount.toNumber(),
-      userTotal: split.userTotal.toNumber(),
+      amount: toMoney(split.amount.toNumber()),
+      userTotal: toMoney(split.userTotal.toNumber()),
     })),
     catArray: tx.catArray.map((cat) => ({
       ...cat,
-      amount: cat.amount.toNumber(),
+      amount: toMoney(cat.amount.toNumber()),
     })),
     receipt: tx.receipt
       ? {
           ...tx.receipt,
-          subtotal: tx.receipt.subtotal.toNumber(),
-          tax: tx.receipt.tax.toNumber(),
-          tip: tx.receipt.tip.toNumber(),
-          grand_total: tx.receipt.grand_total.toNumber(),
+          subtotal: toMoney(tx.receipt.subtotal.toNumber()),
+          tax: toMoney(tx.receipt.tax.toNumber()),
+          tip: toMoney(tx.receipt.tip.toNumber()),
+          grand_total: toMoney(tx.receipt.grand_total.toNumber()),
           items: tx.receipt.items.map((item) => ({
             ...item,
-            unit_price: item.unit_price.toNumber(),
+            unit_price: toMoney(item.unit_price.toNumber()),
           })),
         }
       : null,

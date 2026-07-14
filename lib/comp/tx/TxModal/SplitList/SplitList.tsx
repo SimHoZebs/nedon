@@ -1,6 +1,7 @@
 import { ActionBtn, Button } from "@/comp/shared/Button";
 import { H3 } from "@/comp/shared/Heading";
 
+import { toMoney } from "@/util/money";
 import { trpc } from "@/util/trpc";
 
 import SplitUser from "./SplitUser";
@@ -51,12 +52,11 @@ const SplitList = (props: Props) => {
 
   const splitTxArray = tx?.splitTxArray || [];
 
-  const updatedSplitAmount = splitTxArray.reduce(
-    (amount, split) => amount + split.amount,
-    0,
+  const updatedSplitAmount = toMoney(
+    splitTxArray.reduce((amount, split) => amount + split.amount, 0),
   );
 
-  const isWrongSplit = Math.abs(updatedSplitAmount - txAmount) > 0.01;
+  const isWrongSplit = updatedSplitAmount !== txAmount;
 
   const syncSplit = async () => {
     if (!appUser || !tx) {
@@ -143,8 +143,8 @@ const SplitList = (props: Props) => {
               isWrongSplit && splitTxArray.length > 0 ? "" : "hidden"
             }`}
           >
-            {`Current split total is $${updatedSplitAmount.toString()}; ${Math.abs(
-              txAmount - updatedSplitAmount,
+            {`Current split total is $${updatedSplitAmount.toString()}; ${toMoney(
+              Math.abs(txAmount - updatedSplitAmount),
             ).toString()} ${updatedSplitAmount > txAmount ? "over " : "under "}the total`}
           </p>
 

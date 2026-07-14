@@ -4,6 +4,7 @@ import type { SplitTxFormState, Tx, TxFormState } from "@/types/tx";
 import { useStore } from "./store";
 
 import { mapTxToFormState } from "lib/domain/tx";
+import { toMoney } from "lib/util/money";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
@@ -62,7 +63,10 @@ export const useTxStore = create<Store>()(
           return {
             txOnModal: {
               ...store.txOnModal,
-              catArray,
+              catArray: catArray.map((cat) => ({
+                ...cat,
+                amount: toMoney(cat.amount),
+              })),
             },
           };
         });
@@ -75,7 +79,11 @@ export const useTxStore = create<Store>()(
           return {
             txOnModal: {
               ...store.txOnModal,
-              splitTxArray,
+              splitTxArray: splitTxArray.map((split) => ({
+                ...split,
+                amount: toMoney(split.amount),
+                userTotal: toMoney(split.userTotal),
+              })),
             },
           };
         });
