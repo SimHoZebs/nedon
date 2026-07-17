@@ -1,6 +1,6 @@
 import type { Tx } from "@/types/tx";
 
-import { Prisma } from "@prisma/client";
+import Decimal from "decimal.js";
 import { getCatStyle } from "lib/domain/cat";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 
@@ -15,7 +15,8 @@ const TxCard = (props: Props) => {
     isLoading && appUser
       ? props.tx.splitTxArray.find((split) => split.ownerId === appUser.id)
           ?.amount
-      : new Prisma.Decimal(0);
+      : "0";
+  const displayedAmount = new Decimal(splitAmount ?? props.tx.amount).negated();
 
   return (
     <button
@@ -30,17 +31,13 @@ const TxCard = (props: Props) => {
 
         <div
           className={`flex items-center gap-x-1 font-light text-base sm:text-lg ${
-            props.tx.amount.greaterThan(0) ? "" : "text-green-300"
+            new Decimal(props.tx.amount).isPositive() ? "" : "text-green-300"
           }`}
         >
           {props.tx.splitTxArray.length > 1 && (
             <span className="icon-[lucide--split] h-4 w-4 text-zinc-400" />
           )}
-          <div>
-            {splitAmount
-              ? splitAmount.mul(-1).toNumber()
-              : props.tx.amount.mul(-1).toNumber()}
-          </div>
+          <div>{displayedAmount.toString()}</div>
           <div>{props.tx.isoCurrencyCode || "US"}</div>
         </div>
       </div>

@@ -1,4 +1,6 @@
-import { MdsType, Prisma } from "@prisma/client";
+import { MdsTypeSchema } from "./enums";
+import { MoneySchema } from "./money";
+
 import z from "zod";
 
 export const ReceiptItemSchema = z
@@ -7,16 +9,15 @@ export const ReceiptItemSchema = z
     name: z.string(),
     description: z.string(),
     quantity: z.number(),
-    unit_price: z.instanceof(Prisma.Decimal),
-    mds: z.nativeEnum(MdsType),
+    unit_price: MoneySchema,
+    mds: MdsTypeSchema,
     receiptId: z.string(),
   })
   .strict();
 
-export type BaseReceiptItem = Prisma.ReceiptItemGetPayload<undefined>;
+export type BaseReceiptItem = z.infer<typeof ReceiptItemSchema>;
 
-export const BaseReceiptItemSchema =
-  ReceiptItemSchema satisfies z.ZodType<BaseReceiptItem>;
+export const BaseReceiptItemSchema = ReceiptItemSchema;
 
 //"Pure" types are types without considering the database schema.
 export const PureReceiptItemSchema = BaseReceiptItemSchema.omit({
@@ -35,8 +36,8 @@ export const ReceiptItemFormStateSchema = z
     name: z.string(),
     description: z.string(),
     quantity: z.number().int(),
-    unit_price: z.number(),
-    mds: z.nativeEnum(MdsType),
+    unit_price: MoneySchema,
+    mds: MdsTypeSchema,
     receiptId: z.string().optional(),
   })
   .strict();

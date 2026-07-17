@@ -1,10 +1,16 @@
-import { Prisma } from "@prisma/client";
+import type { Money } from "@/types/money";
 
-export const toMoney = (value: number): number => {
-  if (!Number.isFinite(value)) {
+import Decimal from "decimal.js";
+
+export const toMoney = (value: Decimal.Value): Money => {
+  const decimal = new Decimal(value);
+
+  if (!decimal.isFinite()) {
     throw new RangeError("Money values must be finite");
   }
 
-  const normalized = new Prisma.Decimal(value).toDecimalPlaces(2).toNumber();
-  return normalized === 0 ? 0 : normalized;
+  const normalized = decimal.toDecimalPlaces(2);
+  return normalized.isZero() ? "0" : normalized.toFixed();
 };
+
+export const toDecimal = (value: Decimal.Value): Decimal => new Decimal(value);

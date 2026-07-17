@@ -3,6 +3,7 @@ import { trpc } from "@/util/trpc";
 
 import type { CatFormState } from "@/types/cat";
 
+import Decimal from "decimal.js";
 import { getCatStyle } from "lib/domain/cat";
 import { useTxStore } from "lib/store/txStore";
 import type React from "react";
@@ -87,10 +88,10 @@ const CatChip = (props: Props) => {
                   return;
                 }
 
-                const valueToNum = Number.parseFloat(e.target.value) || 0;
-                const flooredAmount = Math.min(
+                const value = e.target.value || "0";
+                const flooredAmount = Decimal.min(
                   tx.amount,
-                  Math.max(0, valueToNum),
+                  Decimal.max(0, value),
                 );
                 const tmpCatArray = structuredClone(catArray);
                 tmpCatArray[props.index].amount = toMoney(flooredAmount);

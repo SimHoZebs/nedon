@@ -2,6 +2,7 @@ import Input from "@/comp/shared/Input";
 
 import { toMoney } from "@/util/money";
 
+import Decimal from "decimal.js";
 import { useTxStore } from "lib/store/txStore";
 import type React from "react";
 import { twMerge } from "tailwind-merge";
@@ -24,7 +25,8 @@ const SplitUser = (props: Props) => {
   );
   const focusedSplitTxIndex = useTxStore((state) => state.focusedSplitTxIndex);
   const amountDisplay = splitTxAmountDisplayArray[props.index];
-  const amount = Number.parseFloat(amountDisplay || "0") || 0;
+  const amountPrefix = amountDisplay?.match(/^-?(?:\d+\.?\d*|\.\d+)/)?.[0];
+  const amount = new Decimal(amountPrefix || 0);
   const catArray = tx?.catArray || [];
   const setCatArray = useTxStore((s) => s.setCatArray);
   const setEditedSplitTxIndexArray = useTxStore(
@@ -33,7 +35,7 @@ const SplitUser = (props: Props) => {
   const isEditingSplitTx = useTxStore((state) => state.isEditingSplitTx);
 
   const split = splitTxArray[props.index];
-  const txAmount = tx ? tx.amount : 0;
+  const txAmount = tx?.amount || "0";
   const isModified =
     props.editedIndexArray.find(
       (modifiedIndex) => modifiedIndex === props.index,
@@ -58,7 +60,7 @@ const SplitUser = (props: Props) => {
     }
 
     updatedCatArray[unassignedCat].amount = toMoney(
-      updatedCatArray[unassignedCat].amount + amount,
+      new Decimal(updatedCatArray[unassignedCat].amount).plus(amount),
     );
     setCatArray(updatedCatArray);
   };
@@ -101,7 +103,12 @@ const SplitUser = (props: Props) => {
                 onChange={(e) => {
                   //value can have arithmetic operators. Differentiate between
                   //number input and calculation input.
-                  const numOnly = Number.parseFloat(e.target.value).toString();
+                  let numOnly: string;
+                  try {
+                    numOnly = new Decimal(e.target.value).toString();
+                  } catch {
+                    return;
+                  }
 
                   if (numOnly === e.target.value) {
                     if (!isModified) {
@@ -111,10 +118,7 @@ const SplitUser = (props: Props) => {
                       updatedArray.push(props.index);
                       setEditedSplitTxIndexArray(updatedArray);
                     }
-                    const newValue = Math.min(
-                      Number.parseFloat(e.target.value),
-                      txAmount,
-                    );
+                    const newValue = Decimal.min(e.target.value, txAmount);
 
                     props.onAmountChange(newValue.toString());
                   }
@@ -134,31 +138,43 @@ const SplitUser = (props: Props) => {
                 //0.01 does the same thing 0.01 $ steps
                 step={1}
                 value={
-                  txAmount === 0 ? "0" : ((amount / txAmount) * 100).toString()
+                  new Decimal(txAmount).isZero()
+                    ? "0"
+                    : amount.div(txAmount).mul(100).toString()
                 }
                 onFocus={props.onFocus}
                 onChange={(e) => {
                   setEditedSplitTxIndexArray((prev) => [...prev, props.index]);
-                  const prevPercentage =
-                    txAmount === 0 ? 0 : (amount / txAmount) * 100;
-                  const parsedPercentage = Number.parseFloat(e.target.value);
-                  if (!Number.isFinite(parsedPercentage)) return;
+                  const prevPercentage = new Decimal(txAmount).isZero()
+                    ? new Decimal(0)
+                    : amount.div(txAmount).mul(100);
+                  let parsedPercentage: Decimal;
+                  try {
+                    parsedPercentage = new Decimal(e.target.value);
+                  } catch {
+                    return;
+                  }
+                  if (!parsedPercentage.isFinite()) return;
 
-                  const updatedPercentage = Math.min(parsedPercentage, 100);
+                  const updatedPercentage = Decimal.min(parsedPercentage, 100);
 
                   let updatedSplitAmount = toMoney(
-                    (updatedPercentage / 100) * txAmount,
+                    updatedPercentage.div(100).mul(txAmount),
                   );
 
-                  if (amount === updatedSplitAmount) {
-                    if (prevPercentage < updatedPercentage) {
-                      updatedSplitAmount = toMoney(updatedSplitAmount + 0.01);
+                  if (amount.equals(updatedSplitAmount)) {
+                    if (prevPercentage.lessThan(updatedPercentage)) {
+                      updatedSplitAmount = toMoney(
+                        new Decimal(updatedSplitAmount).plus(0.01),
+                      );
                     } else {
-                      updatedSplitAmount = toMoney(updatedSplitAmount - 0.01);
+                      updatedSplitAmount = toMoney(
+                        new Decimal(updatedSplitAmount).minus(0.01),
+                      );
                     }
                   }
 
-                  props.onAmountChange(updatedSplitAmount.toString());
+                  props.onAmountChange(updatedSplitAmount);
                 }}
               />
               <label htmlFor="ratio">%</label>

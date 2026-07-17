@@ -11,9 +11,8 @@ export const txInclude = {
       items: true,
     },
   },
-  originTx: true,
   splitTxArray: true,
-};
+} satisfies Prisma.TxInclude;
 
 export const createTxInput = (
   txClientSide: TxFormState,

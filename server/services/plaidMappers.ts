@@ -2,6 +2,7 @@ import type { TxFormState } from "@/types/tx";
 
 import { MdsType, TxKind } from "@prisma/client";
 import type { Transaction } from "plaid";
+import { normalizeMoneyValue } from "server/mappers/prismaToDto";
 import { plaidCategories } from "server/util/plaidCategories";
 
 export function mapPlaidTransactionToTxFormState(
@@ -24,10 +25,10 @@ export function mapPlaidTransactionToTxFormState(
   return {
     kind: TxKind.ORIGINAL,
     name: tx.merchant_name || tx.name,
-    amount: tx.amount,
+    amount: normalizeMoneyValue(tx.amount),
     recurring: false,
     mds: MdsType.UNDETERMINED,
-    userTotal: 0,
+    userTotal: "0",
     originTxId: null,
     originalBankTxId: null,
     datetime: tx.date ? new Date(tx.date) : null,
@@ -43,7 +44,7 @@ export function mapPlaidTransactionToTxFormState(
             primary: primary || "",
             detailed: detailed || "",
             description: description,
-            amount: tx.amount,
+            amount: normalizeMoneyValue(tx.amount),
           },
         ]
       : [],

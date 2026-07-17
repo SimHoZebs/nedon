@@ -1,19 +1,24 @@
 import { createStructuredResponse } from "@/util/structuredResponse";
 
-import { type ReceiptFormState, ReceiptFormStateSchema } from "@/types/receipt";
+import {
+  type Receipt,
+  type ReceiptFormState,
+  ReceiptFormStateSchema,
+} from "@/types/receipt";
 
 import { extractReceiptData } from "./ai";
 import * as blobStorage from "./blobStorage";
 import * as ocr from "./OCR";
 
 import { Prisma } from "@prisma/client";
+import { mapReceipt, normalizeMoneyValue } from "server/mappers/prismaToDto";
 import db from "server/util/db";
 import { z } from "zod";
 
 export const createReceipt = async (input: {
   id: string;
   receipt: ReceiptFormState;
-}) => {
+}): Promise<Receipt | null> => {
   const { items, id: _id, txId: _txId, ...receiptWithoutItems } = input.receipt;
 
   if (!items) {
@@ -54,7 +59,45 @@ export const createReceipt = async (input: {
     },
   });
 
-  return updatedTx.receipt;
+  return updatedTx.receipt ? mapReceipt(updatedTx.receipt) : null;
+};
+
+const normalizeAiReceiptMoney = (value: unknown): unknown => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+
+  const normalized: Record<string, unknown> = { ...value };
+  for (const key of ["subtotal", "tax", "tip", "grand_total"]) {
+    const money = normalized[key];
+    if (typeof money === "string" || typeof money === "number") {
+      try {
+        normalized[key] = normalizeMoneyValue(money);
+      } catch {
+        // Keep invalid AI data unchanged so schema validation reports it.
+      }
+    }
+  }
+
+  if (Array.isArray(normalized.items)) {
+    normalized.items = normalized.items.map((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return item;
+      const normalizedItem: Record<string, unknown> = { ...item };
+      const unitPrice = normalizedItem.unit_price;
+      if (typeof unitPrice === "string" || typeof unitPrice === "number") {
+        try {
+          normalizedItem.unit_price = normalizeMoneyValue(unitPrice);
+        } catch {
+          // Keep invalid AI data unchanged so schema validation reports it.
+        }
+      }
+      return normalizedItem;
+    });
+  }
+
+  if ("properties" in normalized) {
+    normalized.properties = normalizeAiReceiptMoney(normalized.properties);
+  }
+
+  return normalized;
 };
 
 export const processReceipt = async (path: string) => {
@@ -82,7 +125,9 @@ export const processReceipt = async (path: string) => {
       return sr;
     }
 
-    const receiptJson = await extractReceiptData(annotationResult.text);
+    const receiptJson = normalizeAiReceiptMoney(
+      await extractReceiptData(annotationResult.text),
+    );
 
     try {
       const parsedReceipt = ReceiptFormStateSchema.safeParse(receiptJson);

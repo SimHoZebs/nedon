@@ -1,9 +1,7 @@
+import { MoneySchema } from "./money";
 import { ReceiptItemFormStateSchema, ReceiptItemSchema } from "./receiptItem";
 
-import { Prisma } from "@prisma/client";
 import z from "zod";
-
-type PureReceipt = Prisma.ReceiptGetPayload<undefined>;
 
 const PureReceiptSchema = z
   .object({
@@ -12,25 +10,23 @@ const PureReceiptSchema = z
     transaction_id: z.string(),
     date: z.date(),
     merchant: z.string(),
-    subtotal: z.instanceof(Prisma.Decimal),
+    subtotal: MoneySchema,
     currency: z.string(),
-    tax: z.instanceof(Prisma.Decimal),
-    tip: z.instanceof(Prisma.Decimal),
-    grand_total: z.instanceof(Prisma.Decimal),
+    tax: MoneySchema,
+    tip: MoneySchema,
+    grand_total: MoneySchema,
     payment_method: z.string(),
     online_link: z.string(),
     location: z.string(),
     txId: z.string(),
   })
-  .strict() satisfies z.ZodType<PureReceipt>;
-
-export type Receipt = Prisma.ReceiptGetPayload<{
-  include: { items: true };
-}>;
+  .strict();
 
 export const ReceiptSchema = PureReceiptSchema.extend({
   items: ReceiptItemSchema.array(),
-}) satisfies z.ZodType<Receipt>;
+}).strict();
+
+export type Receipt = z.infer<typeof ReceiptSchema>;
 
 export const ReceiptFormStateSchema = z
   .object({
@@ -39,11 +35,11 @@ export const ReceiptFormStateSchema = z
     transaction_id: z.string(),
     date: z.coerce.date(),
     merchant: z.string(),
-    subtotal: z.number(),
+    subtotal: MoneySchema,
     currency: z.string(),
-    tax: z.number(),
-    tip: z.number(),
-    grand_total: z.number(),
+    tax: MoneySchema,
+    tip: MoneySchema,
+    grand_total: MoneySchema,
     payment_method: z.string(),
     online_link: z.string(),
     location: z.string(),

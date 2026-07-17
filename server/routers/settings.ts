@@ -1,6 +1,11 @@
-import { UnsavedCatSettingsSchema } from "@/types/catSettings";
+import {
+  CatSettingsSchema,
+  UnsavedCatSettingsSchema,
+} from "@/types/catSettings";
 import { UserSettingsSchema } from "@/types/userSettings";
 
+import { Prisma } from "@prisma/client";
+import { mapCatSettings, mapUserSettings } from "server/mappers/prismaToDto";
 import { procedure, router } from "server/trpc";
 import db from "server/util/db";
 import z from "zod";
@@ -8,52 +13,70 @@ import z from "zod";
 const settingsRouter = router({
   get: procedure
     .input(z.object({ userId: z.string() }))
+    .output(UserSettingsSchema.nullable())
     .query(async ({ input }) => {
-      return await db.userSettings.findFirst({
+      const settings = await db.userSettings.findFirst({
         where: { userId: input.userId },
         include: { catSettings: true },
       });
+      return settings ? mapUserSettings(settings) : null;
     }),
 
-  upsert: procedure.input(UserSettingsSchema).mutation(async ({ input }) => {
-    const { id, catSettings, ...rest } = input;
-    const catSettingsToCreate = catSettings?.filter((cs) => !cs.id) || [];
-    const catSettingsToUpdate = catSettings?.filter((cs) => cs.id) || [];
+  upsert: procedure
+    .input(UserSettingsSchema)
+    .output(UserSettingsSchema)
+    .mutation(async ({ input }) => {
+      const { id, catSettings, ...rest } = input;
+      const catSettingsToCreate = catSettings.filter((cs) => !cs.id);
+      const catSettingsToUpdate = catSettings;
 
-    return await db.userSettings.upsert({
-      where: { id: id },
-      create: {
-        ...rest,
-        catSettings: {
-          create: catSettingsToCreate.map(({ id, ...cs }) => cs),
-        },
-      },
-      update: {
-        ...rest,
-        catSettings: {
-          deleteMany: {
-            id: { notIn: catSettingsToUpdate.map((cs) => cs.id) },
+      const settings = await db.userSettings.upsert({
+        where: { id },
+        create: {
+          ...rest,
+          catSettings: {
+            create: catSettingsToCreate.map(({ id: _id, budget, ...cs }) => ({
+              ...cs,
+              budget: new Prisma.Decimal(budget),
+            })),
           },
-          create: catSettingsToCreate.map(({ id, ...cs }) => cs),
-          update: catSettingsToUpdate.map((cs) => ({
-            where: { id: cs.id },
-            data: cs,
-          })),
         },
-      },
-      include: { catSettings: true },
-    });
-  }),
+        update: {
+          ...rest,
+          catSettings: {
+            deleteMany: {
+              id: { notIn: catSettingsToUpdate.map((cs) => cs.id) },
+            },
+            create: catSettingsToCreate.map(({ id: _id, budget, ...cs }) => ({
+              ...cs,
+              budget: new Prisma.Decimal(budget),
+            })),
+            update: catSettingsToUpdate.map(({ budget, ...cs }) => ({
+              where: { id: cs.id },
+              data: { ...cs, budget: new Prisma.Decimal(budget) },
+            })),
+          },
+        },
+        include: { catSettings: true },
+      });
+      return mapUserSettings(settings);
+    }),
 
   upsertCatSetting: procedure
     .input(UnsavedCatSettingsSchema)
+    .output(CatSettingsSchema)
     .mutation(async ({ input }) => {
-      const { id, ...rest } = input;
-      return await db.catSettings.upsert({
+      const { id, budget, userSettingsId, ...rest } = input;
+      const catSettings = await db.catSettings.upsert({
         where: { id: id || "" },
-        create: rest,
-        update: rest,
+        create: {
+          ...rest,
+          userSettingsId,
+          budget: new Prisma.Decimal(budget),
+        },
+        update: { ...rest, budget: new Prisma.Decimal(budget) },
       });
+      return mapCatSettings(catSettings);
     }),
 });
 

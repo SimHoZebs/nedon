@@ -2,10 +2,11 @@ import { Button } from "@/comp/shared/Button";
 
 import { toMoney } from "@/util/money";
 
+import { TxKind } from "@/types/enums";
 import type { SplitTxFormState } from "@/types/tx";
 
 import { createId } from "@paralleldrive/cuid2";
-import { TxKind } from "@prisma/client";
+import Decimal from "decimal.js";
 import useAppUser from "lib/hooks/useAutoLoadUser";
 import { useTxStore } from "lib/store/txStore";
 
@@ -56,7 +57,7 @@ const SplitUserOptionList = () => {
                   }
 
                   const newAmount = toMoney(
-                    txOnModal.amount / (splitTxArray.length + 1),
+                    new Decimal(txOnModal.amount).div(splitTxArray.length + 1),
                   );
 
                   const updatedSplitTxArray: SplitTxFormState[] =
@@ -81,7 +82,7 @@ const SplitUserOptionList = () => {
                     originTxId: txId,
                     name: txOnModal.name,
                     amount: newAmount,
-                    userTotal: 0,
+                    userTotal: toMoney(0),
                     recurring: txOnModal.recurring,
                     mds: txOnModal.mds,
                     bankId: null,

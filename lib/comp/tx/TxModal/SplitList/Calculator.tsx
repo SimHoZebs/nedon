@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { evaluateDecimalExpression } from "@/util/decimalExpression";
 
 interface Props {
   value: string;
@@ -27,9 +27,7 @@ const Calculator = (props: Props) => {
       case "=": {
         let evaluation: string;
         try {
-          const calculate = new Function(`return ${props.value}`);
-          evaluation = calculate();
-          evaluation = Prisma.Decimal(evaluation).toFixed(2);
+          evaluation = evaluateDecimalExpression(props.value).toFixed(2);
         } catch (e) {
           console.error(e);
           evaluation = "ERROR";

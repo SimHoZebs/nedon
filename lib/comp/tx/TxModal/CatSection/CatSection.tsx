@@ -1,5 +1,6 @@
 import { ActionBtn, Button } from "@/comp/shared/Button";
 
+import { toMoney } from "@/util/money";
 import { trpc } from "@/util/trpc";
 
 import type { CatFormState } from "@/types/cat";
@@ -81,7 +82,7 @@ const CatSection = () => {
               //add a new cat
               tmpCatArray.push(
                 createNewCat({
-                  amount: 0,
+                  amount: toMoney(0),
                   txId,
                   primary: "Uncategorized", // Default primary
                   detailed: "Uncategorized", // Default detailed

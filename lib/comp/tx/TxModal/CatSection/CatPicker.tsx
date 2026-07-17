@@ -3,10 +3,10 @@ import { trpc } from "@/util/trpc";
 import type { CatFormState } from "@/types/cat";
 
 import { createNewCat, getCatStyle } from "lib/domain/cat";
+import type { plaidCategories } from "lib/domain/plaidCategories";
 import { useStore } from "lib/store/store";
 import { useTxStore } from "lib/store/txStore";
 import { type ForwardedRef, forwardRef, useState } from "react";
-import type { plaidCategories } from "server/util/plaidCategories";
 
 interface Props {
   appUserCatArray: CatFormState[];

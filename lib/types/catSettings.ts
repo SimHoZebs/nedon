@@ -1,17 +1,18 @@
-import { Prisma } from "@prisma/client";
-import { z } from "zod";
+import { MoneySchema } from "./money";
 
-export type CatSettings = Prisma.CatSettingsGetPayload<undefined>;
+import { z } from "zod";
 
 export const CatSettingsSchema = z
   .object({
     id: z.string(),
     name: z.string(),
-    budget: z.instanceof(Prisma.Decimal),
+    budget: MoneySchema,
     userSettingsId: z.string(),
     parentId: z.string().nullable(),
   })
   .strict();
+
+export type CatSettings = z.infer<typeof CatSettingsSchema>;
 
 export const UnsavedCatSettingsSchema = CatSettingsSchema.omit({ id: true })
   .extend({

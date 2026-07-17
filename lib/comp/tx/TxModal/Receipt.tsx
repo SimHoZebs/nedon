@@ -8,6 +8,7 @@ import { trpc } from "@/util/trpc";
 
 import type { ReceiptFormState } from "@/types/receipt";
 
+import Decimal from "decimal.js";
 import { useTxStore } from "lib/store/txStore";
 import Image from "next/image";
 import React from "react";
@@ -106,12 +107,14 @@ const Receipt = () => {
 
   const receiptSum = toMoney(
     tx?.receipt
-      ? tx.receipt.items.reduce(
-          (sum, item) => sum + item.unit_price * item.quantity,
-          0,
-        ) +
-          tx.receipt.tip +
-          tx.receipt.tax
+      ? tx.receipt.items
+          .reduce(
+            (sum, item) =>
+              sum.plus(new Decimal(item.unit_price).mul(item.quantity)),
+            new Decimal(0),
+          )
+          .plus(tx.receipt.tip)
+          .plus(tx.receipt.tax)
       : 0,
   );
 
@@ -191,7 +194,9 @@ const Receipt = () => {
                 />
               </td>
               <td>
-                <p>${toMoney(item.unit_price * item.quantity).toString()}</p>
+                <p>
+                  ${toMoney(new Decimal(item.unit_price).mul(item.quantity))}
+                </p>
               </td>
             </tr>
           ))}
@@ -213,9 +218,12 @@ const Receipt = () => {
               />
               <p className="text-xs">
                 (
-                {tx.amount === 0
+                {new Decimal(tx.amount).isZero()
                   ? "0"
-                  : ((tx.receipt.tip * 100) / tx.amount).toString()}
+                  : new Decimal(tx.receipt.tip)
+                      .mul(100)
+                      .div(tx.amount)
+                      .toString()}
                 %)
               </p>
             </td>
@@ -241,12 +249,12 @@ const Receipt = () => {
       {tx?.receipt && (
         <p
           className={`h-5 text-pink-500 ${
-            receiptSum !== tx.amount ? "" : "hidden"
+            new Decimal(receiptSum).equals(tx.amount) ? "hidden" : ""
           }`}
         >
-          Receipt total is <b>${receiptSum.toString()}</b>, which is{" "}
-          <b>${toMoney(tx.amount - receiptSum).toString()}</b> off from this
-          transaction. Adjust your receipt to match the amount.
+          Receipt total is <b>${receiptSum}</b>, which is{" "}
+          <b>${toMoney(new Decimal(tx.amount).minus(receiptSum))}</b> off from
+          this transaction. Adjust your receipt to match the amount.
         </p>
       )}
     </div>

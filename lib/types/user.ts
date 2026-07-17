@@ -1,18 +1,14 @@
-import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 
-export const OMIT_PRIVATE_DATA = {
-  bankAccessToken: true,
-  bankSyncToken: true,
-} as const;
+export const PublicUserSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+  })
+  .strict();
 
-export type PureUser = Prisma.UserGetPayload<{
-  omit: typeof OMIT_PRIVATE_DATA;
-}>;
-
-export type Connection = Prisma.UserGetPayload<{
-  omit: typeof OMIT_PRIVATE_DATA;
-}>;
+export type PublicUser = z.infer<typeof PublicUserSchema>;
+export type Connection = PublicUser;
 
 export const UnAuthUserClientSideSchema = z
   .object({
@@ -48,6 +44,13 @@ export const UserClientSideSchema = z
   .strict();
 
 export interface UserClientSide extends z.infer<typeof UserClientSideSchema> {}
+
+export const ClientUserSchema = z.union([
+  UserClientSideSchema,
+  UnAuthUserClientSideSchema,
+]);
+
+export type ClientUser = z.infer<typeof ClientUserSchema>;
 
 export const isUserClientSide = (user: unknown): user is UserClientSide => {
   return UserClientSideSchema.safeParse(user).success;

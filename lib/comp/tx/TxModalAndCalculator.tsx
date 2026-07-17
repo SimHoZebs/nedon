@@ -5,6 +5,7 @@ import type { SplitTxFormState } from "@/types/tx";
 import Calculator from "./TxModal/SplitList/Calculator";
 import TxModal from "./TxModal/TxModal";
 
+import Decimal from "decimal.js";
 import { motion } from "framer-motion";
 import { useStore } from "lib/store/store";
 import { useTxStore } from "lib/store/txStore";
@@ -28,20 +29,26 @@ const TxModalAndCalculator = (props: Props) => {
   const hasEditedCatArray = useTxStore((s) => s.hasEditedCatArray);
   const focusedSplitTxIndex = useTxStore((state) => state.focusedSplitTxIndex);
   const tx = useTxStore((state) => state.txOnModal);
-  const txAmount = tx?.amount || 0;
+  const txAmount = tx?.amount || "0";
   const catArray = tx?.catArray || [];
   const splitTxArray: SplitTxFormState[] = tx?.splitTxArray || [];
   const [isCalcHidden, setIsCalcHidden] = React.useState(false);
   const screenType = useStore((s) => s.screenType);
 
   // Changes a user's split amount and balances
-  const changeSplitAmount = (index: number, newAmount: number) => {
-    if (!Number.isFinite(newAmount)) return;
+  const changeSplitAmount = (index: number, newAmount: string) => {
+    let parsedAmount: Decimal;
+    try {
+      parsedAmount = new Decimal(newAmount);
+    } catch {
+      return;
+    }
+    if (!parsedAmount.isFinite()) return;
 
     const updatedSplitTxArray = structuredClone(splitTxArray);
 
     const newAmountFloored = toMoney(
-      Math.max(Math.min(newAmount, txAmount), 0),
+      Decimal.max(Decimal.min(parsedAmount, txAmount), 0),
     );
 
     updatedSplitTxArray[index].amount = newAmountFloored;
@@ -50,12 +57,12 @@ const TxModalAndCalculator = (props: Props) => {
     const editedIndices = new Set(editedSplitTxIndexArray); // Optimize lookup
 
     // Calculate the total amount of the splits that hasn't been edited
-    let editedSplitAmountTotal = 0;
+    let editedSplitAmountTotal = new Decimal(0);
     const len = updatedSplitTxArray.length;
     for (let i = 0; i < len; i++) {
       const split = updatedSplitTxArray[i];
       if (editedIndices.has(i) || i === index) {
-        editedSplitAmountTotal += split.amount;
+        editedSplitAmountTotal = editedSplitAmountTotal.plus(split.amount);
       } else {
         uneditedSplitArray.push(split);
       }
@@ -63,13 +70,14 @@ const TxModalAndCalculator = (props: Props) => {
 
     // Include tx.user's if needed
     if (hasEditedCatArray) {
-      editedSplitAmountTotal += catArray.reduce(
-        (acc, cat) => acc + cat.amount,
-        0,
+      editedSplitAmountTotal = editedSplitAmountTotal.plus(
+        catArray.reduce((acc, cat) => acc.plus(cat.amount), new Decimal(0)),
       );
     }
 
-    let remainder = toMoney(txAmount - editedSplitAmountTotal);
+    let remainder = new Decimal(
+      toMoney(new Decimal(txAmount).minus(editedSplitAmountTotal)),
+    );
 
     // Handle edge case: no unedited splits
     if (uneditedSplitArray.length === 0) {
@@ -84,9 +92,9 @@ const TxModalAndCalculator = (props: Props) => {
       } else if (idx === uneditedSplitArray.length - 1) {
         split.amount = toMoney(remainder);
       } else {
-        const portion = remainder / uneditedSplitArray.length;
+        const portion = remainder.div(uneditedSplitArray.length);
         split.amount = toMoney(portion);
-        remainder = toMoney(remainder - portion);
+        remainder = new Decimal(toMoney(remainder.minus(portion)));
       }
     });
 
@@ -109,7 +117,7 @@ const TxModalAndCalculator = (props: Props) => {
       <TxModal
         onClose={props.onClose}
         onSplitAmountChange={(index, amount) => {
-          changeSplitAmount(index, Number.parseFloat(amount));
+          changeSplitAmount(index, amount);
         }}
       />
 
@@ -141,16 +149,13 @@ const TxModalAndCalculator = (props: Props) => {
                 copy[focusedSplitTxIndex] = value;
 
                 // Removes anything after arithmetic
-                const onlyNumber = Number.parseFloat(value).toString();
-                // If the change was purely numeric, balance the split
-                if (onlyNumber === value) {
-                  changeSplitAmount(
-                    focusedSplitTxIndex,
-                    Number.parseFloat(value),
-                  );
-                } else {
+                try {
+                  new Decimal(value);
+                } catch {
                   setSplitTxAmountDisplayArray(copy);
+                  return;
                 }
+                changeSplitAmount(focusedSplitTxIndex, value);
               }}
             />
           </motion.div>

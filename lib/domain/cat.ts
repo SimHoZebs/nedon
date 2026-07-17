@@ -1,6 +1,6 @@
 import type { CatFormState } from "@/types/cat";
 
-import { plaidCategories } from "server/util/plaidCategories";
+import { plaidCategories } from "./plaidCategories";
 
 export const createNewCat = (input: CatFormState): CatFormState => {
   return {

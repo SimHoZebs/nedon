@@ -1,4 +1,7 @@
+import { toMoney } from "@/util/money";
 import { trpc } from "@/util/trpc";
+
+import type { CatSettings } from "@/types/catSettings";
 
 import { Button, CloseBtn } from "../shared/Button";
 import DateSortedTxList from "../shared/DateSortedTxList";
@@ -6,7 +9,7 @@ import { H1, H2 } from "../shared/Heading";
 import Input from "../shared/Input";
 import Modal from "../shared/Modal";
 
-import { type CatSettings, Prisma } from "@prisma/client";
+import Decimal from "decimal.js";
 import { getCatStyle } from "lib/domain/cat";
 import { type NestedCatWithTx, organizeTxByTime } from "lib/domain/tx";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
@@ -28,7 +31,7 @@ const CatModal = (props: Props) => {
     { enabled: !!appUser && !appUserLoading },
   );
 
-  const [budget, setBudget] = useState<Prisma.Decimal>(new Prisma.Decimal(0));
+  const [budget, setBudget] = useState("0");
 
   useEffect(() => {
     if (settings) {
@@ -39,7 +42,7 @@ const CatModal = (props: Props) => {
   const upsertCatSetting = trpc.settings.upsertCatSetting.useMutation();
   const queryClient = trpc.useUtils();
 
-  const totalAmount = cat.primary.total.absoluteValue();
+  const totalAmount = new Decimal(cat.primary.total.toString()).absoluteValue();
 
   const txUnderThisCat = cat.primary.detailed.flatMap((d) => d.txs);
 
@@ -65,25 +68,25 @@ const CatModal = (props: Props) => {
           <div className="flex w-full flex-col items-start">
             <H2>$ {totalAmount.toNumber()} Spent</H2>
             <p>
-              {props.modalData.settings?.budget && (
-                <p className="text-sm text-zinc-400">
-                  {Prisma.Decimal.div(
-                    totalAmount,
-                    props.modalData.settings.budget,
-                  )
-                    .mul(100)
-                    .toNumber()}
-                  % of ${props.modalData.settings.budget.toNumber()}
-                </p>
-              )}
+              {props.modalData.settings?.budget &&
+                !new Decimal(props.modalData.settings.budget).isZero() && (
+                  <p className="text-sm text-zinc-400">
+                    {totalAmount
+                      .div(props.modalData.settings.budget)
+                      .mul(100)
+                      .toNumber()}
+                    % of $
+                    {new Decimal(props.modalData.settings.budget).toNumber()}
+                  </p>
+                )}
             </p>
           </div>
 
           <div>
             <p>Budget</p>
             <Input
-              value={budget.toNumber()}
-              onChange={(e) => setBudget(new Prisma.Decimal(e.target.value))}
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
               className="rounded-md border border-zinc-700"
               type="number"
             />
@@ -97,7 +100,7 @@ const CatModal = (props: Props) => {
                 const upsertData = {
                   id: settings?.id,
                   name: cat.primary.name,
-                  budget: budget,
+                  budget: toMoney(budget || "0"),
                   parentId: null,
                   userSettingsId: userSettings.id,
                 };
@@ -116,7 +119,12 @@ const CatModal = (props: Props) => {
                 <div key={detailedCat.name} className="flex justify-between">
                   <span>{detailedCat.name}</span>
                   <span>
-                    ${Number(detailedCat.total.absoluteValue().toFixed(2))}
+                    $
+                    {Number(
+                      new Decimal(detailedCat.total.toString())
+                        .absoluteValue()
+                        .toFixed(2),
+                    )}
                   </span>
                 </div>
               ))}

@@ -201,16 +201,19 @@ const userRouter = router({
       return result;
     }),
 
-  delete: procedure.input(z.string()).mutation(async ({ input }) => {
-    const user = await db.user.delete({
-      where: {
-        id: input,
-      },
-      ...INCLUDE_CONNECTIONS_SAEFLY,
-    });
+  delete: procedure
+    .input(z.string())
+    .output(z.string())
+    .mutation(async ({ input }) => {
+      const user = await db.user.delete({
+        where: {
+          id: input,
+        },
+        select: { id: true },
+      });
 
-    return user;
-  }),
+      return user.id;
+    }),
 
   connection: connectionRouter,
 });

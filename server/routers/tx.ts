@@ -8,23 +8,26 @@ import { Prisma, TxKind } from "@prisma/client";
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
 import { createCatWithoutTxInput } from "server/domains/cat";
 import { createTxInput, txInclude } from "server/domains/tx";
+import { mapTx, prismaDecimalToMoney } from "server/mappers/prismaToDto";
 import db from "server/util/db";
 import { z } from "zod";
 
 const txRouter = router({
   getWithoutBank: procedure
     .input(z.object({ userId: z.string(), txId: z.string() }))
+    .output(TxSchema.nullable())
     .query(async ({ input }) => {
-      const txInDB = await db.tx.findUnique({
+      const txInDB = await db.tx.findFirst({
         where: {
           id: input.txId,
+          ownerId: input.userId,
         },
         include: txInclude,
       });
 
       if (!txInDB) return null;
 
-      return txInDB;
+      return mapTx(txInDB);
     }),
 
   syncWithBank: procedure
@@ -55,6 +58,12 @@ const txRouter = router({
 
   getAll: procedure
     .input(z.object({ userId: z.string(), date: z.date() }))
+    .output(
+      z.discriminatedUnion("ok", [
+        z.object({ ok: z.literal(true), value: TxSchema.array() }),
+        z.object({ ok: z.literal(false), error: z.unknown() }),
+      ]),
+    )
     .query(async ({ input }) => {
       let result: Result<Tx[], unknown>;
       try {
@@ -96,7 +105,6 @@ const txRouter = router({
                 items: true,
               },
             },
-            originTx: true,
             splitTxArray: true,
           },
         });
@@ -110,7 +118,7 @@ const txRouter = router({
         }
 
         console.log("returning txArray", txArray.length);
-        result = { ok: true, value: txArray };
+        result = { ok: true, value: txArray.map(mapTx) };
       } catch (error) {
         if (error instanceof PrismaClientInitializationError) {
           result = { ok: false, error: "Database not initialized" };
@@ -126,8 +134,9 @@ const txRouter = router({
   //all tx meta including the user
   getAllAssociated: procedure
     .input(z.object({ id: z.string() }))
+    .output(TxSchema.array())
     .query(async ({ input }) => {
-      return db.tx.findMany({
+      const txArray = await db.tx.findMany({
         where: {
           ownerId: input.id,
           kind: { not: TxKind.ORIGINAL },
@@ -135,30 +144,35 @@ const txRouter = router({
 
         include: txInclude,
       });
+      return txArray.map(mapTx);
     }),
 
   create: procedure
     .input(TxFormStateSchema)
     .output(TxSchema)
     .mutation(async ({ input }) => {
-      return await db.tx.create({
+      const tx = await db.tx.create({
         data: createTxInput(input),
         include: txInclude,
       });
+      return mapTx(tx);
     }),
 
   createMany: procedure
     .input(z.array(TxFormStateSchema))
+    .output(TxSchema.array())
     .mutation(async ({ input }) => {
       const txCreateQueryArray = input.map((tx) => {
         return db.tx.create({ data: createTxInput(tx), include: txInclude });
       });
 
-      return await db.$transaction(txCreateQueryArray);
+      const txArray = await db.$transaction(txCreateQueryArray);
+      return txArray.map(mapTx);
     }),
 
   update: procedure
     .input(TxFormStateSchema.extend({ id: z.string() }))
+    .output(TxSchema)
     .mutation(async ({ input }) => {
       const {
         id,
@@ -233,11 +247,12 @@ const txRouter = router({
         include: txInclude,
       });
 
-      return tx;
+      return mapTx(tx);
     }),
 
   reset: procedure
     .input(z.object({ txId: z.string() }))
+    .output(TxSchema.nullable())
     .mutation(async ({ input }) => {
       const tx = await db.tx.findUnique({
         where: {
@@ -253,17 +268,18 @@ const txRouter = router({
       });
 
       if (!tx?.originalBankTx) {
-        return await db.tx.findUnique({
+        const unchangedTx = await db.tx.findUnique({
           where: {
             id: input.txId,
           },
           include: txInclude,
         });
+        return unchangedTx ? mapTx(unchangedTx) : null;
       }
 
       const originalTx = tx.originalBankTx;
 
-      return await db.tx.update({
+      const resetTx = await db.tx.update({
         where: {
           id: input.txId,
         },
@@ -285,13 +301,14 @@ const txRouter = router({
             create: originalTx.catArray.map((cat) =>
               createCatWithoutTxInput({
                 ...cat,
-                amount: cat.amount.toNumber(),
+                amount: prismaDecimalToMoney(cat.amount),
               }),
             ),
           },
         },
         include: txInclude,
       });
+      return mapTx(resetTx);
     }),
 
   delete: procedure

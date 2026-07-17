@@ -7,7 +7,10 @@ import DateRangePicker from "@/comp/shared/DateRangePicker";
 
 import { trpc } from "@/util/trpc";
 
-import { type CatSettings, Prisma } from "@prisma/client";
+import type { CatSettings } from "@/types/catSettings";
+import type { Tx } from "@/types/tx";
+
+import Decimal from "decimal.js";
 import { AnimatePresence, motion } from "framer-motion";
 import type { NestedCatWithTx, TxType } from "lib/domain/tx";
 import {
@@ -70,22 +73,42 @@ const Page = () => {
   }, [date, rangeFormat, txArray.data, txArray.status, txOragnizedByTimeArray]);
 
   const { nestedCatWithTxArray, spendingTotal } = useMemo(() => {
-    const [y, m, _d] = YMD;
+    const [y, m, d] = YMD;
 
-    if (y === -1 || !txOragnizedByTimeArray[y] || !txOragnizedByTimeArray[y][m])
-      return { groupedCatUI: [], spendingTotal: 0 };
+    let scopedTxArray: Tx[];
+    if (rangeFormat === "all") {
+      scopedTxArray = txOragnizedByTimeArray.flat(3);
+    } else if (y === -1 || !txOragnizedByTimeArray[y]) {
+      return { nestedCatWithTxArray: [], spendingTotal: new Decimal(0) };
+    } else if (rangeFormat === "year") {
+      scopedTxArray = txOragnizedByTimeArray[y].flat(2);
+    } else if (m === -1 || !txOragnizedByTimeArray[y][m]) {
+      return { nestedCatWithTxArray: [], spendingTotal: new Decimal(0) };
+    } else if (rangeFormat === "month") {
+      scopedTxArray = txOragnizedByTimeArray[y][m].flat();
+    } else if (d !== -1 && txOragnizedByTimeArray[y][m][d]) {
+      scopedTxArray = txOragnizedByTimeArray[y][m][d];
+    } else {
+      return { nestedCatWithTxArray: [], spendingTotal: new Decimal(0) };
+    }
 
-    const nestedCatWithTxArray = convertTxArrayToNestedCatWithTxArray(
-      txOragnizedByTimeArray[y][m].flat(),
-    );
+    const txTypeArray = scopedTxArray.filter((tx) => {
+      const amount = new Decimal(tx.amount);
+      if (txType === "spending") return amount.isPositive();
+      if (txType === "received") return amount.isNegative();
+      return false;
+    });
+
+    const nestedCatWithTxArray =
+      convertTxArrayToNestedCatWithTxArray(txTypeArray);
 
     const spendingTotal = nestedCatWithTxArray.reduce(
-      (acc, curr) => acc.add(curr.primary.total),
-      Prisma.Decimal(0),
+      (acc, curr) => acc.add(curr.primary.total.toString()),
+      new Decimal(0),
     );
 
     return { nestedCatWithTxArray, spendingTotal };
-  }, [txOragnizedByTimeArray, YMD]);
+  }, [rangeFormat, txOragnizedByTimeArray, txType, YMD]);
 
   return appUser ? (
     <section className="flex flex-col items-center gap-y-4">
@@ -142,7 +165,7 @@ const Page = () => {
             />
           )}
 
-          {nestedCatWithTxArray && nestedCatWithTxArray.length === 0 && (
+          {nestedCatWithTxArray.length > 0 && (
             <>
               <AnalysisBar
                 organizedTxByCatArray={nestedCatWithTxArray}

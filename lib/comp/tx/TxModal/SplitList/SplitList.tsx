@@ -7,6 +7,7 @@ import { trpc } from "@/util/trpc";
 import SplitUser from "./SplitUser";
 import SplitUserOptionList from "./SplitUserOptionList";
 
+import Decimal from "decimal.js";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useTxStore } from "lib/store/txStore";
 import type React from "react";
@@ -48,15 +49,19 @@ const SplitList = (props: Props) => {
     (state) => state.setEditedSplitTxIndexArray,
   );
 
-  const txAmount = tx?.amount || 0;
+  const txAmount = tx?.amount || "0";
 
   const splitTxArray = tx?.splitTxArray || [];
 
   const updatedSplitAmount = toMoney(
-    splitTxArray.reduce((amount, split) => amount + split.amount, 0),
+    splitTxArray.reduce(
+      (amount, split) => amount.plus(split.amount),
+      new Decimal(0),
+    ),
   );
 
-  const isWrongSplit = updatedSplitAmount !== txAmount;
+  const splitDifference = new Decimal(txAmount).minus(updatedSplitAmount);
+  const isWrongSplit = !splitDifference.isZero();
 
   const syncSplit = async () => {
     if (!appUser || !tx) {
@@ -143,9 +148,9 @@ const SplitList = (props: Props) => {
               isWrongSplit && splitTxArray.length > 0 ? "" : "hidden"
             }`}
           >
-            {`Current split total is $${updatedSplitAmount.toString()}; ${toMoney(
-              Math.abs(txAmount - updatedSplitAmount),
-            ).toString()} ${updatedSplitAmount > txAmount ? "over " : "under "}the total`}
+            {`Current split total is $${updatedSplitAmount}; ${toMoney(
+              splitDifference.abs(),
+            )} ${splitDifference.isNegative() ? "over " : "under "}the total`}
           </p>
 
           <div className="flex flex-col gap-y-1 px-3 md:w-fit">

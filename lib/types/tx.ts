@@ -1,24 +1,23 @@
 import { CatFormStateSchema, CatSchema, isSavedCatArray } from "./cat";
+import { MdsTypeSchema, TxKindSchema } from "./enums";
+import { MoneySchema } from "./money";
 import { ReceiptFormStateSchema, ReceiptSchema } from "./receipt";
 
-import { MdsType, Prisma, TxKind } from "@prisma/client";
 import { z } from "zod";
 
-export type SplitTx = Prisma.TxGetPayload<undefined>;
-
-const SplitTx = z
+const SplitTxSchema = z
   .object({
     id: z.string(),
-    kind: z.nativeEnum(TxKind),
+    kind: TxKindSchema,
     ownerId: z.string(),
     originalBankTxId: z.string().nullable(),
     originTxId: z.string().nullable(),
-    userTotal: z.instanceof(Prisma.Decimal),
+    userTotal: MoneySchema,
     recurring: z.boolean(),
-    mds: z.nativeEnum(MdsType),
+    mds: MdsTypeSchema,
     bankId: z.string().nullable(),
     name: z.string(),
-    amount: z.instanceof(Prisma.Decimal),
+    amount: MoneySchema,
     datetime: z.date().nullable(),
     authorizedDatetime: z.date(),
     accountId: z.string().nullable(),
@@ -30,21 +29,23 @@ const SplitTx = z
     locationPostalCode: z.string().nullable(),
     locationCountry: z.string().nullable(),
   })
-  .strict() satisfies z.ZodType<SplitTx>;
+  .strict();
+
+export type SplitTx = z.infer<typeof SplitTxSchema>;
 
 export const SplitTxFormStateSchema = z
   .object({
     id: z.string().optional(),
-    kind: z.nativeEnum(TxKind),
+    kind: TxKindSchema,
     ownerId: z.string(),
     originalBankTxId: z.string().nullable(),
     originTxId: z.string().nullable(),
-    userTotal: z.number(),
+    userTotal: MoneySchema,
     recurring: z.boolean(),
-    mds: z.nativeEnum(MdsType),
+    mds: MdsTypeSchema,
     bankId: z.string().nullable(),
     name: z.string(),
-    amount: z.number(),
+    amount: MoneySchema,
     datetime: z.date().nullable(),
     authorizedDatetime: z.date(),
     accountId: z.string().nullable(),
@@ -60,33 +61,27 @@ export const SplitTxFormStateSchema = z
 
 export type SplitTxFormState = z.infer<typeof SplitTxFormStateSchema>;
 
-export type Tx = Prisma.TxGetPayload<{
-  include: {
-    splitTxArray: true;
-    receipt: { include: { items: true } };
-    catArray: true;
-  };
-}>;
-
-export const TxSchema = SplitTx.extend({
-  splitTxArray: z.array(SplitTx),
+export const TxSchema = SplitTxSchema.extend({
+  splitTxArray: z.array(SplitTxSchema),
   receipt: ReceiptSchema.nullable(),
   catArray: z.array(CatSchema),
-}).strict() satisfies z.ZodType<Tx>;
+}).strict();
+
+export type Tx = z.infer<typeof TxSchema>;
 
 export const TxFormStateSchema = z
   .object({
     id: z.string().optional(),
-    kind: z.nativeEnum(TxKind),
+    kind: TxKindSchema,
     ownerId: z.string(),
     originalBankTxId: z.string().nullable(),
     originTxId: z.string().nullable(),
-    userTotal: z.number(),
+    userTotal: MoneySchema,
     recurring: z.boolean(),
-    mds: z.nativeEnum(MdsType),
+    mds: MdsTypeSchema,
     bankId: z.string().nullable(),
     name: z.string(),
-    amount: z.number(),
+    amount: MoneySchema,
     datetime: z.date().nullable(),
     authorizedDatetime: z.date(),
     accountId: z.string().nullable(),

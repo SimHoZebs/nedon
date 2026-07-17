@@ -1,3 +1,4 @@
+import { MdsType, TxKind } from "@/types/enums";
 import type { ChaseCSVTx, Tx, TxFormState } from "@/types/tx";
 
 import useAutoLoadUser from "../hooks/useAutoLoadUser";
@@ -5,7 +6,7 @@ import { useStore } from "../store/store";
 import { toMoney } from "../util/money";
 import { trpc } from "../util/trpc";
 
-import { MdsType, Prisma, TxKind } from "@prisma/client";
+import Decimal from "decimal.js";
 
 export const createTxFromChaseCSV = (
   chaseCSVTx: ChaseCSVTx,
@@ -15,12 +16,12 @@ export const createTxFromChaseCSV = (
     kind: TxKind.USER,
     splitTxArray: [],
     name: chaseCSVTx.Description,
-    amount: toMoney(Number(chaseCSVTx.Amount)),
+    amount: toMoney(chaseCSVTx.Amount),
     recurring: false,
     mds: MdsType.UNDETERMINED,
     datetime: new Date(chaseCSVTx.PostingDate),
     authorizedDatetime: new Date(chaseCSVTx.PostingDate),
-    userTotal: 0,
+    userTotal: toMoney(0),
     originTxId: null,
     originalBankTxId: null,
     bankId: null,
@@ -41,27 +42,27 @@ export const createTxFromChaseCSV = (
 export const mapTxToFormState = (tx: Tx): TxFormState => {
   return {
     ...tx,
-    amount: toMoney(tx.amount.toNumber()),
-    userTotal: toMoney(tx.userTotal.toNumber()),
+    amount: toMoney(tx.amount),
+    userTotal: toMoney(tx.userTotal),
     splitTxArray: tx.splitTxArray.map((split) => ({
       ...split,
-      amount: toMoney(split.amount.toNumber()),
-      userTotal: toMoney(split.userTotal.toNumber()),
+      amount: toMoney(split.amount),
+      userTotal: toMoney(split.userTotal),
     })),
     catArray: tx.catArray.map((cat) => ({
       ...cat,
-      amount: toMoney(cat.amount.toNumber()),
+      amount: toMoney(cat.amount),
     })),
     receipt: tx.receipt
       ? {
           ...tx.receipt,
-          subtotal: toMoney(tx.receipt.subtotal.toNumber()),
-          tax: toMoney(tx.receipt.tax.toNumber()),
-          tip: toMoney(tx.receipt.tip.toNumber()),
-          grand_total: toMoney(tx.receipt.grand_total.toNumber()),
+          subtotal: toMoney(tx.receipt.subtotal),
+          tax: toMoney(tx.receipt.tax),
+          tip: toMoney(tx.receipt.tip),
+          grand_total: toMoney(tx.receipt.grand_total),
           items: tx.receipt.items.map((item) => ({
             ...item,
-            unit_price: toMoney(item.unit_price.toNumber()),
+            unit_price: toMoney(item.unit_price),
           })),
         }
       : null,
@@ -71,11 +72,11 @@ export const mapTxToFormState = (tx: Tx): TxFormState => {
 export type NestedCatWithTx = {
   primary: {
     name: string;
-    total: Prisma.Decimal;
+    total: Decimal;
     detailed: {
       name: string;
       txs: Tx[];
-      total: Prisma.Decimal;
+      total: Decimal;
     }[];
   };
 };
@@ -93,12 +94,12 @@ export const convertTxArrayToNestedCatWithTxArray = (txArray: Tx[]) => {
         catWithTxArray.push({
           primary: {
             name: cat.primary,
-            total: Prisma.Decimal(0),
+            total: new Decimal(cat.amount),
             detailed: [
               {
                 name: cat.detailed,
                 txs: [tx],
-                total: tx.amount,
+                total: new Decimal(cat.amount),
               },
             ],
           },
@@ -115,27 +116,23 @@ export const convertTxArrayToNestedCatWithTxArray = (txArray: Tx[]) => {
         primaryCat.detailed.push({
           name: cat.detailed,
           txs: [tx],
-          total: tx.amount,
+          total: new Decimal(cat.amount),
         });
-        primaryCat.total = primaryCat.total.add(tx.amount);
+        primaryCat.total = primaryCat.total.add(cat.amount);
         continue;
       }
 
       const detailedCat = primaryCat.detailed[detailedCatIndex];
       detailedCat.txs.push(tx);
-      detailedCat.total = detailedCat.total.add(tx.amount);
-      primaryCat.total = primaryCat.total.add(tx.amount);
+      detailedCat.total = detailedCat.total.add(cat.amount);
+      primaryCat.total = primaryCat.total.add(cat.amount);
     }
   }
 
   return catWithTxArray;
 };
 
-export const txTypeArray: ["spending", "received", "transfers"] = [
-  "spending",
-  "received",
-  "transfers",
-] as const;
+export const txTypeArray = ["spending", "received"] as const;
 
 export type TxType = (typeof txTypeArray)[number];
 

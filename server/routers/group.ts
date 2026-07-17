@@ -1,13 +1,15 @@
-import { OMIT_PRIVATE_DATA } from "@/types/user";
+import { GroupSchema } from "@/types/group";
 
 import { procedure, router } from "../trpc";
 
 import db from "server/util/db";
+import { OMIT_PRIVATE_DATA } from "server/util/user";
 import { z } from "zod";
 
 export const groupRouter = router({
   get: procedure
     .input(z.object({ id: z.string() }))
+    .output(GroupSchema.nullable())
     .query(async ({ input }) => {
       const group = await db.group.findUnique({
         where: {
@@ -26,6 +28,7 @@ export const groupRouter = router({
 
   create: procedure
     .input(z.object({ id: z.string() }))
+    .output(GroupSchema)
     .mutation(async ({ input }) => {
       const group = await db.group.create({
         data: {
@@ -62,6 +65,7 @@ export const groupRouter = router({
 
   addUser: procedure
     .input(z.object({ groupId: z.string(), userId: z.string() }))
+    .output(GroupSchema)
     .mutation(async ({ input }) => {
       const group = await db.group.update({
         where: {
@@ -84,6 +88,7 @@ export const groupRouter = router({
 
   removeUser: procedure
     .input(z.object({ groupId: z.string(), userId: z.string() }))
+    .output(GroupSchema)
     .mutation(async ({ input }) => {
       const group = await db.group.update({
         where: {

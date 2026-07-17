@@ -3,6 +3,7 @@ import { CatFormStateSchema, CatSchema } from "@/types/cat";
 import { procedure, router } from "../trpc";
 
 import { Prisma } from "@prisma/client";
+import { mapCat } from "server/mappers/prismaToDto";
 import db from "server/util/db";
 import { plaidCategories } from "server/util/plaidCategories";
 import { z } from "zod";
@@ -10,14 +11,16 @@ import { z } from "zod";
 const catRouter = router({
   create: procedure
     .input(CatFormStateSchema.extend({ txId: z.string() }))
+    .output(CatSchema)
     .mutation(async ({ input }) => {
       const { id: _id, amount, ...cat } = input;
-      return await db.cat.create({
+      const createdCat = await db.cat.create({
         data: {
           ...cat,
           amount: new Prisma.Decimal(amount),
         },
       });
+      return mapCat(createdCat);
     }),
 
   upsertMany: procedure
@@ -27,6 +30,7 @@ const catRouter = router({
         catArray: z.array(CatFormStateSchema),
       }),
     )
+    .output(CatSchema.array())
     .mutation(async ({ input }) => {
       const catToUpdateArray = input.catArray.filter(
         (cat): cat is (typeof input.catArray)[number] & { id: string } =>
@@ -62,15 +66,17 @@ const catRouter = router({
         include: { catArray: true },
       });
 
-      return upsertedTx.catArray;
+      return upsertedTx.catArray.map(mapCat);
     }),
 
   delete: procedure
     .input(z.object({ id: z.string() }))
+    .output(CatSchema)
     .mutation(async ({ input }) => {
-      return await db.cat.delete({
+      const deletedCat = await db.cat.delete({
         where: { id: input.id },
       });
+      return mapCat(deletedCat);
     }),
 
   deleteMany: procedure

@@ -3,19 +3,19 @@ import { trpc } from "@/util/trpc";
 import { ActionBtn } from "../shared/Button";
 import Modal from "../shared/Modal";
 
-import type { Prisma } from "@prisma/client";
+import Decimal from "decimal.js";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import type React from "react";
 import { useState } from "react";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
-  oweUser: { id: string; amount: Prisma.Decimal } | undefined;
+  oweUser: { id: string; amount: Decimal } | undefined;
 }
 const SettleModal = (props: Props) => {
   const { user: appUser, isLoading } = useAutoLoadUser();
 
-  const [settleAmount, setSettleAmount] = useState(0);
+  const [settleAmount, setSettleAmount] = useState("0");
   const [appUserGiving, setAppUserGiving] = useState(true);
 
   const associatedTxArray = trpc.tx.getAllAssociated.useQuery(
@@ -49,12 +49,21 @@ const SettleModal = (props: Props) => {
           type="number"
           step={0.01}
           value={settleAmount}
-          onChange={(e) => setSettleAmount(Number.parseFloat(e.target.value))}
+          onChange={(e) => setSettleAmount(e.target.value)}
         />
       </div>
 
       <ActionBtn
-        disabled={!settleAmount}
+        disabled={
+          !settleAmount ||
+          (() => {
+            try {
+              return new Decimal(settleAmount).isZero();
+            } catch {
+              return true;
+            }
+          })()
+        }
         onClickAsync={async () => {
           //Why do I even need this check?
           if (!props.oweUser) {

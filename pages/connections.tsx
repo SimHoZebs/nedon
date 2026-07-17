@@ -3,7 +3,7 @@ import { ActionBtn, Button } from "@/comp/shared/Button";
 
 import { trpc } from "@/util/trpc";
 
-import { Prisma } from "@prisma/client";
+import Decimal from "decimal.js";
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useMemo, useState } from "react";
 
@@ -14,7 +14,7 @@ const Connections = () => {
   const [showModal, setShowModal] = useState(false);
   const [oweUser, setOweUser] = useState<{
     id: string;
-    amount: Prisma.Decimal;
+    amount: Decimal;
   }>();
 
   const { user: appUser, isLoading } = useAutoLoadUser();
@@ -35,7 +35,7 @@ const Connections = () => {
           );
       return;
     }
-    const oweGroup: { [userId: string]: Prisma.Decimal } = {};
+    const oweGroup: { [userId: string]: Decimal } = {};
 
     if (!appUser) {
       console.error("appUser not found");
@@ -44,7 +44,7 @@ const Connections = () => {
 
     for (const tx of associatedTxArray.data) {
       for (const split of tx.splitTxArray) {
-        const splitAmount = split.amount;
+        const splitAmount = new Decimal(split.amount);
 
         if (tx.ownerId === appUser.id) {
           if (split.ownerId === appUser.id) continue;
@@ -98,7 +98,7 @@ const Connections = () => {
                     setShowModal(true);
                     setOweUser({
                       id: user.id,
-                      amount: calcOweGroup?.[user.id] || new Prisma.Decimal(0),
+                      amount: calcOweGroup?.[user.id] || new Decimal(0),
                     });
                   }}
                 >

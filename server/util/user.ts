@@ -1,10 +1,13 @@
-import {
-  type Connection,
-  OMIT_PRIVATE_DATA,
-  type PureUser,
-  type UnAuthUserClientSide,
-  type UserClientSide,
+import type {
+  Connection,
+  UnAuthUserClientSide,
+  UserClientSide,
 } from "@/types/user";
+
+export const OMIT_PRIVATE_DATA = {
+  bankAccessToken: true,
+  bankSyncToken: true,
+} as const;
 
 export const INCLUDE_CONNECTIONS_SAEFLY = {
   include: {
@@ -14,26 +17,32 @@ export const INCLUDE_CONNECTIONS_SAEFLY = {
   },
 } as const;
 
-export const sanitizeUser = (
-  user: PureUser & {
-    myConnectionArray: Connection[];
-    bankAccessToken?: string | null;
-    bankSyncToken?: string | null;
-  },
-): UnAuthUserClientSide | UserClientSide => {
-  const { bankAccessToken, bankSyncToken, ...userWithoutAccessToken } = user;
+export const sanitizeUser = (user: {
+  id: string;
+  name: string;
+  myConnectionArray: Connection[];
+  bankAccessToken?: string | null;
+  bankSyncToken?: string | null;
+}): UnAuthUserClientSide | UserClientSide => {
+  const sanitizedUser = {
+    id: user.id,
+    name: user.name,
+    myConnectionArray: user.myConnectionArray.map(({ id, name }) => ({
+      id,
+      name,
+    })),
+    hasBankSyncToken: !!user.bankSyncToken,
+  };
 
-  if (bankAccessToken) {
+  if (user.bankAccessToken) {
     return {
-      ...userWithoutAccessToken,
+      ...sanitizedUser,
       hasAccessToken: true,
-      hasBankSyncToken: !!bankSyncToken,
-    } as UserClientSide;
+    } satisfies UserClientSide;
   } else {
     return {
-      ...userWithoutAccessToken,
+      ...sanitizedUser,
       hasAccessToken: false,
-      hasBankSyncToken: !!bankSyncToken,
-    } as UnAuthUserClientSide;
+    } satisfies UnAuthUserClientSide;
   }
 };

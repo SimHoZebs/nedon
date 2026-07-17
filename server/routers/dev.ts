@@ -2,6 +2,7 @@ import type { Result } from "@/util/type";
 
 import {
   isUserClientSide,
+  PublicUserSchema,
   type UnAuthUserClientSide,
   type UserClientSide,
 } from "@/types/user";
@@ -19,14 +20,14 @@ const devRouter = router({
     return user.count;
   }),
 
-  getAllUsers: procedure.input(z.undefined()).query(async () => {
-    //developers get to see all accounts
-    const userArray = await db.user.findMany({
-      ...INCLUDE_CONNECTIONS_SAEFLY,
-    });
-
-    return userArray;
-  }),
+  getAllUsers: procedure
+    .input(z.undefined())
+    .output(z.array(PublicUserSchema))
+    .query(async () => {
+      return db.user.findMany({
+        select: { id: true, name: true },
+      });
+    }),
 
   getFirstUser: procedure.input(z.undefined()).query(async () => {
     let result: Result<UnAuthUserClientSide | UserClientSide, unknown>;

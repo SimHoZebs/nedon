@@ -1,6 +1,6 @@
 import type { Tx } from "@/types/tx";
 
-import { Prisma } from "@prisma/client";
+import Decimal from "decimal.js";
 import type { TxType } from "lib/domain/tx";
 import { useStore } from "lib/store/store";
 import { useEffect, useState } from "react";
@@ -94,7 +94,7 @@ const generateDailyTxSumArray = (
   dateLen: number,
 ) => {
   const result: { date: number; amount: number }[] = [];
-  let amountSum = new Prisma.Decimal(0);
+  let amountSum = new Decimal(0);
   let txIndex = txArray.length - 1;
 
   // Loop through the days of the month and generate empty sums for days with
@@ -112,17 +112,17 @@ const generateDailyTxSumArray = (
     else if (txArray[txIndex][0]?.authorizedDatetime.getDate() === i) {
       amountSum = amountSum.add(
         txArray[txIndex].reduce((acc, curr) => {
+          const amount = new Decimal(curr.amount);
+
           switch (txType) {
             case "spending":
-              return curr.amount.isPositive() ? acc.add(curr.amount) : acc;
+              return amount.isPositive() ? acc.add(amount) : acc;
             case "received":
-              return curr.amount.isNegative()
-                ? acc.sub(curr.amount.negated())
-                : acc;
+              return amount.isNegative() ? acc.sub(amount.negated()) : acc;
             default:
               return acc;
           }
-        }, new Prisma.Decimal(0)),
+        }, new Decimal(0)),
       );
       txIndex--;
     }

@@ -27,6 +27,7 @@
     "@trpc/next": "11.7.2",
     "@trpc/react-query": "11.7.2",
     "@trpc/server": "11.7.2",
+    "decimal.js": "^10.6.0",
     "framer-motion": "^12.23.25",
     "next": "16.2.6",
     "openai": "^6.10.0",

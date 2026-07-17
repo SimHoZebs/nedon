@@ -1,23 +1,24 @@
-import { Prisma } from "@prisma/client";
-import { z } from "zod";
+import { MoneySchema } from "./money";
 
-export type Cat = Prisma.CatGetPayload<undefined>;
+import { z } from "zod";
 
 export const CatSchema = z
   .object({
     id: z.string(),
-    amount: z.instanceof(Prisma.Decimal),
+    amount: MoneySchema,
     primary: z.string(),
     detailed: z.string(),
     description: z.string(),
     txId: z.string(),
   })
-  .strict() satisfies z.ZodType<Cat>;
+  .strict();
+
+export type Cat = z.infer<typeof CatSchema>;
 
 export const CatFormStateSchema = z
   .object({
     id: z.string().optional(),
-    amount: z.number(),
+    amount: MoneySchema,
     primary: z.string(),
     detailed: z.string(),
     description: z.string(),

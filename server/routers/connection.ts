@@ -1,20 +1,14 @@
-import { OMIT_PRIVATE_DATA } from "@/types/user";
+import { ClientUserSchema } from "@/types/user";
 
 import { procedure, router } from "server/trpc";
 import db from "server/util/db";
+import { INCLUDE_CONNECTIONS_SAEFLY, sanitizeUser } from "server/util/user";
 import z from "zod";
-
-const WITH_CONNECTIONS_OMIT_ACCESS_TOKEN = {
-  include: {
-    myConnectionArray: {
-      omit: OMIT_PRIVATE_DATA,
-    },
-  },
-};
 
 const connectionRouter = router({
   add: procedure
     .input(z.object({ userId: z.string(), connectionId: z.string() }))
+    .output(ClientUserSchema)
     .mutation(async ({ input }) => {
       const user = await db.user.update({
         where: {
@@ -27,7 +21,7 @@ const connectionRouter = router({
             },
           },
         },
-        ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
+        ...INCLUDE_CONNECTIONS_SAEFLY,
       });
 
       await db.user.update({
@@ -43,11 +37,12 @@ const connectionRouter = router({
         },
       });
 
-      return user;
+      return sanitizeUser(user);
     }),
 
   remove: procedure
     .input(z.object({ userId: z.string(), connectionId: z.string() }))
+    .output(ClientUserSchema)
     .mutation(async ({ input }) => {
       const user = await db.user.update({
         where: {
@@ -60,7 +55,7 @@ const connectionRouter = router({
             },
           },
         },
-        ...WITH_CONNECTIONS_OMIT_ACCESS_TOKEN,
+        ...INCLUDE_CONNECTIONS_SAEFLY,
       });
 
       await db.user.update({
@@ -76,7 +71,7 @@ const connectionRouter = router({
         },
       });
 
-      return user;
+      return sanitizeUser(user);
     }),
 });
 export default connectionRouter;
