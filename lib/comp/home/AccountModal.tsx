@@ -1,6 +1,6 @@
 import Modal from "@/comp/shared/Modal";
 
-import type { BankAccount } from "@/types/bank";
+import type { FinancialAccount } from "@/types/financial";
 
 import { CloseBtn } from "../shared/Button";
 import DateSortedTxList from "../shared/DateSortedTxList";
@@ -12,7 +12,7 @@ import { useMemo } from "react";
 
 interface Props {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
-  clickedAccount: BankAccount;
+  clickedAccount: FinancialAccount;
 }
 
 const AccountModal = (props: Props) => {
@@ -41,8 +41,8 @@ const AccountModal = (props: Props) => {
                 <p className="text-zinc-400">{""}</p>
               </div>
               <div className="flex flex-col items-end lg:items-start">
-                <H3>Current: ${props.clickedAccount.balances.available}</H3>
-                <H3>Available: ${props.clickedAccount.balances.current}</H3>
+                <H3>Current: ${props.clickedAccount.currentBalance}</H3>
+                <H3>Available: ${props.clickedAccount.availableBalance}</H3>
               </div>
             </div>
             <section className="flex h-full w-full flex-col gap-y-3 p-1 lg:max-w-lg">

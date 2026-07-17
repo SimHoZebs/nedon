@@ -3,7 +3,6 @@ import { GroupSchema } from "@/types/group";
 import { procedure, router } from "../trpc";
 
 import db from "server/util/db";
-import { OMIT_PRIVATE_DATA } from "server/util/user";
 import { z } from "zod";
 
 export const groupRouter = router({
@@ -17,7 +16,7 @@ export const groupRouter = router({
         },
         include: {
           userArray: {
-            omit: OMIT_PRIVATE_DATA,
+            select: { id: true, name: true },
           },
         },
       });
@@ -44,7 +43,7 @@ export const groupRouter = router({
           },
         },
         include: {
-          userArray: { omit: OMIT_PRIVATE_DATA },
+          userArray: { select: { id: true, name: true } },
         },
       });
 
@@ -79,7 +78,7 @@ export const groupRouter = router({
           },
         },
         include: {
-          userArray: { omit: OMIT_PRIVATE_DATA },
+          userArray: { select: { id: true, name: true } },
         },
       });
 
@@ -102,7 +101,7 @@ export const groupRouter = router({
           },
         },
         include: {
-          userArray: { omit: OMIT_PRIVATE_DATA },
+          userArray: { select: { id: true, name: true } },
         },
       });
 

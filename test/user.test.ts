@@ -8,8 +8,12 @@ describe("sanitizeUser", () => {
     const databaseUser = {
       id: "user-id",
       name: "Test User",
-      bankAccessToken: "access-token",
-      bankSyncToken: "sync-token",
+      financialConnectionArray: [
+        {
+          status: "ACTIVE" as const,
+          lastSyncSuccessAt: new Date("2026-07-17T00:00:00.000Z"),
+        },
+      ],
       futurePrivateField: "private",
       myConnectionArray: [
         {
@@ -24,13 +28,11 @@ describe("sanitizeUser", () => {
     expect(user).toEqual({
       id: "user-id",
       name: "Test User",
-      hasAccessToken: true,
-      hasBankSyncToken: true,
+      hasFinancialConnection: true,
+      hasCompletedFinancialSync: true,
       myConnectionArray: [{ id: "connection-id", name: "Connection" }],
     });
     expect(ClientUserSchema.safeParse(user).success).toBe(true);
-    expect("bankAccessToken" in user).toBe(false);
-    expect("bankSyncToken" in user).toBe(false);
     expect("futurePrivateField" in user).toBe(false);
     expect("futurePrivateField" in user.myConnectionArray[0]).toBe(false);
   });
@@ -39,13 +41,12 @@ describe("sanitizeUser", () => {
     const user = sanitizeUser({
       id: "user-id",
       name: "Test User",
-      bankAccessToken: null,
-      bankSyncToken: null,
+      financialConnectionArray: [],
       myConnectionArray: [],
     });
 
-    expect(user.hasAccessToken).toBe(false);
-    expect(user.hasBankSyncToken).toBe(false);
+    expect(user.hasFinancialConnection).toBe(false);
+    expect(user.hasCompletedFinancialSync).toBe(false);
     expect(ClientUserSchema.safeParse(user).success).toBe(true);
   });
 });

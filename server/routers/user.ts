@@ -1,6 +1,5 @@
 import type { Result } from "@/util/type";
 
-import type { BankAccount } from "@/types/bank";
 import {
   isUserClientSide,
   type UnAuthUserClientSide,
@@ -10,7 +9,6 @@ import {
 import { procedure, router } from "../trpc";
 import connectionRouter from "./connection";
 
-import { Prisma } from "@prisma/client";
 import { UserNotFoundError } from "server/util/customErrors";
 import db from "server/util/db";
 import { INCLUDE_CONNECTIONS_SAEFLY, sanitizeUser } from "server/util/user";
@@ -80,90 +78,6 @@ const userRouter = router({
           };
         }
       }
-      return result;
-    }),
-
-  connectToBank: procedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ input, ctx }) => {
-      let result: Result<UserClientSide, Error>;
-      try {
-        const getResult = await ctx.bankService.establishConnection(input.id);
-        if (!getResult.ok) {
-          throw new Error(
-            `Failed to establish bank connection: ${getResult.error}`,
-          );
-        }
-
-        // Fetch user after update
-        const user = await db.user.findUnique({
-          where: { id: input.id },
-          ...INCLUDE_CONNECTIONS_SAEFLY,
-        });
-
-        if (!user) {
-          throw new UserNotFoundError(input.id);
-        }
-
-        const userClientSide = sanitizeUser(user);
-
-        if (!isUserClientSide(userClientSide)) {
-          throw new Error("Updated user does not match UserClientSide schema");
-        }
-
-        result = {
-          ok: true,
-          value: userClientSide,
-        };
-      } catch (e) {
-        if (!(e instanceof Error)) {
-          console.error("Unknown error type:", e);
-          result = {
-            ok: false,
-            error: new Error("An unexpected error occurred."),
-          };
-          return result;
-        }
-
-        if (
-          e instanceof Prisma.PrismaClientKnownRequestError &&
-          e.code === "P2025"
-        ) {
-          result = {
-            ok: false,
-            error: new UserNotFoundError(input.id),
-          };
-        } else {
-          console.error("Error connecting user to bank:", e);
-          result = {
-            ok: false,
-            error: new Error("An unexpected error occurred."),
-          };
-        }
-      }
-      return result;
-    }),
-
-  getAllAccounts: procedure
-    .input(z.object({ userId: z.string() }))
-    .query(async ({ input, ctx }) => {
-      let result: Result<BankAccount[], Error>;
-
-      try {
-        const res = await ctx.bankService.getAccounts(input.userId);
-        result = { ok: true, value: res.accounts };
-      } catch (e) {
-        if (e instanceof Error) {
-          result = { ok: false, error: e };
-        } else {
-          console.error("Error fetching accounts:", e);
-          result = {
-            ok: false,
-            error: new Error("An unexpected error occurred."),
-          };
-        }
-      }
-
       return result;
     }),
 

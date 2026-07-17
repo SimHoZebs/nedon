@@ -1,6 +1,6 @@
 import type { CatFormState } from "@/types/cat";
 
-import { plaidCategories } from "./plaidCategories";
+import { transactionCategories } from "./transactionCategories";
 
 export const createNewCat = (input: CatFormState): CatFormState => {
   return {
@@ -19,17 +19,17 @@ export const getCatStyle = (primary: string, detailed: string) => {
   };
 
   if (
-    !(primary in plaidCategories) ||
-    !(detailed in plaidCategories[primary])
+    !(primary in transactionCategories) ||
+    !(detailed in transactionCategories[primary])
   ) {
     return defaultStyle;
   }
 
   return {
-    name: plaidCategories[primary][detailed].name,
-    bgColor: plaidCategories[primary][detailed].bgColor,
-    textColor: plaidCategories[primary][detailed].textColor,
-    icon: plaidCategories[primary][detailed].icon,
-    border: plaidCategories[primary][detailed]?.border,
+    name: transactionCategories[primary][detailed].name,
+    bgColor: transactionCategories[primary][detailed].bgColor,
+    textColor: transactionCategories[primary][detailed].textColor,
+    icon: transactionCategories[primary][detailed].icon,
+    border: transactionCategories[primary][detailed]?.border,
   };
 };

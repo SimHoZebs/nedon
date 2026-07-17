@@ -24,7 +24,6 @@ export const createTxFromChaseCSV = (
     userTotal: toMoney(0),
     originTxId: null,
     originalBankTxId: null,
-    bankId: null,
     ownerId: userId,
     accountId: null,
     logoUrl: null,
@@ -241,8 +240,8 @@ export const useTxGetAll = () => {
   const datetime = useStore((store) => store.appInitDatetime);
 
   console.debug(
-    "useTxGetAll - appUser.hasAccessToken:",
-    appUser?.hasAccessToken,
+    "useTxGetAll - user:",
+    appUser?.id,
     "isLoading:",
     appUserIsLoading,
     "datetime:",
@@ -251,7 +250,7 @@ export const useTxGetAll = () => {
 
   console.debug(
     "getAll?: ",
-    (appUser?.hasAccessToken && !!datetime && !appUserIsLoading) === true,
+    (!!appUser && !!datetime && !appUserIsLoading) === true,
   );
 
   const txGetAllResult = trpc.tx.getAll.useQuery(
@@ -261,8 +260,7 @@ export const useTxGetAll = () => {
     },
     {
       staleTime: 3600000,
-      enabled:
-        (appUser?.hasAccessToken && !!datetime && !appUserIsLoading) === true,
+      enabled: (!!appUser && !!datetime && !appUserIsLoading) === true,
     },
   );
 

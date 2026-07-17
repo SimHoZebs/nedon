@@ -1,5 +1,3 @@
-import { trpc } from "@/util/trpc";
-
 import BankLoginBtn from "./BankLoginBtn";
 import { NavBtn } from "./NavBtn";
 
@@ -9,7 +7,7 @@ import { useStore } from "lib/store/store";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/router";
 import type React from "react";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 const font = Inter({ subsets: ["latin"] });
 
@@ -18,21 +16,14 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const router = useRouter();
   const { user: appUser, isLoading: appUserLoading } = useAutoLoadUser();
 
-  const txGetAllRetryCount = useRef(0);
   const setScreenType = useStore((state) => state.setScreenType);
   const setTxOragnizedByTimeArray = useStore(
     (state) => state.setTxOrganizedByTimeArray,
   );
   const txGetAll = useTxGetAll();
 
-  const queryClient = trpc.useUtils();
-
   useEffect(() => {
     const loadTxArray = async () => {
-      if (!appUser?.hasAccessToken) {
-        console.log("No access token, skipping tx fetch");
-        return;
-      }
       if (txGetAll.status !== "success") {
         console.log("txGetAll not successful, skipping tx fetch");
         return;
@@ -44,19 +35,6 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
 
       const txArray = txGetAll.data.value;
 
-      // Missing sync state means sandbox accounts may still be backfilling txs.
-      while (
-        !appUser.hasBankSyncToken &&
-        txGetAllRetryCount.current < 3 &&
-        ((txArray && txArray.length < 1) || txArray === null)
-      ) {
-        console.log("No transactions found. Retrying...");
-
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        txGetAllRetryCount.current += 3;
-        await queryClient.tx.getAll.invalidate();
-      }
-
       if (txArray) {
         console.log("updating txOragnizedByTimeArray");
         const response = organizeTxByTime(txArray);
@@ -65,7 +43,7 @@ const Layout = (props: React.HTMLAttributes<HTMLDivElement>) => {
     };
 
     loadTxArray();
-  }, [appUser, queryClient.tx.getAll, setTxOragnizedByTimeArray, txGetAll]);
+  }, [setTxOragnizedByTimeArray, txGetAll]);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null;

@@ -26,6 +26,17 @@ enum TxKind {
   SPLIT
 }
 
+enum FinancialProvider {
+  PLAID
+  SIMPLEFIN
+}
+
+enum FinancialConnectionStatus {
+  ACTIVE
+  ERROR
+  DISCONNECTED
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -41,10 +52,8 @@ model Group {
 }
 
 model User {
-  id              String  @id @default(cuid(2))
-  name            String  @default("")
-  bankAccessToken String? // Private: Do not expose to client
-  bankSyncToken   String? //tracker for transaction updates
+  id   String @id @default(cuid(2))
+  name String @default("")
 
   ownedTxArray Tx[] //transactions I own
   splitTxs     Tx[] @relation("txSplits") //transactions I was split into
@@ -56,6 +65,55 @@ model User {
   connectedWithArray User[] @relation("UserConnections") //users connected to me
 
   settings UserSettings?
+
+  financialConnectionArray FinancialConnection[]
+}
+
+model FinancialConnection {
+  id String @id @default(cuid(2))
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider             FinancialProvider
+  externalConnectionId String?
+  credential           String // Private: never expose or log this value
+  checkpoint           String?
+  status               FinancialConnectionStatus @default(ACTIVE)
+  lastSyncAttemptAt    DateTime?
+  lastSyncSuccessAt    DateTime?
+  lastError            String?
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+
+  accountArray FinancialAccount[]
+
+  @@unique([userId, provider, externalConnectionId])
+  @@index([userId])
+}
+
+model FinancialAccount {
+  id String @id @default(cuid(2))
+
+  connectionId String
+  connection   FinancialConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  externalId       String
+  name             String
+  mask             String?
+  type             String
+  subtype          String?
+  currentBalance   Decimal?  @db.Money
+  availableBalance Decimal?  @db.Money
+  currency         String?
+  balanceDate      DateTime?
+  active           Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  txArray Tx[]
+
+  @@unique([connectionId, externalId])
 }
 
 //Created when a transaction is saved to the database from category modification
@@ -89,23 +147,26 @@ model Tx {
   recurring Boolean @default(false)
   mds       MdsType @default(UNDETERMINED)
 
-  bankId             String?   @unique // connector's tranasction_id
-  name               String
-  amount             Decimal   @db.Money
-  datetime           DateTime? //datetime of when tx was posted
-  authorizedDatetime DateTime //datetime of when tx was authorized by user
-  accountId          String?
-  logoUrl            String?
-  isoCurrencyCode    String?
-  locationAddress    String?
-  locationCity       String?
-  locationRegion     String?
-  locationPostalCode String?
-  locationCountry    String?
+  externalTransactionId String?
+  financialAccountId    String?
+  financialAccount      FinancialAccount? @relation(fields: [financialAccountId], references: [id], onDelete: SetNull)
+  providerPending       Boolean           @default(false)
+  name                  String
+  amount                Decimal           @db.Money
+  datetime              DateTime? //datetime of when tx was posted
+  authorizedDatetime    DateTime //datetime of when tx was authorized by user
+  logoUrl               String?
+  isoCurrencyCode       String?
+  locationAddress       String?
+  locationCity          String?
+  locationRegion        String?
+  locationPostalCode    String?
+  locationCountry       String?
+
+  @@unique([financialAccountId, externalTransactionId])
 }
 
-// Ensure to match the Plaid's PFC
-// Refer to https://plaid.com/docs/transactions/pfc-migration/#backfilling-historical-transactions-with-pfcs
+// Internal category taxonomy. Provider categories are mapped into this shape.
 model Cat {
   id String @id @default(cuid(2))
 

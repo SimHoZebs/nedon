@@ -1,16 +1,16 @@
-import type { IBankService } from "./services/IBankService";
-import { plaidBankService } from "./services/PlaidBankService";
+import { financialDataService } from "./financial";
+import type { FinancialDataService } from "./financial/FinancialDataService";
 
 import type * as trpcNext from "@trpc/server/adapters/next";
 
 export interface Context {
-  bankService: IBankService;
+  financialDataService: FinancialDataService;
 }
 
 export const createContext = async (
   _opts?: trpcNext.CreateNextContextOptions,
 ): Promise<Context> => {
   return {
-    bankService: plaidBankService,
+    financialDataService,
   };
 };

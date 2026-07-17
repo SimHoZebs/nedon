@@ -61,8 +61,8 @@ async function main() {
       return acc;
     }, {});
   fs.writeFileSync(
-    "./server/util/plaidCategories.ts",
-    `export const plaidCategories: {
+    "./lib/domain/transactionCategories.ts",
+    `export const transactionCategories: {
   [primary: string]: {
     [detailed: string]: {
       description: string;
@@ -74,7 +74,7 @@ async function main() {
   };
 } = ${JSON.stringify(categories, null, 2)} as const;
 
-export type PlaidCat = typeof plaidCategories;`,
+export type TransactionCategoryCatalog = typeof transactionCategories;`,
   );
 }
 

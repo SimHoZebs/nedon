@@ -27,3 +27,20 @@ test("frontend and shared code do not import Prisma", () => {
 
   expect(prismaImports).toEqual([]);
 });
+
+test("frontend and shared code do not import financial provider internals", () => {
+  const files = ["lib", "pages"]
+    .flatMap((directory) => collectSourceFiles(directory))
+    .filter(
+      (file) => !file.includes(`${path.sep}pages${path.sep}api${path.sep}`),
+    );
+  const forbiddenImports = files.filter((file) => {
+    const contents = readFileSync(file, "utf8");
+    return (
+      contents.includes('from "plaid"') ||
+      contents.includes("server/financial/providers")
+    );
+  });
+
+  expect(forbiddenImports).toEqual([]);
+});

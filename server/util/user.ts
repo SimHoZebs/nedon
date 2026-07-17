@@ -4,15 +4,16 @@ import type {
   UserClientSide,
 } from "@/types/user";
 
-export const OMIT_PRIVATE_DATA = {
-  bankAccessToken: true,
-  bankSyncToken: true,
-} as const;
-
 export const INCLUDE_CONNECTIONS_SAEFLY = {
   include: {
     myConnectionArray: {
-      omit: OMIT_PRIVATE_DATA,
+      select: { id: true, name: true },
+    },
+    financialConnectionArray: {
+      select: {
+        status: true,
+        lastSyncSuccessAt: true,
+      },
     },
   },
 } as const;
@@ -21,8 +22,10 @@ export const sanitizeUser = (user: {
   id: string;
   name: string;
   myConnectionArray: Connection[];
-  bankAccessToken?: string | null;
-  bankSyncToken?: string | null;
+  financialConnectionArray?: Array<{
+    status: "ACTIVE" | "ERROR" | "DISCONNECTED";
+    lastSyncSuccessAt: Date | null;
+  }>;
 }): UnAuthUserClientSide | UserClientSide => {
   const sanitizedUser = {
     id: user.id,
@@ -31,18 +34,26 @@ export const sanitizeUser = (user: {
       id,
       name,
     })),
-    hasBankSyncToken: !!user.bankSyncToken,
+    hasCompletedFinancialSync:
+      user.financialConnectionArray?.some(
+        (connection) => connection.lastSyncSuccessAt !== null,
+      ) ?? false,
   };
 
-  if (user.bankAccessToken) {
+  const hasFinancialConnection =
+    user.financialConnectionArray?.some(
+      (connection) => connection.status !== "DISCONNECTED",
+    ) ?? false;
+
+  if (hasFinancialConnection) {
     return {
       ...sanitizedUser,
-      hasAccessToken: true,
+      hasFinancialConnection: true,
     } satisfies UserClientSide;
   } else {
     return {
       ...sanitizedUser,
-      hasAccessToken: false,
+      hasFinancialConnection: false,
     } satisfies UnAuthUserClientSide;
   }
 };

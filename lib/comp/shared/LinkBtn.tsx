@@ -9,10 +9,9 @@ import { usePlaidLink } from "react-plaid-link";
 
 const LinkBtn = () => {
   const appUser = useAutoLoadUser();
-  const exchangeConnectionToken =
-    trpc.bank.exchangeConnectionToken.useMutation();
-  const linkToken = trpc.bank.createConnectionIntent.useQuery(
-    { userId: appUser.user?.id || "" },
+  const completeConnection = trpc.financial.completeConnection.useMutation();
+  const connectionFlow = trpc.financial.beginConnection.useQuery(
+    { userId: appUser.user?.id || "", provider: "PLAID" },
     {
       staleTime: 360000,
     },
@@ -28,15 +27,15 @@ const LinkBtn = () => {
           return;
         }
 
-        const result = await exchangeConnectionToken.mutateAsync({
+        const result = await completeConnection.mutateAsync({
           userId: appUser.user.id,
-          publicToken,
+          provider: "PLAID",
+          completion: { type: "embeddedToken", token: publicToken },
         });
-
-        if (!result.ok) {
+        if (!result.initialSync.ok) {
           console.error(
-            "Failed to exchange bank connection token",
-            result.error,
+            "Initial financial sync failed",
+            result.initialSync.error,
           );
           return;
         }
@@ -46,13 +45,16 @@ const LinkBtn = () => {
 
       exchangeToken();
     },
-    [appUser.user, exchangeConnectionToken, router],
+    [appUser.user, completeConnection, router],
   );
 
   let isOauth = false;
 
   const config: Parameters<typeof usePlaidLink>[0] = {
-    token: linkToken.data ? linkToken.data : null,
+    token:
+      connectionFlow.data?.type === "embedded"
+        ? connectionFlow.data.token
+        : null,
     onSuccess,
   };
 
@@ -74,7 +76,9 @@ const LinkBtn = () => {
 
   return (
     <ActionBtn onClick={() => open()}>
-      {linkToken.data ? "Link a bank account" : "Waiting for link token..."}
+      {connectionFlow.data
+        ? "Link a bank account"
+        : "Waiting for connection token..."}
     </ActionBtn>
   );
 };

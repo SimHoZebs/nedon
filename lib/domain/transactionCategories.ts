@@ -1,4 +1,4 @@
-export const plaidCategories: {
+export const transactionCategories: {
   [primary: string]: {
     [detailed: string]: {
       name: string;
@@ -901,4 +901,4 @@ export const plaidCategories: {
   },
 } as const;
 
-export type PlaidCat = typeof plaidCategories;
+export type TransactionCategoryCatalog = typeof transactionCategories;

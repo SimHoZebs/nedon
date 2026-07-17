@@ -33,3 +33,25 @@
 **Q: How are monetary values represented outside the database?**
 
 **A:** Money crosses the API as decimal strings so the transport and frontend do not depend on Prisma or lose precision through JavaScript numbers. Prisma Decimal conversion stays on the server, while frontend calculations use `decimal.js` and convert back to normalized strings for API inputs.
+
+## Financial Data Providers
+
+**Q: Why are provider adapters separate from financial synchronization?**
+
+**A:** Provider adapters translate external connection and data protocols into normalized accounts and transactions. They never write Prisma records. Nedon's financial sync service owns reconciliation, imported originals, editable copies, and checkpoint persistence so every provider follows the same domain rules.
+
+**Q: How are external records identified?**
+
+**A:** Provider identifiers are never assumed to be globally unique. Connections scope accounts, and accounts scope transactions. Internal IDs cross the client boundary; provider credentials and external identifiers remain on the server.
+
+**Q: How can both cursor and snapshot providers use the same boundary?**
+
+**A:** A provider returns either an explicit delta with removals and a checkpoint, or a bounded snapshot with completeness metadata. Snapshot absence is not treated as deletion unless the provider confirms that the observed window is complete.
+
+**Q: How are provider credentials protected?**
+
+**A:** Credentials are encrypted with AES-256-GCM before persistence using `FINANCIAL_DATA_ENCRYPTION_KEY`, which must contain a base64-encoded 32-byte key. Legacy Plaid tokens are accepted only for migration and are encrypted on their first use. Credentials, including SimpleFIN Access URLs, never cross the API boundary or enter provider error messages.
+
+**Q: What amount convention does Nedon use?**
+
+**A:** Imported amounts use the existing Nedon convention: positive values represent spending and negative values represent incoming money. Provider adapters normalize their source convention before returning transactions.

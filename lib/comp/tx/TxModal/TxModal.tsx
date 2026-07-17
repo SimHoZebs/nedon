@@ -35,7 +35,7 @@ const TxModal = (props: Props) => {
     (store) => store.txOrganizedByTimeArray,
   );
   const { user: appUser, isLoading: appUserIsLoading } = useAutoLoadUser();
-  const getAllAccounts = trpc.user.getAllAccounts.useQuery(
+  const getAllAccounts = trpc.financial.listAccounts.useQuery(
     { userId: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser && !appUserIsLoading },
   );
@@ -79,11 +79,10 @@ const TxModal = (props: Props) => {
   };
 
   const accountName =
-    getAllAccounts.isLoading || !getAllAccounts.data || !getAllAccounts.data.ok
+    getAllAccounts.isLoading || !getAllAccounts.data
       ? ""
-      : getAllAccounts.data.value.find(
-          (account) => account.id === tx?.accountId,
-        )?.name || "";
+      : getAllAccounts.data.find((account) => account.id === tx?.accountId)
+          ?.name || "";
 
   return (
     tx && (

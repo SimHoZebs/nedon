@@ -3,7 +3,7 @@ import { trpc } from "@/util/trpc";
 import type { CatFormState } from "@/types/cat";
 
 import { createNewCat, getCatStyle } from "lib/domain/cat";
-import type { plaidCategories } from "lib/domain/plaidCategories";
+import type { transactionCategories } from "lib/domain/transactionCategories";
 import { useStore } from "lib/store/store";
 import { useTxStore } from "lib/store/txStore";
 import { type ForwardedRef, forwardRef, useState } from "react";
@@ -19,7 +19,7 @@ const CatPicker = forwardRef(
   (props: Props, ref: ForwardedRef<HTMLDivElement>) => {
     const createTx = trpc.tx.create.useMutation();
     const upsertCatArray = trpc.cat.upsertMany.useMutation();
-    const catOptionArray = trpc.cat.getPlaidCats.useQuery(undefined, {
+    const catOptionArray = trpc.cat.getCategoryCatalog.useQuery(undefined, {
       staleTime: Number.POSITIVE_INFINITY,
     });
     const queryClient = trpc.useUtils();
@@ -77,8 +77,8 @@ const CatPicker = forwardRef(
       queryClient.tx.invalidate();
     };
 
-    const plaidCatsToCatArray = (plaidCats: typeof plaidCategories) => {
-      return Object.entries(plaidCats).flatMap(([primaryName, detailedObj]) => {
+    const catalogToCatArray = (catalog: typeof transactionCategories) => {
+      return Object.entries(catalog).flatMap(([primaryName, detailedObj]) => {
         return {
           name: primaryName,
           detailed: Object.keys(detailedObj).map((name) => ({
@@ -88,7 +88,7 @@ const CatPicker = forwardRef(
       });
     };
 
-    const primaryCategories = plaidCatsToCatArray(catOptionArray.data || {});
+    const primaryCategories = catalogToCatArray(catOptionArray.data || {});
 
     const detailedCategories = selectedPrimary
       ? catOptionArray.data

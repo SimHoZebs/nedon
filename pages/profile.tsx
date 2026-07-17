@@ -1,9 +1,10 @@
 import { ActionBtn, Button } from "@/comp/shared/Button";
+import FinancialConnections from "@/comp/shared/FinancialConnections";
 import Input from "@/comp/shared/Input";
+import LinkBtn from "@/comp/shared/LinkBtn";
+import SimpleFinBtn from "@/comp/shared/SimpleFinBtn";
 
 import { trpc } from "@/util/trpc";
-
-import type { UnAuthUserClientSide } from "@/types/user";
 
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useEffect, useId, useState } from "react";
@@ -14,25 +15,6 @@ const Profile = () => {
 
   const isDev = process.env.NODE_ENV === "development";
   const updateName = trpc.user.updateName.useMutation();
-  const connectToBank = trpc.user.connectToBank.useMutation({
-    onSuccess: async () => {
-      await queryClient.invalidate();
-    },
-  });
-  const queryClient = trpc.useUtils();
-
-  const connectUnAuthUserToPlaid = async (user: UnAuthUserClientSide) => {
-    const connectToBankResult = await connectToBank.mutateAsync({
-      id: user.id,
-    });
-    if (!connectToBankResult.ok) {
-      console.error("Failed to connect to Plaid:", connectToBankResult.error);
-      return;
-    }
-
-    console.log("Connected to Plaid successfully");
-  };
-
   useEffect(() => {
     if (!isLoading) setUnsavedUser(appUser);
   }, [appUser, isLoading]);
@@ -64,13 +46,13 @@ const Profile = () => {
           >
             Save
           </ActionBtn>
-          {unsavedUser.hasAccessToken || (
-            <ActionBtn
-              onClickAsync={() => connectUnAuthUserToPlaid(unsavedUser)}
-            >
-              Connect to Plaid
-            </ActionBtn>
+          {unsavedUser.hasFinancialConnection || (
+            <div className="flex w-full flex-col gap-3">
+              <LinkBtn />
+              <SimpleFinBtn />
+            </div>
           )}
+          <FinancialConnections />
           {isDev && (
             <div>
               <pre>{JSON.stringify(appUser, null, 2)}</pre>

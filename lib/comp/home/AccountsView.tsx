@@ -3,7 +3,7 @@ import { H2, H3 } from "@/comp/shared/Heading";
 
 import { trpc } from "@/util/trpc";
 
-import type { BankAccount } from "@/types/bank";
+import type { FinancialAccount } from "@/types/financial";
 
 import useAutoLoadUser from "lib/hooks/useAutoLoadUser";
 import { useRef } from "react";
@@ -11,17 +11,17 @@ import { useRef } from "react";
 interface Props {
   setShowAccountModal: React.Dispatch<React.SetStateAction<boolean>>;
   setClickedAccount: React.Dispatch<
-    React.SetStateAction<BankAccount | undefined>
+    React.SetStateAction<FinancialAccount | undefined>
   >;
 }
 
 const AccountsView = (props: Props) => {
   const { user: appUser, isLoading: appUserIsLoading } = useAutoLoadUser();
-  const getAllAccounts = trpc.user.getAllAccounts.useQuery(
+  const getAllAccounts = trpc.financial.listAccounts.useQuery(
     { userId: appUser ? appUser.id : "" },
     { staleTime: 3600000, enabled: !!appUser && !appUserIsLoading },
   );
-  const allAccounts = getAllAccounts.data?.ok ? getAllAccounts.data.value : [];
+  const allAccounts = getAllAccounts.data || [];
 
   const loading = useRef(
     <div className="h-7 w-1/4 animate-pulse rounded-lg bg-zinc-700" />,
@@ -30,7 +30,7 @@ const AccountsView = (props: Props) => {
   const total =
     allAccounts && allAccounts.length > 0
       ? allAccounts.reduce(
-          (sum, account) => sum + (account.balances.available || 0),
+          (sum, account) => sum + Number(account.availableBalance || 0),
           0,
         )
       : 0;
@@ -52,7 +52,7 @@ const AccountsView = (props: Props) => {
           allAccounts && allAccounts.length > 0 ? (
             allAccounts.map(
               (account) =>
-                account.balances.available && (
+                account.availableBalance && (
                   <AccountCard
                     key={account.id}
                     onClick={() => {
@@ -61,7 +61,7 @@ const AccountsView = (props: Props) => {
                     }}
                   >
                     <p>{account.name}</p>
-                    <p className="font-light">${account.balances.available}</p>
+                    <p className="font-light">${account.availableBalance}</p>
                   </AccountCard>
                 ),
             )

@@ -7,7 +7,7 @@ import DateRangePicker from "@/comp/shared/DateRangePicker";
 import DateSortedTxList from "@/comp/shared/DateSortedTxList";
 import TxModalAndCalculator from "@/comp/tx/TxModalAndCalculator";
 
-import type { BankAccount } from "@/types/bank";
+import type { FinancialAccount } from "@/types/financial";
 import type { TxFormState } from "@/types/tx";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -22,7 +22,7 @@ const Home: NextPage = () => {
   const [showTxModal, setShowTxModal] = useState(false);
   const [showCsvUploadPreviewModal, setShowCsvUploadPreviewModal] =
     useState(false);
-  const [clickedAccount, setClickedAccount] = useState<BankAccount>();
+  const [clickedAccount, setClickedAccount] = useState<FinancialAccount>();
   const [YMD, setYMD] = useState([-1, -1, -1]);
   const [csvTxArray, setCsvTxArray] = React.useState<TxFormState[]>([]);
   const { date, setDate, rangeFormat, setRangeFormat } = useDateRange();

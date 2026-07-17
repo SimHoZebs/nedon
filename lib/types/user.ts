@@ -20,8 +20,8 @@ export const UnAuthUserClientSideSchema = z
         name: z.string(),
       }),
     ),
-    hasAccessToken: z.boolean(),
-    hasBankSyncToken: z.boolean(),
+    hasFinancialConnection: z.boolean(),
+    hasCompletedFinancialSync: z.boolean(),
   })
   .strict();
 
@@ -38,8 +38,8 @@ export const UserClientSideSchema = z
         name: z.string(),
       }),
     ),
-    hasAccessToken: z.literal(true),
-    hasBankSyncToken: z.boolean(),
+    hasFinancialConnection: z.literal(true),
+    hasCompletedFinancialSync: z.boolean(),
   })
   .strict();
 

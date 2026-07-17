@@ -27,6 +27,7 @@ export const createTxInput = (
     originTxId: _originTxId,
     id: _id,
     ownerId,
+    accountId,
     ...rest
   } = txClientSide;
   const receiptCreate = receipt
@@ -74,10 +75,12 @@ export const createTxInput = (
     receipt: receiptCreate,
     catArray: catArrayCreate,
     owner: { connect: { id: ownerId } },
+    financialAccount: accountId ? { connect: { id: accountId } } : undefined,
     splitTxArray: {
       create: splitTxArray.map((split) => {
         const {
           ownerId: splitOwnerId,
+          accountId: splitAccountId,
           id: _splitId,
           amount: splitAmount,
           userTotal: splitUserTotal,
@@ -91,6 +94,9 @@ export const createTxInput = (
           userTotal: new Prisma.Decimal(splitUserTotal),
           kind: TxKind.SPLIT,
           owner: { connect: { id: splitOwnerId } },
+          financialAccount: splitAccountId
+            ? { connect: { id: splitAccountId } }
+            : undefined,
           catArray: catArrayCreate,
           receipt: receiptCreate,
         };

@@ -30,32 +30,6 @@ const txRouter = router({
       return mapTx(txInDB);
     }),
 
-  syncWithBank: procedure
-    .input(z.object({ userId: z.string(), date: z.date() }))
-    .mutation(async ({ input, ctx }) => {
-      let result: Result<void, unknown>;
-      try {
-        const syncResult = await ctx.bankService.syncTransactions(
-          input.userId,
-          input.date.toISOString(),
-        );
-
-        if (!syncResult.ok)
-          throw new Error(`Bank sync failed: ${syncResult.error}`);
-
-        return { ok: true, value: undefined };
-      } catch (error) {
-        if (error instanceof PrismaClientInitializationError) {
-          result = { ok: false, error: "Database not initialized" };
-          return result;
-        }
-        console.error(error);
-        console.error("Input: ", input);
-        result = { ok: false, error };
-        return result;
-      }
-    }),
-
   getAll: procedure
     .input(z.object({ userId: z.string(), date: z.date() }))
     .output(
@@ -67,8 +41,6 @@ const txRouter = router({
     .query(async ({ input }) => {
       let result: Result<Tx[], unknown>;
       try {
-        const user = await db.user.findFirst({ where: { id: input.userId } });
-
         const date = new Date(input.date);
 
         const firstDayThisMonth = new Date(
@@ -108,14 +80,6 @@ const txRouter = router({
             splitTxArray: true,
           },
         });
-
-        if (!user) {
-          console.error("No user found with id: ", input.userId);
-          throw new Error("No user found");
-        } else if (!user.bankAccessToken) {
-          console.error("No access token for user: ", input.userId);
-          throw new Error("No access token for user");
-        }
 
         console.log("returning txArray", txArray.length);
         result = { ok: true, value: txArray.map(mapTx) };
@@ -187,7 +151,6 @@ const txRouter = router({
         userTotal,
         recurring,
         mds,
-        bankId,
         name,
         datetime,
         authorizedDatetime,
@@ -210,13 +173,12 @@ const txRouter = router({
         data: {
           recurring,
           mds,
-          bankId: bankId || undefined,
           name,
           amount: new Prisma.Decimal(amount),
           userTotal: new Prisma.Decimal(userTotal),
           datetime,
           authorizedDatetime,
-          accountId,
+          financialAccountId: accountId,
           logoUrl,
           isoCurrencyCode,
           locationAddress,
@@ -288,7 +250,7 @@ const txRouter = router({
           amount: originalTx.amount,
           datetime: originalTx.datetime,
           authorizedDatetime: originalTx.authorizedDatetime,
-          accountId: originalTx.accountId,
+          financialAccountId: originalTx.financialAccountId,
           logoUrl: originalTx.logoUrl,
           isoCurrencyCode: originalTx.isoCurrencyCode,
           locationAddress: originalTx.locationAddress,

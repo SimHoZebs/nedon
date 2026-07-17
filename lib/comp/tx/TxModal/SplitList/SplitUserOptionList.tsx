@@ -85,7 +85,6 @@ const SplitUserOptionList = () => {
                     userTotal: toMoney(0),
                     recurring: txOnModal.recurring,
                     mds: txOnModal.mds,
-                    bankId: null,
                     datetime: txOnModal.datetime,
                     authorizedDatetime: txOnModal.authorizedDatetime,
                     accountId: txOnModal.accountId,

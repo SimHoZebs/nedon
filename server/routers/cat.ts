@@ -3,9 +3,9 @@ import { CatFormStateSchema, CatSchema } from "@/types/cat";
 import { procedure, router } from "../trpc";
 
 import { Prisma } from "@prisma/client";
+import { transactionCategories } from "lib/domain/transactionCategories";
 import { mapCat } from "server/mappers/prismaToDto";
 import db from "server/util/db";
-import { plaidCategories } from "server/util/plaidCategories";
 import { z } from "zod";
 
 const catRouter = router({
@@ -95,8 +95,8 @@ const catRouter = router({
       return deletedCatArray;
     }),
 
-  getPlaidCats: procedure.input(z.void()).query(async () => {
-    return plaidCategories;
+  getCategoryCatalog: procedure.input(z.void()).query(async () => {
+    return transactionCategories;
   }),
 });
 

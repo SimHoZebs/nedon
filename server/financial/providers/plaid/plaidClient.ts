@@ -1,5 +1,6 @@
+import { PLAID_CLIENT_ID, PLAID_ENV, PLAID_SECRET } from "./plaidConfig";
+
 import { Configuration, PlaidApi, PlaidEnvironments } from "plaid";
-import { PLAID_CLIENT_ID, PLAID_ENV, PLAID_SECRET } from "server/constants";
 
 // Initialize the Plaid client
 // Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
