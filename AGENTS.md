@@ -45,3 +45,7 @@ Architectural decisions are documented in the `/docs` directory. Please follow t
 *   **Location:** Key decisions are stored in `docs/architecture.md`.
 *   **Format:** Use a concise, question-and-answer (FAQ) format.
 *   **Focus:** Prioritize explaining the "why" behind a decision, not just the "what".
+
+## Autonomous checks
+- Run `scripts/financial-verify.sh` before finishing provider/mapper/credential tasks (also runs on pre-push).
+- Run `scripts/frontier-check.sh --owner=tx|analytics|transport` for scoped work (pre-commit covers staged biome + whitespace + Prisma-import).

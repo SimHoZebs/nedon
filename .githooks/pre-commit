@@ -1,0 +1,27 @@
+#!/bin/sh
+# pre-commit: FAST scoped checks only (staged files).
+# Full tsc/vitest live in pre-push (scripts/financial-verify.sh), not here.
+set -eu
+cd "$(dirname "$0")/.."
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx|json)$' || true)
+
+if [ -n "$STAGED" ]; then
+  # shellcheck disable=SC2086
+  corepack pnpm exec biome check $STAGED
+fi
+
+git diff --cached --check
+git diff --check
+
+# frontier-check invariant (scoped): no @prisma/client in staged client files
+STAGED_CLIENT=$(echo "$STAGED" | grep -e '^lib/' -e '^pages/' | grep -v '\.js$' || true)
+if [ -n "$STAGED_CLIENT" ]; then
+  echo "$STAGED_CLIENT" | tr '\n' '\0' | xargs -0 git grep --cached -n "@prisma/client" -- > /tmp/nedon-precommit-prisma.out 2>&1 || true
+  if [ -s /tmp/nedon-precommit-prisma.out ]; then
+    cat /tmp/nedon-precommit-prisma.out
+    echo "FAIL: @prisma/client in staged client files (see scripts/frontier-check.sh §3)" >&2
+    exit 1
+  fi
+  echo "PASS: no @prisma/client in staged client files"
+fi
