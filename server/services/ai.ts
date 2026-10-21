@@ -1,36 +1,31 @@
 import openai from "server/clients/openaiClient";
 
-// This is the assistant ID for the receipt processing assistant.
-// It's better to have it here than hardcoded in the middle of logic.
-const RECEIPT_ASSISTANT_ID = "asst_ThX4O8JDzBsGV7BO43RA3FVE";
-
 export async function extractReceiptData(text: string): Promise<unknown> {
   try {
-    const thread = await openai.beta.threads.create();
-
-    await openai.beta.threads.messages.create(thread.id, {
-      role: "user",
-      content: text,
-    });
-
-    const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
-      assistant_id: RECEIPT_ASSISTANT_ID,
-    });
-
-    if (run.status !== "completed") {
-      console.error("OpenAI run failed", run);
-      throw new Error(`OpenAI run failed with status: ${run.status}`);
+    // TODO(landpatch): set OPENAI_MODEL and OPENAI_INSTRUCTIONS. Stored assistant: asst_ThX4O8JDzBsGV7BO43RA3FVE.
+    const model = process.env.OPENAI_MODEL;
+    const instructions = process.env.OPENAI_INSTRUCTIONS;
+    if (!model || !instructions) {
+      throw new Error("Set OPENAI_MODEL and OPENAI_INSTRUCTIONS. Stored assistant: asst_ThX4O8JDzBsGV7BO43RA3FVE.");
     }
 
-    const messages = await openai.beta.threads.messages.list(run.thread_id);
-    const message = messages.data[0];
+    const response = await openai.responses.create({
+      model,
+      instructions,
+      input: text,
+    });
 
-    if (message.content[0].type !== "text") {
-      console.error("OpenAI response is not text", message);
+    if (response.status !== "completed") {
+      console.error("OpenAI run failed", response);
+      throw new Error(`OpenAI run failed with status: ${response.status}`);
+    }
+
+    if (!response.output_text) {
+      console.error("OpenAI response is not text", response);
       throw new Error("AI response was not in the expected text format.");
     }
 
-    const jsonText = message.content[0].text.value;
+    const jsonText = response.output_text;
     return JSON.parse(jsonText);
   } catch (error) {
     console.error("Error in AI service while extracting receipt data:", error);
